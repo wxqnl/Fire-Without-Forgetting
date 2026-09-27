@@ -1099,6 +1099,29 @@ class MCRNN(nn.Module):
 #         return output, [output]
 
 
+class GRUCtrl(nn.Module):
+    """Positive control for the Phase 0 probe: a continuous-state GRU core inside the
+    otherwise spiking world model. It keeps the MCRNN interface (list of T input spike
+    tensors in, T identical outputs out) so that everything else stays unchanged."""
+
+    def __init__(self, config, input_size, size, act=None, norm=None, device="cuda"):
+        super().__init__()
+        self.T = config.spike_times
+        self._layer = nn.Linear(input_size + size, 3 * size, bias=False)
+        self._norm = nn.LayerNorm(3 * size, eps=1e-03)
+
+    def forward(self, inputs, state):
+        x = sum(inputs) / self.T
+        h = state[0][-1]
+        parts = self._norm(self._layer(torch.cat([x, h], -1)))
+        reset, cand, update = torch.split(parts, [h.shape[-1]] * 3, -1)
+        cand = torch.tanh(torch.sigmoid(reset) * cand)
+        update = torch.sigmoid(update - 1)
+        h = update * cand + (1 - update) * h
+        outputs = [h] * self.T
+        return outputs, [torch.stack(outputs, dim=0)]
+
+
 class Conv2dSame(torch.nn.Conv2d):
     def calc_same_pad(self, i, k, s, d):
         return max((math.ceil(i / s) - 1) * s + (k - 1) * d + 1 - i, 0)

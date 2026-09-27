@@ -283,3 +283,7 @@ thr025:
 
 thr100:
   MCNode: {threshold: 1.0}
+
+# positive control: continuous-state GRU core, everything else spiking
+grucell:
+  dyn_cell: 'GRUCtrl'

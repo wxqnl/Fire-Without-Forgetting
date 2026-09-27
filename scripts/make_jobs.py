@@ -11,6 +11,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 RUNS = ROOT / "runs"
 
 CONDS = {"base": [], "A": ["persist"], "B": ["nodendreset"], "AB": ["persist", "nodendreset"]}
+# positive control: continuous GRU core (only used with tau 2, which it ignores)
+CTRL = {"gru": ["grucell"]}
 TAUS = {2: [], 16: ["taud16"], 128: ["taud128"]}
 
 
@@ -18,8 +20,8 @@ def suite(task):
     return task.split("_", 1)[0]
 
 
-def probe_jobs(task, seeds=(0, 1), taus=(2, 16, 128)):
-    for cond, cfgs in CONDS.items():
+def probe_jobs(task, seeds=(0, 1), taus=(2, 16, 128), conds=CONDS):
+    for cond, cfgs in conds.items():
         for tau in taus:
             for seed in seeds:
                 name = f"probe/{task}/{cond}_tau{tau}/s{seed}"
@@ -30,8 +32,9 @@ def probe_jobs(task, seeds=(0, 1), taus=(2, 16, 128)):
                 yield dict(name=name, cmd=cmd, logdir=str(logdir), mem_gb=3)
 
 
-def rl_jobs(task, steps, seeds=(0, 1, 2), taus=(2, 128), train_ratio=64, eval_every=None):
-    for cond, cfgs in CONDS.items():
+def rl_jobs(task, steps, seeds=(0, 1, 2), taus=(2, 128), train_ratio=64, eval_every=None,
+            conds=CONDS):
+    for cond, cfgs in conds.items():
         for tau in taus:
             for seed in seeds:
                 name = f"rl/{task}/{cond}_tau{tau}/s{seed}"
@@ -49,15 +52,21 @@ def main():
     # longest jobs (RL on POPGym) start early so they do not become the tail
     jobs += probe_jobs("bsuite_memlen-16")
     jobs += rl_jobs("popgym_RepeatPreviousEasy", steps=5e5)
+    for task in ("bsuite_memlen-16", "popgym_RepeatPreviousEasy", "bsuite_memlen-8", "bsuite_memlen-32"):
+        jobs += probe_jobs(task, taus=(2,), conds=CTRL)
+    jobs += rl_jobs("bsuite_memlen-16", steps=2e5, taus=(2,), conds=CTRL)
+    jobs += rl_jobs("popgym_RepeatPreviousEasy", steps=5e5, taus=(2,), conds=CTRL)
     jobs += probe_jobs("popgym_RepeatPreviousEasy")
     jobs += rl_jobs("bsuite_memlen-16", steps=2e5)
     jobs += probe_jobs("bsuite_memlen-8")
     jobs += probe_jobs("bsuite_memlen-32")
     RUNS.mkdir(exist_ok=True)
     out = RUNS / "jobs.jsonl"
-    with open(out, "w") as f:
+    tmp = out.with_suffix(".tmp")
+    with open(tmp, "w") as f:
         for job in jobs:
             f.write(json.dumps(job) + "\n")
+    tmp.replace(out)  # atomic: the running queue re-reads this file
     print(f"{len(jobs)} jobs -> {out}")
 
 
