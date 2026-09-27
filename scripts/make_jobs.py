@@ -142,6 +142,10 @@ def main():
     jobs += recall_jobs("bsuite_memlen-32-recall", {
         "ABG_tau128": G["ABG_tau128"], "ABG_tau512": ["persist", "nodendreset", "taud512", "dendgain"],
         "AB_tau128": CONDS["AB"] + TAUS[128], "base_tau2": [], "gru_tau2": ["grucell"]})
+    # 14:30 stretch point: an episode has 66 rows, so the training window must be longer
+    jobs += recall_jobs("bsuite_memlen-64-recall", {
+        "ABG_tau512": ["persist", "nodendreset", "taud512", "dendgain"], "gru_tau2": ["grucell"]},
+        extra="--batch_length 80")
     RUNS.mkdir(exist_ok=True)
     out = RUNS / "jobs.jsonl"
     tmp = out.with_suffix(".tmp")
