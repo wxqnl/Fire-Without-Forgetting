@@ -128,6 +128,13 @@ def main():
                         updates=3000)
     jobs += recall_jobs("bsuite_memlen-16-recall", grid_cells())
     jobs += recall_jobs("bsuite_memlen-8-recall", grid_cells(), extra="--batch_length 32")
+    # 13:10: with A, tau 128 keeps the cue in the dendrites at ~1% of threshold (write gain
+    # 1/tau) and it never reaches the spikes; intervention G decouples the gain
+    G = {"ABG_tau128": ["persist", "nodendreset", "taud128", "dendgain"],
+         "ABG_tau16": ["persist", "nodendreset", "taud16", "dendgain"],
+         "AG_tau128": ["persist", "taud128", "dendgain"]}
+    jobs += recall_jobs("bsuite_memlen-8-recall", G, extra="--batch_length 32")
+    jobs += recall_jobs("bsuite_memlen-16-recall", {k: G[k] for k in ("ABG_tau128", "ABG_tau16")})
     RUNS.mkdir(exist_ok=True)
     out = RUNS / "jobs.jsonl"
     tmp = out.with_suffix(".tmp")

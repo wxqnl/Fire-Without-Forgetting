@@ -315,7 +315,8 @@ class MCNode(BaseMCNode):
                  comps=['basal', 'apical', 'soma'],
                  act_fun=QGateGrad,
                  dend_reset=True,
-                 sg_alpha=None):
+                 sg_alpha=None,
+                 dend_gain=False):
         super().__init__(threshold, v_reset, comps)
 
         self.tau = tau
@@ -323,6 +324,12 @@ class MCNode(BaseMCNode):
         self.tau_apical = tau_apical
         # dend_reset=False: somatic spikes no longer reset the dendrites (intervention B)
         self.dend_reset = dend_reset
+        # dend_gain=True (intervention G): scale dendritic inputs by sqrt(tau_d / 2). The Euler
+        # update v += (x - v) / tau writes new input with gain 1/tau, so a long tau_d keeps a
+        # cue for long but stores it too weakly to drive the soma. sqrt(tau_d / 2) equalises
+        # the steady-state spread for noise-like input across tau_d; tau_d = 2 is unchanged.
+        self.gain_basal = math.sqrt(tau_basal / 2.0) if dend_gain else 1.0
+        self.gain_apical = math.sqrt(tau_apical / 2.0) if dend_gain else 1.0
         if isinstance(act_fun, str):
             act_fun = eval(act_fun)
         # the original code ties the surrogate width to tau; sg_alpha decouples it for tau sweeps
@@ -334,8 +341,8 @@ class MCNode(BaseMCNode):
             inputs torch.Tensor: Inputs for basal dendrite  
         '''
 
-        self.mems['basal'] =  self.mems['basal'] + (basal_inputs-self.mems['basal'])/ self.tau_basal
-        self.mems['apical'] =  self.mems['apical'] + (apical_inputs-self.mems['apical']) / self.tau_apical
+        self.mems['basal'] =  self.mems['basal'] + (self.gain_basal * basal_inputs-self.mems['basal'])/ self.tau_basal
+        self.mems['apical'] =  self.mems['apical'] + (self.gain_apical * apical_inputs-self.mems['apical']) / self.tau_apical
         z_t = F.sigmoid(self.mems['apical'])
         h_t = self.mems['basal'] - self.mems['soma'] + soma_inputs
         self.mems['soma'] = self.mems['soma'] + z_t*(h_t-self.mems['soma']) / self.tau

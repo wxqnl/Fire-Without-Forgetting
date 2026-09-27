@@ -79,7 +79,7 @@ defaults:
     {threshold: 0.5, v_reset: 0.0, eps: 1e-3}
 
   MCNode:
-    {threshold: 0.5, tau: 2.0, tau_basal: 2.0, tau_apical: 2.0, v_reset: 0.0, comps: ['basal', 'apical', 'soma'], act_fun: "QGateGrad", dend_reset: True, sg_alpha: 2.0}
+    {threshold: 0.5, tau: 2.0, tau_basal: 2.0, tau_apical: 2.0, v_reset: 0.0, comps: ['basal', 'apical', 'soma'], act_fun: "QGateGrad", dend_reset: True, sg_alpha: 2.0, dend_gain: False}
 
   # Intervention A: keep the recurrent cell's membrane potentials across env steps
   persist_state: False
@@ -283,6 +283,10 @@ thr025:
 
 thr100:
   MCNode: {threshold: 1.0}
+
+# intervention G: dendritic input gain sqrt(tau_d / 2), decoupled from the retention time
+dendgain:
+  MCNode: {dend_gain: True}
 
 # positive control: continuous-state GRU core, everything else spiking
 grucell:
