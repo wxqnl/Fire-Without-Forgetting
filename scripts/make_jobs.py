@@ -81,6 +81,9 @@ LADDER_MSE = {
     "ann-mse": (["grucell", "annwm"], "--reward_head symlog_mse"),
     "base-mse": ([], "--reward_head symlog_mse"),
     "AB128-mse": (["persist", "nodendreset", "taud128"], "--reward_head symlog_mse"),
+    "ann-mse-lr1e-3": (["grucell", "annwm"], "--reward_head symlog_mse --model_lr 1e-3"),
+    "ann-mse-rs10": (["grucell", "annwm"], "--reward_head symlog_mse --reward_scale 10"),
+    "gru-mse-rs10": (["grucell"], "--reward_head symlog_mse --reward_scale 10"),
 }
 
 
