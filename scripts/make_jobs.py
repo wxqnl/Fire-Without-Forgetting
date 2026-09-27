@@ -92,6 +92,8 @@ def main():
     jobs += ladder_jobs()
     # the all-ANN control at exactly the settings of the running memlen-8 GRU control
     jobs += ladder_jobs("bsuite_memlen-8", {"ann": LADDER["ann"]}, updates=6000, extra="")
+    # memory-free control: the context bit is shown on every step
+    jobs += ladder_jobs("bsuite_memlen-4-cue", {k: LADDER[k] for k in ("gru", "base")})
     jobs += probe_jobs("bsuite_memlen-16")
     for task in ("bsuite_memlen-16", "popgym_RepeatPreviousEasy", "bsuite_memlen-8"):
         jobs += probe_jobs(task, taus=(2,), conds=CTRL)

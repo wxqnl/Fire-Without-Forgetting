@@ -6,7 +6,8 @@ class MemoryChain:
     """bsuite memory_len task behind the Dreamer env interface.
 
     task: "memlen-<L>" (one context bit, recalled after L steps) or
-    "memlen-<L>-bits-<B>" (memory_size variant).
+    "memlen-<L>-bits-<B>" (memory_size variant). A trailing "-cue" appends the context
+    bits to every observation, which removes the need for memory (control).
     """
 
     metadata = {}
@@ -15,11 +16,14 @@ class MemoryChain:
         from bsuite.environments import memory_chain
 
         parts = task.split("-")
+        self._cue = parts[-1] == "cue"
+        if self._cue:
+            parts = parts[:-1]
         assert parts[0] == "memlen", task
         length = int(parts[1])
         bits = int(parts[3]) if len(parts) > 3 else 1
         self._env = memory_chain.MemoryChain(memory_length=length, num_bits=bits, seed=seed)
-        self._dim = bits + 2
+        self._dim = bits + 2 + (bits if self._cue else 0)
         self.reward_range = [-1.0, 1.0]
 
     @property
@@ -37,12 +41,18 @@ class MemoryChain:
     def action_space(self):
         return gym.spaces.Discrete(2)
 
+    def _obs(self, ts):
+        vec = ts.observation.reshape(-1).astype(np.float32)
+        if self._cue:
+            vec = np.concatenate([vec, 2 * self._env._context.astype(np.float32) - 1])
+        return vec
+
     def step(self, action):
         ts = self._env.step(int(action))
         done = ts.last()
         terminal = done and ts.discount == 0
         obs = {
-            "vector": ts.observation.reshape(-1).astype(np.float32),
+            "vector": self._obs(ts),
             "is_first": False,
             "is_last": done,
             "is_terminal": terminal,
@@ -53,7 +63,7 @@ class MemoryChain:
     def reset(self):
         ts = self._env.reset()
         return {
-            "vector": ts.observation.reshape(-1).astype(np.float32),
+            "vector": self._obs(ts),
             "is_first": True,
             "is_last": False,
             "is_terminal": False,
