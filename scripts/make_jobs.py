@@ -47,19 +47,30 @@ def rl_jobs(task, steps, seeds=(0, 1, 2), taus=(2, 128), train_ratio=64, eval_ev
                 yield dict(name=name, cmd=cmd, logdir=str(logdir), mem_gb=14.5)
 
 
+def pick(jobs, keep):
+    """keep: set of "cond_tau" labels, e.g. {"base_tau2", "AB_tau128"}"""
+    return [j for j in jobs if j["name"].split("/")[2] in keep]
+
+
+def with_updates(jobs, updates):
+    for j in jobs:
+        j["cmd"] = j["cmd"].replace("--updates 20000", f"--updates {updates}")
+    return jobs
+
+
 def main():
+    # 2026-09-27 11:15: GPUs 1-6 are available for 8 more hours (hard stop 18:50).
+    # Depth over breadth: keep the running memlen-16 grid, GRU controls and partial
+    # RepeatPrevious grid; keep a minimal RL contrast; add short probes that can finish.
+    core = {"base_tau2", "A_tau2", "B_tau2", "AB_tau2", "AB_tau128", "base_tau128"}
     jobs = []
-    # longest jobs (RL on POPGym) start early so they do not become the tail
     jobs += probe_jobs("bsuite_memlen-16")
-    jobs += rl_jobs("popgym_RepeatPreviousEasy", steps=5e5)
     for task in ("bsuite_memlen-16", "popgym_RepeatPreviousEasy", "bsuite_memlen-8", "bsuite_memlen-32"):
         jobs += probe_jobs(task, taus=(2,), conds=CTRL)
-    jobs += rl_jobs("bsuite_memlen-16", steps=2e5, taus=(2,), conds=CTRL)
-    jobs += rl_jobs("popgym_RepeatPreviousEasy", steps=5e5, taus=(2,), conds=CTRL)
-    jobs += probe_jobs("popgym_RepeatPreviousEasy")
-    jobs += rl_jobs("bsuite_memlen-16", steps=2e5)
-    jobs += probe_jobs("bsuite_memlen-8")
-    jobs += probe_jobs("bsuite_memlen-32")
+    jobs += pick(rl_jobs("popgym_RepeatPreviousEasy", steps=5e5), {"base_tau2", "AB_tau128"})
+    jobs += pick(probe_jobs("popgym_RepeatPreviousEasy"), {"base_tau2", "base_tau16", "base_tau128", "A_tau2"})
+    jobs += with_updates(pick(probe_jobs("popgym_RepeatPreviousEasy"), {"B_tau2", "AB_tau2", "AB_tau128"}), 15000)
+    jobs += with_updates(pick(probe_jobs("bsuite_memlen-8"), core), 15000)
     RUNS.mkdir(exist_ok=True)
     out = RUNS / "jobs.jsonl"
     tmp = out.with_suffix(".tmp")

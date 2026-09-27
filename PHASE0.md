@@ -66,8 +66,31 @@
 2. `ImagBehavior._compute_actor_loss` 的 reinforce / both 分支里，`self.value(imag_feat[:-1])` 切的是脉冲时间维（T），而不是想象步维。已改为 `imag_feat[:, :-1]`。DMC 用 `dynamics` 梯度，不走这个分支。
 3. `_policy`、`preprocess`、`simulate` 默认观测里有 `image` 键，已兼容纯向量环境。
 4. `sample_episodes` 的随机种子写死为 0，已改为 `config.seed`。
+5. **`sample_episodes` 会改写回放数据（影响大）**：
+   - 原因：它用 `v[index:...]` 截取片段，再把片段首步标成 `is_first=True`。对 numpy 数组来说切片是视图，所以这次写入会落到存储的 episode 上。
+   - 后果：采样 2000 次后，86% 的步被永久标成 episode 起点，模型几乎每步都重置状态，任何模型都学不到记忆。
+   - 影响范围：只影响以 numpy 数组存放的回放，即本实验的探针数据，以及从磁盘恢复的 RL 训练。在线 RL 的缓存是 Python list，切片即拷贝，不受影响。原论文的 DMC 从头训练应该也不受影响；但凡是中途恢复过的训练都会受影响。
+   - 修复：切片后加 `.copy()`（commit `b333196`）。
+   - 本次处理：09:21 启动、在 10:19 之前跑的探针全部作废，移到 `runs/_invalid_is_first_bug/`，用修好的代码重跑。RL 任务不受影响，继续运行。
 
 以上改动都经过单元测试：A 打开时，非首步进入循环单元的膜电位等于上一步结束时的值，`is_first` 时为 0；base 条件下每步从 0 开始。
+
+## 2.6 8 小时时限下的收缩方案（2026-09-27 11:15 起）
+
+GPU 1–6 只能再用 8 小时。看门狗 `scripts/deadline_stop.sh` 在 **18:50** 停掉所有任务和我们自己的 MPS 守护进程、确认 GPU 已释放，然后生成汇总（日志在 `runs/deadline.log`）。
+
+原则是深度优先：学习本身很慢，每个任务跑到足够多的更新数，比多开条件更重要。
+
+| 部分 | 内容 | 预计到 18:50 |
+|---|---|---|
+| 探针 memlen-16 | 完整 2×2×3τ 网格，2 个种子（10:20 起跑） | 约 17–18k 次更新 |
+| GRU 对照 | memlen-8 / 16 / 32、RepeatPreviousEasy | 约 17–18k 次更新 |
+| 探针 RepeatPreviousEasy | base τ2 / 16 / 128、A τ2（10:20 起跑）；新增 B τ2、A+B τ2、A+B τ128（15k 次更新） | 17k / 15k |
+| 探针 memlen-8（新增） | base τ2 / 128、A τ2、B τ2、A+B τ2 / 128（15k 次更新） | 15k |
+| RL RepeatPreviousEasy | 只保留 base τ2 与 A+B τ128，各 3 个种子 | 约 30 万环境步（计划 50 万） |
+
+- 停掉 18 个 RL，数据移到 `runs/_stopped_for_8h_limit/`（约 4.2 万环境步，都还在随机水平）。
+- 放弃：memlen-16 的 RL、GRU 的 RL、memlen-32 的 SNN 探针。
 
 ## 3. 运行方式
 
