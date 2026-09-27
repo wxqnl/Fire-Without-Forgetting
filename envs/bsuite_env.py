@@ -6,8 +6,13 @@ class MemoryChain:
     """bsuite memory_len task behind the Dreamer env interface.
 
     task: "memlen-<L>" (one context bit, recalled after L steps) or
-    "memlen-<L>-bits-<B>" (memory_size variant). A trailing "-cue" appends the context
-    bits to every observation, which removes the need for memory (control).
+    "memlen-<L>-bits-<B>" (memory_size variant). Trailing flags:
+      -cue     append the context bits to every observation, which removes the need for
+               memory (control);
+      -recall  the final reward is the queried context bit itself (+1/-1), independent of
+               the action. The original reward is +1 iff action == context, an XOR of cue
+               and action with no first-order signal, which a world model learns slowly
+               even when its state holds the cue.
     """
 
     metadata = {}
@@ -16,9 +21,9 @@ class MemoryChain:
         from bsuite.environments import memory_chain
 
         parts = task.split("-")
-        self._cue = parts[-1] == "cue"
-        if self._cue:
-            parts = parts[:-1]
+        self._cue = "cue" in parts
+        self._recall = "recall" in parts
+        parts = [x for x in parts if x not in ("cue", "recall")]
         assert parts[0] == "memlen", task
         length = int(parts[1])
         bits = int(parts[3]) if len(parts) > 3 else 1
@@ -58,7 +63,10 @@ class MemoryChain:
             "is_terminal": terminal,
         }
         info = dict(discount=np.array(0.0 if terminal else 1.0, np.float32))
-        return obs, float(ts.reward), done, info
+        reward = float(ts.reward)
+        if self._recall and done:
+            reward = 2.0 * float(self._env._context[self._env._query]) - 1.0
+        return obs, reward, done, info
 
     def reset(self):
         ts = self._env.reset()

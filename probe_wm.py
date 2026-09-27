@@ -67,11 +67,30 @@ def auc(pos, neg):
     return (r_pos - len(pos) * (len(pos) + 1) / 2) / (len(pos) * len(neg))
 
 
+def logistic_acc(x, y):
+    """Held-out accuracy of an L2-regularised logistic regression (first half trains)."""
+    n = len(y) // 2
+    x = (x - x[:n].mean(0)) / (x[:n].std(0) + 1e-6)
+    w = torch.zeros(x.shape[1] + 1, device=x.device, requires_grad=True)
+    opt = torch.optim.LBFGS([w], max_iter=100, line_search_fn="strong_wolfe")
+
+    def closure():
+        opt.zero_grad()
+        z = x[:n] @ w[:-1] + w[-1]
+        loss = torch.nn.functional.binary_cross_entropy_with_logits(z, y[:n]) + 1e-3 * (w[:-1] ** 2).sum()
+        loss.backward()
+        return loss
+
+    with torch.enable_grad():
+        opt.step(closure)
+    return float((((x[n:] @ w[:-1] + w[-1]) > 0).float() == y[n:]).float().mean())
+
+
 @torch.no_grad()
 def evaluate(wm, eval_eps, config, chunk=128):
     keys = list(next(iter(eval_eps.values())).keys())
     batch = {k: np.stack([ep[k] for ep in eval_eps.values()]) for k in keys}
-    preds, rates = [], []
+    preds, rates, states, mems = [], [], [], []
     for s in range(0, len(eval_eps), chunk):
         data = wm.preprocess({k: v[s : s + chunk] for k, v in batch.items()})
         embed = wm.encoder(data)
@@ -79,10 +98,14 @@ def evaluate(wm, eval_eps, config, chunk=128):
         feat = wm.dynamics.get_feat(post)
         preds.append(wm.heads["reward"](feat).mode()[..., 0].cpu().numpy())
         rates.append(post["deter"].mean().item())
+        states.append(post["deter"].float().mean(0))  # [B, rows, deter]: what the heads read
+        mem_keys = sorted(k for k in post if k.startswith("mem_"))
+        if mem_keys:
+            mems.append(torch.cat([post[k] for k in mem_keys], -1))
     pred = np.concatenate(preds)
     true = batch["reward"]
     pos, neg = pred[true > 0], pred[true < 0]
-    return {
+    out = {
         "eval_auc": float(auc(pos, neg)),
         "eval_bal_acc": float(((pos > 0).mean() + (neg < 0).mean()) / 2),
         "eval_reward_mse": float(np.mean((pred - true)[true != 0] ** 2)),
@@ -90,6 +113,17 @@ def evaluate(wm, eval_eps, config, chunk=128):
         "eval_pos_steps": int(len(pos)),
         "eval_neg_steps": int(len(neg)),
     }
+    if config.task.startswith("bsuite") and len({len(ep["reward"]) for ep in eval_eps.values()}) == 1:
+        # memory read out without the reward head: linear decodability of the cue (context
+        # bit, shown in rows 0-1) from the recurrent state at every row
+        cue = torch.tensor(batch["vector"][:, 0, 2] > 0, dtype=torch.float32, device=config.device)
+        for name, xs in (("h", states), ("mem", mems)):
+            if xs:
+                x = torch.cat(xs)
+                acc = [logistic_acc(x[:, t], cue) for t in range(x.shape[1])]
+                out[f"eval_cue_{name}"] = [round(a, 3) for a in acc]
+                out[f"eval_cue_{name}_end"] = acc[-1]
+    return out
 
 
 def grad_profile(wm, eval_eps, n=64):
@@ -156,6 +190,7 @@ def main(config, args):
             log = {"step": update, **{k: float(np.mean(v)) for k, v in running.items()}}
             log.update(evaluate(wm, eval_eps, config))
             log.update(grad_profile(wm, eval_eps))
+            torch.save(wm.state_dict(), logdir / "wm.pt")  # survives the hard stop
             log["sec_per_update"] = (time.time() - t0) / args.eval_every
             log["peak_mem_gb"] = torch.cuda.max_memory_allocated() / 2**30
             t0 = time.time()

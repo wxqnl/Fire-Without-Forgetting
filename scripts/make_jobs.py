@@ -96,27 +96,38 @@ def ladder_jobs(task="bsuite_memlen-4", variants=LADDER, updates=4000, extra="--
         yield dict(name=name, cmd=" ".join(cmd.split()), logdir=str(logdir), mem_gb=2.5)
 
 
+def recall_jobs(task, cells, seeds=(0, 1), updates=12000, extra=""):
+    """Main Phase 0 grid after 12:45 (see PHASE0.md 2.7): memlen-L-recall, MSE reward head,
+    cue-retention probe. cells: {"cond_tauX": config blocks}."""
+    for cell, cfgs in cells.items():
+        for seed in seeds:
+            name = f"recall/{task}/{cell}/s{seed}"
+            logdir = RUNS / name
+            cmd = (f"{{python}} probe_wm.py --configs {' '.join([suite(task), *cfgs])} --task {task} "
+                   f"--seed {seed} --updates {updates} --eval_every 500 --reward_head symlog_mse "
+                   f"{extra} --logdir {logdir}")
+            yield dict(name=name, cmd=" ".join(cmd.split()), logdir=str(logdir), mem_gb=2.5)
+
+
+def grid_cells():
+    cells = {f"{c}_tau{t}": cfgs + TAUS[t] for c, cfgs in CONDS.items() for t in (2, 128)}
+    cells.update({"base_tau16": TAUS[16], "AB_tau16": CONDS["AB"] + TAUS[16]})
+    cells.update({"gru_tau2": ["grucell"], "ann_tau2": ["grucell", "annwm"]})
+    return cells
+
+
 def main():
     # 2026-09-27 11:15: GPUs 1-6 are available for 8 more hours (hard stop 18:50).
-    # Depth over breadth: keep the running memlen-16 grid, GRU controls and partial
-    # RepeatPrevious grid; add short probes that can finish.
-    # 12:00: RL (resumable from latest_model.pt) and the memlen-32 GRU control make room
-    # for the ablation ladder.
-    core = {"base_tau2", "A_tau2", "B_tau2", "AB_tau2", "AB_tau128", "base_tau128"}
+    # 12:45: the memlen-L reward is an XOR of cue and action. Trained world models keep the
+    # cue in their state (linear probe 0.97-1.00) but their reward head does not learn the
+    # XOR, so the XOR probe grid is confounded and was stopped (runs/_xor_probe). New grid:
+    # the -recall variant (reward = cue), MSE reward head, cue-retention probe.
     jobs = []
-    jobs += ladder_jobs()
-    jobs += ladder_jobs(variants=LADDER_MSE)
-    # the all-ANN control at exactly the settings of the running memlen-8 GRU control
-    jobs += ladder_jobs("bsuite_memlen-8", {"ann": LADDER["ann"]}, updates=6000, extra="")
-    # memory-free control: the context bit is shown on every step
-    jobs += ladder_jobs("bsuite_memlen-4-cue", {k: LADDER[k] for k in ("gru", "base")})
-    jobs += ladder_jobs("bsuite_memlen-4-cue", {k: LADDER_MSE[k] for k in ("gru-mse", "ann-mse")})
-    jobs += probe_jobs("bsuite_memlen-16", taus=(2, 128))  # tau 16 dropped at 12:25 for the ladder
-    for task in ("bsuite_memlen-16", "popgym_RepeatPreviousEasy", "bsuite_memlen-8"):
-        jobs += probe_jobs(task, taus=(2,), conds=CTRL)
-    jobs += pick(probe_jobs("popgym_RepeatPreviousEasy"), {"base_tau2", "base_tau16", "base_tau128", "A_tau2"})
-    jobs += with_updates(pick(probe_jobs("popgym_RepeatPreviousEasy"), {"B_tau2", "AB_tau2", "AB_tau128"}), 15000)
-    jobs += with_updates(pick(probe_jobs("bsuite_memlen-8"), core), 15000)
+    # quick check that the reward head learns the recall task
+    jobs += ladder_jobs("bsuite_memlen-4-recall", {k: LADDER_MSE[k] for k in ("ann-mse", "gru-mse", "base-mse", "AB128-mse")},
+                        updates=3000)
+    jobs += recall_jobs("bsuite_memlen-16-recall", grid_cells())
+    jobs += recall_jobs("bsuite_memlen-8-recall", grid_cells(), extra="--batch_length 32")
     RUNS.mkdir(exist_ok=True)
     out = RUNS / "jobs.jsonl"
     tmp = out.with_suffix(".tmp")

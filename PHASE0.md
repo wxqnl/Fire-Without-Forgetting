@@ -92,11 +92,37 @@ GPU 1–6 只能再用 8 小时。看门狗 `scripts/deadline_stop.sh` 在 **18:
 - 停掉 18 个 RL，数据移到 `runs/_stopped_for_8h_limit/`（约 4.2 万环境步，都还在随机水平）。
 - 放弃：memlen-16 的 RL、GRU 的 RL、memlen-32 的 SNN 探针。
 
+## 2.7 原探针的 XOR 混杂与 recall 重设计（2026-09-27 11:20–12:30）
+
+**现象**：训练 2000–4000 次更新后，所有条件的奖励预测 AUC 都在 0.5，GRU 阳性对照也一样；连 memlen-2 都学不会。
+
+**排查过程**：
+
+| 检查 | 结果 | 说明 |
+|---|---|---|
+| 普通 GRU 在完全相同的批数据上训练（MSE，lr 1e-3） | memlen-8 在 200 次更新时 AUC 1.00 | 数据管线没问题 |
+| 初始化时，终止步奖励预测对各步输入的梯度（memlen-8，读出层随机） | base τ2 每往回一步衰减约 4.6 倍，到线索步约为终止步的 1/300000；A+B τ128 平台约 1/100；GRU 不衰减 | 通路完好；base 的梯度随步数指数衰减，符合复位失忆的假设 |
+| 奖励损失 / 无记忆下限 | 几千次更新后，所有模型仍在下限之上 | 255 桶 two-hot 奖励头零初始化、lr 1e-4，连不需要记忆的部分都学得很慢 |
+| 消融阶梯（memlen-4） | 线索每步都显示（无需记忆）时，全 ANN + MSE 头在 500 次更新时 AUC 1.00；需要记忆时，所有变体（包括全 ANN、lr 1e-3、reward_scale 10）都约 0.5 | 瓶颈不在"动作 × 线索"的组合，也不在脉冲层 |
+| 对训练好的全 ANN 世界模型做线性探针（memlen-4，4000 次更新） | 从 h 解码线索：第 1–5 步为 0.96–1.00；从终止步 h 解码最后动作：0.94–0.97；奖励 AUC 0.49–0.52 | **记忆没有丢**，状态里同时有线索和动作 |
+
+**原因**：BSuite memory_len 的奖励是"动作是否等于线索"，即线索与动作的 XOR。奖励与线索单独不相关，与动作单独也不相关，梯度下降没有一阶信号，要先逃离鞍点。线索在 h 中只是幅值较小的一个方向，所以世界模型长时间卡在鞍点；普通 GRU 能学会，是因为原始观测以满幅值直接输入。所以原探针测的是"能不能学会 XOR"，而不是"能不能记住"。POPGym RepeatPrevious 的奖励同样是"动作 × 记住的牌"，有同样的问题。这是探针设计的失误，不是 Spiking-WM 的 bug。
+
+**重设计**（commit 见 git log）：
+
+1. 任务：`bsuite_memlen-L-recall`，终止步奖励直接等于线索（±1），与动作无关，记忆可以线性读出。验证：全 ANN 在 memlen-4-recall 上 250 次更新时 AUC 1.00。
+2. 奖励头：所有条件统一改用 `symlog_mse`（原为 255 桶 two-hot）。它从一开始就对零奖励步给出正确预测，几百次更新就到无记忆下限。
+3. 新增指标 `eval_cue_h`、`eval_cue_mem`：在每一步用线性探针（逻辑回归，一半测试 episode 训练、一半测试）从循环状态解码线索。h 是预测头读取的脉冲；mem 是膜电位，仅 A/AB 有。它不依赖奖励头，直接对应方案 E1 的"记忆保留曲线"。
+4. 每次评估保存 `wm.pt`，18:50 硬停后仍可事后分析。
+5. 新网格（12:27 启动，12000 次更新、每 500 次评估，2 个种子）：memlen-16-recall 与 memlen-8-recall（后者 batch_length 32）。条件：base/A/B/AB × τ_d {2, 128}，base 与 A+B 的 τ16，GRU 对照，全 ANN 对照（`annwm`：SiLU 代替所有 LIF，单时间步，GRU 核）。
+
+**停掉并存档**：原 XOR 探针网格和 XOR 阶梯移到 `runs/_xor_probe/`；6 个 RL（可从 `latest_model.pt` 续跑）留在 `runs/rl/`。
+
 ## 3. 运行方式
 
 ```bash
 cd fwf
-python scripts/make_jobs.py                  # 生成 runs/jobs.jsonl（144 个任务，按优先级排序）
+python scripts/make_jobs.py                  # 生成 runs/jobs.jsonl（按优先级排序；当前内容见 main()）
 setsid nohup python scripts/queue.py --jobs runs/jobs.jsonl --gpus 1,2,3,4,5,6 > runs/queue.log 2>&1 &
 python scripts/summarize.py                  # 汇总到 runs/summary.md 和 runs/plots/
 ```
