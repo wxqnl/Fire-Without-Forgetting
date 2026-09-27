@@ -58,16 +58,43 @@ def with_updates(jobs, updates):
     return jobs
 
 
+# Ablation ladder (2026-09-27 12:00): even the GRU control stays at chance, although a
+# plain GRU learns memlen-8 from the same batches in 200 updates. Short runs localise the
+# failure: learning rate, reward-loss weight, spiking feed-forward layers (annwm).
+LADDER = {
+    "gru": (["grucell"], ""),
+    "gru-lr3e-4": (["grucell"], "--model_lr 3e-4"),
+    "gru-rs10": (["grucell"], "--reward_scale 10"),
+    "ann": (["grucell", "annwm"], ""),
+    "ann-lr3e-4": (["grucell", "annwm"], "--model_lr 3e-4"),
+    "base": ([], ""),
+    "AB128": (["persist", "nodendreset", "taud128"], ""),
+}
+
+
+def ladder_jobs(task="bsuite_memlen-4", variants=LADDER, updates=4000, extra="--batch_length 32 --train_steps 100000"):
+    for variant, (cfgs, flags) in variants.items():
+        name = f"ladder/{task}/{variant}/s0"
+        logdir = RUNS / name
+        cmd = (f"{{python}} probe_wm.py --configs {' '.join([suite(task), *cfgs])} --task {task} "
+               f"--seed 0 --updates {updates} --eval_every 250 {extra} {flags} --logdir {logdir}")
+        yield dict(name=name, cmd=" ".join(cmd.split()), logdir=str(logdir), mem_gb=2.5)
+
+
 def main():
     # 2026-09-27 11:15: GPUs 1-6 are available for 8 more hours (hard stop 18:50).
     # Depth over breadth: keep the running memlen-16 grid, GRU controls and partial
-    # RepeatPrevious grid; keep a minimal RL contrast; add short probes that can finish.
+    # RepeatPrevious grid; add short probes that can finish.
+    # 12:00: RL (resumable from latest_model.pt) and the memlen-32 GRU control make room
+    # for the ablation ladder.
     core = {"base_tau2", "A_tau2", "B_tau2", "AB_tau2", "AB_tau128", "base_tau128"}
     jobs = []
+    jobs += ladder_jobs()
+    # the all-ANN control at exactly the settings of the running memlen-8 GRU control
+    jobs += ladder_jobs("bsuite_memlen-8", {"ann": LADDER["ann"]}, updates=6000, extra="")
     jobs += probe_jobs("bsuite_memlen-16")
-    for task in ("bsuite_memlen-16", "popgym_RepeatPreviousEasy", "bsuite_memlen-8", "bsuite_memlen-32"):
+    for task in ("bsuite_memlen-16", "popgym_RepeatPreviousEasy", "bsuite_memlen-8"):
         jobs += probe_jobs(task, taus=(2,), conds=CTRL)
-    jobs += pick(rl_jobs("popgym_RepeatPreviousEasy", steps=5e5), {"base_tau2", "AB_tau128"})
     jobs += pick(probe_jobs("popgym_RepeatPreviousEasy"), {"base_tau2", "base_tau16", "base_tau128", "A_tau2"})
     jobs += with_updates(pick(probe_jobs("popgym_RepeatPreviousEasy"), {"B_tau2", "AB_tau2", "AB_tau128"}), 15000)
     jobs += with_updates(pick(probe_jobs("bsuite_memlen-8"), core), 15000)

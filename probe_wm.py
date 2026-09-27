@@ -92,6 +92,28 @@ def evaluate(wm, eval_eps, config, chunk=128):
     }
 
 
+def grad_profile(wm, eval_eps, n=64):
+    """|d terminal reward prediction / d embedding| per row, relative to the terminal row.
+
+    Only for fixed-length episodes (BSuite memory_len, where the cue is in rows 0-1): how
+    much of the gradient from the memory-dependent reward reaches the cue step."""
+    eps = list(eval_eps.values())[:n]
+    if len({len(ep["reward"]) for ep in eps}) != 1:
+        return {}
+    data = wm.preprocess({k: np.stack([ep[k] for ep in eps]) for k in eps[0]})
+    with torch.no_grad():
+        embed = wm.encoder(data)
+    embed = embed.detach().requires_grad_(True)
+    post, _ = wm.dynamics.observe(embed, data["action"], data["is_first"])
+    pred = wm.heads["reward"](wm.dynamics.get_feat(post)).mode()[..., 0]
+    pred[:, -1].sum().backward()
+    g = embed.grad.abs().sum(dim=(0, 1, 3)).cpu().numpy()  # embed is [T, B, rows, dim]
+    if g[-1] == 0:  # reward head is zero-initialised
+        return {}
+    g = g / g[-1]
+    return {"eval_grad_cue": float(g[:2].max()), "eval_grad_rows": [float(f"{x:.3g}") for x in g]}
+
+
 def main(config, args):
     tools.set_seed_everywhere(config.seed)
     logdir = pathlib.Path(config.logdir).expanduser()
@@ -133,6 +155,7 @@ def main(config, args):
         if update % args.eval_every == 0 or update == args.updates:
             log = {"step": update, **{k: float(np.mean(v)) for k, v in running.items()}}
             log.update(evaluate(wm, eval_eps, config))
+            log.update(grad_profile(wm, eval_eps))
             log["sec_per_update"] = (time.time() - t0) / args.eval_every
             log["peak_mem_gb"] = torch.cuda.max_memory_allocated() / 2**30
             t0 = time.time()

@@ -287,3 +287,12 @@ thr100:
 # positive control: continuous-state GRU core, everything else spiking
 grucell:
   dyn_cell: 'GRUCtrl'
+
+# all-ANN control (with grucell: a plain DreamerV3-style world model): SiLU instead of
+# LIF in the encoder, decoder, heads and RSSM input/output layers; one time step
+annwm:
+  ANNAct: {}
+  act: 'ANNAct'
+  encoder: {act: 'ANNAct'}
+  decoder: {act: 'ANNAct'}
+  spike_times: 1

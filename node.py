@@ -347,3 +347,16 @@ class MCNode(BaseMCNode):
         if self.dend_reset:
             self.mems['basal'] = self.mems['basal'] * (1. - self.spike.detach())
             self.mems['apical'] = self.mems['apical']  * (1. - self.spike.detach())
+
+
+class ANNAct(nn.Module):
+    """Non-spiking SiLU with the node interface, for the all-ANN control (config block annwm)."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+
+    def forward(self, inputs):
+        return F.silu(inputs)
+
+    def n_reset(self):
+        pass
