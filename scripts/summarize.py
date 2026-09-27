@@ -15,9 +15,9 @@ import pathlib
 import numpy as np
 
 RUNS = pathlib.Path(__file__).resolve().parents[1] / "runs"
-COND_ORDER = ["base", "A", "B", "AB", "AG", "ABG", "gru", "ann"]
+COND_ORDER = ["base", "G", "A", "B", "AB", "AG", "ABG", "gru", "ann"]
 COND_LABEL = {"base": "base (original)", "A": "A: no inter-step reset", "B": "B: no dendritic reset",
-              "AB": "A+B", "AG": "A + dendritic gain (G)", "ABG": "A+B + dendritic gain (G)",
+              "AB": "A+B", "G": "G only (resets kept)", "AG": "A + dendritic gain (G)", "ABG": "A+B + dendritic gain (G)",
               "gru": "GRU core (control)", "ann": "all-ANN + GRU (control)"}
 
 
@@ -98,7 +98,7 @@ def plot(kind, task, cells, key, ylabel):
 
     taus = sorted({t for _, t in cells})
     fig, axes = plt.subplots(1, len(taus), figsize=(4.2 * len(taus), 3.4), sharey=True, squeeze=False)
-    colors = dict(base="#6b7280", A="#2563eb", B="#d97706", AB="#059669", gru="#a855f7", ann="#111827", AG="#0891b2", ABG="#dc2626")
+    colors = dict(base="#6b7280", A="#2563eb", B="#d97706", AB="#059669", gru="#a855f7", ann="#111827", G="#9ca3af", AG="#0891b2", ABG="#dc2626")
     for ax, tau in zip(axes[0], taus):
         for cond in COND_ORDER:
             for i, rows in enumerate(cells.get((cond, tau), {}).values()):
@@ -129,8 +129,8 @@ def plot_retention(task, cells):
     import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots(figsize=(6.4, 4.0))
-    styles = {2: "-", 16: "--", 128: ":"}
-    colors = dict(base="#6b7280", A="#2563eb", B="#d97706", AB="#059669", gru="#a855f7", ann="#111827", AG="#0891b2", ABG="#dc2626")
+    styles = {2: "-", 16: "--", 128: ":", 512: "-."}
+    colors = dict(base="#6b7280", A="#2563eb", B="#d97706", AB="#059669", gru="#a855f7", ann="#111827", G="#9ca3af", AG="#0891b2", ABG="#dc2626")
     for (cond, tau), runs in sorted(cells.items(), key=lambda x: (COND_ORDER.index(x[0][0]), x[0][1])):
         profiles = [[r for r in rows if "eval_cue_h" in r][-1]["eval_cue_h"] for rows in runs.values()
                     if any("eval_cue_h" in r for r in rows)]

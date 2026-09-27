@@ -13,7 +13,7 @@ RUNS = ROOT / "runs"
 CONDS = {"base": [], "A": ["persist"], "B": ["nodendreset"], "AB": ["persist", "nodendreset"]}
 # positive control: continuous GRU core (only used with tau 2, which it ignores)
 CTRL = {"gru": ["grucell"]}
-TAUS = {2: [], 16: ["taud16"], 128: ["taud128"]}
+TAUS = {2: [], 16: ["taud16"], 128: ["taud128"], 512: ["taud512"]}
 
 
 def suite(task):
@@ -126,7 +126,9 @@ def main():
     # quick check that the reward head learns the recall task
     jobs += ladder_jobs("bsuite_memlen-4-recall", {k: LADDER_MSE[k] for k in ("ann-mse", "gru-mse", "base-mse", "AB128-mse")},
                         updates=3000)
-    jobs += recall_jobs("bsuite_memlen-16-recall", grid_cells())
+    # 13:25: B alone cannot help while A's reset wipes the state (memlen-8 B runs all at
+    # chance); its memlen-16 runs make room for memlen-32 and the G-only control
+    jobs += recall_jobs("bsuite_memlen-16-recall", {k: v for k, v in grid_cells().items() if not k.startswith("B_")})
     jobs += recall_jobs("bsuite_memlen-8-recall", grid_cells(), extra="--batch_length 32")
     # 13:10: with A, tau 128 keeps the cue in the dendrites at ~1% of threshold (write gain
     # 1/tau) and it never reaches the spikes; intervention G decouples the gain
@@ -135,6 +137,11 @@ def main():
          "AG_tau128": ["persist", "taud128", "dendgain"]}
     jobs += recall_jobs("bsuite_memlen-8-recall", G, extra="--batch_length 32")
     jobs += recall_jobs("bsuite_memlen-16-recall", {k: G[k] for k in ("ABG_tau128", "ABG_tau16")})
+    # is G alone enough? (inter-step reset kept)
+    jobs += recall_jobs("bsuite_memlen-16-recall", {"G_tau128": ["taud128", "dendgain"]})
+    jobs += recall_jobs("bsuite_memlen-32-recall", {
+        "ABG_tau128": G["ABG_tau128"], "ABG_tau512": ["persist", "nodendreset", "taud512", "dendgain"],
+        "AB_tau128": CONDS["AB"] + TAUS[128], "base_tau2": [], "gru_tau2": ["grucell"]})
     RUNS.mkdir(exist_ok=True)
     out = RUNS / "jobs.jsonl"
     tmp = out.with_suffix(".tmp")

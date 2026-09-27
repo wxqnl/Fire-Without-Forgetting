@@ -284,6 +284,9 @@ thr025:
 thr100:
   MCNode: {threshold: 1.0}
 
+taud512:
+  MCNode: {tau_basal: 512.0, tau_apical: 512.0}
+
 # intervention G: dendritic input gain sqrt(tau_d / 2), decoupled from the retention time
 dendgain:
   MCNode: {dend_gain: True}
