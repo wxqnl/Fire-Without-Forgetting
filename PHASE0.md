@@ -80,8 +80,23 @@ python scripts/summarize.py                  # 汇总到 runs/summary.md 和 run
 
 - **调度**：每张 GPU 起一个用户级 MPS 守护进程（`.mps/gpu<k>/`），同卡多进程并发执行。实测单卡 12 个进程时总吞吐是不开 MPS 时的 3.4 倍。每张卡最多 10 个进程。
 - **显存**：按任务估计值记账（探针 3GB、RL 14GB），单卡预算 74GB。启动前再用 nvidia-smi 检查实际空闲显存，避让其他用户。
-- **断点续跑**：成功的任务在 `<logdir>/.exit` 写入 0，重启队列时跳过；失败的任务重试一次。RL 任务从 `latest_model.pt` 和已存的 episode 续跑。
-- **停止**：`pkill -f scripts/queue.py`，然后 `pkill -f "probe_wm.py|dreamer.py"`，再对每张卡执行 `CUDA_MPS_PIPE_DIRECTORY=.mps/gpu<k>/pipe bash -c 'echo quit | nvidia-cuda-mps-control'`。
+- **断点续跑**：
+  - 每个任务自己把退出码写入 `<logdir>/.exit`，同时记录 `.pid` 和 `.gpu`。
+  - 重启队列时：已成功的任务跳过；仍在运行的任务直接接管，不会重复启动；失败的任务重试一次。
+  - RL 任务从 `latest_model.pt` 和已存的 episode 续跑。
+- **调度**：队首任务放不下时，给它预留余量最大的那张卡，较小的任务回填其他卡，避免队头阻塞。
+- **只停调度器**（任务继续跑，之后重启时会被接管）：`pkill -f scripts/queue.py`。
+- **全部停止**：
+  1. `pkill -f scripts/queue.py`；
+  2. `pkill -f "probe_wm.py|dreamer.py"`；
+  3. 对每张卡执行 `CUDA_MPS_PIPE_DIRECTORY=.mps/gpu<k>/pipe bash -c 'echo quit | nvidia-cuda-mps-control'`。
+- **加任务**：编辑 `scripts/make_jobs.py` 后重新运行。它用原子方式重写 `runs/jobs.jsonl`，正在运行的队列下一轮会自动读到。
+
+### 2.5 阳性对照
+
+`grucell`：循环核换成连续状态的 GRU，编码器、预测头仍然是脉冲网络。它在四个探针任务上各跑 2 个种子，在两个 RL 任务上各跑 3 个种子。
+
+用途：如果 GRU 核也学不会某个任务，那个任务上 SNN 的失败就不能归因于复位，只能说明训练预算或其他模块有问题。
 
 ## 4. 结果
 

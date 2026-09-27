@@ -29,7 +29,7 @@ def probe_jobs(task, seeds=(0, 1), taus=(2, 16, 128), conds=CONDS):
                 configs = " ".join([suite(task), *cfgs, *TAUS[tau]])
                 cmd = (f"{{python}} probe_wm.py --configs {configs} --task {task} --seed {seed} "
                        f"--updates 20000 --eval_every 1000 --logdir {logdir}")
-                yield dict(name=name, cmd=cmd, logdir=str(logdir), mem_gb=3)
+                yield dict(name=name, cmd=cmd, logdir=str(logdir), mem_gb=2.5)
 
 
 def rl_jobs(task, steps, seeds=(0, 1, 2), taus=(2, 128), train_ratio=64, eval_every=None,
@@ -44,7 +44,7 @@ def rl_jobs(task, steps, seeds=(0, 1, 2), taus=(2, 128), train_ratio=64, eval_ev
                        f"--steps {steps:g} --train_ratio {train_ratio} --logdir {logdir}")
                 if eval_every:
                     cmd += f" --eval_every {eval_every:g}"
-                yield dict(name=name, cmd=cmd, logdir=str(logdir), mem_gb=14)
+                yield dict(name=name, cmd=cmd, logdir=str(logdir), mem_gb=14.5)
 
 
 def main():

@@ -338,8 +338,10 @@ def sample_episodes(episodes, length, seed=0):
                 continue
             if not ret:
                 index = int(np_random.randint(0, total - 1))
+                # copy: a numpy slice is a view, and the is_first write below would
+                # otherwise mark steps of the stored episode as episode starts for good
                 ret = {
-                    k: v[index : min(index + length, total)]
+                    k: v[index : min(index + length, total)].copy()
                     for k, v in episode.items()
                     if "log_" not in k
                 }
