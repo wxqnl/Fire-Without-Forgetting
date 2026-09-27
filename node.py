@@ -313,15 +313,20 @@ class MCNode(BaseMCNode):
                  tau_apical=2.0,
                  v_reset=0.0,
                  comps=['basal', 'apical', 'soma'],
-                 act_fun=QGateGrad):
+                 act_fun=QGateGrad,
+                 dend_reset=True,
+                 sg_alpha=None):
         super().__init__(threshold, v_reset, comps)
 
         self.tau = tau
         self.tau_basal = tau_basal
         self.tau_apical = tau_apical
+        # dend_reset=False: somatic spikes no longer reset the dendrites (intervention B)
+        self.dend_reset = dend_reset
         if isinstance(act_fun, str):
             act_fun = eval(act_fun)
-        self.act_fun = act_fun(alpha=tau, requires_grad=False)
+        # the original code ties the surrogate width to tau; sg_alpha decouples it for tau sweeps
+        self.act_fun = act_fun(alpha=tau if sg_alpha is None else sg_alpha, requires_grad=False)
 
     def integral(self, basal_inputs, apical_inputs, soma_inputs):
         '''
@@ -339,5 +344,6 @@ class MCNode(BaseMCNode):
     def calc_spike(self):
         self.spike = self.act_fun(self.mems['soma'] - self.threshold)
         self.mems['soma'] = self.mems['soma']  * (1. - self.spike.detach())
-        self.mems['basal'] = self.mems['basal'] * (1. - self.spike.detach())
-        self.mems['apical'] = self.mems['apical']  * (1. - self.spike.detach())
+        if self.dend_reset:
+            self.mems['basal'] = self.mems['basal'] * (1. - self.spike.detach())
+            self.mems['apical'] = self.mems['apical']  * (1. - self.spike.detach())

@@ -167,6 +167,8 @@ class WorldModel(nn.Module):
         metrics["dyn_loss"] = to_np(dyn_loss)
         metrics["rep_loss"] = to_np(rep_loss)
         metrics["kl"] = to_np(torch.mean(kl_value))
+        # firing rate of the recurrent spiking cell (activity side of the activity-memory trade-off)
+        metrics["deter_rate"] = to_np(torch.mean(post["deter"]))
         with torch.cuda.amp.autocast(self._use_amp):
             metrics["prior_ent"] = to_np(
                 torch.mean(self.dynamics.get_dist(prior).entropy())
@@ -186,7 +188,8 @@ class WorldModel(nn.Module):
     # this function is called during both rollout and training
     def preprocess(self, obs):
         obs = obs.copy()
-        obs["image"] = torch.Tensor(obs["image"]) / 255.0 - 0.5
+        if "image" in obs:
+            obs["image"] = torch.Tensor(obs["image"]) / 255.0 - 0.5
         if "discount" in obs:
             obs["discount"] *= self._config.discount
             # (batch_size, batch_length) -> (batch_size, batch_length, 1)
@@ -471,12 +474,12 @@ class ImagBehavior(nn.Module):
         elif self._config.imag_gradient == "reinforce":
             actor_target = (
                 policy.log_prob(imag_action)[:-1][:, :, None]
-                * (target - self.value(imag_feat[:-1]).mode()).detach()
+                * (target - self.value(imag_feat[:, :-1]).mode()).detach()
             )
         elif self._config.imag_gradient == "both":
             actor_target = (
                 policy.log_prob(imag_action)[:-1][:, :, None]
-                * (target - self.value(imag_feat[:-1]).mode()).detach()
+                * (target - self.value(imag_feat[:, :-1]).mode()).detach()
             )
             mix = self._config.imag_gradient_mix()
             actor_target = mix * target + (1 - mix) * actor_target

@@ -118,8 +118,8 @@ class Dreamer(nn.Module):
 
     def _policy(self, obs, state, training):
         if state is None:
-            batch_size = len(obs["image"])
-            latent = self._wm.dynamics.initial(len(obs["image"]))
+            batch_size = len(obs["is_first"])
+            latent = self._wm.dynamics.initial(batch_size)
             action = torch.zeros((batch_size, self._config.num_actions)).to(
                 self._config.device
             )
@@ -189,7 +189,7 @@ def count_steps(folder):
 
 
 def make_dataset(episodes, config):
-    generator = tools.sample_episodes(episodes, config.batch_length)
+    generator = tools.sample_episodes(episodes, config.batch_length, config.seed)
     dataset = tools.from_generator(generator, config.batch_size)
     return dataset
 
@@ -233,6 +233,16 @@ def make_env(config, mode):
         from envs.memorymaze import MemoryMaze
 
         env = MemoryMaze(task, seed=config.seed)
+        env = wrappers.OneHotAction(env)
+    elif suite == "popgym":
+        from envs.popgym_env import PopGym
+
+        env = PopGym(task, seed=config.seed + (0 if "train" in mode else 10_000))
+        env = wrappers.OneHotAction(env)
+    elif suite == "bsuite":
+        from envs.bsuite_env import MemoryChain
+
+        env = MemoryChain(task, seed=config.seed + (0 if "train" in mode else 10_000))
         env = wrappers.OneHotAction(env)
     elif suite == "crafter":
         import envs.crafter as crafter

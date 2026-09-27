@@ -1,0 +1,183 @@
+"""World-model memory probe (E1/E2 of the Phase 0 plan).
+
+Trains only the world model on random-policy data from a memory task and measures
+whether its reward prediction uses information from k steps back:
+
+  bsuite_memlen-L          reward at the last step = +1/-1 depending on whether the
+                           random action matches the context bit shown L steps earlier
+  popgym_RepeatPrevious*   reward at every step t > k depends on whether the random
+                           action matches the card shown k steps earlier
+
+A memoryless model cannot beat chance (AUC 0.5) on these steps, so reward-prediction
+AUC on held-out full episodes is a direct read-out of how far back the world model
+remembers. No actor-critic is trained, which removes exploration as a confound.
+
+usage: python probe_wm.py --configs bsuite persist --task bsuite_memlen-16 --logdir ...
+"""
+import argparse
+import json
+import pathlib
+import sys
+import time
+
+sys.path.append(str(pathlib.Path(__file__).parent))
+
+import numpy as np
+import ruamel.yaml as yaml
+import torch
+
+import dreamer
+import models
+import tools
+
+
+def collect(config, episodes, seed, mode):
+    """Random-policy episodes in the replay format used by tools.simulate."""
+    cfg = argparse.Namespace(**vars(config))
+    cfg.seed = seed
+    env = dreamer.make_env(cfg, mode)
+    rng = np.random.RandomState(seed)
+    n_act = env.action_space.shape[0]
+    out = {}
+    for i in range(episodes):
+        obs = env.reset()
+        ep = {k: [v] for k, v in obs.items()}
+        ep["action"] = [np.zeros(n_act, np.float32)]
+        ep["reward"] = [0.0]
+        ep["discount"] = [1.0]
+        done = False
+        while not done:
+            action = np.eye(n_act, dtype=np.float32)[rng.randint(n_act)]
+            obs, reward, done, info = env.step({"action": action})
+            for k, v in obs.items():
+                ep[k].append(v)
+            ep["action"].append(action)
+            ep["reward"].append(reward)
+            ep["discount"].append(float(info["discount"]))
+        out[f"{mode}-{i:06d}"] = {k: tools.convert(v) for k, v in ep.items()}
+    return out, env
+
+
+def auc(pos, neg):
+    """Mann-Whitney AUC: P(score of a positive-reward step > score of a negative one)."""
+    from scipy.stats import rankdata
+
+    ranks = rankdata(np.concatenate([pos, neg]))  # ties get the average rank
+    r_pos = ranks[: len(pos)].sum()
+    return (r_pos - len(pos) * (len(pos) + 1) / 2) / (len(pos) * len(neg))
+
+
+@torch.no_grad()
+def evaluate(wm, eval_eps, config, chunk=128):
+    keys = list(next(iter(eval_eps.values())).keys())
+    batch = {k: np.stack([ep[k] for ep in eval_eps.values()]) for k in keys}
+    preds, rates = [], []
+    for s in range(0, len(eval_eps), chunk):
+        data = wm.preprocess({k: v[s : s + chunk] for k, v in batch.items()})
+        embed = wm.encoder(data)
+        post, _ = wm.dynamics.observe(embed, data["action"], data["is_first"])
+        feat = wm.dynamics.get_feat(post)
+        preds.append(wm.heads["reward"](feat).mode()[..., 0].cpu().numpy())
+        rates.append(post["deter"].mean().item())
+    pred = np.concatenate(preds)
+    true = batch["reward"]
+    pos, neg = pred[true > 0], pred[true < 0]
+    return {
+        "eval_auc": float(auc(pos, neg)),
+        "eval_bal_acc": float(((pos > 0).mean() + (neg < 0).mean()) / 2),
+        "eval_reward_mse": float(np.mean((pred - true)[true != 0] ** 2)),
+        "eval_deter_rate": float(np.mean(rates)),
+        "eval_pos_steps": int(len(pos)),
+        "eval_neg_steps": int(len(neg)),
+    }
+
+
+def main(config, args):
+    tools.set_seed_everywhere(config.seed)
+    logdir = pathlib.Path(config.logdir).expanduser()
+    logdir.mkdir(parents=True, exist_ok=True)
+    done_file = logdir / "results.json"
+    if done_file.exists():
+        print("already finished:", done_file)
+        return
+
+    # identical data for every model seed / condition of a task
+    t0 = time.time()
+    train_eps, env = collect(config, args.train_episodes, args.data_seed, "train")
+    eval_eps, _ = collect(config, args.eval_episodes, args.data_seed + 1, "eval")
+    scale = max(np.abs(ep["reward"]).max() for ep in train_eps.values())
+    for eps in (train_eps, eval_eps):  # unit-magnitude rewards, e.g. POPGym's +-1/(N-k)
+        for ep in eps.values():
+            ep["reward"] = (ep["reward"] / scale).astype(np.float32)
+    steps = sum(len(ep["reward"]) - 1 for ep in train_eps.values())
+    print(f"data: {len(train_eps)} train eps ({steps} steps), {len(eval_eps)} eval eps, "
+          f"reward scale {scale:.4f}, {time.time() - t0:.0f}s")
+
+    config.num_actions = env.action_space.shape[0]
+    dataset = dreamer.make_dataset(train_eps, config)
+    wm = models.WorldModel(env.observation_space, env.action_space, 0, config).to(config.device)
+    wm.requires_grad_(False)
+
+    metrics_file = (logdir / "metrics.jsonl").open("a")
+    log = {"step": 0, **evaluate(wm, eval_eps, config)}
+    print(json.dumps(log))
+    metrics_file.write(json.dumps(log) + "\n")
+    metrics_file.flush()
+    t0 = time.time()
+    running = {}
+    for update in range(1, args.updates + 1):
+        _, _, mets = wm._train(next(dataset))
+        for k in ("model_loss", "reward_loss", "vector_loss", "kl", "deter_rate"):
+            if k in mets:
+                running.setdefault(k, []).append(float(mets[k]))
+        if update % args.eval_every == 0 or update == args.updates:
+            log = {"step": update, **{k: float(np.mean(v)) for k, v in running.items()}}
+            log.update(evaluate(wm, eval_eps, config))
+            log["sec_per_update"] = (time.time() - t0) / args.eval_every
+            log["peak_mem_gb"] = torch.cuda.max_memory_allocated() / 2**30
+            t0 = time.time()
+            running = {}
+            print(json.dumps(log))
+            metrics_file.write(json.dumps(log) + "\n")
+            metrics_file.flush()
+    torch.save(wm.state_dict(), logdir / "wm.pt")
+    done_file.write_text(json.dumps(log, indent=1))
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--configs", nargs="+")
+    parser.add_argument("--updates", type=int, default=20000)
+    parser.add_argument("--eval_every", type=int, default=1000)
+    parser.add_argument("--train_episodes", type=int, default=0)
+    parser.add_argument("--eval_episodes", type=int, default=512)
+    parser.add_argument("--train_steps", type=int, default=200000)
+    parser.add_argument("--data_seed", type=int, default=12345)
+    args, remaining = parser.parse_known_args()
+    configs = yaml.safe_load((pathlib.Path(sys.argv[0]).parent / "configs.yaml").read_text())
+
+    def recursive_update(base, update):
+        for key, value in update.items():
+            if isinstance(value, dict) and key in base:
+                recursive_update(base[key], value)
+            else:
+                base[key] = value
+
+    defaults = {}
+    for name in ["defaults", *(args.configs or [])]:
+        recursive_update(defaults, configs[name])
+    parser = argparse.ArgumentParser()
+    for key, value in sorted(defaults.items(), key=lambda x: x[0]):
+        arg_type = tools.args_type(value)
+        parser.add_argument(f"--{key}", type=arg_type, default=arg_type(value))
+    config = parser.parse_args(remaining)
+    config.time_limit = int(config.time_limit)
+    if not args.train_episodes:
+        # fixed step budget regardless of episode length
+        probe_env = dreamer.make_env(config, "train")
+        obs, n, done = probe_env.reset(), 0, False
+        while not done:
+            _, _, done, _ = probe_env.step({"action": np.eye(probe_env.action_space.shape[0], dtype=np.float32)[0]})
+            n += 1
+        args.train_episodes = max(1, args.train_steps // n)
+    main(config, args)

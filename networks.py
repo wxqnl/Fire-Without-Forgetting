@@ -60,6 +60,9 @@ class RSSM(nn.Module):
         self._device = device
 
         self.T = config.spike_times
+        # persist_state=True carries the recurrent cell's membrane potentials across
+        # environment steps (intervention A); they are cleared only at episode starts
+        self._persist = getattr(config, "persist_state", False)
 
         inp_layers = []
         if self._discrete:
@@ -79,6 +82,7 @@ class RSSM(nn.Module):
 
         self._cell = eval(cell)(config, self._hidden, self._deter, **config.dyn_cell_p)
         self._cell.apply(tools.weight_init)
+        self._mem_keys = list(self._cell.neuron.mems.keys()) if self._persist else []
         # if cell == "gru":
         #     self._cell = GRUCell(self._hidden, self._deter)
         #     self._cell.apply(tools.weight_init)
@@ -151,6 +155,8 @@ class RSSM(nn.Module):
                 stoch=torch.zeros([batch_size, self._stoch]).to(self._device),
                 deter=deter,
             )
+        for c in self._mem_keys:
+            state["mem_" + c] = torch.zeros([batch_size, self._deter]).to(self._device)
         if self._initial == "zeros":
             return state
         # TODO
@@ -276,7 +282,8 @@ class RSSM(nn.Module):
                 stoch = self.get_dist(stats).sample()
             else:
                 stoch = self.get_dist(stats).mode()
-            post = {"stoch": stoch, "deter": prior["deter"], **stats}
+            mems = {k: v for k, v in prior.items() if k.startswith("mem_")}
+            post = {"stoch": stoch, "deter": prior["deter"], **stats, **mems}
         return post, prior
 
     # this is used for making future image
@@ -313,6 +320,8 @@ class RSSM(nn.Module):
             for step in range(self.T):
                 x_spikes.append(self._inp_layers(x))
         deter = prev_state["deter"]   
+        if self._persist:
+            self._cell.neuron.mems = {c: prev_state["mem_" + c] for c in self._mem_keys}
         # 这里 rec_depth 被设置成1
         for _ in range(self._rec_depth):  # rec depth is not correctly implemented
             # (batch, hidden), (batch, deter) -> (batch, deter), (batch, deter)
@@ -332,6 +341,8 @@ class RSSM(nn.Module):
         else:
             stoch = self.get_dist(stats).mode()
         prior = {"stoch": stoch, "deter": deter, **stats}
+        for c in self._mem_keys:
+            prior["mem_" + c] = self._cell.neuron.mems[c]
         return prior
 
 
@@ -453,9 +464,9 @@ class MultiEncoder(nn.Module):
                 mlp_layers,
                 mlp_units,
                 act,
-                config[act],
+                getattr(config, act),
                 norm,
-                config[norm],
+                getattr(config, norm),
                 symlog_inputs=symlog_inputs,
                 spike_times=config.spike_times
             )
@@ -469,7 +480,7 @@ class MultiEncoder(nn.Module):
             outputs.append(torch.stack(cnn_out, dim=0))   
         if self.mlp_shapes:
             inputs = torch.cat([obs[k] for k in self.mlp_shapes], -1)
-            mlp_out = self._mlp(inputs, unroll=True)  # mlp out spike list []
+            mlp_out = self._mlp(inputs, unroll=True, spikes=True)  # mlp out spike list []
             outputs.append(torch.stack(mlp_out, dim=0))
 
         outputs = torch.cat(outputs, -1)
@@ -803,7 +814,7 @@ class SpikeMLP(nn.Module):
                 self.std_layer = nn.Linear(units, np.prod(self._shape))
                 self.std_layer.apply(tools.uniform_weight_init(outscale))
 
-    def forward(self, features, dtype=None, unroll=False, pr=False):
+    def forward(self, features, dtype=None, unroll=False, pr=False, spikes=False):
         self.reset()
         if unroll:
             shape = [self.T] + [1] * len(features.shape)
@@ -815,6 +826,9 @@ class SpikeMLP(nn.Module):
             print("features shape: ", features.shape)
         for step in range(self.T):
             outs.append(self.layers(features[step]))
+        if spikes:
+            # per-step spike list, the same interface as SpikeConvEncoder
+            return outs
         outs =  sum(outs) / self.T
         
         if self._shape is None:
@@ -1005,6 +1019,7 @@ class MCRNN(nn.Module):
         # self.h2o = nn.Linear(size, output_size)
         # self.softmax = nn.LogSoftmax(dim=1) 
         self.T = config.spike_times
+        self._persist = getattr(config, "persist_state", False)
         # TODO
         if norm:
             norm = getattr(normalization, norm)
@@ -1016,7 +1031,8 @@ class MCRNN(nn.Module):
     def forward(self, inputs, state):
         # input spike list or tensor [spike_T, batch, ...]
         # state spike list or tensor [spike_T, batch, ...]
-        self.reset()
+        if not self._persist:
+            self.reset()
         # combined = torch.cat((inputs, hidden), -1) # [T, batch, dims]
         # assert combined.shape[0] == self.T
         outputs = []

@@ -79,7 +79,10 @@ defaults:
     {threshold: 0.5, v_reset: 0.0, eps: 1e-3}
 
   MCNode:
-    {threshold: 0.5, tau: 2.0, tau_basal: 2.0, tau_apical: 2.0, v_reset: 0.0, comps: ['basal', 'apical', 'soma'], act_fun: "QGateGrad"}
+    {threshold: 0.5, tau: 2.0, tau_basal: 2.0, tau_apical: 2.0, v_reset: 0.0, comps: ['basal', 'apical', 'soma'], act_fun: "QGateGrad", dend_reset: True, sg_alpha: 2.0}
+
+  # Intervention A: keep the recurrent cell's membrane potentials across env steps
+  persist_state: False
 
   # Training
   batch_size: 16
@@ -225,3 +228,58 @@ debug:
   prefill: 1
   batch_size: 10
   batch_length: 20
+
+# ---------------------------------------------------------------------------
+# Fire Without Forgetting, Phase 0 (E1 diagnosis / E2 causal intervention)
+# ---------------------------------------------------------------------------
+
+popgym:
+  steps: 1e6
+  action_repeat: 1
+  envs: 4
+  time_limit: 100000
+  train_ratio: 512
+  prefill: 2500
+  eval_every: 2e4
+  eval_episode_num: 16
+  log_every: 1e4
+  video_pred_log: False
+  actor_dist: 'onehot'
+  imag_gradient: 'reinforce'
+  encoder: {mlp_keys: 'vector', cnn_keys: '$^'}
+  decoder: {mlp_keys: 'vector', cnn_keys: '$^'}
+
+bsuite:
+  steps: 3e5
+  action_repeat: 1
+  envs: 4
+  time_limit: 100000
+  train_ratio: 512
+  prefill: 2500
+  eval_every: 1e4
+  eval_episode_num: 32
+  log_every: 1e4
+  video_pred_log: False
+  actor_dist: 'onehot'
+  imag_gradient: 'reinforce'
+  encoder: {mlp_keys: 'vector', cnn_keys: '$^'}
+  decoder: {mlp_keys: 'vector', cnn_keys: '$^'}
+
+# E2 factors (combine: --configs popgym persist nodendreset taud16)
+persist:
+  persist_state: True
+
+nodendreset:
+  MCNode: {dend_reset: False}
+
+taud16:
+  MCNode: {tau_basal: 16.0, tau_apical: 16.0}
+
+taud128:
+  MCNode: {tau_basal: 128.0, tau_apical: 128.0}
+
+thr025:
+  MCNode: {threshold: 0.25}
+
+thr100:
+  MCNode: {threshold: 1.0}
