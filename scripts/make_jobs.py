@@ -110,6 +110,7 @@ def main():
     jobs += ladder_jobs("bsuite_memlen-8", {"ann": LADDER["ann"]}, updates=6000, extra="")
     # memory-free control: the context bit is shown on every step
     jobs += ladder_jobs("bsuite_memlen-4-cue", {k: LADDER[k] for k in ("gru", "base")})
+    jobs += ladder_jobs("bsuite_memlen-4-cue", {k: LADDER_MSE[k] for k in ("gru-mse", "ann-mse")})
     jobs += probe_jobs("bsuite_memlen-16", taus=(2, 128))  # tau 16 dropped at 12:25 for the ladder
     for task in ("bsuite_memlen-16", "popgym_RepeatPreviousEasy", "bsuite_memlen-8"):
         jobs += probe_jobs(task, taus=(2,), conds=CTRL)
