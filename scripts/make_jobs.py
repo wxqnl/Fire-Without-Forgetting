@@ -70,6 +70,18 @@ LADDER = {
     "base": ([], ""),
     "AB128": (["persist", "nodendreset", "taud128"], ""),
 }
+# 12:25: every model is still above the no-memory floor of the reward loss after
+# thousands of updates: the zero-initialised 255-bucket two-hot reward head learns even
+# the memory-free part slowly. An MSE (symlog) reward head starts at the right answer for
+# the zero-reward steps.
+LADDER_MSE = {
+    "gru-mse": (["grucell"], "--reward_head symlog_mse"),
+    "gru-mse-lr3e-4": (["grucell"], "--reward_head symlog_mse --model_lr 3e-4"),
+    "gru-lr1e-3": (["grucell"], "--model_lr 1e-3"),
+    "ann-mse": (["grucell", "annwm"], "--reward_head symlog_mse"),
+    "base-mse": ([], "--reward_head symlog_mse"),
+    "AB128-mse": (["persist", "nodendreset", "taud128"], "--reward_head symlog_mse"),
+}
 
 
 def ladder_jobs(task="bsuite_memlen-4", variants=LADDER, updates=4000, extra="--batch_length 32 --train_steps 100000"):
@@ -90,11 +102,12 @@ def main():
     core = {"base_tau2", "A_tau2", "B_tau2", "AB_tau2", "AB_tau128", "base_tau128"}
     jobs = []
     jobs += ladder_jobs()
+    jobs += ladder_jobs(variants=LADDER_MSE)
     # the all-ANN control at exactly the settings of the running memlen-8 GRU control
     jobs += ladder_jobs("bsuite_memlen-8", {"ann": LADDER["ann"]}, updates=6000, extra="")
     # memory-free control: the context bit is shown on every step
     jobs += ladder_jobs("bsuite_memlen-4-cue", {k: LADDER[k] for k in ("gru", "base")})
-    jobs += probe_jobs("bsuite_memlen-16")
+    jobs += probe_jobs("bsuite_memlen-16", taus=(2, 128))  # tau 16 dropped at 12:25 for the ladder
     for task in ("bsuite_memlen-16", "popgym_RepeatPreviousEasy", "bsuite_memlen-8"):
         jobs += probe_jobs(task, taus=(2,), conds=CTRL)
     jobs += pick(probe_jobs("popgym_RepeatPreviousEasy"), {"base_tau2", "base_tau16", "base_tau128", "A_tau2"})

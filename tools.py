@@ -545,6 +545,8 @@ class SymlogDist:
         return symexp(self._mode)
 
     def log_prob(self, value):
+        if self._mode.shape[-1] == 1 and value.shape == self._mode.shape[:-1]:
+            value = value[..., None]  # scalar targets stored as [batch, time], e.g. reward
         assert self._mode.shape == value.shape
         if self._dist == "mse":
             distance = (self._mode - symlog(value)) ** 2.0
