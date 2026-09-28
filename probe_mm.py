@@ -132,9 +132,8 @@ def probe_losses(probe, feat, batch, device):
 
 
 @torch.no_grad()
-def evaluate(wm, probe, arrays, config, n_eps, length):
-    """Filter n_eps held-out episodes from their start; probe metrics per step."""
-    eps = np.arange(min(n_eps, len(arrays["image"])))
+def evaluate(wm, probe, arrays, config, eps, length):
+    """Filter the held-out episodes eps from their start; probe metrics per step."""
     steps = (LENGTH // length) * length
     mse = np.zeros((len(eps), steps))
     acc = np.zeros((len(eps), steps))
@@ -160,12 +159,18 @@ def evaluate(wm, probe, arrays, config, n_eps, length):
     }
 
 
-def baselines(train, evals):
+def unseen_mazes(train, evals):
+    """Held-out episodes whose maze layout does not occur in the training data (186 of 200)."""
+    seen = {layout.tobytes() for layout in np.asarray(train["maze_layout"])}
+    return np.array([i for i, layout in enumerate(np.asarray(evals["maze_layout"])) if layout.tobytes() not in seen])
+
+
+def baselines(train, evals, eps):
     """Constant predictors from the training data: the probe must beat these."""
     mean_vec = np.asarray(train["targets_vec"][:200, ::10]).reshape(-1, 6).mean(0)
-    ev = np.asarray(evals["targets_vec"][:, 500:]).reshape(-1, 6)
+    ev = np.asarray(evals["targets_vec"][eps, 500:]).reshape(-1, 6)
     freq = np.asarray(train["maze_layout"]).reshape(-1, 81).mean(0)
-    walls = np.asarray(evals["maze_layout"]).reshape(-1, 81)
+    walls = np.asarray(evals["maze_layout"][eps]).reshape(-1, 81)
     return {"baseline_objects_mse": float(((ev - mean_vec) ** 2).mean()),
             "baseline_walls_acc": float(((freq > 0.5) == walls).mean())}
 
@@ -202,7 +207,8 @@ def main():
     opt = torch.optim.Adam(probe.parameters(), lr=args.probe_lr)
     streams = Streams(train, config.batch_size, config.batch_length, config.seed)
     metrics = (logdir / "metrics.jsonl").open("a")
-    log = {"step": 0, **baselines(train, evals)}
+    eval_eps = unseen_mazes(train, evals)
+    log = {"step": 0, "eval_episodes": len(eval_eps), **baselines(train, evals, eval_eps)}
     print(json.dumps(log))
     metrics.write(json.dumps(log) + "\n")
     state, running, t0 = None, {}, time.time()
@@ -220,14 +226,14 @@ def main():
             running.setdefault(k, []).append(float(v))
         if update % args.mm_eval_every == 0 or update == args.mm_updates:
             log = {"step": update, **{k: float(np.mean(v)) for k, v in running.items()}}
-            log.update(evaluate(wm, probe, evals, config, args.mm_eval_eps, config.batch_length))
+            log.update(evaluate(wm, probe, evals, config, eval_eps[:args.mm_eval_eps], config.batch_length))
             log["sec_per_update"] = (time.time() - t0) / args.mm_eval_every
             torch.save({"wm": wm.state_dict(), "probe": probe.state_dict()}, logdir / "model.pt")
             print(json.dumps(log), flush=True)
             metrics.write(json.dumps(log) + "\n")
             metrics.flush()
             running, t0 = {}, time.time()
-    log.update({f"final_{k}": v for k, v in evaluate(wm, probe, evals, config, len(evals["image"]), config.batch_length).items()})
+    log.update({f"final_{k}": v for k, v in evaluate(wm, probe, evals, config, eval_eps, config.batch_length).items()})
     (logdir / "results.json").write_text(json.dumps(log, indent=1))
 
 
