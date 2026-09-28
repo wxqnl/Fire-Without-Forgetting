@@ -133,7 +133,9 @@ class WorldModel(nn.Module):
             return dist
         return tools.SymlogDist((dist._mode * prev_action).sum(-1, keepdim=True))
 
-    def _train(self, data):
+    def _train(self, data, state=None):
+        # state: posterior state to start from (default: initial state); used for truncated
+        # backpropagation through time over long episodes (probe_mm.py)
         # action (batch_size, batch_length, act_dim)
         # image (batch_size, batch_length, h, w, ch)
         # reward (batch_size, batch_length)
@@ -144,7 +146,7 @@ class WorldModel(nn.Module):
             with torch.cuda.amp.autocast(self._use_amp):
                 embed = self.encoder(data)
                 post, prior = self.dynamics.observe(
-                    embed, data["action"], data["is_first"]
+                    embed, data["action"], data["is_first"], state
                 )
                 kl_free = tools.schedule(self._config.kl_free, self._step)
                 dyn_scale = tools.schedule(self._config.dyn_scale, self._step)

@@ -342,6 +342,15 @@ liftau128:
 lifgain:
   LIFRNN: {gain: True}
 
+# Memory Maze offline probe (probe_mm.py): 64x64 first-person images, 6 discrete actions
+mmprobe:
+  encoder: {mlp_keys: '$^', cnn_keys: 'image'}
+  decoder: {mlp_keys: '$^', cnn_keys: 'image'}
+  reward_head: 'symlog_mse'
+  batch_size: 16
+  batch_length: 64
+  video_pred_log: False
+
 # positive control: continuous-state GRU core, everything else spiking
 grucell:
   dyn_cell: 'GRUCtrl'
