@@ -1194,6 +1194,81 @@ class PDRNN(nn.Module):
         return outputs, [torch.stack(outputs, dim=0)]
 
 
+class LIFRNN(nn.Module):
+    """Baseline: a recurrent LIF layer, the usual spiking-RL practice. Each environment step runs
+    T SNN steps, v += (PopNorm(W [x, s]) - v) / tau, hard reset on a spike; the recurrent input
+    is the previous environment step's spikes at the same SNN step, as in MCRNN. The membrane
+    is cleared at every environment step unless persist_state is on (intervention A for LIF).
+    gain=True multiplies the input by sqrt(tau / 2), intervention G for LIF."""
+
+    def __init__(self, config, input_size, size, act=None, norm="PopNorm", device="cuda"):
+        super().__init__()
+        p = config.LIFRNN
+        self.T, self._size = config.spike_times, size
+        self.tau, self.threshold = p["tau"], p["threshold"]
+        self.gain = math.sqrt(self.tau / 2.0) if p["gain"] else 1.0
+        self.neuron = PDState(["v"])
+        self.mem_sizes = {"v": size}
+        self.w = nn.Linear(input_size + size, size)
+        self.norm = getattr(normalization, norm)(size, **getattr(config, norm))
+        self.act_fun = node.QGateGrad(alpha=2.0, requires_grad=False)
+
+    def forward(self, inputs, state):
+        v = self.neuron.mems["v"]
+        if v is None:
+            v = torch.zeros(inputs[0].shape[0], self._size, device=inputs[0].device)
+        outputs = []
+        for step in range(self.T):
+            v = v + (self.gain * self.norm(self.w(torch.cat((inputs[step], state[0][step]), -1))) - v) / self.tau
+            spike = self.act_fun(v - self.threshold)
+            v = v * (1.0 - spike.detach())
+            outputs.append(spike)
+        self.neuron.mems["v"] = v
+        return outputs, [torch.stack(outputs, dim=0)]
+
+
+class GRSNCell(nn.Module):
+    """Baseline: GRSN (Qin et al., AAAI 2025) in its temporal alignment paradigm, one update per
+    environment step with the current c and the membrane u carried across steps:
+
+        c_t = F ⊙ c_{t-1} + (1 - F) ⊙ I      F = sigmoid(W_f x + b_f), I = ReLU(W_i x + b_i)
+        u_t = β ⊙ û_{t-1} + (1 - β) ⊙ c_t    o_t = H(u_t - θ)    û_t = u_t - θ o_t (soft reset)
+
+    β is learnable per neuron. x is the rate of the T input spikes and o_t is repeated T times,
+    as in PDRNN, so that the rest of the world model is shared. Adaptation: a LayerNorm on the
+    input-gate pre-activation puts I at the input scale of the other cells; without it the
+    neurons never reach θ in this world model (firing rate 0). Use with persist_state."""
+
+    def __init__(self, config, input_size, size, act=None, norm="PopNorm", device="cuda"):
+        super().__init__()
+        p = config.GRSN
+        self.T, self._size, self.threshold = config.spike_times, size, p["threshold"]
+        self.neuron = PDState(["c", "u"])
+        self.mem_sizes = {"c": size, "u": size}
+        self.forget = nn.Linear(input_size, size)
+        self.inp = nn.Linear(input_size, size)
+        self.inp_norm = nn.LayerNorm(size, eps=1e-3)
+        beta = torch.full((size,), float(p["beta_init"]))
+        self.beta_logit = nn.Parameter(torch.log(beta / (1 - beta)))
+        self.act_fun = node.QGateGrad(alpha=2.0, requires_grad=False)
+
+    def forward(self, inputs, state):
+        x = sum(inputs) / self.T
+        c, u = self.neuron.mems["c"], self.neuron.mems["u"]
+        if c is None:
+            c = torch.zeros(x.shape[0], self._size, device=x.device)
+            u = torch.zeros_like(c)
+        f = torch.sigmoid(self.forget(x))
+        c = f * c + (1 - f) * F.relu(self.inp_norm(self.inp(x)))
+        beta = torch.sigmoid(self.beta_logit)
+        u = beta * u + (1 - beta) * c
+        spike = self.act_fun(u - self.threshold)
+        u = u - self.threshold * spike
+        self.neuron.mems["c"], self.neuron.mems["u"] = c, u
+        outputs = [spike] * self.T
+        return outputs, [torch.stack(outputs, dim=0)]
+
+
 class Conv2dSame(torch.nn.Conv2d):
     def calc_same_pad(self, i, k, s, d):
         return max((math.ceil(i / s) - 1) * s + (k - 1) * d + 1 - i, 0)

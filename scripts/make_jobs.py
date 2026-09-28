@@ -173,14 +173,14 @@ def round2():
     return jobs
 
 
-def rl2_jobs(task, cells, steps=2e5, seed=0, train_ratio=64, extra=""):
+def rl2_jobs(task, cells, steps=2e5, seed=0, train_ratio=64, extra="", eval_every=1e4):
     """RL with the action-indexed reward head (configs block rewardbyact, MSE reward head)."""
     for cell, cfgs in cells.items():
         name = f"rl2/{task}/{cell}/s{seed}"
         logdir = RUNS / name
         cmd = (f"{{python}} dreamer.py --configs {' '.join([suite(task), *cfgs, 'rewardbyact'])} --task {task} "
                f"--seed {seed} --steps {steps:g} --train_ratio {train_ratio} --reward_head symlog_mse "
-               f"--eval_every 1e4 {extra} --logdir {logdir}")
+               f"--eval_every {eval_every:g} {extra} --logdir {logdir}")
         yield dict(name=name, cmd=" ".join(cmd.split()), logdir=str(logdir), mem_gb=14.5)
 
 
@@ -233,8 +233,68 @@ def round4():
     return jobs
 
 
+# main comparison (EXPERIMENTS.md): the same world model with different recurrent cores
+MAIN = {
+    "base_tau2": [],                                                   # Spiking-WM (MCN), original
+    "LIF_tau2": ["lifcell"],                                           # recurrent LIF, usual practice
+    "GRSN_tau2": ["grsn"],                                             # GRSN (AAAI 2025), state kept
+    "ABG_tau128": ["persist", "nodendreset", "taud128", "dendgain"],   # Spiking-WM + A+B+G
+    "PD2L_tau1000": ["ours"],                                          # proposed model
+    "ann_tau2": ["grucell", "annwm"],                                  # DreamerV3-style ANN
+}
+MEMLEN_EXTRA = {8: "--batch_length 32", 16: "", 32: "", 64: "--batch_length 80"}
+
+
+def dmc_jobs(task, cells, steps=2e5, seed=0):
+    """DMC from proprioception, continuous actions: original reward head, no rewardbyact."""
+    for cell, cfgs in cells.items():
+        name = f"rl2/{task}/{cell}/s{seed}"
+        cmd = (f"{{python}} dreamer.py --configs dmc_proprio {' '.join(cfgs)} --task {task} --seed {seed} "
+               f"--steps {steps:g} --train_ratio 64 --eval_every 2e4 --logdir {RUNS / name}")
+        yield dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=14.5)
+
+
+def round5():
+    """2026-09-28 05:30, one seed: the main experiments of the paper (EXPERIMENTS.md). Runs that
+    already exist with the same settings (rl2 memlen-16/32 for base and A+B+G, walker for base and
+    A+B+G, recall probes of round 1-4) are reused and not repeated."""
+    M = MAIN
+    jobs = []
+    # 1. world-model memory probe (Fig. mechanism / retention; ablations of the proposed model)
+    for L in (8, 16, 32, 64):
+        cells = {"LIF_tau2": M["LIF_tau2"], "LIFp_tau2": M["LIF_tau2"] + ["persist"], "GRSN_tau2": M["GRSN_tau2"]}
+        if L != 32:
+            cells["PD2L_tau1000"] = M["PD2L_tau1000"]
+        if L in (32, 64):
+            cells["ann_tau2"] = M["ann_tau2"]
+        if L == 64:
+            cells.update(base_tau2=[], ABG_tau128=M["ABG_tau128"])
+        if L in (16, 32):  # A+G for LIF: persistent membrane, long tau, input gain
+            cells["LIFpg_tau128"] = M["LIF_tau2"] + ["persist", "liftau128", "lifgain"]
+        jobs += recall_jobs(f"bsuite_memlen-{L}-recall", cells, seeds=(0,), extra=MEMLEN_EXTRA[L])
+    jobs += recall_jobs("bsuite_memlen-32-recall", {
+        "PD2Leuler_tau1000": ["ours", "pdeuler"], "PD2L_tau128": ["ours", "pdtau128"],
+        "PD2Lfix_tau1000": ["ours", "pdfixtau"], "PD2Lcap_tau1000": ["ours", "ratecap"]}, seeds=(0,))
+    # 2. RL on BSuite memory length (memory-length curve)
+    have = {16: ("base_tau2", "ABG_tau128"), 32: ("base_tau2", "ABG_tau128")}
+    for L, steps in ((8, 1.5e5), (16, 2e5), (32, 3e5), (64, 5e5)):
+        cells = {k: v for k, v in M.items() if k not in have.get(L, ())}
+        jobs += rl2_jobs(f"bsuite_memlen-{L}", cells, steps=steps, extra=MEMLEN_EXTRA[L])
+    # 3. RL on POPGym; episodes of 51 steps fit the default window, the longer tasks get 128
+    for task, steps, extra in (("RepeatFirstEasy", 3e5, ""), ("RepeatPreviousEasy", 3e5, ""),
+                               ("CountRecallEasy", 3e5, ""), ("RepeatPreviousMedium", 5e5, "--batch_length 128"),
+                               ("AutoencodeEasy", 5e5, "--batch_length 128"),
+                               ("RepeatPreviousHard", 5e5, "--batch_length 128")):
+        jobs += rl2_jobs(f"popgym_{task}", M, steps=steps, extra=extra, eval_every=2e4)
+    # 4. non-memory control (Pr5): DMC from proprioception
+    jobs += dmc_jobs("dmc_walker_walk", {k: v for k, v in M.items() if k not in ("base_tau2", "ABG_tau128")})
+    for task in ("dmc_cheetah_run", "dmc_cartpole_swingup"):
+        jobs += dmc_jobs(task, M)
+    return jobs
+
+
 def main():
-    jobs = round3() + round4()
+    jobs = round3() + round4() + round5()
     RUNS.mkdir(exist_ok=True)
     out = RUNS / "jobs.jsonl"
     tmp = out.with_suffix(".tmp")

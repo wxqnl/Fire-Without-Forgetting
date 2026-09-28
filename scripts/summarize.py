@@ -22,7 +22,8 @@ RUNS = pathlib.Path(__file__).resolve().parents[1] / "runs"
 # round 2 (2026-09-28): thr025 / thr100 = soma threshold 0.25 / 1.0 (Pr4); ABGcap = G with the
 # firing rate capped at 0.06
 COND_ORDER = ["base", "G", "A", "Athr025", "Athr100", "B", "AB", "ABthr025", "ABthr100", "AG", "AGthr025", "AGthr100",
-              "ABG", "ABGthr025", "ABGthr100", "ABGcap", "PD", "PDeuler", "PDfix", "PD2L", "PDT1", "PDcap", "gru", "ann"]
+              "ABG", "ABGthr025", "ABGthr100", "ABGcap", "PD", "PDeuler", "PDfix", "PD2L", "PDT1", "PDcap",
+              "PD2Leuler", "PD2Lfix", "PD2Lcap", "LIF", "LIFp", "LIFpg", "GRSN", "gru", "ann"]
 COND_LABEL = {"base": "base (original)", "A": "A: no inter-step reset", "B": "B: no dendritic reset",
               "AB": "A+B", "G": "G only (resets kept)", "AG": "A + dendritic gain (G)", "ABG": "A+B + dendritic gain (G)",
               "gru": "GRU core (control)", "ann": "all-ANN + GRU (control)",
@@ -31,12 +32,16 @@ COND_LABEL = {"base": "base (original)", "A": "A: no inter-step reset", "B": "B:
               "ABGcap": "A+B+G, rate capped at 0.06", "AGthr025": "A+G, threshold 0.25", "AGthr100": "A+G, threshold 1.0",
               "ABGthr025": "A+B+G, threshold 0.25", "ABGthr100": "A+B+G, threshold 1.0",
               "PD": "method prototype (PDRNN)", "PDeuler": "PDRNN, Euler input gain", "PDfix": "PDRNN, fixed tau",
-              "PD2L": "PDRNN, 2 layers", "PDT1": "PDRNN, T = 1", "PDcap": "PDRNN, rate capped at 0.06"}
+              "PD2L": "ours (PDRNN, 2 layers)", "PDT1": "PDRNN, T = 1", "PDcap": "PDRNN, rate capped at 0.06",
+              "PD2Leuler": "ours, Euler input gain", "PD2Lfix": "ours, fixed tau", "PD2Lcap": "ours, rate capped at 0.06",
+              "LIF": "recurrent LIF (usual practice)", "LIFp": "LIF + persistent membrane",
+              "LIFpg": "LIF + persistent + gain", "GRSN": "GRSN (AAAI 2025)"}
 COND_COLOR = dict(base="#6b7280", A="#2563eb", B="#d97706", AB="#059669", gru="#a855f7", ann="#111827", G="#9ca3af",
                   AG="#0891b2", ABG="#dc2626", ABGcap="#f472b6", Athr025="#60a5fa", Athr100="#1e3a8a",
                   ABthr025="#34d399", ABthr100="#065f46", AGthr025="#67e8f9", AGthr100="#155e75",
                   ABGthr025="#fca5a5", ABGthr100="#7f1d1d", PD="#ea580c", PDeuler="#fdba74", PDfix="#c2410c",
-                  PD2L="#9a3412", PDT1="#facc15", PDcap="#fb923c")
+                  PD2L="#9a3412", PDT1="#facc15", PDcap="#fb923c", PD2Leuler="#fed7aa", PD2Lfix="#7c2d12",
+                  PD2Lcap="#f97316", LIF="#16a34a", LIFp="#4ade80", LIFpg="#14532d", GRSN="#7c3aed")
 
 
 def load(path):
