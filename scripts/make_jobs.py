@@ -293,8 +293,26 @@ def round5():
     return jobs
 
 
+def round6():
+    """Memory Maze offline probe (probe_mm.py) for the six models of MAIN, one seed. Listed only
+    once the data cache exists (gen_memory_maze.py, then probe_mm.py --prepare)."""
+    data = ROOT / "data" / "memory_maze_9x9"
+    if not all((data / f"{split}_cache" / "done").exists() for split in ("train", "eval")):
+        return []
+    jobs = []
+    for cell, cfgs in MAIN.items():
+        name = f"mmaze/memory_maze_9x9/{cell}/s0"
+        cmd = (f"{{python}} probe_mm.py --configs mmprobe {' '.join(cfgs)} --data {data} --seed 0 "
+               f"--mm_updates 20000 --mm_eval_every 2000 --logdir {RUNS / name}")
+        jobs.append(dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=20))
+    return jobs
+
+
 def main():
-    jobs = round3() + round4() + round5()
+    # priority: rounds 3-4, round 5 probes and BSuite RL, Memory Maze, then POPGym and DMC
+    r5 = round5()
+    late = [j for j in r5 if "/popgym_" in j["name"] or "/dmc_" in j["name"]]
+    jobs = round3() + round4() + [j for j in r5 if j not in late] + round6() + late
     RUNS.mkdir(exist_ok=True)
     out = RUNS / "jobs.jsonl"
     tmp = out.with_suffix(".tmp")
