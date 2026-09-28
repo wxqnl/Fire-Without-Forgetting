@@ -123,7 +123,8 @@ def main():
         wm.load_state_dict(torch.load(logdir / "wm.pt", map_location=config.device))
     else:
         state = torch.load(logdir / "latest_model.pt", map_location=config.device)
-        wm.load_state_dict({k[len("_wm."):]: v for k, v in state.items() if k.startswith("_wm.")})
+        state = {k[len("_wm."):]: v for k, v in state.items() if k.startswith("_wm.")}
+        wm.load_state_dict({k.replace("_orig_mod.", "", 1): v for k, v in state.items()})  # torch.compile prefix
     wm.eval()
     counter = Counter(config.spike_times)
     attach(wm, counter)
