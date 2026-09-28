@@ -1,0 +1,7 @@
+{
+  "baseline": "R2I",
+  "jax": "0.4.23",
+  "devices": [
+    "cuda:0"
+  ]
+}

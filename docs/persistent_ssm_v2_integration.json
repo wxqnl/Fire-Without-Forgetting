@@ -1,0 +1,45 @@
+{
+  "status": "passed",
+  "code": "/data/Minko/fire-without-forgetting/code/persistent-ssm-v2",
+  "encoder_spike_rate": 0.15230274200439453,
+  "encoder_unique_vectors": 4,
+  "source": "real POPGym replay; full 512-wide 3-layer complex SSM, 32x32 WTA latent, all decoder/reward/continuation/actor/critic updates",
+  "scan_step_max_errors": {
+    "logit": 4.172325134277344e-07,
+    "stoch": 0.0,
+    "deter": 0.0,
+    "ssm_real": 8.642673492431641e-07,
+    "ssm_imag": 8.344650268554688e-07
+  },
+  "scan_step_gradient_max_error": 1.280568540096283e-09,
+  "updates": [
+    {
+      "model_loss": 9.889219284057617,
+      "model_grad_norm": 11.69841480255127,
+      "actor_grad_norm": 2.8038357413606718e-05,
+      "value_grad_norm": 1.5514793395996094,
+      "ssm_spike_rate": 0.15583419799804688,
+      "ssm_state_rms": 0.259276807308197,
+      "encoder_grad_norm": 0.39394286274909973
+    },
+    {
+      "model_loss": 9.227039337158203,
+      "model_grad_norm": 6.751141548156738,
+      "actor_grad_norm": 3.4698907256824896e-05,
+      "value_grad_norm": 1.8877404928207397,
+      "ssm_spike_rate": 0.1562051773071289,
+      "ssm_state_rms": 0.25979799032211304,
+      "encoder_grad_norm": 0.3621448278427124
+    },
+    {
+      "model_loss": 8.975982666015625,
+      "model_grad_norm": 6.164501190185547,
+      "actor_grad_norm": 4.2337735067121685e-05,
+      "value_grad_norm": 2.2984883785247803,
+      "ssm_spike_rate": 0.15624713897705078,
+      "ssm_state_rms": 0.26041191816329956,
+      "encoder_grad_norm": 0.3632485568523407
+    }
+  ],
+  "world_model_parameters": 8020763
+}

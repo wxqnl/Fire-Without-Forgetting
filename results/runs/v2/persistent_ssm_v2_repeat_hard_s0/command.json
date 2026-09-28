@@ -1,0 +1,18 @@
+[
+  "/data/Minko/fire-without-forgetting/envs/torch/bin/python",
+  "-u",
+  "/data/Minko/fire-without-forgetting/code/persistent-ssm-v2/dreamer.py",
+  "--configs",
+  "memory",
+  "persistent",
+  "--task",
+  "popgym_RepeatPreviousHard",
+  "--seed",
+  "0",
+  "--steps",
+  "1000000",
+  "--eval_every",
+  "25000",
+  "--logdir",
+  "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_hard_s0"
+]

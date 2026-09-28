@@ -1,0 +1,11 @@
+{"step": 2500, "eval_return": -0.46805557757616045, "eval_length": 103.0, "eval_episodes": 20.0}
+{"step": 12500, "eval_return": -0.5041666775941849, "eval_length": 103.0, "eval_episodes": 20.0}
+{"step": 22500, "eval_return": -0.4847222432494164, "eval_length": 103.0, "eval_episodes": 20.0}
+{"step": 32500, "eval_return": -0.5152777969837189, "eval_length": 103.0, "eval_episodes": 20.0}
+{"step": 42500, "eval_return": -0.494444465637207, "eval_length": 103.0, "eval_episodes": 20.0}
+{"step": 52500, "eval_return": -0.5458333641290665, "eval_length": 103.0, "eval_episodes": 20.0}
+{"step": 62500, "eval_return": -0.49305557906627656, "eval_length": 103.0, "eval_episodes": 20.0}
+{"step": 72500, "eval_return": -0.5013889044523239, "eval_length": 103.0, "eval_episodes": 20.0}
+{"step": 82500, "eval_return": -0.49583334773778914, "eval_length": 103.0, "eval_episodes": 20.0}
+{"step": 92500, "eval_return": -0.5152778014540672, "eval_length": 103.0, "eval_episodes": 20.0}
+{"step": 100000, "eval_return": -0.49583334624767306, "eval_length": 103.0, "eval_episodes": 20.0}

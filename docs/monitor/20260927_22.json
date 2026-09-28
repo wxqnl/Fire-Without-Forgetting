@@ -1,0 +1,317 @@
+{
+  "checked_at": "2026-09-27T22:17:20.109561+08:00",
+  "project": "/data/Minko/fire-without-forgetting",
+  "protocol": "docs/experiment_protocol_v2.md",
+  "seed_policy": "seed 0 only",
+  "authorized_gpus": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "status": {
+    "checked_at": "2026-09-27T22:17:20.109561+08:00",
+    "queue_state": "running",
+    "runs": [
+      {
+        "job": "persistent_ssm_v2_repeat_easy_s0",
+        "gpu": 0,
+        "pid": 3594834,
+        "started_at": "2026-09-27T21:50:49.586844+08:00",
+        "log": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_easy_s0/train.log",
+        "process_alive": true,
+        "latest_step": 122808,
+        "metrics_age_seconds": 0.3,
+        "latest_evaluations": [
+          {
+            "step": 52500,
+            "eval_return": -0.5041666582226754,
+            "eval_episodes": 20.0
+          },
+          {
+            "step": 77500,
+            "eval_return": -0.443750012665987,
+            "eval_episodes": 20.0
+          },
+          {
+            "step": 102500,
+            "eval_return": -0.4729166701436043,
+            "eval_episodes": 20.0
+          }
+        ],
+        "nonfinite_core_metrics": [],
+        "nonfinite_auxiliary_metrics": [],
+        "checkpoints": [
+          {
+            "name": "latest_model.pt",
+            "bytes": 45835840
+          },
+          {
+            "name": "training_state.pt",
+            "bytes": 127972546
+          }
+        ]
+      },
+      {
+        "job": "persistent_ssm_v2_repeat_hard_s0",
+        "gpu": 1,
+        "pid": 3596036,
+        "started_at": "2026-09-27T21:51:52.299245+08:00",
+        "log": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_hard_s0/train.log",
+        "process_alive": true,
+        "latest_step": 113500,
+        "metrics_age_seconds": 1.4,
+        "latest_evaluations": [
+          {
+            "step": 52500,
+            "eval_return": -0.553260849416256,
+            "eval_episodes": 20.0
+          },
+          {
+            "step": 77500,
+            "eval_return": -0.49891302436590196,
+            "eval_episodes": 20.0
+          },
+          {
+            "step": 102500,
+            "eval_return": -0.5184782415628433,
+            "eval_episodes": 20.0
+          }
+        ],
+        "nonfinite_core_metrics": [],
+        "nonfinite_auxiliary_metrics": [],
+        "checkpoints": [
+          {
+            "name": "latest_model.pt",
+            "bytes": 45835840
+          },
+          {
+            "name": "training_state.pt",
+            "bytes": 127972546
+          }
+        ]
+      },
+      {
+        "job": "mcn_repeat_easy_original_s0",
+        "gpu": 2,
+        "pid": 3526697,
+        "started_at": "2026-09-27T21:01:23.195862+08:00",
+        "log": "/data/Minko/fire-without-forgetting/runs/v2/mcn_repeat_easy_original_s0/train.log",
+        "process_alive": true,
+        "latest_step": 47500,
+        "metrics_age_seconds": 0.3,
+        "latest_evaluations": [
+          {
+            "step": 2500,
+            "eval_return": -0.49374998807907106,
+            "eval_episodes": 20.0
+          },
+          {
+            "step": 27500,
+            "eval_return": -0.5291666686534882,
+            "eval_episodes": 20.0
+          }
+        ],
+        "nonfinite_core_metrics": [],
+        "nonfinite_auxiliary_metrics": [],
+        "checkpoints": [
+          {
+            "name": "latest_model.pt",
+            "bytes": 42681890
+          }
+        ]
+      },
+      {
+        "job": "persistent_ssm_v2_repeat_medium_s0",
+        "gpu": 3,
+        "pid": 3583034,
+        "started_at": "2026-09-27T21:41:33.130102+08:00",
+        "log": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_medium_s0/train.log",
+        "process_alive": true,
+        "latest_step": 173143,
+        "metrics_age_seconds": 1.0,
+        "latest_evaluations": [
+          {
+            "step": 102500,
+            "eval_return": -0.5319444671273231,
+            "eval_episodes": 20.0
+          },
+          {
+            "step": 127500,
+            "eval_return": -0.4777777954936028,
+            "eval_episodes": 20.0
+          },
+          {
+            "step": 152500,
+            "eval_return": -0.509722238779068,
+            "eval_episodes": 20.0
+          }
+        ],
+        "nonfinite_core_metrics": [],
+        "nonfinite_auxiliary_metrics": [],
+        "checkpoints": [
+          {
+            "name": "latest_model.pt",
+            "bytes": 45835840
+          },
+          {
+            "name": "training_state.pt",
+            "bytes": 127972546
+          }
+        ]
+      }
+    ],
+    "completed": [
+      "r2i_repeat_easy_s0_cuda",
+      "r2i_repeat_medium_s0_cuda"
+    ],
+    "failed": [
+      "r2i_repeat_easy_s0",
+      "r2i_repeat_medium_s0",
+      "persistent_ssm_repeat_medium_s0"
+    ],
+    "pending": [
+      "r2i_repeat_easy_rewardscale48_s0",
+      "persistent_ssm_repeat_easy_s0",
+      "persistent_ssm_repeat_hard_s0",
+      "mcn_repeat_medium_tau160_stepreset0_dendreset0_s0",
+      "mcn_repeat_medium_tau160_stepreset1_dendreset1_s0",
+      "mcn_repeat_medium_tau160_stepreset1_dendreset0_s0",
+      "mcn_repeat_medium_tau160_stepreset0_dendreset1_s0",
+      "mcn_repeat_medium_tau2_stepreset0_dendreset0_s0",
+      "mcn_repeat_medium_tau8_stepreset0_dendreset0_s0",
+      "mcn_repeat_medium_tau32_stepreset0_dendreset0_s0",
+      "mcn_repeat_medium_tau2_stepreset1_dendreset1_s0",
+      "mcn_repeat_medium_tau2_stepreset1_dendreset0_s0",
+      "mcn_repeat_medium_tau2_stepreset0_dendreset1_s0",
+      "mcn_repeat_medium_tau8_stepreset1_dendreset1_s0",
+      "mcn_repeat_medium_tau8_stepreset1_dendreset0_s0",
+      "mcn_repeat_medium_tau8_stepreset0_dendreset1_s0",
+      "mcn_repeat_medium_tau32_stepreset1_dendreset1_s0",
+      "mcn_repeat_medium_tau32_stepreset1_dendreset0_s0",
+      "mcn_repeat_medium_tau32_stepreset0_dendreset1_s0"
+    ],
+    "gpu": "0, 9521, 48, 165.89\n1, 9521, 47, 186.71\n2, 31919, 31, 197.65\n3, 9521, 51, 191.43\n4, 79949, 100, 690.72\n5, 79947, 100, 682.64\n6, 79949, 100, 691.57\n7, 79947, 100, 687.28\n"
+  },
+  "completed_controls": [
+    {
+      "run": "r2i_repeat_easy_s0_cuda",
+      "checkpoint_step": 949312,
+      "final_evaluation_step": 1000000,
+      "final_eval_return": -0.5166666820645333,
+      "eval_episodes": 20.0,
+      "update_count": 31140.0,
+      "final_checkpoint_complete": false,
+      "reason": "Final asynchronous save started but did not finish before process exit; last persisted periodic checkpoint retained."
+    },
+    {
+      "run": "r2i_repeat_medium_s0_cuda",
+      "checkpoint_step": 926744,
+      "final_evaluation_step": 1000000,
+      "final_eval_return": -0.49583333702757953,
+      "eval_episodes": 20.0,
+      "update_count": 31140.0,
+      "final_checkpoint_complete": false,
+      "reason": "Final asynchronous save started but did not finish before process exit; last persisted periodic checkpoint retained."
+    }
+  ],
+  "learning_gate_passed": false,
+  "next_ready_job": "r2i_repeat_easy_rewardscale48_s0",
+  "next_job_validation": "docs/reward_calibration_integration.json",
+  "trained_duality": {
+    "run": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_medium_s0",
+    "code": "/data/Minko/fire-without-forgetting/code/persistent-ssm-v2",
+    "checkpoint": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_medium_s0/checkpoints/20260927T215744_training_state.pt",
+    "training_step": 77500,
+    "reference_files": [
+      "20260927T172729-0d8662f10e094d22bf02e751fbf86df7-104.npz",
+      "20260927T172730-2a14e85ddffc4a22af008b072aa6a8a7-104.npz",
+      "20260927T172731-ce0a5936eba84ab89ce0967170c96073-104.npz",
+      "20260927T172732-f7ec396425134da6ad499b03a07a9f3e-104.npz"
+    ],
+    "mode": "conditional scan on the same sequentially generated latent/action inputs; mode and coupled sampled latent paths",
+    "results": [
+      {
+        "sampling": "mode",
+        "horizon": 15,
+        "state_max_error": 9.5367431640625e-07,
+        "prior_logits_max_error": 4.76837158203125e-07,
+        "spike_mismatch_fraction": 0.0,
+        "latent_mismatch_fraction": 0.0,
+        "reward_max_error": 0.0,
+        "discounted_return_max_error": 0.0
+      },
+      {
+        "sampling": "mode",
+        "horizon": 50,
+        "state_max_error": 1.430511474609375e-06,
+        "prior_logits_max_error": 7.152557373046875e-07,
+        "spike_mismatch_fraction": 0.0,
+        "latent_mismatch_fraction": 0.0,
+        "reward_max_error": 0.0,
+        "discounted_return_max_error": 0.0
+      },
+      {
+        "sampling": "mode",
+        "horizon": 100,
+        "state_max_error": 1.430511474609375e-06,
+        "prior_logits_max_error": 7.152557373046875e-07,
+        "spike_mismatch_fraction": 0.0,
+        "latent_mismatch_fraction": 0.0,
+        "reward_max_error": 0.0,
+        "discounted_return_max_error": 0.0
+      },
+      {
+        "sampling": "sample",
+        "horizon": 15,
+        "state_max_error": 9.5367431640625e-07,
+        "prior_logits_max_error": 4.76837158203125e-07,
+        "spike_mismatch_fraction": 0.0,
+        "latent_mismatch_fraction": 0.0,
+        "reward_max_error": 0.0,
+        "discounted_return_max_error": 0.0
+      },
+      {
+        "sampling": "sample",
+        "horizon": 50,
+        "state_max_error": 1.430511474609375e-06,
+        "prior_logits_max_error": 4.76837158203125e-07,
+        "spike_mismatch_fraction": 0.0,
+        "latent_mismatch_fraction": 0.0,
+        "reward_max_error": 0.0,
+        "discounted_return_max_error": 0.0
+      },
+      {
+        "sampling": "sample",
+        "horizon": 100,
+        "state_max_error": 1.430511474609375e-06,
+        "prior_logits_max_error": 7.152557373046875e-07,
+        "spike_mismatch_fraction": 0.0,
+        "latent_mismatch_fraction": 0.0,
+        "reward_max_error": 0.0,
+        "discounted_return_max_error": 0.0
+      }
+    ],
+    "interpretation": "finite-precision consistency of the exact recurrence on these held-out inputs; not reward-prediction accuracy or an independently parallelized autoregressive imagination"
+  },
+  "method_memory_probe": "docs/probes_stochastic/persistent_ssm_v2_medium_step77500.json",
+  "world_model_diagnostics": [
+    "docs/r2i_easy_checkpoint949312_diagnosis.json",
+    "docs/r2i_medium_checkpoint926744_diagnosis.json",
+    "docs/ssm_v2_step77500_diagnosis.json"
+  ],
+  "checkpoint_repair": "code/r2i-v3; synchronous saves and persisted update count; does not recover missing old final weights",
+  "excluded_method_run": "persistent_ssm_repeat_medium_s0",
+  "excluded_run_reason": "v1 T=1 encoder emitted no observation-dependent spikes",
+  "method_implementation": "code/persistent-ssm-v2",
+  "hourly_monitor_id": "automation",
+  "offline_memory_maze": "awaiting user-provided real data path",
+  "phase0_results": "docs/phase0_results.json",
+  "remaining_scope": [
+    "E1 DreamerV3 and other SNN baselines, BSuite delay curves, Autoencode, unfinished 1M SNN runs",
+    "E2 learning gate then 2x2 reset by dendritic tau, thresholds and DMC controls",
+    "E3 successful control comparisons and real Memory Maze offline evaluation",
+    "E4 mature checkpoints and approximate scan comparator",
+    "E5 AC/MAC and state-access accounting; current power sampling is only a partial window"
+  ]
+}

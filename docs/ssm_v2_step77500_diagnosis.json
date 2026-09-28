@@ -1,0 +1,52 @@
+{
+  "run": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_medium_s0",
+  "code": "/data/Minko/fire-without-forgetting/code/persistent-ssm-v2",
+  "checkpoint": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_medium_s0/checkpoints/20260927T215744_training_state.pt",
+  "training_step": 77500,
+  "episodes": 16,
+  "reference_files": [
+    "20260927T172729-0d8662f10e094d22bf02e751fbf86df7-104.npz",
+    "20260927T172730-2a14e85ddffc4a22af008b072aa6a8a7-104.npz",
+    "20260927T172731-ce0a5936eba84ab89ce0967170c96073-104.npz",
+    "20260927T172732-f7ec396425134da6ad499b03a07a9f3e-104.npz",
+    "20260927T172733-565f29e20596491290c4c64d0759ef1a-104.npz",
+    "20260927T172734-0cc6ac490ccf4e608a54f60028812197-104.npz",
+    "20260927T172735-5a564481a9b046b9beaf364b167cc7f3-104.npz",
+    "20260927T172736-2d5a6ff412a24280997002e397f414cf-104.npz",
+    "20260927T172737-c862275229024527b9abacb64587ff0b-104.npz",
+    "20260927T172738-b9ed699b19b743ad918667f4b869d822-104.npz",
+    "20260927T172739-294da113f2434b84b8a1e62aa7f27de6-104.npz",
+    "20260927T172740-8151d943a6504e9aab3050a8ed882c76-104.npz",
+    "20260927T172741-de6e745ec4784c378548848ba16bea1e-104.npz",
+    "20260927T172742-12aeca4a2cae42cca119c44fed6db805-104.npz",
+    "20260927T172742-1f9b32d29da545ac9c9faa0189286bdf-104.npz",
+    "20260927T172743-4c8f8d459404412ea887137cf31fa04a-104.npz"
+  ],
+  "inference": "sampled posterior; actual held-out full episodes",
+  "encoder_spike_rate": 0.2587890625,
+  "encoder_unique_vectors": 4,
+  "readout_spike_rate": 0.21364887058734894,
+  "readout_unique_vectors": 1009,
+  "reconstruction_accuracy": 0.7325721383094788,
+  "posterior_entropy_mean": 101.52513885498047,
+  "reward_sign_accuracy": 0.7586805555555556,
+  "reward_balanced_sign_accuracy": 0.5,
+  "reward_mse": 0.00014641076268162578,
+  "random_policy_constant_reward_mse": 0.00014132694923318923,
+  "reward_prediction_mean": -0.0049179792404174805,
+  "reward_prediction_std": 0.0,
+  "predicted_positive_fraction": 0.0,
+  "actual_positive_fraction": 0.24131944444444445,
+  "predicted_reward_on_positive": -0.0049179792404174805,
+  "predicted_reward_on_negative": -0.004917979706078768,
+  "reward_hidden_layers": {
+    "2": {
+      "spike_rate": 0.2887890040874481,
+      "unique_vectors": 285
+    },
+    "5": {
+      "spike_rate": 0.4101550877094269,
+      "unique_vectors": 2
+    }
+  }
+}

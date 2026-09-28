@@ -1,0 +1,40 @@
+{
+  "checked_at": "2026-09-28T15:42:35.990689+08:00",
+  "branch": "codex",
+  "tracked_files": 1749,
+  "content_mib": 74.39,
+  "largest_files": [
+    {
+      "path": "results/runs/v2/persistent_ssm_v3_longseq_repeat_easy_s0/training_scalars.jsonl",
+      "bytes": 5173546
+    },
+    {
+      "path": "results/runs/v2/dreamerv3_size12m_repeat_hard_s0/training_scalars.jsonl",
+      "bytes": 2112357
+    },
+    {
+      "path": "results/runs/v2/dreamerv3_size12m_repeat_easy_s0/training_scalars.jsonl",
+      "bytes": 2062882
+    },
+    {
+      "path": "results/runs/v2/dreamerv3_size12m_repeat_medium_s0/training_scalars.jsonl",
+      "bytes": 2023922
+    },
+    {
+      "path": "results/resource_samples.jsonl",
+      "bytes": 1940123
+    },
+    {
+      "path": "results/runs/v2/persistent_ssm_v2_repeat_hard_s0/training_scalars.jsonl",
+      "bytes": 1802908
+    }
+  ],
+  "credential_or_key_findings": [],
+  "oversized_files": [],
+  "external_symlinks": [],
+  "training_code_byte_differences": [],
+  "broken_new_document_links": [],
+  "new_file_whitespace_check_ok": true,
+  "runs": 31,
+  "evaluation_points": 1877
+}

@@ -1,0 +1,80 @@
+Episode has 51 steps and return -0.5.
+Episode has 51 steps and return -0.4.
+Episode has 51 steps and return -0.4.
+Episode has 51 steps and return -0.4.
+Episode has 51 steps and return -0.4.
+Episode has 51 steps and return -0.5.
+Episode has 51 steps and return -0.7.
+Episode has 51 steps and return -0.5.
+Episode has 51 steps and return -0.6.
+Episode has 51 steps and return -0.4.
+Episode has 51 steps and return -0.5.
+Episode has 51 steps and return -0.6.
+Episode has 51 steps and return -0.4.
+Episode has 51 steps and return -0.4.
+Episode has 51 steps and return -0.5.
+Episode has 51 steps and return -0.4.
+Episode has 51 steps and return -0.4.
+Episode has 51 steps and return -0.4.
+Episode has 51 steps and return -0.7.
+Episode has 51 steps and return -0.7.
+Episode has 51 steps and return -0.5.
+Episode has 51 steps and return -0.5.
+Episode has 51 steps and return -0.6.
+Episode has 51 steps and return -0.6.
+Episode has 51 steps and return -0.6.
+Episode has 51 steps and return -0.5.
+Episode has 51 steps and return -0.7.
+Episode has 51 steps and return -0.5.
+Episode has 51 steps and return -0.5.
+Episode has 51 steps and return -0.6.
+Episode has 51 steps and return -0.5.
+Episode has 51 steps and return -0.6.
+Episode has 51 steps and return -0.7.
+Episode has 51 steps and return -0.7.
+Episode has 51 steps and return -0.5.
+Episode has 51 steps and return -0.3.
+Saved chunk: 20260927T215003F402109-0bs5aqyqaltQM0oSzdEENT-5J57IIWpjy9U16l2zz68hb-1024.npz
+Saved chunk: 20260927T215003F401882-2k0EK4mLSidmk0uX2P2wcC-1QmUfyvw04MOSh083NGt6m-1024.npz
+Saved chunk: 20260927T215003F401443-6FOOlpqOTvW7WeJNP7qywu-07XwkCU3yQ0GCuqPwj8Grs-1024.npz
+Saved chunk: 20260927T215003F405236-2FoQsY954lo3LekNJBmt46-7w0F3gemmm74P9gL3OL7mp-1024.npz
+Saved chunk: 20260927T215003F405450-14u8Ngy5XHfD5iHvDcWgWk-0BwejBHudKWTgt34F8qhM1-1024.npzSaved chunk: 20260927T215003F403013-6CHxSwrvw9I3WQWmzcSexG-51nAEMaQYjCqJ20th8SecV-1024.npz
+
+Saved chunk: 20260927T215003F409138-6zzGnDxByNONIwaWebSr0A-0FL2DZkCjSylhSBhO65hNI-1024.npz
+Saved chunk: 20260927T215003F409344-61NR5Hve4WvSPE8cengPwk-30bgMCJa9oj7m1r3cuelJm-1024.npz
+Episode has 51 steps and return -0.7.
+Episode has 51 steps and return -0.5.
+Episode has 51 steps and return -0.5.
+Episode has 51 steps and return -0.4.
+Episode has 51 steps and return -0.3.
+Episode has 51 steps and return -0.5.
+Episode has 51 steps and return -0.5.
+Episode has 51 steps and return -0.6.
+Starting evaluation at step 1000000
+Episode has 51 steps and return -0.5.
+Episode has 51 steps and return -0.4.
+Episode has 51 steps and return -0.0.
+Episode has 51 steps and return -0.7.
+Saved chunk: 20260927T214918F513787-3vDKaaIISmIxNpDWvyq2pB-7C3rgdtfSc8ob4fkfRrnmX-1024.npz
+Episode has 51 steps and return -0.4.
+Episode has 51 steps and return -0.5.
+Episode has 51 steps and return -0.6.
+Episode has 51 steps and return -0.7.
+Episode has 51 steps and return -0.4.
+Episode has 51 steps and return -0.5.
+Episode has 51 steps and return -0.6.
+Episode has 51 steps and return -0.6.
+Episode has 51 steps and return -0.5.
+Episode has 51 steps and return -0.4.
+Episode has 51 steps and return -0.5.
+Episode has 51 steps and return -0.6.
+Episode has 51 steps and return -0.7.
+Episode has 51 steps and return -0.6.
+Episode has 51 steps and return -0.5.
+Episode has 51 steps and return -0.7.
+───────────────────────────────── Step 1000000 ─────────────────────────────────
+episode/length 51 / episode/score -0.58 / episode/reward_rate 0 / 
+eval_episode/length 51 / eval_episode/score -0.71 / eval_episode/reward_rate 0 /
+eval_return -0.52 / eval_return_std 0.15 / eval_episodes 20 / update_count 3.1e4
+
+Writing checkpoint: /data/Minko/fire-without-forgetting/runs/v2/r2i_repeat_easy_s0_cuda/checkpoint.ckpt

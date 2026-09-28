@@ -1,0 +1,40 @@
+{
+  "online_benchmarks": {
+    "bsuite": "0.3.5",
+    "popgym": "1.0.2",
+    "dm-control": "1.0.9",
+    "memory-maze": "1.0.3"
+  },
+  "offline_memory_maze_9x9": {
+    "status": "blocked_network",
+    "url": "https://drive.google.com/drive/folders/1RcnkTZVwEHnAQeEuw7X8Y1RPSmrFLDFB",
+    "expected_trajectories": 30000,
+    "train_trajectories": 29000,
+    "evaluation_trajectories": 1000,
+    "steps_per_trajectory": 1000,
+    "approximate_download_gb": 100,
+    "reason": "Direct Drive and docs.google.com requests from New-H100-2 timed out or failed to connect; no offline dataset downloaded.",
+    "modelscope_search": {
+      "status": "no_matching_public_dataset_found",
+      "record": "/data/Minko/fire-without-forgetting/docs/modelscope_search.json",
+      "queries": [
+        "memory-maze",
+        "memory_maze",
+        "maze",
+        "MemoryMaze",
+        "9x9",
+        "jurgisp",
+        "memory maze"
+      ]
+    }
+  },
+  "pretrained_weights": {
+    "required_for_phase0": false,
+    "initialization": "All phase-0 agents train from scratch. Models are saved by the run; no pretrained checkpoint has been substituted."
+  },
+  "integration_replay": {
+    "path": "/data/Minko/fire-without-forgetting/data/integration_popgym_repeatprevious_easy",
+    "episodes": 50,
+    "use": "Real POPGym random-policy trajectories used only to check four full training updates; not a benchmark result."
+  }
+}

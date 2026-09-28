@@ -1,0 +1,80 @@
+[996285] dataset_size 996285.0 / train_return -0.1 / train_length 51.0 / train_episodes 19535.0
+[996336] dataset_size 996336.0 / train_return -0.0 / train_length 51.0 / train_episodes 19536.0
+[996387] dataset_size 996387.0 / train_return -0.3 / train_length 51.0 / train_episodes 19537.0
+[996438] dataset_size 996438.0 / train_return 0.0 / train_length 51.0 / train_episodes 19538.0
+[996489] dataset_size 996489.0 / train_return -0.1 / train_length 51.0 / train_episodes 19539.0
+[996500] model_loss 1.2 / model_grad_norm 0.7 / observation_loss 0.2 / reward_loss 0.4 / cont_loss 0.0 / encoder_spike_rate 0.3 / encoder_observation_variance 0.1 / encoder_input_weight_grad_norm 0.0 / ssm_spike_rate 0.2 / ssm_state_rms 0.7 / ssm_tau_min 1.8 / ssm_tau_median 63.6 / ssm_tau_max 1866.8 / kl_free 1.0 / dyn_scale 0.5 / rep_scale 0.1 / dyn_loss 1.0 / rep_loss 1.0 / kl 1.0 / prior_ent 27.3 / post_ent 26.3 / normed_target_mean 0.1 / normed_target_std 0.0 / normed_target_min -0.1 / normed_target_max 0.2 / EMA_005 -0.1 / EMA_095 0.0 / value_mean -0.0 / value_std 0.0 / value_min -0.0 / value_max 0.0 / target_mean -0.0 / target_std 0.0 / target_min -0.2 / target_max 0.1 / imag_reward_mean -0.0 / imag_reward_std 0.0 / imag_reward_min -0.0 / imag_reward_max 0.0 / imag_action_mean 1.5 / imag_action_std 1.1 / imag_action_min 0.0 / imag_action_max 3.0 / actor_entropy 0.2 / actor_loss -0.0 / actor_grad_norm 0.0 / value_loss 0.8 / value_grad_norm 0.1 / update_count 31163.0 / fps 19.4
+[996540] dataset_size 996540.0 / train_return -0.3 / train_length 51.0 / train_episodes 19540.0
+[996591] dataset_size 996591.0 / train_return -0.2 / train_length 51.0 / train_episodes 19541.0
+[996642] dataset_size 996642.0 / train_return -0.2 / train_length 51.0 / train_episodes 19542.0
+[996693] dataset_size 996693.0 / train_return -0.2 / train_length 51.0 / train_episodes 19543.0
+[996744] dataset_size 996744.0 / train_return -0.2 / train_length 51.0 / train_episodes 19544.0
+[996795] dataset_size 996795.0 / train_return -0.1 / train_length 51.0 / train_episodes 19545.0
+[996846] dataset_size 996846.0 / train_return 0.0 / train_length 51.0 / train_episodes 19546.0
+[996897] dataset_size 996897.0 / train_return -0.0 / train_length 51.0 / train_episodes 19547.0
+[996948] dataset_size 996948.0 / train_return -0.2 / train_length 51.0 / train_episodes 19548.0
+[996999] dataset_size 996999.0 / train_return 0.0 / train_length 51.0 / train_episodes 19549.0
+[997050] dataset_size 997050.0 / train_return -0.2 / train_length 51.0 / train_episodes 19550.0
+[997101] dataset_size 997101.0 / train_return 0.1 / train_length 51.0 / train_episodes 19551.0
+[997152] dataset_size 997152.0 / train_return -0.1 / train_length 51.0 / train_episodes 19552.0
+[997203] dataset_size 997203.0 / train_return -0.1 / train_length 51.0 / train_episodes 19553.0
+[997254] dataset_size 997254.0 / train_return -0.0 / train_length 51.0 / train_episodes 19554.0
+[997305] dataset_size 997305.0 / train_return 0.0 / train_length 51.0 / train_episodes 19555.0
+[997356] dataset_size 997356.0 / train_return -0.2 / train_length 51.0 / train_episodes 19556.0
+[997407] dataset_size 997407.0 / train_return -0.2 / train_length 51.0 / train_episodes 19557.0
+[997458] dataset_size 997458.0 / train_return 0.0 / train_length 51.0 / train_episodes 19558.0
+[997500] model_loss 1.2 / model_grad_norm 0.8 / observation_loss 0.2 / reward_loss 0.4 / cont_loss 0.0 / encoder_spike_rate 0.3 / encoder_observation_variance 0.1 / encoder_input_weight_grad_norm 0.0 / ssm_spike_rate 0.2 / ssm_state_rms 0.7 / ssm_tau_min 1.8 / ssm_tau_median 63.6 / ssm_tau_max 1867.4 / kl_free 1.0 / dyn_scale 0.5 / rep_scale 0.1 / dyn_loss 1.0 / rep_loss 1.0 / kl 1.0 / prior_ent 27.3 / post_ent 26.3 / normed_target_mean 0.1 / normed_target_std 0.0 / normed_target_min -0.1 / normed_target_max 0.2 / EMA_005 -0.1 / EMA_095 0.0 / value_mean -0.0 / value_std 0.0 / value_min -0.0 / value_max 0.0 / target_mean -0.0 / target_std 0.0 / target_min -0.2 / target_max 0.1 / imag_reward_mean -0.0 / imag_reward_std 0.0 / imag_reward_min -0.0 / imag_reward_max 0.0 / imag_action_mean 1.5 / imag_action_std 1.1 / imag_action_min 0.0 / imag_action_max 3.0 / actor_entropy 0.2 / actor_loss -0.0 / actor_grad_norm 0.0 / value_loss 0.8 / value_grad_norm 0.1 / update_count 31194.0 / fps 23.9
+[997509] dataset_size 997509.0 / train_return -0.0 / train_length 51.0 / train_episodes 19559.0
+[997560] dataset_size 997560.0 / train_return -0.1 / train_length 51.0 / train_episodes 19560.0
+[997611] dataset_size 997611.0 / train_return -0.2 / train_length 51.0 / train_episodes 19561.0
+[997662] dataset_size 997662.0 / train_return -0.2 / train_length 51.0 / train_episodes 19562.0
+[997713] dataset_size 997713.0 / train_return -0.3 / train_length 51.0 / train_episodes 19563.0
+[997764] dataset_size 997764.0 / train_return -0.1 / train_length 51.0 / train_episodes 19564.0
+[997815] dataset_size 997815.0 / train_return -0.2 / train_length 51.0 / train_episodes 19565.0
+[997866] dataset_size 997866.0 / train_return -0.2 / train_length 51.0 / train_episodes 19566.0
+[997917] dataset_size 997917.0 / train_return -0.4 / train_length 51.0 / train_episodes 19567.0
+[997968] dataset_size 997968.0 / train_return -0.1 / train_length 51.0 / train_episodes 19568.0
+[998019] dataset_size 998019.0 / train_return -0.2 / train_length 51.0 / train_episodes 19569.0
+[998070] dataset_size 998070.0 / train_return -0.1 / train_length 51.0 / train_episodes 19570.0
+[998121] dataset_size 998121.0 / train_return -0.2 / train_length 51.0 / train_episodes 19571.0
+[998172] dataset_size 998172.0 / train_return 0.0 / train_length 51.0 / train_episodes 19572.0
+[998223] dataset_size 998223.0 / train_return -0.3 / train_length 51.0 / train_episodes 19573.0
+[998274] dataset_size 998274.0 / train_return 0.1 / train_length 51.0 / train_episodes 19574.0
+[998325] dataset_size 998325.0 / train_return -0.3 / train_length 51.0 / train_episodes 19575.0
+[998376] dataset_size 998376.0 / train_return 0.0 / train_length 51.0 / train_episodes 19576.0
+[998427] dataset_size 998427.0 / train_return -0.2 / train_length 51.0 / train_episodes 19577.0
+[998478] dataset_size 998478.0 / train_return -0.2 / train_length 51.0 / train_episodes 19578.0
+[998500] model_loss 1.2 / model_grad_norm 0.8 / observation_loss 0.2 / reward_loss 0.4 / cont_loss 0.0 / encoder_spike_rate 0.3 / encoder_observation_variance 0.1 / encoder_input_weight_grad_norm 0.0 / ssm_spike_rate 0.2 / ssm_state_rms 0.7 / ssm_tau_min 1.8 / ssm_tau_median 63.6 / ssm_tau_max 1867.1 / kl_free 1.0 / dyn_scale 0.5 / rep_scale 0.1 / dyn_loss 1.0 / rep_loss 1.0 / kl 1.0 / prior_ent 27.3 / post_ent 26.3 / normed_target_mean 0.0 / normed_target_std 0.0 / normed_target_min -0.1 / normed_target_max 0.2 / EMA_005 -0.1 / EMA_095 0.0 / value_mean -0.0 / value_std 0.0 / value_min -0.0 / value_max 0.0 / target_mean -0.0 / target_std 0.0 / target_min -0.2 / target_max 0.1 / imag_reward_mean -0.0 / imag_reward_std 0.0 / imag_reward_min -0.0 / imag_reward_max 0.0 / imag_action_mean 1.5 / imag_action_std 1.1 / imag_action_min 0.0 / imag_action_max 3.0 / actor_entropy 0.2 / actor_loss -0.0 / actor_grad_norm 0.0 / value_loss 0.8 / value_grad_norm 0.1 / update_count 31225.0 / fps 19.4
+[998529] dataset_size 998529.0 / train_return -0.3 / train_length 51.0 / train_episodes 19579.0
+[998580] dataset_size 998580.0 / train_return -0.2 / train_length 51.0 / train_episodes 19580.0
+[998631] dataset_size 998631.0 / train_return -0.2 / train_length 51.0 / train_episodes 19581.0
+[998682] dataset_size 998682.0 / train_return -0.3 / train_length 51.0 / train_episodes 19582.0
+[998733] dataset_size 998733.0 / train_return -0.0 / train_length 51.0 / train_episodes 19583.0
+[998784] dataset_size 998784.0 / train_return -0.2 / train_length 51.0 / train_episodes 19584.0
+[998835] dataset_size 998835.0 / train_return -0.3 / train_length 51.0 / train_episodes 19585.0
+[998886] dataset_size 998886.0 / train_return 0.0 / train_length 51.0 / train_episodes 19586.0
+[998937] dataset_size 998937.0 / train_return 0.1 / train_length 51.0 / train_episodes 19587.0
+[998988] dataset_size 998988.0 / train_return -0.0 / train_length 51.0 / train_episodes 19588.0
+[999039] dataset_size 999039.0 / train_return -0.1 / train_length 51.0 / train_episodes 19589.0
+[999090] dataset_size 999090.0 / train_return -0.1 / train_length 51.0 / train_episodes 19590.0
+[999141] dataset_size 999141.0 / train_return -0.2 / train_length 51.0 / train_episodes 19591.0
+[999192] dataset_size 999192.0 / train_return -0.0 / train_length 51.0 / train_episodes 19592.0
+[999243] dataset_size 999243.0 / train_return -0.2 / train_length 51.0 / train_episodes 19593.0
+[999294] dataset_size 999294.0 / train_return -0.2 / train_length 51.0 / train_episodes 19594.0
+[999345] dataset_size 999345.0 / train_return -0.2 / train_length 51.0 / train_episodes 19595.0
+[999396] dataset_size 999396.0 / train_return -0.3 / train_length 51.0 / train_episodes 19596.0
+[999447] dataset_size 999447.0 / train_return 0.0 / train_length 51.0 / train_episodes 19597.0
+[999498] dataset_size 999498.0 / train_return -0.2 / train_length 51.0 / train_episodes 19598.0
+[999500] model_loss 1.2 / model_grad_norm 0.8 / observation_loss 0.2 / reward_loss 0.4 / cont_loss 0.0 / encoder_spike_rate 0.3 / encoder_observation_variance 0.1 / encoder_input_weight_grad_norm 0.0 / ssm_spike_rate 0.2 / ssm_state_rms 0.7 / ssm_tau_min 1.8 / ssm_tau_median 63.6 / ssm_tau_max 1866.7 / kl_free 1.0 / dyn_scale 0.5 / rep_scale 0.1 / dyn_loss 1.0 / rep_loss 1.0 / kl 1.0 / prior_ent 27.3 / post_ent 26.3 / normed_target_mean 0.1 / normed_target_std 0.0 / normed_target_min -0.1 / normed_target_max 0.2 / EMA_005 -0.1 / EMA_095 0.0 / value_mean -0.0 / value_std 0.0 / value_min -0.0 / value_max 0.0 / target_mean -0.0 / target_std 0.0 / target_min -0.1 / target_max 0.1 / imag_reward_mean -0.0 / imag_reward_std 0.0 / imag_reward_min -0.0 / imag_reward_max 0.0 / imag_action_mean 1.5 / imag_action_std 1.1 / imag_action_min 0.0 / imag_action_max 3.0 / actor_entropy 0.2 / actor_loss -0.0 / actor_grad_norm 0.0 / value_loss 0.8 / value_grad_norm 0.1 / update_count 31257.0 / fps 19.0
+[999549] dataset_size 999549.0 / train_return -0.1 / train_length 51.0 / train_episodes 19599.0
+[999600] dataset_size 999600.0 / train_return -0.4 / train_length 51.0 / train_episodes 19600.0
+[999651] dataset_size 999651.0 / train_return -0.1 / train_length 51.0 / train_episodes 19601.0
+[999702] dataset_size 999702.0 / train_return -0.3 / train_length 51.0 / train_episodes 19602.0
+[999753] dataset_size 999753.0 / train_return -0.2 / train_length 51.0 / train_episodes 19603.0
+[999804] dataset_size 999804.0 / train_return -0.1 / train_length 51.0 / train_episodes 19604.0
+[999855] dataset_size 999855.0 / train_return -0.1 / train_length 51.0 / train_episodes 19605.0
+[999906] dataset_size 999906.0 / train_return -0.1 / train_length 51.0 / train_episodes 19606.0
+[999957] dataset_size 999957.0 / train_return -0.2 / train_length 51.0 / train_episodes 19607.0
+[1000000] 
+Start evaluation.
+[1000000] eval_return -0.2 / eval_length 51.0 / eval_episodes 20.0

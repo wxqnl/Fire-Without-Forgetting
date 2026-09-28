@@ -1,0 +1,76 @@
+{
+  "run": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_medium_s0",
+  "code": "/data/Minko/fire-without-forgetting/code/persistent-ssm-v2",
+  "checkpoint": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_medium_s0/training_state.pt",
+  "training_step": 1000000,
+  "reference_files": [
+    "20260927T172729-0d8662f10e094d22bf02e751fbf86df7-104.npz",
+    "20260927T172730-2a14e85ddffc4a22af008b072aa6a8a7-104.npz",
+    "20260927T172731-ce0a5936eba84ab89ce0967170c96073-104.npz",
+    "20260927T172732-f7ec396425134da6ad499b03a07a9f3e-104.npz"
+  ],
+  "mode": "conditional scan on the same sequentially generated latent/action inputs; mode and coupled sampled latent paths",
+  "results": [
+    {
+      "sampling": "mode",
+      "horizon": 15,
+      "state_max_error": 1.430511474609375e-06,
+      "prior_logits_max_error": 3.814697265625e-06,
+      "spike_mismatch_fraction": 0.0,
+      "latent_mismatch_fraction": 0.0,
+      "reward_max_error": 0.0,
+      "discounted_return_max_error": 0.0
+    },
+    {
+      "sampling": "mode",
+      "horizon": 50,
+      "state_max_error": 2.384185791015625e-06,
+      "prior_logits_max_error": 4.76837158203125e-06,
+      "spike_mismatch_fraction": 0.0,
+      "latent_mismatch_fraction": 0.0,
+      "reward_max_error": 0.0,
+      "discounted_return_max_error": 0.0
+    },
+    {
+      "sampling": "mode",
+      "horizon": 100,
+      "state_max_error": 4.172325134277344e-06,
+      "prior_logits_max_error": 4.76837158203125e-06,
+      "spike_mismatch_fraction": 0.0,
+      "latent_mismatch_fraction": 0.0,
+      "reward_max_error": 0.0,
+      "discounted_return_max_error": 0.0
+    },
+    {
+      "sampling": "sample",
+      "horizon": 15,
+      "state_max_error": 1.430511474609375e-06,
+      "prior_logits_max_error": 3.814697265625e-06,
+      "spike_mismatch_fraction": 0.0,
+      "latent_mismatch_fraction": 0.0,
+      "reward_max_error": 0.0,
+      "discounted_return_max_error": 0.0
+    },
+    {
+      "sampling": "sample",
+      "horizon": 50,
+      "state_max_error": 2.6226043701171875e-06,
+      "prior_logits_max_error": 4.76837158203125e-06,
+      "spike_mismatch_fraction": 0.0,
+      "latent_mismatch_fraction": 0.0,
+      "reward_max_error": 0.0,
+      "discounted_return_max_error": 0.0
+    },
+    {
+      "sampling": "sample",
+      "horizon": 100,
+      "state_max_error": 3.814697265625e-06,
+      "prior_logits_max_error": 4.76837158203125e-06,
+      "spike_mismatch_fraction": 0.0,
+      "latent_mismatch_fraction": 0.0,
+      "reward_max_error": 0.0,
+      "discounted_return_max_error": 0.0
+    }
+  ],
+  "interpretation": "finite-precision consistency of the exact recurrence on these held-out inputs; not reward-prediction accuracy or an independently parallelized autoregressive imagination"
+}

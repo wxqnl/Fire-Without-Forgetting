@@ -1,0 +1,393 @@
+{
+  "checked_at": "2026-09-28T15:06:01.466872+08:00",
+  "queue_state": "running",
+  "runs": [
+    {
+      "job": "mcn_repeat_easy_original_s0",
+      "gpu": 2,
+      "pid": 3526697,
+      "started_at": "2026-09-27T21:01:23.195862+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/mcn_repeat_easy_original_s0/train.log",
+      "process_alive": true,
+      "latest_step": 592161,
+      "latest_action_steps": 592161,
+      "metrics_age_seconds": 2.6,
+      "latest_evaluations": [
+        {
+          "step": 527500,
+          "eval_return": 0.25625000409781934,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 552500,
+          "eval_return": 0.28750000819563865,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 577500,
+          "eval_return": 0.28750000409781934,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [],
+      "checkpoint_metadata": null,
+      "checkpoints": [
+        {
+          "name": "latest_model.pt",
+          "bytes": 42681890
+        }
+      ],
+      "latest_logged_update_count": 18507.0,
+      "log_tail": [
+        "[592008] dataset_size 592008.0 / train_return 0.4 / train_length 51.0 / train_episodes 11608.0",
+        "[592059] dataset_size 592059.0 / train_return 0.3 / train_length 51.0 / train_episodes 11609.0",
+        "[592110] dataset_size 592110.0 / train_return 0.4 / train_length 51.0 / train_episodes 11610.0",
+        "[592161] dataset_size 592161.0 / train_return 0.2 / train_length 51.0 / train_episodes 11611.0"
+      ],
+      "actual_command": "/data/Minko/fire-without-forgetting/envs/torch/bin/python -u /data/Minko/fire-without-forgetting/code/mcn-v2/dreamer.py --configs memory --task popgym_RepeatPreviousEasy --seed 0 --steps 1000000 --eval_every 25000 --logdir /data/Minko/fire-without-forgetting/runs/v2/mcn_repeat_easy_original_s0 "
+    },
+    {
+      "job": "persistent_ssm_v3_longseq_repeat_easy_s0",
+      "gpu": 2,
+      "pid": 3956124,
+      "started_at": "2026-09-28T02:19:04.335148+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v3_longseq_repeat_easy_s0/train.log",
+      "process_alive": true,
+      "latest_step": 2852768,
+      "latest_action_steps": 2852768,
+      "metrics_age_seconds": 2.4,
+      "latest_evaluations": [
+        {
+          "step": 2782768,
+          "eval_return": -0.1604166679084301,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 2807768,
+          "eval_return": -0.13750000540167093,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 2832768,
+          "eval_return": -0.1604166679084301,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [],
+      "checkpoint_metadata": null,
+      "checkpoints": [
+        {
+          "name": "latest_model.pt",
+          "bytes": 45835840
+        },
+        {
+          "name": "training_state.pt",
+          "bytes": 127972546
+        }
+      ],
+      "latest_logged_update_count": 44163.0,
+      "log_tail": [
+        "[2852736] dataset_size 2852736.0 / train_return -0.2 / train_length 51.0 / train_episodes 55936.0",
+        "[2852736] dataset_size 2852736.0 / train_return -0.2 / train_length 51.0 / train_episodes 55936.0",
+        "[2852736] dataset_size 2852736.0 / train_return -0.1 / train_length 51.0 / train_episodes 55936.0",
+        "[2852768] model_loss 1.2 / model_grad_norm 0.5 / observation_loss 0.2 / reward_loss 0.4 / cont_loss 0.0 / encoder_spike_rate 0.2 / encoder_observation_variance 0.1 / encoder_input_weight_grad_norm 0.0 / ssm_spike_rate 0.2 / ssm_state_rms 0.8 / ssm_tau_min 1.7 / ssm_tau_median 64.1 / ssm_tau_max 1941.6 / kl_free 1.0 / dyn_scale 0.5 / rep_scale 0.1 / dyn_loss 1.0 / rep_loss 1.0 / kl 1.0 / prior_ent 29.7 / post_ent 28.7 / normed_target_mean 0.1 / normed_target_std 0.0 / normed_target_min -0.1 / normed_target_max 0.2 / EMA_005 -0.1 / EMA_095 0.0 / value_mean -0.0 / value_std 0.0 / value_min -0.1 / value_max 0.0 / target_mean -0.0 / target_std 0.0 / target_min -0.2 / target_max 0.1 / imag_reward_mean -0.0 / imag_reward_std 0.0 / imag_reward_min -0.0 / imag_reward_max 0.0 / imag_action_mean 1.4 / imag_action_std 1.1 / imag_action_min 0.0 / imag_action_max 3.0 / actor_entropy 0.2 / actor_loss -0.0 / actor_grad_norm 0.0 / value_loss 1.0 / value_grad_norm 0.2 / update_count 44163.0 / fps 33.6"
+      ],
+      "actual_command": "/data/Minko/fire-without-forgetting/envs/torch/bin/python -u /data/Minko/fire-without-forgetting/code/persistent-ssm-longseq-v3/dreamer.py --configs memory persistent longseq --task popgym_RepeatPreviousEasy --seed 0 --steps 5000000 --eval_every 25000 --logdir /data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v3_longseq_repeat_easy_s0 "
+    },
+    {
+      "job": "r2i_bsuite_memory4_s0",
+      "gpu": 0,
+      "pid": 741255,
+      "started_at": "2026-09-28T15:01:47.737124+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/r2i_bsuite_memory4_s0/train.log",
+      "process_alive": true,
+      "latest_step": 180024,
+      "latest_action_steps": 150016.0,
+      "metrics_age_seconds": 4.7,
+      "latest_evaluations": [
+        {
+          "step": 120016,
+          "train_action_steps": 100008.0,
+          "eval_return": 0.1,
+          "eval_return_std": 0.9949874371066201,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 150072,
+          "train_action_steps": 125056.0,
+          "eval_return": 0.2,
+          "eval_return_std": 0.9797958971132713,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 180024,
+          "train_action_steps": 150016.0,
+          "eval_return": -0.2,
+          "eval_return_std": 0.9797958971132713,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [],
+      "checkpoint_metadata": null,
+      "checkpoints": [
+        {
+          "name": "checkpoint.ckpt",
+          "bytes": 144080810
+        }
+      ],
+      "latest_logged_update_count": 1831.0,
+      "log_tail": [
+        "Episode has 5 steps and return 1.0.",
+        "Episode has 5 steps and return -1.0.",
+        "Episode has 5 steps and return 1.0.",
+        "Episode has 5 steps and return -1.0."
+      ],
+      "actual_command": "/data/Minko/fire-without-forgetting/envs/r2i/bin/python -u /data/Minko/fire-without-forgetting/code/r2i-bsuite-v5/recall2imagine/train.py --configs popgym --task bsuite_memory_len/3 --logdir /data/Minko/fire-without-forgetting/runs/v2/r2i_bsuite_memory4_s0 --seed 0 --run.steps 1000000 --run.eval_every 25000 --run.eval_eps 20 --run.log_every 60 --run.save_every 600 --envs.restart False --jax.prealloc False "
+    },
+    {
+      "job": "dreamerv3_bsuite_memory4_s0",
+      "gpu": 1,
+      "pid": 741290,
+      "started_at": "2026-09-28T15:01:48.076245+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/dreamerv3_bsuite_memory4_s0/train.log",
+      "process_alive": true,
+      "latest_step": 49440,
+      "latest_action_steps": 41200.0,
+      "metrics_age_seconds": 50.8,
+      "latest_evaluations": [
+        {
+          "step": 0,
+          "train_action_steps": 0.0,
+          "eval_return": 0.3,
+          "eval_return_std": 0.9539392014169458,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 30000,
+          "train_action_steps": 25000.0,
+          "eval_return": 0.0,
+          "eval_return_std": 1.0,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [
+        "replay/replay_ratio"
+      ],
+      "checkpoint_metadata": null,
+      "checkpoints": [],
+      "latest_logged_update_count": 132.0,
+      "log_tail": [
+        "episode/score -1 / episode/length 6 / train/loss/con 0.4 / train/loss/dyn 2.32 / train/loss/policy -3.6e-5 / train/loss/rep 2.32 / train/loss/repval 9.06 / train/loss/rew 5.44 / train/loss/value 1.85 / train/loss/vector 0.62 / train/rand/action 1 / replay/replay_ratio 52.59 / fps/policy 61.05 / fps/train 3207.86",
+        "",
+        "Writing metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_bsuite_memory4_s0/metrics.jsonl",
+        "Writing metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_bsuite_memory4_s0/scores.jsonl"
+      ],
+      "actual_command": "/data/Minko/fire-without-forgetting/envs/dreamerv3/bin/python -u /data/Minko/fire-without-forgetting/code/dreamerv3-bsuite-v2/dreamerv3/main.py --configs size12m fwf_popgym --logdir /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_bsuite_memory4_s0 --seed 0 --run.steps 1000000 --run.log_every 60 --logger.timer True --task bsuite_memory_len/3 "
+    },
+    {
+      "job": "persistent_ssm_bsuite_memory4_s0",
+      "gpu": 3,
+      "pid": 741300,
+      "started_at": "2026-09-28T15:01:48.390230+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_bsuite_memory4_s0/train.log",
+      "process_alive": true,
+      "latest_step": 41320,
+      "latest_action_steps": 41320,
+      "metrics_age_seconds": 0.3,
+      "latest_evaluations": [
+        {
+          "step": 32768,
+          "eval_return": -0.2,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [],
+      "checkpoint_metadata": null,
+      "checkpoints": [],
+      "latest_logged_update_count": 225.0,
+      "log_tail": [
+        "[41360] dataset_size 41360.0 / train_return 1.0 / train_length 5.0 / train_episodes 8272.0",
+        "[41360] dataset_size 41360.0 / train_return -1.0 / train_length 5.0 / train_episodes 8272.0",
+        "[41360] dataset_size 41360.0 / train_return 1.0 / train_length 5.0 / train_episodes 8272.0",
+        "[41360] dataset_size 41360.0 / train_return -1.0 / train_length 5.0 / train_episodes 8272.0"
+      ],
+      "actual_command": "/data/Minko/fire-without-forgetting/envs/torch/bin/python -u /data/Minko/fire-without-forgetting/code/persistent-ssm-longseq-v3/dreamer.py --configs memory persistent longseq --task bsuite_memory_len/3 --seed 0 --steps 1000000 --eval_every 25000 --logdir /data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_bsuite_memory4_s0 "
+    }
+  ],
+  "completed": [
+    "persistent_ssm_v2_repeat_medium_s0",
+    "persistent_ssm_v2_repeat_easy_s0",
+    "persistent_ssm_v2_repeat_hard_s0",
+    "r2i_repeat_easy_s0_cuda",
+    "r2i_repeat_medium_s0_cuda",
+    "r2i_recipe_reference_repeat_easy_s0",
+    "r2i_recipe_resetfix_repeat_easy_s0",
+    "r2i_recipe_reference_repeat_medium_s0",
+    "r2i_recipe_resetfix_repeat_medium_s0",
+    "dreamerv3_v1_integration_easy_timer_s0",
+    "dreamerv3_size12m_repeat_easy_s0",
+    "dreamerv3_size12m_repeat_medium_s0",
+    "dreamerv3_size12m_repeat_hard_s0",
+    "persistent_ssm_v3_longseq_integration_easy_s0",
+    "r2i_bs30_integration_s0",
+    "dreamerv3_bs30_integration_s0",
+    "persistent_ssm_bs30_integration_s0"
+  ],
+  "failed": [
+    "r2i_repeat_easy_s0",
+    "r2i_repeat_medium_s0",
+    "persistent_ssm_repeat_medium_s0",
+    "dreamerv3_v1_integration_easy_s0"
+  ],
+  "pending": [
+    "r2i_repeat_easy_rewardscale48_s0",
+    "persistent_ssm_repeat_easy_s0",
+    "persistent_ssm_repeat_hard_s0",
+    "mcn_repeat_medium_tau160_stepreset0_dendreset0_s0",
+    "mcn_repeat_medium_tau160_stepreset1_dendreset1_s0",
+    "mcn_repeat_medium_tau160_stepreset1_dendreset0_s0",
+    "mcn_repeat_medium_tau160_stepreset0_dendreset1_s0",
+    "mcn_repeat_medium_tau2_stepreset0_dendreset0_s0",
+    "mcn_repeat_medium_tau8_stepreset0_dendreset0_s0",
+    "mcn_repeat_medium_tau32_stepreset0_dendreset0_s0",
+    "mcn_repeat_medium_tau2_stepreset1_dendreset1_s0",
+    "mcn_repeat_medium_tau2_stepreset1_dendreset0_s0",
+    "mcn_repeat_medium_tau2_stepreset0_dendreset1_s0",
+    "mcn_repeat_medium_tau8_stepreset1_dendreset1_s0",
+    "mcn_repeat_medium_tau8_stepreset1_dendreset0_s0",
+    "mcn_repeat_medium_tau8_stepreset0_dendreset1_s0",
+    "mcn_repeat_medium_tau32_stepreset1_dendreset1_s0",
+    "mcn_repeat_medium_tau32_stepreset1_dendreset0_s0",
+    "mcn_repeat_medium_tau32_stepreset0_dendreset1_s0",
+    "r2i_bsuite_memory30_s0",
+    "r2i_bsuite_memory100_s0",
+    "dreamerv3_bsuite_memory30_s0",
+    "dreamerv3_bsuite_memory100_s0",
+    "persistent_ssm_bsuite_memory30_s0",
+    "persistent_ssm_bsuite_memory100_s0"
+  ],
+  "gpu": "0, 37739, 48, 240.18\n1, 3713, 100, 159.86\n2, 50703, 89, 199.14\n3, 18417, 0, 175.08\n4, 79963, 100, 683.09\n5, 79963, 100, 682.86\n6, 79967, 85, 661.96\n7, 79965, 100, 688.41\n",
+  "heartbeat_requested_time": "2026-09-28T04:02:14.893+08:00",
+  "actual_check_started_at": "2026-09-28T14:44:00+08:00",
+  "timing_note": "Previous actual check about03:07. No evidence that intervening hourly checks executed. Server training continued; no cause for desktop execution delay established.",
+  "new_completed_records": [
+    "docs/dreamerv3_repeat_completed.json",
+    "docs/ssm_v2_easy_completed.json"
+  ],
+  "bsuite_integration": {
+    "passed": true,
+    "checked_at": "2026-09-28T15:01:45.128596+08:00",
+    "actual_action_steps_per_backend": 34816,
+    "updates": {
+      "r2i": 31,
+      "dreamerv3": 33,
+      "persistent_ssm": 132
+    },
+    "sampled_max_process_memory_mib": {
+      "r2i_bs30_integration_s0": 37730,
+      "dreamerv3_bs30_integration_s0": 3708,
+      "persistent_ssm_bs30_integration_s0": 18406
+    },
+    "sampling_note": "30-second samples, not exact allocation peaks",
+    "records": {
+      "r2i": "docs/bsuite_training_integration_r2i.json",
+      "dreamerv3": "docs/bsuite_training_integration_dreamerv3.json",
+      "torch": "docs/bsuite_training_integration_torch.json"
+    },
+    "scope": "Full-model integration only; not performance evidence. Main stage three official lengths, seed0, one million actual actions each."
+  },
+  "active_checkpoints": {
+    "mcn_repeat_easy_original_s0": {
+      "state_dict_entries": 312,
+      "tensor_count": 312,
+      "checkpoint_limitation": "weights only; no exact optimizer resume"
+    },
+    "persistent_ssm_v3_longseq_repeat_easy_s0": {
+      "environment_steps": 2832768,
+      "update_count": 43850,
+      "optimizer_state_counts": {
+        "world_model_optimizer": 77,
+        "actor_optimizer": 10,
+        "value_optimizer": 10
+      }
+    },
+    "checked_at": "2026-09-28T15:02:40.545395+08:00"
+  },
+  "services": [
+    "fwf-checkpoints: 1 windows (created Mon Sep 28 02:17:43 2026)",
+    "fwf-dreamerv3: 1 windows (created Mon Sep 28 02:11:51 2026)",
+    "fwf-resources: 1 windows (created Mon Sep 28 02:11:26 2026)",
+    "fwf-v2: 1 windows (created Sun Sep 27 21:01:22 2026)"
+  ],
+  "resource_sample_age_seconds": 16.7,
+  "disk_free_gib": 287.61,
+  "enabled_bsuite_stage": [
+    {
+      "name": "r2i_bsuite_memory4_s0",
+      "gpu": 0,
+      "enabled": true,
+      "seed": 0
+    },
+    {
+      "name": "r2i_bsuite_memory30_s0",
+      "gpu": 0,
+      "enabled": true,
+      "seed": 0
+    },
+    {
+      "name": "r2i_bsuite_memory100_s0",
+      "gpu": 0,
+      "enabled": true,
+      "seed": 0
+    },
+    {
+      "name": "dreamerv3_bsuite_memory4_s0",
+      "gpu": 1,
+      "enabled": true,
+      "seed": 0
+    },
+    {
+      "name": "dreamerv3_bsuite_memory30_s0",
+      "gpu": 1,
+      "enabled": true,
+      "seed": 0
+    },
+    {
+      "name": "dreamerv3_bsuite_memory100_s0",
+      "gpu": 1,
+      "enabled": true,
+      "seed": 0
+    },
+    {
+      "name": "persistent_ssm_bsuite_memory4_s0",
+      "gpu": 3,
+      "enabled": true,
+      "seed": 0
+    },
+    {
+      "name": "persistent_ssm_bsuite_memory30_s0",
+      "gpu": 3,
+      "enabled": true,
+      "seed": 0
+    },
+    {
+      "name": "persistent_ssm_bsuite_memory100_s0",
+      "gpu": 3,
+      "enabled": true,
+      "seed": 0
+    }
+  ],
+  "remaining_gaps": [
+    "E1 full BSuite curve, Autoencode, MCN and same-framework SNN controls",
+    "E2 Medium learning gate and causal reset matrix",
+    "E3 matched-budget MCN/ANN, Memory Maze user download",
+    "E4 approximate parallel comparison",
+    "E5 AC/MAC/state-access accounting and isolated energy"
+  ],
+  "conclusion": "Easy baselines learn; Medium remains at floor. No evidence of proposed-method superiority. Continue bounded seed0 queues; E2 remains disabled."
+}

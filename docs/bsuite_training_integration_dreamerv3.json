@@ -1,0 +1,1299 @@
+{
+  "run": "dreamerv3_bs30_integration_s0",
+  "result": {
+    "returncode": 0,
+    "gpu": 1,
+    "elapsed_seconds": 140.5050938129425,
+    "command": [
+      "taskset",
+      "-c",
+      "80-95",
+      "/data/Minko/fire-without-forgetting/envs/dreamerv3/bin/python",
+      "-u",
+      "/data/Minko/fire-without-forgetting/code/dreamerv3-bsuite-v2/dreamerv3/main.py",
+      "--configs",
+      "size12m",
+      "fwf_popgym",
+      "--logdir",
+      "/data/Minko/fire-without-forgetting/runs/v2/dreamerv3_bs30_integration_s0",
+      "--seed",
+      "0",
+      "--run.steps",
+      "34816",
+      "--run.log_every",
+      "15",
+      "--logger.timer",
+      "True",
+      "--task",
+      "bsuite_memory_len/15"
+    ],
+    "ended_at": "2026-09-28T14:56:17.003648+08:00"
+  },
+  "core_nonfinite": [],
+  "evaluations": [
+    {
+      "step": 0,
+      "eval_episode/score": -1.0,
+      "eval_episode/length": 32.0,
+      "train_action_steps": 0.0,
+      "updates": 0.0,
+      "eval_return": 0.2,
+      "eval_return_std": 0.9797958971132713,
+      "eval_episodes": 20.0,
+      "elapsed_seconds": 4.850553035736084,
+      "eval_epstats/reward_rate": 0.03225806451612902
+    },
+    {
+      "step": 25808,
+      "eval_episode/score": 1.0,
+      "eval_episode/length": 32.0,
+      "train_action_steps": 25000.0,
+      "updates": 0.0,
+      "eval_return": 0.1,
+      "eval_return_std": 0.9949874371066201,
+      "eval_episodes": 20.0,
+      "elapsed_seconds": 27.30122661590576,
+      "eval_epstats/reward_rate": 0.03225806451612902
+    },
+    {
+      "step": 35944,
+      "eval_episode/score": 1.0,
+      "eval_episode/length": 32.0,
+      "train_action_steps": 34816.0,
+      "updates": 33.0,
+      "eval_return": -0.1,
+      "eval_return_std": 0.99498743710662,
+      "eval_episodes": 20.0,
+      "elapsed_seconds": 47.216862201690674,
+      "eval_epstats/reward_rate": 0.03225806451612902
+    }
+  ],
+  "checked_at": "2026-09-28T14:59:52.409427+08:00",
+  "checkpoint_directory": "fire-without-forgetting/runs/v2/dreamerv3_bs30_integration_s0/ckpt/20260928T145600F976858-000000035944",
+  "done": true,
+  "serialized_counters": {
+    "step": 35944,
+    "action_steps": 34816,
+    "updates": {
+      "updates": 33,
+      "batches": 37,
+      "actions": 6413
+    }
+  },
+  "agent_keys": [
+    "params",
+    "counters"
+  ],
+  "agent_nested": {
+    "params": [
+      "con/head/logit/bias",
+      "con/head/logit/kernel",
+      "con/mlp/linear0/bias",
+      "con/mlp/linear0/kernel",
+      "con/mlp/norm0/scale",
+      "dec/mlp/linear0/bias",
+      "dec/mlp/linear0/kernel",
+      "dec/mlp/linear1/bias",
+      "dec/mlp/linear1/kernel",
+      "dec/mlp/linear2/bias",
+      "dec/mlp/linear2/kernel",
+      "dec/mlp/norm0/scale"
+    ],
+    "counters": [
+      "updates",
+      "batches",
+      "actions"
+    ]
+  },
+  "optimizer_state": {
+    "opt/state/1/0": {
+      "shape": [],
+      "finite": true,
+      "value": 33
+    },
+    "opt/state/1/1/con/head/logit/bias": {
+      "shape": [
+        1
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/con/head/logit/kernel": {
+      "shape": [
+        256,
+        1
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/con/mlp/linear0/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/con/mlp/linear0/kernel": {
+      "shape": [
+        2560,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/con/mlp/norm0/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dec/mlp/linear0/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dec/mlp/linear0/kernel": {
+      "shape": [
+        2560,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dec/mlp/linear1/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dec/mlp/linear1/kernel": {
+      "shape": [
+        256,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dec/mlp/linear2/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dec/mlp/linear2/kernel": {
+      "shape": [
+        256,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dec/mlp/norm0/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dec/mlp/norm1/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dec/mlp/norm2/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dec/vec/vector/pred/bias": {
+      "shape": [
+        3
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dec/vec/vector/pred/kernel": {
+      "shape": [
+        256,
+        3
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/dyngru/bias": {
+      "shape": [
+        6144
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/dyngru/kernel": {
+      "shape": [
+        8,
+        256,
+        768
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/dynhid0/bias": {
+      "shape": [
+        2048
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/dynhid0/kernel": {
+      "shape": [
+        8,
+        1024,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/dynhid0norm/scale": {
+      "shape": [
+        2048
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/dynin0/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/dynin0/kernel": {
+      "shape": [
+        2048,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/dynin0norm/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/dynin1/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/dynin1/kernel": {
+      "shape": [
+        512,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/dynin1norm/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/dynin2/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/dynin2/kernel": {
+      "shape": [
+        2,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/dynin2norm/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/obs0/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/obs0/kernel": {
+      "shape": [
+        2304,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/obs0norm/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/obslogit/bias": {
+      "shape": [
+        512
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/obslogit/kernel": {
+      "shape": [
+        256,
+        512
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/prior0/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/prior0/kernel": {
+      "shape": [
+        2048,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/prior0norm/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/prior1/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/prior1/kernel": {
+      "shape": [
+        256,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/prior1norm/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/priorlogit/bias": {
+      "shape": [
+        512
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/dyn/priorlogit/kernel": {
+      "shape": [
+        256,
+        512
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/enc/mlp0/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/enc/mlp0/kernel": {
+      "shape": [
+        3,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/enc/mlp0norm/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/enc/mlp1/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/enc/mlp1/kernel": {
+      "shape": [
+        256,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/enc/mlp1norm/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/enc/mlp2/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/enc/mlp2/kernel": {
+      "shape": [
+        256,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/enc/mlp2norm/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/pol/head/action/logits/bias": {
+      "shape": [
+        2
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/pol/head/action/logits/kernel": {
+      "shape": [
+        256,
+        2
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/pol/mlp/linear0/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/pol/mlp/linear0/kernel": {
+      "shape": [
+        2560,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/pol/mlp/linear1/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/pol/mlp/linear1/kernel": {
+      "shape": [
+        256,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/pol/mlp/linear2/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/pol/mlp/linear2/kernel": {
+      "shape": [
+        256,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/pol/mlp/norm0/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/pol/mlp/norm1/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/pol/mlp/norm2/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/rew/head/logits/bias": {
+      "shape": [
+        255
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/rew/head/logits/kernel": {
+      "shape": [
+        256,
+        255
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/rew/mlp/linear0/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/rew/mlp/linear0/kernel": {
+      "shape": [
+        2560,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/rew/mlp/norm0/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/val/head/logits/bias": {
+      "shape": [
+        255
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/val/head/logits/kernel": {
+      "shape": [
+        256,
+        255
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/val/mlp/linear0/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/val/mlp/linear0/kernel": {
+      "shape": [
+        2560,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/val/mlp/linear1/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/val/mlp/linear1/kernel": {
+      "shape": [
+        256,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/val/mlp/linear2/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/val/mlp/linear2/kernel": {
+      "shape": [
+        256,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/val/mlp/norm0/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/val/mlp/norm1/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/1/1/val/mlp/norm2/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/0": {
+      "shape": [],
+      "finite": true,
+      "value": 33
+    },
+    "opt/state/2/1/con/head/logit/bias": {
+      "shape": [
+        1
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/con/head/logit/kernel": {
+      "shape": [
+        256,
+        1
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/con/mlp/linear0/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/con/mlp/linear0/kernel": {
+      "shape": [
+        2560,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/con/mlp/norm0/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dec/mlp/linear0/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dec/mlp/linear0/kernel": {
+      "shape": [
+        2560,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dec/mlp/linear1/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dec/mlp/linear1/kernel": {
+      "shape": [
+        256,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dec/mlp/linear2/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dec/mlp/linear2/kernel": {
+      "shape": [
+        256,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dec/mlp/norm0/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dec/mlp/norm1/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dec/mlp/norm2/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dec/vec/vector/pred/bias": {
+      "shape": [
+        3
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dec/vec/vector/pred/kernel": {
+      "shape": [
+        256,
+        3
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/dyngru/bias": {
+      "shape": [
+        6144
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/dyngru/kernel": {
+      "shape": [
+        8,
+        256,
+        768
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/dynhid0/bias": {
+      "shape": [
+        2048
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/dynhid0/kernel": {
+      "shape": [
+        8,
+        1024,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/dynhid0norm/scale": {
+      "shape": [
+        2048
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/dynin0/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/dynin0/kernel": {
+      "shape": [
+        2048,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/dynin0norm/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/dynin1/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/dynin1/kernel": {
+      "shape": [
+        512,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/dynin1norm/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/dynin2/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/dynin2/kernel": {
+      "shape": [
+        2,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/dynin2norm/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/obs0/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/obs0/kernel": {
+      "shape": [
+        2304,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/obs0norm/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/obslogit/bias": {
+      "shape": [
+        512
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/obslogit/kernel": {
+      "shape": [
+        256,
+        512
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/prior0/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/prior0/kernel": {
+      "shape": [
+        2048,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/prior0norm/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/prior1/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/prior1/kernel": {
+      "shape": [
+        256,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/prior1norm/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/priorlogit/bias": {
+      "shape": [
+        512
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/dyn/priorlogit/kernel": {
+      "shape": [
+        256,
+        512
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/enc/mlp0/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/enc/mlp0/kernel": {
+      "shape": [
+        3,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/enc/mlp0norm/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/enc/mlp1/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/enc/mlp1/kernel": {
+      "shape": [
+        256,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/enc/mlp1norm/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/enc/mlp2/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/enc/mlp2/kernel": {
+      "shape": [
+        256,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/enc/mlp2norm/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/pol/head/action/logits/bias": {
+      "shape": [
+        2
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/pol/head/action/logits/kernel": {
+      "shape": [
+        256,
+        2
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/pol/mlp/linear0/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/pol/mlp/linear0/kernel": {
+      "shape": [
+        2560,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/pol/mlp/linear1/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/pol/mlp/linear1/kernel": {
+      "shape": [
+        256,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/pol/mlp/linear2/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/pol/mlp/linear2/kernel": {
+      "shape": [
+        256,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/pol/mlp/norm0/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/pol/mlp/norm1/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/pol/mlp/norm2/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/rew/head/logits/bias": {
+      "shape": [
+        255
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/rew/head/logits/kernel": {
+      "shape": [
+        256,
+        255
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/rew/mlp/linear0/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/rew/mlp/linear0/kernel": {
+      "shape": [
+        2560,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/rew/mlp/norm0/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/val/head/logits/bias": {
+      "shape": [
+        255
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/val/head/logits/kernel": {
+      "shape": [
+        256,
+        255
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/val/mlp/linear0/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/val/mlp/linear0/kernel": {
+      "shape": [
+        2560,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/val/mlp/linear1/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/val/mlp/linear1/kernel": {
+      "shape": [
+        256,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/val/mlp/linear2/bias": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/val/mlp/linear2/kernel": {
+      "shape": [
+        256,
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/val/mlp/norm0/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/val/mlp/norm1/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/2/1/val/mlp/norm2/scale": {
+      "shape": [
+        256
+      ],
+      "finite": true,
+      "value": null
+    },
+    "opt/state/3/count": {
+      "shape": [],
+      "finite": true,
+      "value": 33
+    },
+    "opt/step/value": {
+      "shape": [],
+      "finite": true,
+      "value": 33
+    }
+  },
+  "checkpoint_all_finite": true
+}

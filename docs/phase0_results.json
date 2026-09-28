@@ -1,0 +1,324 @@
+{
+  "checked_at": "2026-09-27T20:37:21.019248+08:00",
+  "completed_at": "2026-09-27T19:46:38.398756+08:00",
+  "task": "popgym_RepeatPreviousMedium",
+  "seed": 0,
+  "uniform_random_expected_return": -0.5,
+  "maximum_return": 1.0,
+  "conclusion": "四组在 100,000 环境步内均未表现出超出随机水平的持续提升；未得到复位干预改善记忆任务表现的证据。该轮为单种子初筛，不能用于否定完整新架构。",
+  "full_proposed_model_implemented": false,
+  "runs": [
+    {
+      "run": "original_tau2_seed0",
+      "label": "原版 MCN",
+      "gpu": 0,
+      "returncode": 0,
+      "environment_steps": 100000,
+      "final_eval_return": -0.5319444671273231,
+      "scored_action_accuracy_from_return": 0.23402776643633844,
+      "eval_episodes": 20.0,
+      "elapsed_seconds": 9412.264761209488,
+      "logged_nonfinite_count": 0,
+      "first_model_loss": 6.182782173156738,
+      "last_logged_update": {
+        "step": 99500,
+        "update_count": 3132.0,
+        "model_loss": 1.4897109270095825,
+        "mcn_spike_rate": 0.11795780062675476,
+        "actor_entropy": 1.380000352859497,
+        "actor_grad_norm": 0.0010625217018969124
+      },
+      "evaluation_curve": [
+        {
+          "step": 2500,
+          "eval_return": -0.4486111253499985,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 12500,
+          "eval_return": -0.4875000178813934,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 22500,
+          "eval_return": -0.5138889133930207,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 32500,
+          "eval_return": -0.5125000163912773,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 42500,
+          "eval_return": -0.5263889014720917,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 52500,
+          "eval_return": -0.484722238779068,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 62500,
+          "eval_return": -0.5152777880430222,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 72500,
+          "eval_return": -0.4861111268401146,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 82500,
+          "eval_return": -0.5125000208616257,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 92500,
+          "eval_return": -0.4819444552063942,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 100000,
+          "eval_return": -0.5319444671273231,
+          "eval_episodes": 20.0
+        }
+      ]
+    },
+    {
+      "run": "persistent_tau2_seed0",
+      "label": "取消步间复位",
+      "gpu": 1,
+      "returncode": 0,
+      "environment_steps": 100000,
+      "final_eval_return": -0.49861113280057906,
+      "scored_action_accuracy_from_return": 0.25069443359971044,
+      "eval_episodes": 20.0,
+      "elapsed_seconds": 9617.990311384201,
+      "logged_nonfinite_count": 0,
+      "first_model_loss": 6.165965557098389,
+      "last_logged_update": {
+        "step": 99500,
+        "update_count": 3132.0,
+        "model_loss": 1.4164977073669434,
+        "mcn_spike_rate": 0.1310797929763794,
+        "actor_entropy": 1.381882667541504,
+        "actor_grad_norm": 0.0009208605752064614
+      },
+      "evaluation_curve": [
+        {
+          "step": 2500,
+          "eval_return": -0.4847222357988358,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 12500,
+          "eval_return": -0.49305557161569596,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 22500,
+          "eval_return": -0.5388889074325561,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 32500,
+          "eval_return": -0.49722224175930024,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 42500,
+          "eval_return": -0.5125000216066837,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 52500,
+          "eval_return": -0.5111111283302308,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 62500,
+          "eval_return": -0.508333346247673,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 72500,
+          "eval_return": -0.5305555775761605,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 82500,
+          "eval_return": -0.5250000208616257,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 92500,
+          "eval_return": -0.49305557161569596,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 100000,
+          "eval_return": -0.49861113280057906,
+          "eval_episodes": 20.0
+        }
+      ]
+    },
+    {
+      "run": "no_dendrite_reset_tau2_seed0",
+      "label": "取消树突发放复位",
+      "gpu": 3,
+      "returncode": 0,
+      "environment_steps": 100000,
+      "final_eval_return": -0.5041666805744172,
+      "scored_action_accuracy_from_return": 0.24791665971279142,
+      "eval_episodes": 20.0,
+      "elapsed_seconds": 9227.463701963425,
+      "logged_nonfinite_count": 0,
+      "first_model_loss": 6.175680160522461,
+      "last_logged_update": {
+        "step": 99500,
+        "update_count": 3132.0,
+        "model_loss": 1.4526660442352295,
+        "mcn_spike_rate": 0.14055101573467255,
+        "actor_entropy": 1.380915880203247,
+        "actor_grad_norm": 0.0011678338814817835
+      },
+      "evaluation_curve": [
+        {
+          "step": 2500,
+          "eval_return": -0.48888890296220777,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 12500,
+          "eval_return": -0.5180555716156959,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 22500,
+          "eval_return": -0.5055555805563927,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 32500,
+          "eval_return": -0.5041666820645332,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 42500,
+          "eval_return": -0.4847222402691841,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 52500,
+          "eval_return": -0.51666669100523,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 62500,
+          "eval_return": -0.5291666865348816,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 72500,
+          "eval_return": -0.5222222402691841,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 82500,
+          "eval_return": -0.48333334773778913,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 92500,
+          "eval_return": -0.49166669100522997,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 100000,
+          "eval_return": -0.5041666805744172,
+          "eval_episodes": 20.0
+        }
+      ]
+    },
+    {
+      "run": "persistent_no_dendrite_reset_tau2_seed0",
+      "label": "两种复位都取消",
+      "gpu": 2,
+      "returncode": 0,
+      "environment_steps": 100000,
+      "final_eval_return": -0.49583334624767306,
+      "scored_action_accuracy_from_return": 0.25208332687616347,
+      "eval_episodes": 20.0,
+      "elapsed_seconds": 9567.819647550583,
+      "logged_nonfinite_count": 0,
+      "first_model_loss": 6.151063919067383,
+      "last_logged_update": {
+        "step": 99500,
+        "update_count": 3132.0,
+        "model_loss": 1.4484031200408936,
+        "mcn_spike_rate": 0.1894330382347107,
+        "actor_entropy": 1.3819799423217773,
+        "actor_grad_norm": 0.001153440740381484
+      },
+      "evaluation_curve": [
+        {
+          "step": 2500,
+          "eval_return": -0.46805557757616045,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 12500,
+          "eval_return": -0.5041666775941849,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 22500,
+          "eval_return": -0.4847222432494164,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 32500,
+          "eval_return": -0.5152777969837189,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 42500,
+          "eval_return": -0.494444465637207,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 52500,
+          "eval_return": -0.5458333641290665,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 62500,
+          "eval_return": -0.49305557906627656,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 72500,
+          "eval_return": -0.5013889044523239,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 82500,
+          "eval_return": -0.49583334773778914,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 92500,
+          "eval_return": -0.5152778014540672,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 100000,
+          "eval_return": -0.49583334624767306,
+          "eval_episodes": 20.0
+        }
+      ]
+    }
+  ]
+}

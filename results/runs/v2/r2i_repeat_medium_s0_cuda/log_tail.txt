@@ -1,0 +1,80 @@
+Episode has 103 steps and return -0.5.
+Episode has 103 steps and return -0.6.
+Episode has 103 steps and return -0.4.
+Episode has 103 steps and return -0.4.
+Episode has 103 steps and return -0.6.
+Episode has 103 steps and return -0.6.
+Episode has 103 steps and return -0.4.
+Episode has 103 steps and return -0.7.
+Episode has 103 steps and return -0.5.
+Episode has 103 steps and return -0.4.
+Episode has 103 steps and return -0.5.
+Episode has 103 steps and return -0.4.
+Episode has 103 steps and return -0.4.
+Episode has 103 steps and return -0.6.
+Episode has 103 steps and return -0.4.
+Episode has 103 steps and return -0.5.
+Episode has 103 steps and return -0.7.
+Episode has 103 steps and return -0.3.
+Episode has 103 steps and return -0.6.
+Episode has 103 steps and return -0.6.
+Episode has 103 steps and return -0.4.
+Episode has 103 steps and return -0.4.
+Episode has 103 steps and return -0.8.
+Episode has 103 steps and return -0.6.
+Episode has 103 steps and return -0.6.
+Episode has 103 steps and return -0.4.
+Episode has 103 steps and return -0.4.
+Episode has 103 steps and return -0.5.
+Episode has 103 steps and return -0.5.
+Episode has 103 steps and return -0.6.
+Episode has 103 steps and return -0.5.
+Episode has 103 steps and return -0.6.
+Episode has 103 steps and return -0.6.
+Episode has 103 steps and return -0.5.
+Episode has 103 steps and return -0.6.
+Episode has 103 steps and return -0.5.
+Episode has 103 steps and return -0.4.
+Episode has 103 steps and return -0.3.
+Episode has 103 steps and return -0.6.
+Episode has 103 steps and return -0.6.
+Episode has 103 steps and return -0.6.
+Episode has 103 steps and return -0.4.
+Saved chunk: 20260927T215104F354597-3Kn5QAAN5GjU3v3qNikNR1-4FrAsuQZe4hZz95RjiR7f3-1024.npz
+Saved chunk: 20260927T215104F355989-4xjQdX2Em1QH4o9r8Pfg7v-7hVbHi8397NIpASlUZfYdh-1024.npz
+Saved chunk: 20260927T215104F355837-1zTsBtIpmcorRsPqiQDNVk-7AIvgBBEK21dZvWl2eABgG-1024.npz
+Saved chunk: 20260927T215104F358851-0aeXgtdoKN5iyiLSeW58Lc-05vNUzOz4a29Fubewslfuo-1024.npz
+Saved chunk: 20260927T215104F354986-67JlI1881n3CGJ32qNabH3-03y5MS435Ag3lAGLLylpcz-1024.npzSaved chunk: 20260927T215104F357782-46i2ZriZ6vQ4X7Xq25oOFX-79ayo0akeIDQVlivLKvU7v-1024.npz
+Saved chunk: 20260927T215104F355651-69g6rEUIenOQwPlJhKJgRY-22w4dBH4nDEFz2JmSo7Qky-1024.npzSaved chunk: 20260927T215104F359114-7LSEBtZMy4XhOrEZmz7Emt-3UjhQlX9nmoXAo2xDIYbVE-1024.npz
+
+
+Starting evaluation at step 1000000
+Episode has 103 steps and return -0.4.
+Episode has 103 steps and return -0.5.
+Episode has 103 steps and return -0.4.
+Episode has 103 steps and return -0.4.
+Episode has 103 steps and return -0.6.
+Saved chunk: 20260927T215021F946267-7qzdgftpNw9OZrs87lquQV-1bR3EwxM1yvFG8sqYweAb3-1024.npz
+Episode has 103 steps and return -0.5.
+Episode has 103 steps and return -0.6.
+Episode has 103 steps and return -0.5.
+Episode has 103 steps and return -0.4.
+Episode has 103 steps and return -0.4.
+Episode has 103 steps and return -0.5.
+Episode has 103 steps and return -0.5.
+Episode has 103 steps and return -0.7.
+Episode has 103 steps and return -0.4.
+Episode has 103 steps and return -0.5.
+Saved chunk: 20260927T215128F660163-1bR3EwxM1yvFG8sqYweAb3-0BwRLwsuTMrzdbIkLoJN1E-1024.npz
+Episode has 103 steps and return -0.6.
+Episode has 103 steps and return -0.5.
+Episode has 103 steps and return -0.7.
+Episode has 103 steps and return -0.3.
+Episode has 103 steps and return -0.6.
+───────────────────────────────── Step 1000000 ─────────────────────────────────
+episode/length 103 / episode/score -0.42 / episode/reward_rate 0 / 
+eval_episode/length 103 / eval_episode/score -0.56 / eval_episode/reward_rate 0 
+/ eval_return -0.5 / eval_return_std 0.09 / eval_episodes 20 / update_count 
+3.1e4
+
+Writing checkpoint: /data/Minko/fire-without-forgetting/runs/v2/r2i_repeat_medium_s0_cuda/checkpoint.ckpt

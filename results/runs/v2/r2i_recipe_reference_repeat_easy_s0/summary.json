@@ -1,0 +1,847 @@
+{
+  "run": "r2i_recipe_reference_repeat_easy_s0",
+  "group": "v2",
+  "status": "completed",
+  "scope": "bounded_stage",
+  "seed": "0",
+  "task": "gym_popgym:popgym-RepeatPreviousEasy-v0",
+  "code_snapshot": "r2i-recipe-reference-v4",
+  "configured_budget": 5000000,
+  "budget_unit": "driver_transitions_including_reset",
+  "latest_logged_step": 5000000,
+  "latest_logged_action_steps": null,
+  "latest_logged_updates": 77612.0,
+  "final_or_latest_evaluation": {
+    "step": 5000000,
+    "update_count": 77612.0,
+    "eval_return": 0.7895833568647503,
+    "eval_return_std": 0.09635276187026247,
+    "eval_episodes": 20.0
+  },
+  "evaluation_points": 200,
+  "returncode": 0,
+  "elapsed_seconds": 7008.057693004608,
+  "ended_at": "2026-09-28T01:41:03.345954+08:00",
+  "exclusion": null,
+  "final_checkpoint_metadata": {
+    "environment_steps": 5000000,
+    "update_count": 77612,
+    "saved_at": 1790530851.3455787,
+    "write_mode": "synchronous"
+  },
+  "metric_source_bytes": 3033927,
+  "metric_source_records": 12285,
+  "incomplete_or_malformed_lines": 0,
+  "training_scalar_records": 115,
+  "nonfinite_training_records": [
+    {
+      "step": 32865,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 68449,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 110305,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 152097,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 197185,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 239521,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 281697,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 325001,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 370273,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 412185,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 454761,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 500033,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 545497,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 588129,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 630817,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 675065,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 720225,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 762593,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 805185,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 849345,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 891873,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 934905,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 977761,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1023233,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1065505,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1108345,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1150777,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1196129,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1238464,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1279913,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1325065,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1371041,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1414081,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1456545,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1500097,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1545889,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1588705,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1630817,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1675025,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1718881,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1761713,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1804193,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1849249,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1891617,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1934409,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 1976481,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2021657,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2064105,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2107113,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2150097,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2195553,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2238953,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2281825,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2325033,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2370833,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2413377,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2455969,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2500057,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2545753,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2587809,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2629985,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2675089,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2720769,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2763833,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2806305,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2850017,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2896081,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2939009,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 2981345,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3025049,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3070761,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3114417,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3157601,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3200097,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3245217,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3288545,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3331361,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3375009,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3420449,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3461945,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3504737,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3550041,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3595745,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3638689,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3681249,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3725073,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3770993,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3813601,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3856737,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3900001,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3944929,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 3987457,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4030385,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4075033,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4120289,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4162785,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4205537,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4250065,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4294877,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4336865,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4379697,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4425097,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4470873,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4513953,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4557089,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4600025,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4645793,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4688481,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4731361,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4775057,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4820833,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4863969,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4906849,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4950089,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    },
+    {
+      "step": 4995441,
+      "metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ]
+    }
+  ],
+  "exported_at": "2026-09-28T15:30:42.095464+08:00",
+  "source_run_directory": "/data/Minko/fire-without-forgetting/runs/v2/r2i_recipe_reference_repeat_easy_s0",
+  "exported_directory": "runs/v2/r2i_recipe_reference_repeat_easy_s0",
+  "gpu": 0
+}

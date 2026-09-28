@@ -1,0 +1,17 @@
+{
+  "mcn_repeat_easy_original_s0": {
+    "state_dict_entries": 312,
+    "tensor_count": 312,
+    "checkpoint_limitation": "weights only; no exact optimizer resume"
+  },
+  "persistent_ssm_v3_longseq_repeat_easy_s0": {
+    "environment_steps": 2832768,
+    "update_count": 43850,
+    "optimizer_state_counts": {
+      "world_model_optimizer": 77,
+      "actor_optimizer": 10,
+      "value_optimizer": 10
+    }
+  },
+  "checked_at": "2026-09-28T15:02:40.545395+08:00"
+}

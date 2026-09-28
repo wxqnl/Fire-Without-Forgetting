@@ -1,0 +1,45 @@
+{
+  "status": "passed",
+  "code": "r2i-resetfix-v4",
+  "batch": [
+    4,
+    1024
+  ],
+  "precision": "float16",
+  "seed": 0,
+  "physical_gpu": "1",
+  "source": "real saved replay and fresh seed-0 official FP16 initialization; 12 complete world-model/actor/critic updates; first 2 excluded from timing",
+  "warm_update_seconds": [
+    0.0541465450078249,
+    0.05072712601395324,
+    0.05216326197842136,
+    0.05248132802080363,
+    0.05318180099129677,
+    0.05289744900073856,
+    0.05230247997678816,
+    0.052774546027649194,
+    0.05301562696695328,
+    0.049878043006174266
+  ],
+  "median_update_seconds": 0.05262793702422641,
+  "replay_positions_per_second": 77829.3855241651,
+  "process_gpu_memory": [
+    "3740000, 37724"
+  ],
+  "core_metrics": {
+    "actor_opt_grad_norm": 0.00025032690609805286,
+    "actor_opt_loss": -3.601975917816162,
+    "cont_loss_mean": 0.12387937307357788,
+    "dyn_loss_mean": 3.8796772956848145,
+    "extr_critic_critic_opt_grad_norm": 14.821671485900879,
+    "extr_critic_critic_opt_loss": 104730.9375,
+    "model_loss_mean": 8.766678810119629,
+    "model_opt_grad_norm": 11.351698875427246,
+    "model_opt_loss": 87666.7890625,
+    "observation_loss_mean": 1.1196341514587402,
+    "rep_loss_mean": 3.8796772956848145,
+    "reward_loss_mean": 5.195359230041504
+  },
+  "co_located_with": "existing project SSM Hard run",
+  "scope": "hardware/integration measurement; not a learning run or isolated efficiency result"
+}

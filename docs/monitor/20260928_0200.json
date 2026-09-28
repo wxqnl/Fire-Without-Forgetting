@@ -1,0 +1,305 @@
+{
+  "checked_at": "2026-09-28T02:22:00.600256+08:00",
+  "queue_state": "running",
+  "runs": [
+    {
+      "job": "persistent_ssm_v2_repeat_easy_s0",
+      "gpu": 0,
+      "pid": 3594834,
+      "started_at": "2026-09-27T21:50:49.586844+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_easy_s0/train.log",
+      "process_alive": true,
+      "latest_step": 826710,
+      "metrics_age_seconds": 1.8,
+      "latest_evaluations": [
+        {
+          "step": 752500,
+          "eval_return": -0.141666666418314,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 777500,
+          "eval_return": -0.11875000298023224,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 802500,
+          "eval_return": -0.11458333674818277,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [],
+      "checkpoint_metadata": null,
+      "checkpoints": [
+        {
+          "name": "latest_model.pt",
+          "bytes": 45835840
+        },
+        {
+          "name": "training_state.pt",
+          "bytes": 127972546
+        }
+      ]
+    },
+    {
+      "job": "persistent_ssm_v2_repeat_hard_s0",
+      "gpu": 1,
+      "pid": 3596036,
+      "started_at": "2026-09-27T21:51:52.299245+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_hard_s0/train.log",
+      "process_alive": true,
+      "latest_step": 932945,
+      "metrics_age_seconds": 3.2,
+      "latest_evaluations": [
+        {
+          "step": 877500,
+          "eval_return": -0.5032608553767204,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 902500,
+          "eval_return": -0.5086956337094307,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 927500,
+          "eval_return": -0.5086956366896629,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [],
+      "checkpoint_metadata": null,
+      "checkpoints": [
+        {
+          "name": "latest_model.pt",
+          "bytes": 45835840
+        },
+        {
+          "name": "training_state.pt",
+          "bytes": 127972546
+        }
+      ]
+    },
+    {
+      "job": "mcn_repeat_easy_original_s0",
+      "gpu": 2,
+      "pid": 3526697,
+      "started_at": "2026-09-27T21:01:23.195862+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/mcn_repeat_easy_original_s0/train.log",
+      "process_alive": true,
+      "latest_step": 179877,
+      "metrics_age_seconds": 0.8,
+      "latest_evaluations": [
+        {
+          "step": 127500,
+          "eval_return": -0.4979166716337204,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 152500,
+          "eval_return": -0.4895833358168602,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 177500,
+          "eval_return": -0.491666679084301,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [],
+      "checkpoint_metadata": null,
+      "checkpoints": [
+        {
+          "name": "latest_model.pt",
+          "bytes": 42681890
+        }
+      ]
+    },
+    {
+      "job": "persistent_ssm_v2_repeat_medium_s0",
+      "gpu": 3,
+      "pid": 3583034,
+      "started_at": "2026-09-27T21:41:33.130102+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_medium_s0/train.log",
+      "process_alive": true,
+      "latest_step": 967685,
+      "metrics_age_seconds": 2.0,
+      "latest_evaluations": [
+        {
+          "step": 902500,
+          "eval_return": -0.47916668504476545,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 927500,
+          "eval_return": -0.5111111223697662,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 952500,
+          "eval_return": -0.5388889119029046,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [],
+      "checkpoint_metadata": null,
+      "checkpoints": [
+        {
+          "name": "latest_model.pt",
+          "bytes": 45835840
+        },
+        {
+          "name": "training_state.pt",
+          "bytes": 127972546
+        }
+      ]
+    },
+    {
+      "job": "dreamerv3_size12m_repeat_easy_s0",
+      "gpu": 0,
+      "pid": 3950396,
+      "started_at": "2026-09-28T02:15:12.608649+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_easy_s0/train.log",
+      "process_alive": true,
+      "latest_step": 46544,
+      "metrics_age_seconds": 18.8,
+      "latest_evaluations": [
+        {
+          "step": 0,
+          "eval_return": -0.4687500139698386,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 25008,
+          "eval_return": -0.5041666816920042,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [
+        "replay/replay_ratio"
+      ],
+      "checkpoint_metadata": null,
+      "checkpoints": []
+    },
+    {
+      "job": "dreamerv3_size12m_repeat_medium_s0",
+      "gpu": 3,
+      "pid": 3950405,
+      "started_at": "2026-09-28T02:15:12.952715+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_medium_s0/train.log",
+      "process_alive": true,
+      "latest_step": 46128,
+      "metrics_age_seconds": 17.0,
+      "latest_evaluations": [
+        {
+          "step": 0,
+          "eval_return": -0.44861111445352436,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 25008,
+          "eval_return": -0.5097222260199488,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [
+        "replay/replay_ratio"
+      ],
+      "checkpoint_metadata": null,
+      "checkpoints": []
+    },
+    {
+      "job": "dreamerv3_size12m_repeat_hard_s0",
+      "gpu": 1,
+      "pid": 3950414,
+      "started_at": "2026-09-28T02:15:13.289016+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/train.log",
+      "process_alive": true,
+      "latest_step": 45248,
+      "metrics_age_seconds": 10.1,
+      "latest_evaluations": [
+        {
+          "step": 0,
+          "eval_return": -0.5478260971605777,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 25008,
+          "eval_return": -0.5184782705269754,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [
+        "replay/replay_ratio"
+      ],
+      "checkpoint_metadata": null,
+      "checkpoints": []
+    },
+    {
+      "job": "persistent_ssm_v3_longseq_repeat_easy_s0",
+      "gpu": 2,
+      "pid": 3956124,
+      "started_at": "2026-09-28T02:19:04.335148+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v3_longseq_repeat_easy_s0/train.log",
+      "process_alive": true,
+      "latest_step": 48960,
+      "metrics_age_seconds": 0.7,
+      "latest_evaluations": [
+        {
+          "step": 32768,
+          "eval_return": -0.5062499806284905,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [],
+      "checkpoint_metadata": null,
+      "checkpoints": []
+    }
+  ],
+  "completed": [
+    "r2i_repeat_easy_s0_cuda",
+    "r2i_repeat_medium_s0_cuda",
+    "r2i_recipe_reference_repeat_easy_s0",
+    "r2i_recipe_resetfix_repeat_easy_s0",
+    "r2i_recipe_reference_repeat_medium_s0",
+    "r2i_recipe_resetfix_repeat_medium_s0",
+    "dreamerv3_v1_integration_easy_timer_s0",
+    "persistent_ssm_v3_longseq_integration_easy_s0"
+  ],
+  "failed": [
+    "r2i_repeat_easy_s0",
+    "r2i_repeat_medium_s0",
+    "persistent_ssm_repeat_medium_s0",
+    "dreamerv3_v1_integration_easy_s0"
+  ],
+  "pending": [
+    "r2i_repeat_easy_rewardscale48_s0",
+    "persistent_ssm_repeat_easy_s0",
+    "persistent_ssm_repeat_hard_s0",
+    "mcn_repeat_medium_tau160_stepreset0_dendreset0_s0",
+    "mcn_repeat_medium_tau160_stepreset1_dendreset1_s0",
+    "mcn_repeat_medium_tau160_stepreset1_dendreset0_s0",
+    "mcn_repeat_medium_tau160_stepreset0_dendreset1_s0",
+    "mcn_repeat_medium_tau2_stepreset0_dendreset0_s0",
+    "mcn_repeat_medium_tau8_stepreset0_dendreset0_s0",
+    "mcn_repeat_medium_tau32_stepreset0_dendreset0_s0",
+    "mcn_repeat_medium_tau2_stepreset1_dendreset1_s0",
+    "mcn_repeat_medium_tau2_stepreset1_dendreset0_s0",
+    "mcn_repeat_medium_tau2_stepreset0_dendreset1_s0",
+    "mcn_repeat_medium_tau8_stepreset1_dendreset1_s0",
+    "mcn_repeat_medium_tau8_stepreset1_dendreset0_s0",
+    "mcn_repeat_medium_tau8_stepreset0_dendreset1_s0",
+    "mcn_repeat_medium_tau32_stepreset1_dendreset1_s0",
+    "mcn_repeat_medium_tau32_stepreset1_dendreset0_s0",
+    "mcn_repeat_medium_tau32_stepreset0_dendreset1_s0"
+  ],
+  "gpu": "0, 13233, 100, 169.23\n1, 13233, 100, 175.15\n2, 50343, 99, 239.86\n3, 13233, 100, 191.73\n4, 79949, 100, 637.77\n5, 79947, 100, 645.58\n6, 79949, 100, 643.86\n7, 79947, 100, 658.61\n"
+}

@@ -1,0 +1,80 @@
+Episode has 51 steps and return 0.5.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.9.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.8.
+written 0.12MB with offset 4872
+written 0.12MB with offset 4873
+written 0.12MB with offset 4874
+written 0.12MB with offset 4875
+written 0.12MB with offset 4876
+written 0.12MB with offset 4877
+written 0.12MB with offset 4878
+written 0.12MB with offset 4879
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.9.
+Episode has 51 steps and return 0.7.
+Episode has 51 steps and return 0.6.
+Episode has 51 steps and return 0.6.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.9.
+Episode has 51 steps and return 0.9.
+Episode has 51 steps and return 0.9.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.7.
+Episode has 51 steps and return 0.7.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.7.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.6.
+Episode has 51 steps and return 0.9.
+Episode has 51 steps and return 1.0.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.6.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 1.0.
+Episode has 51 steps and return 0.9.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.9.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.6.
+Episode has 51 steps and return 0.6.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.7.
+Episode has 51 steps and return 0.7.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.7.
+Episode has 51 steps and return 0.7.
+Episode has 51 steps and return 0.9.
+Episode has 51 steps and return 1.0.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.6.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.9.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.9.
+Episode has 51 steps and return 0.9.
+Episode has 51 steps and return 0.8.
+Episode has 51 steps and return 0.9.
+Episode has 51 steps and return 0.7.
+───────────────────────────────── Step 5000000 ─────────────────────────────────
+episode/length 51 / episode/score 0.71 / episode/sum_abs_reward 1 / 
+episode/reward_rate 0 / eval_return 0.79 / eval_return_std 0.1 / eval_episodes 
+20 / update_count 7.8e4
+
+Writing checkpoint: /data/Minko/fire-without-forgetting/runs/v2/r2i_recipe_reference_repeat_easy_s0/checkpoint.ckpt
+written 137.5814MB to the buffer prefix
+Wrote checkpoint: /data/Minko/fire-without-forgetting/runs/v2/r2i_recipe_reference_repeat_easy_s0/checkpoint.ckpt

@@ -1,0 +1,40 @@
+{
+  "run": "persistent_ssm_repeat_medium_s0",
+  "group": "v2",
+  "status": "excluded",
+  "scope": "bounded_stage",
+  "seed": "0",
+  "task": "popgym_RepeatPreviousMedium",
+  "code_snapshot": "persistent-ssm-v1",
+  "configured_budget": 1000000,
+  "budget_unit": "actual_actions",
+  "latest_logged_step": 119500,
+  "latest_logged_action_steps": 119500,
+  "latest_logged_updates": 3757.0,
+  "final_or_latest_evaluation": {
+    "step": 102500,
+    "eval_return": -0.4916666835546494,
+    "eval_length": 103.0,
+    "eval_episodes": 20.0
+  },
+  "evaluation_points": 5,
+  "returncode": -15,
+  "elapsed_seconds": 1557.9903936386108,
+  "ended_at": "2026-09-27T21:35:17.258964+08:00",
+  "exclusion": {
+    "reason": "All four real observations mapped to the same zero-spike encoder output under inherited T=1 feedforward LIF tau=2. This is a degenerate frontend configuration; not a valid test of the proposed memory architecture.",
+    "valid_for_method_comparison": false,
+    "diagnosis": "docs/ssm_v1_encoder_diagnosis.json",
+    "stopped_at": "2026-09-27T21:35:14.873935+08:00"
+  },
+  "final_checkpoint_metadata": null,
+  "metric_source_bytes": 336146,
+  "metric_source_records": 1288,
+  "incomplete_or_malformed_lines": 0,
+  "training_scalar_records": 118,
+  "nonfinite_training_records": [],
+  "exported_at": "2026-09-28T15:30:40.591184+08:00",
+  "source_run_directory": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_repeat_medium_s0",
+  "exported_directory": "runs/v2/persistent_ssm_repeat_medium_s0",
+  "gpu": 3
+}

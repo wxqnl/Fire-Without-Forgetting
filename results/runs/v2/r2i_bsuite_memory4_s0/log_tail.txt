@@ -1,0 +1,80 @@
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return 1.0.
+Episode has 5 steps and return -1.0.
+Episode has 5 steps and return -1.0.
+───────────────────────────────── Step 1200000 ─────────────────────────────────
+episode/length 5 / episode/score -1 / episode/sum_abs_reward 1 / 
+episode/reward_rate 0.17 / eval_return -0.1 / eval_return_std 0.99 / 
+eval_episodes 20 / update_count 1.5e4 / train_action_steps 1e6
+
+Writing checkpoint: /data/Minko/fire-without-forgetting/runs/v2/r2i_bsuite_memory4_s0/checkpoint.ckpt
+written 137.4489MB to the buffer prefix
+Wrote checkpoint: /data/Minko/fire-without-forgetting/runs/v2/r2i_bsuite_memory4_s0/checkpoint.ckpt

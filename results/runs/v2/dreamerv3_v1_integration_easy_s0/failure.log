@@ -1,0 +1,72 @@
+---  ___                           __   ______ ---
+--- |   \ _ _ ___ __ _ _ __  ___ _ \ \ / /__ / ---
+--- | |) | '_/ -_) _` | '  \/ -_) '/\ V / |_ \ ---
+--- |___/|_| \___\__,_|_|_|_\___|_|  \_/ |___/ ---
+Replica: 0 / 1
+Logdir: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_v1_integration_easy_s0
+Run script: train_eval
+Observations
+  vector           Space(float32, shape=(4,), low=0, high=1)
+  reward           Space(float32, shape=(), low=-inf, high=inf)
+  is_first         Space(bool, shape=(), low=False, high=True)
+  is_last          Space(bool, shape=(), low=False, high=True)
+  is_terminal      Space(bool, shape=(), low=False, high=True)
+Actions
+  action           Space(int32, shape=(), low=0, high=4)
+Extras
+  consec           Space(int32, shape=(), low=-2147483648, high=2147483647)
+  stepid           Space(uint8, shape=(20,), low=0, high=255)
+  dyn/deter        Space(float32, shape=(2048,), low=-inf, high=inf)
+  dyn/stoch        Space(float32, shape=(32, 16), low=-inf, high=inf)
+JAX devices (1): [cuda:0]
+Policy devices: cuda:0
+Train devices:  cuda:0
+Initializing parameters...
+Optimizer opt has 9,725,191 params:
+     5,782,528 dyn
+       853,503 val
+       788,996 dec
+       788,996 pol
+       721,407 rew
+       656,129 con
+       133,632 enc
+Done initializing!
+Compiling 1 checkpoint groups...
+Largest checkpoint group: 0 GB
+Compiling train and report...
+Train cost analysis:
+  FLOPS:            2.6e+11
+  Memory (temp):    1.8e+09
+  Memory (inputs):  1.6e+08
+  Memory (outputs): 1.4e+08
+  Memory (code):    3.1e+06
+
+Report cost analysis:
+  FLOPS:            4.1e+07
+  Memory (temp):    8.6e+06
+  Memory (inputs):  2.2e+07
+  Memory (outputs): 2.1e+04
+  Memory (code):    1.3e+05
+
+Done compiling!
+Logdir /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_v1_integration_easy_s0
+Did not find any checkpoint.
+Saving checkpoint: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_v1_integration_easy_s0/ckpt/20260928T021114F646185-000000000000
+Saved checkpoint.
+Start training loop
+
+--------------------[Agent Step 0]--------------------
+Metrics filtered by: 'score|length|fps|ratio|train/loss/|train/rand/'
+eval_episode/score -0.46 / eval_episode/length 52
+
+Writing metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_v1_integration_easy_s0/metrics.jsonl
+Writing metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_v1_integration_easy_s0/scores.jsonlIndependent evaluation: {"step": 0, "updates": 0, "eval_return": -0.4687500139698386, "eval_return_std": 0.09760589270156951, "eval_episodes": 20, "returns": [-0.5833333507180214, -0.3333333432674408, -0.416666679084301, -0.416666679084301, -0.4583333469927311, -0.5833333507180214, -0.2916666753590107, -0.3333333432674408, -0.5416666828095913, -0.416666679084301, -0.5416666828095913, -0.5000000149011612, -0.6250000186264515, -0.5000000149011612, -0.4583333469927311, -0.6250000186264515, -0.3333333432674408, -0.416666679084301, -0.5416666828095913, -0.4583333469927311], "elapsed_seconds": 6.555188179016113}
+
+Traceback (most recent call last):
+  File "/data/Minko/fire-without-forgetting/code/dreamerv3-v1/dreamerv3/main.py", line 280, in <module>
+    main()
+  File "/data/Minko/fire-without-forgetting/code/dreamerv3-v1/dreamerv3/main.py", line 78, in main
+    embodied.run.train_eval(
+  File "/data/Minko/fire-without-forgetting/code/dreamerv3-v1/embodied/run/train_eval.py", line 181, in train_eval
+    logger.add({'timer': elements.timer.stats()['summary']})
+KeyError: 'summary'

@@ -1,0 +1,80 @@
+Metrics filtered by: 'score|length|fps|ratio|train/loss/|train/rand/'
+episode/score -0.5 / episode/length 156 / train/loss/con 0.03 / train/loss/dyn 1 / train/loss/policy 1.2e-5 / train/loss/rep 1 / train/loss/repval 0.9 / train/loss/rew 0.16 / train/loss/value 0.81 / train/loss/vector 0.08 / train/rand/action 1 / replay/replay_ratio 63.86 / fps/policy 165.82 / fps/train 1.1e4
+
+Writing metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/scores.jsonlWriting metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/metrics.jsonl
+
+
+--------------------[Agent Step 4_951_584]--------------------
+Metrics filtered by: 'score|length|fps|ratio|train/loss/|train/rand/'
+episode/score -0.48 / episode/length 156 / eval_episode/score -0.57 / eval_episode/length 156
+
+Independent evaluation: {"step": 4951584, "updates": 77177, "eval_return": -0.5152174009010195, "eval_return_std": 0.08886492963771521, "eval_episodes": 20, "returns": [-0.4565217476338148, -0.5000000093132257, -0.5217391401529312, -0.5652174018323421, -0.43478261679410934, -0.43478261679410934, -0.6086956635117531, -0.4130434859544039, -0.4565217476338148, -0.3913043551146984, -0.43478261679410934, -0.4782608784735203, -0.5000000093132257, -0.5652174018323421, -0.5652174018323421, -0.5217391401529312, -0.5434782709926367, -0.5434782709926367, -0.8043478410691023, -0.5652174018323421], "elapsed_seconds": 33323.8330476284}
+Writing metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/scores.jsonl
+Writing metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/metrics.jsonl
+
+--------------------[Agent Step 4_951_600]--------------------
+Metrics filtered by: 'score|length|fps|ratio|train/loss/|train/rand/'
+train/loss/con 0.02 / train/loss/dyn 1 / train/loss/policy -6.3e-4 / train/loss/rep 1 / train/loss/repval 0.9 / train/loss/rew 0.16 / train/loss/value 0.82 / train/loss/vector 0.08 / train/rand/action 1 / replay/replay_ratio 63.94 / fps/policy 176.74 / fps/train 8298.92
+
+Writing metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/metrics.jsonl
+Writing metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/scores.jsonl
+
+--------------------[Agent Step 4_961_344]--------------------
+Metrics filtered by: 'score|length|fps|ratio|train/loss/|train/rand/'
+episode/score -0.43 / episode/length 156 / train/loss/con 0.03 / train/loss/dyn 1 / train/loss/policy 3e-4 / train/loss/rep 1 / train/loss/repval 0.89 / train/loss/rew 0.16 / train/loss/value 0.8 / train/loss/vector 0.08 / train/rand/action 1 / replay/replay_ratio 64.38 / fps/policy 161.93 / fps/train 1e4
+
+Writing metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/metrics.jsonlWriting metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/scores.jsonl
+
+
+--------------------[Agent Step 4_971_328]--------------------
+Metrics filtered by: 'score|length|fps|ratio|train/loss/|train/rand/'
+episode/score -0.52 / episode/length 156 / train/loss/con 0.03 / train/loss/dyn 1 / train/loss/policy -9.9e-4 / train/loss/rep 1 / train/loss/repval 0.9 / train/loss/rew 0.16 / train/loss/value 0.81 / train/loss/vector 0.08 / train/rand/action 1 / replay/replay_ratio 64.06 / fps/policy 166.16 / fps/train 1.1e4
+
+Writing metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/metrics.jsonlWriting metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/scores.jsonl
+
+
+--------------------[Agent Step 4_976_592]--------------------
+Metrics filtered by: 'score|length|fps|ratio|train/loss/|train/rand/'
+episode/score -0.52 / episode/length 156 / eval_episode/score -0.59 / eval_episode/length 156
+
+Independent evaluation: {"step": 4976592, "updates": 77568, "eval_return": -0.5402174013666808, "eval_return_std": 0.07694393309799498, "eval_episodes": 20, "returns": [-0.6086956635117531, -0.3913043551146984, -0.3478260934352875, -0.5869565326720476, -0.5000000093132257, -0.5434782709926367, -0.6739130560308695, -0.5652174018323421, -0.5217391401529312, -0.5217391401529312, -0.5000000093132257, -0.652173925191164, -0.5652174018323421, -0.5652174018323421, -0.5869565326720476, -0.5000000093132257, -0.5000000093132257, -0.4782608784735203, -0.6086956635117531, -0.5869565326720476], "elapsed_seconds": 33485.956183195114}
+Writing metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/scores.jsonlWriting metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/metrics.jsonl
+
+
+--------------------[Agent Step 4_979_664]--------------------
+Metrics filtered by: 'score|length|fps|ratio|train/loss/|train/rand/'
+episode/score -0.63 / episode/length 156 / train/loss/con 0.03 / train/loss/dyn 1 / train/loss/policy 5.3e-5 / train/loss/rep 1 / train/loss/repval 0.89 / train/loss/rew 0.16 / train/loss/value 0.8 / train/loss/vector 0.08 / train/rand/action 1 / replay/replay_ratio 63.94 / fps/policy 190.56 / fps/train 8857.09
+
+Writing metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/scores.jsonl
+Writing metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/metrics.jsonl
+
+--------------------[Agent Step 4_989_632]--------------------
+Metrics filtered by: 'score|length|fps|ratio|train/loss/|train/rand/'
+episode/score -0.52 / episode/length 156 / train/loss/con 0.04 / train/loss/dyn 1 / train/loss/policy 2.7e-5 / train/loss/rep 1 / train/loss/repval 0.89 / train/loss/rew 0.16 / train/loss/value 0.81 / train/loss/vector 0.08 / train/rand/action 1 / replay/replay_ratio 64.17 / fps/policy 166.02 / fps/train 1.1e4
+
+Writing metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/metrics.jsonlWriting metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/scores.jsonl
+
+
+--------------------[Agent Step 4_999_616]--------------------
+Metrics filtered by: 'score|length|fps|ratio|train/loss/|train/rand/'
+episode/score -0.54 / episode/length 156 / train/loss/con 0.03 / train/loss/dyn 1 / train/loss/policy -3.2e-4 / train/loss/rep 1 / train/loss/repval 0.89 / train/loss/rew 0.16 / train/loss/value 0.81 / train/loss/vector 0.08 / train/rand/action 1 / replay/replay_ratio 64.06 / fps/policy 166.27 / fps/train 1.1e4
+
+Writing metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/metrics.jsonl
+Writing metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/scores.jsonl
+
+--------------------[Agent Step 5_000_000]--------------------
+Metrics filtered by: 'score|length|fps|ratio|train/loss/|train/rand/'
+eval_episode/score -0.54 / eval_episode/length 156
+
+Independent evaluation: {"step": 5000000, "updates": 77934, "eval_return": -0.4847826177254319, "eval_return_std": 0.0784116918817117, "eval_episodes": 20, "returns": [-0.43478261679410934, -0.5652174018323421, -0.43478261679410934, -0.5000000093132257, -0.6739130560308695, -0.5652174018323421, -0.4565217476338148, -0.5652174018323421, -0.4565217476338148, -0.5217391401529312, -0.326086962595582, -0.5652174018323421, -0.4130434859544039, -0.4565217476338148, -0.3913043551146984, -0.4565217476338148, -0.4130434859544039, -0.43478261679410934, -0.5217391401529312, -0.5434782709926367], "elapsed_seconds": 33638.18649601936}
+Writing metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/scores.jsonl
+Writing metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/metrics.jsonl
+--------------------[Agent Step 5_000_000]--------------------
+Metrics filtered by: 'score|length|fps|ratio|train/loss/|train/rand/'
+train/loss/con 0.02 / train/loss/dyn 1 / train/loss/policy -3e-4 / train/loss/rep 1 / train/loss/repval 0.9 / train/loss/rew 0.16 / train/loss/value 0.81 / train/loss/vector 0.08 / train/rand/action 1
+
+
+Writing metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/metrics.jsonlSaving checkpoint: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/ckpt/20260928T113710F317016-000005000000
+
+Writing metrics: /data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/scores.jsonl
+Saved checkpoint.

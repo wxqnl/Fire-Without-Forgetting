@@ -1,0 +1,27 @@
+{
+  "name": "persistent_ssm_v2_repeat_medium_s0",
+  "command": [
+    "/data/Minko/fire-without-forgetting/envs/torch/bin/python",
+    "-u",
+    "/data/Minko/fire-without-forgetting/code/persistent-ssm-v2/dreamer.py",
+    "--configs",
+    "memory",
+    "persistent",
+    "--task",
+    "popgym_RepeatPreviousMedium",
+    "--seed",
+    "0",
+    "--steps",
+    "1000000",
+    "--eval_every",
+    "25000",
+    "--logdir",
+    "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_medium_s0"
+  ],
+  "allowed_gpus": [
+    3
+  ],
+  "purpose": "\u5b8c\u6574\u6301\u4e45\u6001\u8109\u51b2 SSM\uff1bT=1 \u524d\u9988\u795e\u7ecf\u5143 tau=1\uff0c\u771f\u5b9e\u89c2\u6d4b\u53ef\u533a\u5206\u4e14\u7f16\u7801\u5668\u68af\u5ea6\u975e\u96f6\u3002",
+  "seed": 0,
+  "implementation": "persistent-ssm-v2"
+}

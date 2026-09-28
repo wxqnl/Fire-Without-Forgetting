@@ -1,0 +1,23 @@
+[
+  "taskset",
+  "-c",
+  "80-95",
+  "/data/Minko/fire-without-forgetting/envs/dreamerv3/bin/python",
+  "-u",
+  "/data/Minko/fire-without-forgetting/code/dreamerv3-bsuite-v2/dreamerv3/main.py",
+  "--configs",
+  "size12m",
+  "fwf_popgym",
+  "--logdir",
+  "/data/Minko/fire-without-forgetting/runs/v2/dreamerv3_bsuite_memory4_s0",
+  "--seed",
+  "0",
+  "--run.steps",
+  "1000000",
+  "--run.log_every",
+  "60",
+  "--logger.timer",
+  "True",
+  "--task",
+  "bsuite_memory_len/3"
+]

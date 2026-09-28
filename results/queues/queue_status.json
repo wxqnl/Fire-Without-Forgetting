@@ -1,0 +1,22 @@
+{
+  "state": "completed",
+  "queue_pid": 3178658,
+  "total": 4,
+  "gpus": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "active": [],
+  "pending": [],
+  "completed": [
+    "original_tau2_seed0",
+    "persistent_tau2_seed0",
+    "no_dendrite_reset_tau2_seed0",
+    "persistent_no_dendrite_reset_tau2_seed0"
+  ],
+  "failed": [],
+  "seed_policy": "seed 0 only",
+  "updated_at": "2026-09-27T19:46:38.398756+08:00"
+}

@@ -1,0 +1,2 @@
+{"step": 32768, "eval_return": -0.5062499806284905, "eval_length": 51.0, "eval_episodes": 20.0}
+{"step": 33024, "eval_return": -0.4895833320915699, "eval_length": 51.0, "eval_episodes": 20.0}

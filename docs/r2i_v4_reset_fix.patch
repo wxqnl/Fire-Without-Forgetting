@@ -1,0 +1,33 @@
+--- reference/nets.py
++++ resetfix/nets.py
+@@ -86,6 +86,11 @@
+     # imagination teacher (== posterior) forcing
+     post_stoch = jnp.concatenate([
+       state['stoch'][:, None], post['stoch'][:, :-1]], 1)
++    # Match obs_step(): reset both recurrent state and its previous latent input.
++    initial_stoch = jnp.broadcast_to(
++        zero_state['stoch'][:, None], post_stoch.shape)
++    post_stoch = self._mask_steps(post_stoch, 1.0 - is_first)
++    post_stoch += self._mask_steps(initial_stoch, is_first)
+     if self._classes:
+       shape = post_stoch.shape[:-2] + (self._stoch * self._classes,)
+       post_stoch = post_stoch.reshape(shape)
+--- reference/ssm/common.py
++++ resetfix/ssm/common.py
+@@ -366,8 +366,15 @@
+ 
+     if dones is None:
+         _, xs = jax.lax.associative_scan(operator_without_dones, (A, B))
++    elif mode == 'init' and len(Ab.shape) == 1:
++        # Encode reset in each affine map before composition. The prepended
++        # x0 entry is a dummy step; episode flags belong to real input steps.
++        reset = dones[:, None]
++        A = A.at[1:].set(A[1:] * (1 - reset))
++        B = B.at[1:].add(reset * (Ab * init)[None])
++        _, xs = jax.lax.associative_scan(operator_without_dones, (A, B))
+     else:
+-        dones = np.insert(dones, -1, 0)
++        dones = np.insert(dones, 0, 0)
+         zeros = np.repeat(np.expand_dims(init, 0), B.shape[0], 0)
+         _, xs, zs, ds = jax.lax.associative_scan(operator_with_dones, (A, B, zeros, dones))
+ 

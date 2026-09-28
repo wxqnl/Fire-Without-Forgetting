@@ -1,0 +1,46 @@
+[
+  {
+    "job": "persistent_ssm_v2_repeat_easy_s0",
+    "checkpoint": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_easy_s0/checkpoints/20260928T010152_training_state.pt",
+    "step": 627500,
+    "updates": 19632,
+    "bytes": 127972546,
+    "optimizer_state_keys": [
+      "world_model_optimizer",
+      "actor_optimizer",
+      "value_optimizer"
+    ]
+  },
+  {
+    "job": "persistent_ssm_v2_repeat_hard_s0",
+    "checkpoint": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_hard_s0/checkpoints/20260928T010316_training_state.pt",
+    "step": 677500,
+    "updates": 21194,
+    "bytes": 127972546,
+    "optimizer_state_keys": [
+      "world_model_optimizer",
+      "actor_optimizer",
+      "value_optimizer"
+    ]
+  },
+  {
+    "job": "mcn_repeat_easy_original_s0",
+    "checkpoint": "/data/Minko/fire-without-forgetting/runs/v2/mcn_repeat_easy_original_s0/checkpoints/20260928T003519_latest_model.pt",
+    "step": null,
+    "updates": null,
+    "bytes": 42681890,
+    "optimizer_state_keys": []
+  },
+  {
+    "job": "persistent_ssm_v2_repeat_medium_s0",
+    "checkpoint": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_medium_s0/checkpoints/20260928T010531_training_state.pt",
+    "step": 752500,
+    "updates": 23538,
+    "bytes": 127972546,
+    "optimizer_state_keys": [
+      "world_model_optimizer",
+      "actor_optimizer",
+      "value_optimizer"
+    ]
+  }
+]

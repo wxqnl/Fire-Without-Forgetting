@@ -1,0 +1,106 @@
+{
+  "run": "persistent_ssm_bs30_integration_s0",
+  "result": {
+    "returncode": 0,
+    "gpu": 3,
+    "elapsed_seconds": 60.06709432601929,
+    "command": [
+      "taskset",
+      "-c",
+      "112-127",
+      "/data/Minko/fire-without-forgetting/envs/torch/bin/python",
+      "-u",
+      "/data/Minko/fire-without-forgetting/code/persistent-ssm-longseq-v3/dreamer.py",
+      "--configs",
+      "memory",
+      "persistent",
+      "longseq",
+      "--task",
+      "bsuite_memory_len/15",
+      "--seed",
+      "0",
+      "--steps",
+      "34816",
+      "--eval_every",
+      "2048",
+      "--logdir",
+      "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_bs30_integration_s0"
+    ],
+    "ended_at": "2026-09-28T14:54:56.905748+08:00"
+  },
+  "core_nonfinite": [],
+  "evaluations": [
+    {
+      "step": 32768,
+      "eval_return": -0.2,
+      "eval_length": 31.0,
+      "eval_episodes": 20.0
+    },
+    {
+      "step": 34816,
+      "eval_return": -0.1,
+      "eval_length": 31.0,
+      "eval_episodes": 20.0
+    }
+  ],
+  "checked_at": "2026-09-28T14:59:25.080744+08:00",
+  "checkpoint_keys": [
+    "agent",
+    "environment_steps",
+    "update_count",
+    "world_model_optimizer",
+    "actor_optimizer",
+    "value_optimizer",
+    "reward_ema",
+    "torch_rng",
+    "cuda_rng",
+    "numpy_rng",
+    "python_rng",
+    "resume_note"
+  ],
+  "serialized_counters": {
+    "environment_steps": 34816,
+    "update_count": 132
+  },
+  "checkpoint_nested": {
+    "agent": [
+      "_wm.encoder._mlp.layers.0.weight",
+      "_wm.encoder._mlp.layers.1.weight",
+      "_wm.encoder._mlp.layers.1.bias",
+      "_wm.encoder._mlp.layers.2.threshold",
+      "_wm.encoder._mlp.layers.2.act_fun.alpha",
+      "_wm.encoder._mlp.layers.3.weight",
+      "_wm.encoder._mlp.layers.4.weight",
+      "_wm.encoder._mlp.layers.4.bias",
+      "_wm.encoder._mlp.layers.5.threshold",
+      "_wm.encoder._mlp.layers.5.act_fun.alpha",
+      "_wm.dynamics.layers.0.log_tau",
+      "_wm.dynamics.layers.0.phase"
+    ],
+    "environment_steps": "int",
+    "update_count": "int",
+    "world_model_optimizer": [
+      "state",
+      "param_groups"
+    ],
+    "actor_optimizer": [
+      "state",
+      "param_groups"
+    ],
+    "value_optimizer": [
+      "state",
+      "param_groups"
+    ],
+    "reward_ema": "Tensor",
+    "torch_rng": "Tensor",
+    "cuda_rng": "list",
+    "numpy_rng": "tuple",
+    "python_rng": "tuple",
+    "resume_note": "str"
+  },
+  "optimizer_state_counts": {
+    "world_model_optimizer": 77,
+    "actor_optimizer": 10,
+    "value_optimizer": 10
+  }
+}

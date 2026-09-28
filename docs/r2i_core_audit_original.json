@@ -1,0 +1,67 @@
+{
+  "code": "/data/Minko/fire-without-forgetting/code/r2i-v2",
+  "source": "actual saved R2I Easy replay, fixed trained parameters and identical projected inputs",
+  "checkpoint_step": 949312,
+  "replay_files": [
+    "20260927T215003F405236-2FoQsY954lo3LekNJBmt46-7w0F3gemmm74P9gL3OL7mp-1024.npz",
+    "20260927T215003F405450-14u8Ngy5XHfD5iHvDcWgWk-0BwejBHudKWTgt34F8qhM1-1024.npz",
+    "20260927T215003F409138-6zzGnDxByNONIwaWebSr0A-0FL2DZkCjSylhSBhO65hNI-1024.npz",
+    "20260927T215003F409344-61NR5Hve4WvSPE8cengPwk-30bgMCJa9oj7m1r3cuelJm-1024.npz"
+  ],
+  "batch_shape": [
+    4,
+    128,
+    512
+  ],
+  "results": [
+    {
+      "mode": "no_interior_reset",
+      "hidden_max_error": 1.1454021660028957e-05,
+      "hidden_mean_error": 4.388371905861277e-07,
+      "output_max_error": 5.7220458984375e-06,
+      "output_mean_error": 1.0557640450770123e-07,
+      "hidden_rms": 2.3638758659362793,
+      "reset_positions": [
+        [],
+        [],
+        [],
+        []
+      ]
+    },
+    {
+      "mode": "actual_episode_resets",
+      "hidden_max_error": 15.3197021484375,
+      "hidden_mean_error": 0.17177416384220123,
+      "output_max_error": 1.177634596824646,
+      "output_mean_error": 0.014367826282978058,
+      "hidden_rms": 1.9108030796051025,
+      "reset_positions": [
+        [
+          0,
+          12,
+          64,
+          116
+        ],
+        [
+          0,
+          12,
+          64,
+          116
+        ],
+        [
+          0,
+          12,
+          64,
+          116
+        ],
+        [
+          0,
+          12,
+          64,
+          116
+        ]
+      ]
+    }
+  ],
+  "scope": "isolates SSM core numerical consistency and episode resets; does not establish the sole cause of a learning failure"
+}

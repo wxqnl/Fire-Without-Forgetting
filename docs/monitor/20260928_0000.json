@@ -1,0 +1,361 @@
+{
+  "checked_at": "2026-09-28T00:02:47.394050+08:00",
+  "queue_state": "running",
+  "runs": [
+    {
+      "job": "persistent_ssm_v2_repeat_easy_s0",
+      "gpu": 0,
+      "pid": 3594834,
+      "started_at": "2026-09-27T21:50:49.586844+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_easy_s0/train.log",
+      "process_alive": true,
+      "latest_step": 495873,
+      "metrics_age_seconds": 0.4,
+      "latest_evaluations": [
+        {
+          "step": 427500,
+          "eval_return": -0.2395833371207118,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 452500,
+          "eval_return": -0.1770833296701312,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 477500,
+          "eval_return": -0.08333333451300859,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [],
+      "checkpoints": [
+        {
+          "name": "latest_model.pt",
+          "bytes": 45835840
+        },
+        {
+          "name": "training_state.pt",
+          "bytes": 127972546
+        }
+      ]
+    },
+    {
+      "job": "persistent_ssm_v2_repeat_hard_s0",
+      "gpu": 1,
+      "pid": 3596036,
+      "started_at": "2026-09-27T21:51:52.299245+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_hard_s0/train.log",
+      "process_alive": true,
+      "latest_step": 523500,
+      "metrics_age_seconds": 0.9,
+      "latest_evaluations": [
+        {
+          "step": 452500,
+          "eval_return": -0.502173900604248,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 477500,
+          "eval_return": -0.5130434617400169,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 502500,
+          "eval_return": -0.508695638179779,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [],
+      "checkpoints": [
+        {
+          "name": "latest_model.pt",
+          "bytes": 45835840
+        },
+        {
+          "name": "training_state.pt",
+          "bytes": 127972546
+        }
+      ]
+    },
+    {
+      "job": "mcn_repeat_easy_original_s0",
+      "gpu": 2,
+      "pid": 3526697,
+      "started_at": "2026-09-27T21:01:23.195862+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/mcn_repeat_easy_original_s0/train.log",
+      "process_alive": true,
+      "latest_step": 112659,
+      "metrics_age_seconds": 2.7,
+      "latest_evaluations": [
+        {
+          "step": 52500,
+          "eval_return": -0.4895833369344473,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 77500,
+          "eval_return": -0.48541666865348815,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 102500,
+          "eval_return": -0.5000000119209289,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [],
+      "checkpoints": [
+        {
+          "name": "latest_model.pt",
+          "bytes": 42681890
+        }
+      ]
+    },
+    {
+      "job": "persistent_ssm_v2_repeat_medium_s0",
+      "gpu": 3,
+      "pid": 3583034,
+      "started_at": "2026-09-27T21:41:33.130102+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_medium_s0/train.log",
+      "process_alive": true,
+      "latest_step": 597400,
+      "metrics_age_seconds": 0.5,
+      "latest_evaluations": [
+        {
+          "step": 527500,
+          "eval_return": -0.5055555745959281,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 552500,
+          "eval_return": -0.508333346247673,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 577500,
+          "eval_return": -0.5319444552063942,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [],
+      "checkpoints": [
+        {
+          "name": "latest_model.pt",
+          "bytes": 45835840
+        },
+        {
+          "name": "training_state.pt",
+          "bytes": 127972546
+        }
+      ]
+    },
+    {
+      "job": "r2i_recipe_resetfix_repeat_easy_s0",
+      "gpu": 1,
+      "pid": 3744490,
+      "started_at": "2026-09-27T23:41:04.700523+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/r2i_recipe_resetfix_repeat_easy_s0/train.log",
+      "process_alive": true,
+      "latest_step": 900017,
+      "metrics_age_seconds": 0.3,
+      "latest_evaluations": [
+        {
+          "step": 850096,
+          "eval_return": -0.5416666828095913,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 875056,
+          "eval_return": -0.4854166811332107,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 900016,
+          "eval_return": -0.5187500154599547,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ],
+      "checkpoints": [
+        {
+          "name": "checkpoint.ckpt",
+          "bytes": 144141066
+        }
+      ]
+    },
+    {
+      "job": "r2i_recipe_reference_repeat_easy_s0",
+      "gpu": 0,
+      "pid": 3749863,
+      "started_at": "2026-09-27T23:44:15.288254+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/r2i_recipe_reference_repeat_easy_s0/train.log",
+      "process_alive": true,
+      "latest_step": 725088,
+      "metrics_age_seconds": 31.1,
+      "latest_evaluations": [
+        {
+          "step": 675064,
+          "eval_return": -0.4604166803881526,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 700024,
+          "eval_return": -0.47916668094694614,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 725088,
+          "eval_return": -0.4979166815057397,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ],
+      "checkpoints": [
+        {
+          "name": "checkpoint.ckpt",
+          "bytes": 144128271
+        }
+      ]
+    },
+    {
+      "job": "r2i_recipe_reference_repeat_medium_s0",
+      "gpu": 2,
+      "pid": 3749873,
+      "started_at": "2026-09-27T23:44:15.684915+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/r2i_recipe_reference_repeat_medium_s0/train.log",
+      "process_alive": true,
+      "latest_step": 650000,
+      "metrics_age_seconds": 25.8,
+      "latest_evaluations": [
+        {
+          "step": 600080,
+          "eval_return": -0.5263888928107917,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 625040,
+          "eval_return": -0.5013888926245272,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 650000,
+          "eval_return": -0.5166666705161334,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ],
+      "checkpoints": [
+        {
+          "name": "checkpoint.ckpt",
+          "bytes": 144127165
+        }
+      ]
+    },
+    {
+      "job": "r2i_recipe_resetfix_repeat_medium_s0",
+      "gpu": 3,
+      "pid": 3749920,
+      "started_at": "2026-09-27T23:44:16.133670+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/r2i_recipe_resetfix_repeat_medium_s0/train.log",
+      "process_alive": true,
+      "latest_step": 700024,
+      "metrics_age_seconds": 17.3,
+      "latest_evaluations": [
+        {
+          "step": 650000,
+          "eval_return": -0.5125000038184225,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 675064,
+          "eval_return": -0.4930555592291057,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 700024,
+          "eval_return": -0.49444444812834265,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [
+        "train/reward_pos_acc",
+        "train/reward_pos_loss"
+      ],
+      "checkpoints": [
+        {
+          "name": "checkpoint.ckpt",
+          "bytes": 144128053
+        }
+      ]
+    }
+  ],
+  "completed": [
+    "r2i_repeat_easy_s0_cuda",
+    "r2i_repeat_medium_s0_cuda"
+  ],
+  "failed": [
+    "r2i_repeat_easy_s0",
+    "r2i_repeat_medium_s0",
+    "persistent_ssm_repeat_medium_s0"
+  ],
+  "pending": [
+    "r2i_repeat_easy_rewardscale48_s0",
+    "persistent_ssm_repeat_easy_s0",
+    "persistent_ssm_repeat_hard_s0",
+    "mcn_repeat_medium_tau160_stepreset0_dendreset0_s0",
+    "mcn_repeat_medium_tau160_stepreset1_dendreset1_s0",
+    "mcn_repeat_medium_tau160_stepreset1_dendreset0_s0",
+    "mcn_repeat_medium_tau160_stepreset0_dendreset1_s0",
+    "mcn_repeat_medium_tau2_stepreset0_dendreset0_s0",
+    "mcn_repeat_medium_tau8_stepreset0_dendreset0_s0",
+    "mcn_repeat_medium_tau32_stepreset0_dendreset0_s0",
+    "mcn_repeat_medium_tau2_stepreset1_dendreset1_s0",
+    "mcn_repeat_medium_tau2_stepreset1_dendreset0_s0",
+    "mcn_repeat_medium_tau2_stepreset0_dendreset1_s0",
+    "mcn_repeat_medium_tau8_stepreset1_dendreset1_s0",
+    "mcn_repeat_medium_tau8_stepreset1_dendreset0_s0",
+    "mcn_repeat_medium_tau8_stepreset0_dendreset1_s0",
+    "mcn_repeat_medium_tau32_stepreset1_dendreset1_s0",
+    "mcn_repeat_medium_tau32_stepreset1_dendreset0_s0",
+    "mcn_repeat_medium_tau32_stepreset0_dendreset1_s0"
+  ],
+  "gpu": "0, 47259, 79, 272.36\n1, 47257, 78, 229.65\n2, 69657, 81, 252.95\n3, 47257, 85, 295.98\n4, 79949, 85, 683.08\n5, 79947, 100, 685.98\n6, 79949, 100, 679.72\n7, 79947, 100, 689.82\n",
+  "progress_since_last_snapshot": {
+    "persistent_ssm_v2_repeat_easy_s0": 33456,
+    "persistent_ssm_v2_repeat_hard_s0": 36955,
+    "mcn_repeat_easy_original_s0": 6732,
+    "persistent_ssm_v2_repeat_medium_s0": 38110,
+    "r2i_recipe_resetfix_repeat_easy_s0": 650001,
+    "r2i_recipe_reference_repeat_easy_s0": 614783,
+    "r2i_recipe_reference_repeat_medium_s0": 547631,
+    "r2i_recipe_resetfix_repeat_medium_s0": 590935
+  },
+  "new_diagnostics": [
+    "docs/duality_v2_medium_step577500.json",
+    "docs/ssm_v2_medium_step577500_diagnosis.json"
+  ],
+  "checkpoint_inspections": [
+    "docs/monitor/checkpoints_20260928_0000_r2i.json",
+    "docs/monitor/checkpoints_20260928_0000_torch.json"
+  ],
+  "learning_gate_passed": false,
+  "scheduling_decision": "Continue all8 approved runs at fixed budgets; no new idle GPU, no failures; E2 and reward-scale diagnostic remain disabled."
+}

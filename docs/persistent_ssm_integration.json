@@ -1,0 +1,39 @@
+{
+  "status": "passed",
+  "source": "real POPGym replay; full 512-wide 3-layer complex SSM, 32x32 WTA latent, all decoder/reward/continuation/actor/critic updates",
+  "scan_step_max_errors": {
+    "logit": 0.0,
+    "stoch": 0.0,
+    "deter": 0.0,
+    "ssm_real": 5.960464477539062e-07,
+    "ssm_imag": 4.76837158203125e-07
+  },
+  "scan_step_gradient_max_error": 3.725290298461914e-09,
+  "updates": [
+    {
+      "model_loss": 7.433298587799072,
+      "model_grad_norm": 2.1101834774017334,
+      "actor_grad_norm": 2.2533761239174055e-06,
+      "value_grad_norm": 0.32885220646858215,
+      "ssm_spike_rate": 0.15572166442871094,
+      "ssm_state_rms": 0.25906190276145935
+    },
+    {
+      "model_loss": 7.374209880828857,
+      "model_grad_norm": 2.0529024600982666,
+      "actor_grad_norm": 2.2413998976844596e-06,
+      "value_grad_norm": 0.3342604339122772,
+      "ssm_spike_rate": 0.15593528747558594,
+      "ssm_state_rms": 0.25943055748939514
+    },
+    {
+      "model_loss": 7.361077785491943,
+      "model_grad_norm": 2.1233603954315186,
+      "actor_grad_norm": 2.2599983822146896e-06,
+      "value_grad_norm": 0.34123343229293823,
+      "ssm_spike_rate": 0.1560993194580078,
+      "ssm_state_rms": 0.2603618800640106
+    }
+  ],
+  "world_model_parameters": 8020763
+}

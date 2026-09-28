@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "checked_at": "2026-09-28T15:01:45.128596+08:00",
+  "actual_action_steps_per_backend": 34816,
+  "updates": {
+    "r2i": 31,
+    "dreamerv3": 33,
+    "persistent_ssm": 132
+  },
+  "sampled_max_process_memory_mib": {
+    "r2i_bs30_integration_s0": 37730,
+    "dreamerv3_bs30_integration_s0": 3708,
+    "persistent_ssm_bs30_integration_s0": 18406
+  },
+  "sampling_note": "30-second samples, not exact allocation peaks",
+  "records": {
+    "r2i": "docs/bsuite_training_integration_r2i.json",
+    "dreamerv3": "docs/bsuite_training_integration_dreamerv3.json",
+    "torch": "docs/bsuite_training_integration_torch.json"
+  },
+  "scope": "Full-model integration only; not performance evidence. Main stage three official lengths, seed0, one million actual actions each."
+}

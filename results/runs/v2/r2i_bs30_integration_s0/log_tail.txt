@@ -1,0 +1,80 @@
+2.7e-5 / timer/dataset_min 2.7e-5 / timer/dataset_max 2.7e-5 / 
+timer/agent.train_count 1 / timer/agent.train_total 49.26 / 
+timer/agent.train_frac 0.68 / timer/agent.train_avg 49.26 / 
+timer/agent.train_min 49.26 / timer/agent.train_max 49.26 / 
+timer/agent.report_count 1 / timer/agent.report_total 7.8 / 
+timer/agent.report_frac 0.11 / timer/agent.report_avg 7.8 / 
+timer/agent.report_min 7.8 / timer/agent.report_max 7.8
+
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return 1.0.
+Episode has 31 steps and return -1.0.
+Episode has 31 steps and return -1.0.
+────────────────────────────────── Step 35944 ──────────────────────────────────
+episode/length 31 / episode/score -1 / episode/sum_abs_reward 1 / 
+episode/reward_rate 0.03 / eval_return 0 / eval_return_std 1 / eval_episodes 20 
+/ update_count 31 / train_action_steps 3.5e4
+
+Writing checkpoint: /data/Minko/fire-without-forgetting/runs/v2/r2i_bs30_integration_s0/checkpoint.ckpt
+written 137.4176MB to the buffer prefix
+Wrote checkpoint: /data/Minko/fire-without-forgetting/runs/v2/r2i_bs30_integration_s0/checkpoint.ckpt

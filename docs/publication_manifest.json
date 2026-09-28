@@ -1,0 +1,27 @@
+{
+  "prepared_at": "2026-09-28T15:41:11.824236+08:00",
+  "publication_branch": "codex",
+  "source_project": "/data/Minko/fire-without-forgetting",
+  "publication_checkout": "/data/Minko/fire-without-forgetting-publish-20260928",
+  "result_capture_started_at": "2026-09-28T15:30:38.987946+08:00",
+  "run_records": 31,
+  "evaluation_points": 1877,
+  "included": [
+    "code",
+    "sources (without .git metadata)",
+    "docs",
+    "configs",
+    "scripts",
+    "envs/*.txt",
+    "data/assets.json",
+    "results"
+  ],
+  "excluded": [
+    "virtual environments",
+    "weights and optimizer tensors",
+    "replay/trajectories",
+    "full per-episode training logs",
+    "credentials"
+  ],
+  "training_code_edited_for_publication": false
+}

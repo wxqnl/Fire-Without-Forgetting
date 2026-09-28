@@ -1,0 +1,28 @@
+{
+  "returncode": 0,
+  "elapsed_seconds": 9227.463701963425,
+  "command": [
+    "/data/Minko/fire-without-forgetting/envs/torch/bin/python",
+    "-u",
+    "/data/Minko/fire-without-forgetting/code/spiking-wm/dreamer.py",
+    "--configs",
+    "memory",
+    "--logdir",
+    "/data/Minko/fire-without-forgetting/runs/phase0_initial/no_dendrite_reset_tau2_seed0",
+    "--task",
+    "popgym_RepeatPreviousMedium",
+    "--seed",
+    "0",
+    "--reset_between_steps",
+    "True",
+    "--reset_dendrites",
+    "False",
+    "--mcn_tau",
+    "2.0",
+    "--mcn_threshold",
+    "0.5",
+    "--steps",
+    "100000"
+  ],
+  "gpu": 3
+}

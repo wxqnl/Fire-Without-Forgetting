@@ -1,0 +1,42 @@
+{
+  "status": "passed",
+  "run": "persistent_ssm_v3_longseq_integration_easy_s0",
+  "code": "persistent-ssm-longseq-v3",
+  "seed": 0,
+  "batch": [
+    4,
+    1024
+  ],
+  "train_envs": 8,
+  "eval_envs": 1,
+  "actual_action_steps": 33024,
+  "random_prefill_steps": 32768,
+  "actual_update_count": 104,
+  "optimizer_state_entries": {
+    "world_model_optimizer": 77,
+    "actor_optimizer": 10,
+    "value_optimizer": 10
+  },
+  "finite_logged_core_metrics": true,
+  "unchanged_model_and_optimizer_source": true,
+  "checkpoint_bytes": 127972546,
+  "independent_evaluations": [
+    {
+      "step": 32768,
+      "eval_return": -0.5062499806284905,
+      "eval_length": 51.0,
+      "eval_episodes": 20.0
+    },
+    {
+      "step": 33024,
+      "eval_return": -0.4895833320915699,
+      "eval_length": 51.0,
+      "eval_episodes": 20.0
+    }
+  ],
+  "sampled_process_memory_peak_mib": 18418,
+  "memory_scope": "30-second polling; MCN co-located uses 31910MiB separately; not isolated timing or energy.",
+  "source": "End-to-end real POPGym Easy trajectories, full model/world model/actor/critic updates, final actual checkpoint loaded on CPU.",
+  "scope": "Configuration integration only, not evidence of learning after 256 action steps.",
+  "validated_at": "2026-09-28T02:19:01.329581+08:00"
+}

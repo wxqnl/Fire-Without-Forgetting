@@ -1,0 +1,232 @@
+{
+  "run": "/data/Minko/fire-without-forgetting/runs/phase0_initial/original_tau2_seed0",
+  "code": "/data/Minko/fire-without-forgetting/code/spiking-wm",
+  "checkpoint": "/data/Minko/fire-without-forgetting/runs/phase0_initial/original_tau2_seed0/latest_model.pt",
+  "training_step": null,
+  "reference": "/data/Minko/fire-without-forgetting/runs/phase0_initial/original_tau2_seed0/eval_eps",
+  "inference": "sample posterior; same held-out trajectories and inference RNG seed 0 for all models",
+  "training_seed": 0,
+  "train_probe_episodes": 80,
+  "test_probe_episodes": 40,
+  "ridge": 0.1,
+  "split": "whole episodes, disjoint fit and test; standardization fit on train only",
+  "interval_scope": "conditional episode variability; not variability across model training seeds",
+  "results": [
+    {
+      "view": "readout",
+      "delay": 1,
+      "accuracy": 0.6601941585540771,
+      "episode_bootstrap_interval": [
+        0.6470873951911926,
+        0.6728216275572777
+      ],
+      "features": 3584,
+      "fit_examples": 8240,
+      "test_examples": 4120
+    },
+    {
+      "view": "readout",
+      "delay": 4,
+      "accuracy": 0.2514999806880951,
+      "episode_bootstrap_interval": [
+        0.2382437378168106,
+        0.265749990940094
+      ],
+      "features": 3584,
+      "fit_examples": 8000,
+      "test_examples": 4000
+    },
+    {
+      "view": "readout",
+      "delay": 8,
+      "accuracy": 0.2523437440395355,
+      "episode_bootstrap_interval": [
+        0.23801431246101856,
+        0.2679752543568611
+      ],
+      "features": 3584,
+      "fit_examples": 7680,
+      "test_examples": 3840
+    },
+    {
+      "view": "readout",
+      "delay": 16,
+      "accuracy": 0.2559658885002136,
+      "episode_bootstrap_interval": [
+        0.24289771914482117,
+        0.26789772510528564
+      ],
+      "features": 3584,
+      "fit_examples": 7040,
+      "test_examples": 3520
+    },
+    {
+      "view": "readout",
+      "delay": 32,
+      "accuracy": 0.26076388359069824,
+      "episode_bootstrap_interval": [
+        0.24722222983837128,
+        0.2739670343697071
+      ],
+      "features": 3584,
+      "fit_examples": 5760,
+      "test_examples": 2880
+    },
+    {
+      "view": "readout",
+      "delay": 64,
+      "accuracy": 0.24562501907348633,
+      "episode_bootstrap_interval": [
+        0.22437500953674316,
+        0.26749998331069946
+      ],
+      "features": 3584,
+      "fit_examples": 3200,
+      "test_examples": 1600
+    },
+    {
+      "view": "full_state",
+      "delay": 1,
+      "accuracy": 0.6601941585540771,
+      "episode_bootstrap_interval": [
+        0.6470873951911926,
+        0.6728216275572777
+      ],
+      "features": 3584,
+      "fit_examples": 8240,
+      "test_examples": 4120
+    },
+    {
+      "view": "full_state",
+      "delay": 4,
+      "accuracy": 0.2514999806880951,
+      "episode_bootstrap_interval": [
+        0.2382437378168106,
+        0.265749990940094
+      ],
+      "features": 3584,
+      "fit_examples": 8000,
+      "test_examples": 4000
+    },
+    {
+      "view": "full_state",
+      "delay": 8,
+      "accuracy": 0.2523437440395355,
+      "episode_bootstrap_interval": [
+        0.23801431246101856,
+        0.2679752543568611
+      ],
+      "features": 3584,
+      "fit_examples": 7680,
+      "test_examples": 3840
+    },
+    {
+      "view": "full_state",
+      "delay": 16,
+      "accuracy": 0.2559658885002136,
+      "episode_bootstrap_interval": [
+        0.24289771914482117,
+        0.26789772510528564
+      ],
+      "features": 3584,
+      "fit_examples": 7040,
+      "test_examples": 3520
+    },
+    {
+      "view": "full_state",
+      "delay": 32,
+      "accuracy": 0.26076388359069824,
+      "episode_bootstrap_interval": [
+        0.24722222983837128,
+        0.2739670343697071
+      ],
+      "features": 3584,
+      "fit_examples": 5760,
+      "test_examples": 2880
+    },
+    {
+      "view": "full_state",
+      "delay": 64,
+      "accuracy": 0.24562501907348633,
+      "episode_bootstrap_interval": [
+        0.22437500953674316,
+        0.26749998331069946
+      ],
+      "features": 3584,
+      "fit_examples": 3200,
+      "test_examples": 1600
+    },
+    {
+      "view": "current_observation",
+      "delay": 1,
+      "accuracy": 0.24975726008415222,
+      "episode_bootstrap_interval": [
+        0.23737257421016694,
+        0.2616504728794098
+      ],
+      "features": 4,
+      "fit_examples": 8240,
+      "test_examples": 4120
+    },
+    {
+      "view": "current_observation",
+      "delay": 4,
+      "accuracy": 0.2590000033378601,
+      "episode_bootstrap_interval": [
+        0.24674999713897705,
+        0.2722499966621399
+      ],
+      "features": 4,
+      "fit_examples": 8000,
+      "test_examples": 4000
+    },
+    {
+      "view": "current_observation",
+      "delay": 8,
+      "accuracy": 0.2549479305744171,
+      "episode_bootstrap_interval": [
+        0.2440038938075304,
+        0.26563151031732557
+      ],
+      "features": 4,
+      "fit_examples": 7680,
+      "test_examples": 3840
+    },
+    {
+      "view": "current_observation",
+      "delay": 16,
+      "accuracy": 0.26732951402664185,
+      "episode_bootstrap_interval": [
+        0.2556818127632141,
+        0.2809658944606781
+      ],
+      "features": 4,
+      "fit_examples": 7040,
+      "test_examples": 3520
+    },
+    {
+      "view": "current_observation",
+      "delay": 32,
+      "accuracy": 0.26701387763023376,
+      "episode_bootstrap_interval": [
+        0.25312501192092896,
+        0.28159722685813904
+      ],
+      "features": 4,
+      "fit_examples": 5760,
+      "test_examples": 2880
+    },
+    {
+      "view": "current_observation",
+      "delay": 64,
+      "accuracy": 0.2368750125169754,
+      "episode_bootstrap_interval": [
+        0.21687500178813934,
+        0.25626561865210534
+      ],
+      "features": 4,
+      "fit_examples": 3200,
+      "test_examples": 1600
+    }
+  ]
+}

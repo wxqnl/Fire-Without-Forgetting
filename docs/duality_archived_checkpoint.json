@@ -1,0 +1,33 @@
+{
+  "run": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_repeat_medium_s0",
+  "checkpoint": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_repeat_medium_s0/checkpoints/20260927T212555_training_state.pt",
+  "training_step": 77500,
+  "mode": "deterministic imagination; parallel scan conditioned on the same generated latent/action sequence",
+  "results": [
+    {
+      "horizon": 15,
+      "state_max_error": 7.152557373046875e-07,
+      "spike_mismatch_fraction": 0.0,
+      "latent_mismatch_fraction": 0.0,
+      "reward_max_error": 0.0,
+      "discounted_return_max_error": 0.0
+    },
+    {
+      "horizon": 50,
+      "state_max_error": 7.152557373046875e-07,
+      "spike_mismatch_fraction": 0.0,
+      "latent_mismatch_fraction": 0.0,
+      "reward_max_error": 0.0,
+      "discounted_return_max_error": 0.0
+    },
+    {
+      "horizon": 100,
+      "state_max_error": 8.344650268554688e-07,
+      "spike_mismatch_fraction": 0.0,
+      "latent_mismatch_fraction": 0.0,
+      "reward_max_error": 0.0,
+      "discounted_return_max_error": 0.0
+    }
+  ],
+  "interpretation": "measures finite-precision consistency of the exact recurrence; does not evaluate reward-prediction accuracy against the environment"
+}

@@ -1,0 +1,43 @@
+{
+  "run": "dreamerv3_size12m_repeat_medium_s0",
+  "group": "v2",
+  "status": "completed",
+  "scope": "bounded_stage",
+  "seed": "0",
+  "task": "popgym_RepeatPreviousMedium",
+  "code_snapshot": "dreamerv3-v1",
+  "configured_budget": 5000000,
+  "budget_unit": "driver_transitions_including_reset",
+  "latest_logged_step": 5000000,
+  "latest_logged_action_steps": null,
+  "latest_logged_updates": 77934.0,
+  "final_or_latest_evaluation": {
+    "step": 5000000,
+    "updates": 77934.0,
+    "eval_return": -0.5347222262062132,
+    "eval_return_std": 0.10681810799071109,
+    "eval_episodes": 20.0,
+    "elapsed_seconds": 32195.538246154785
+  },
+  "evaluation_points": 201,
+  "returncode": 0,
+  "elapsed_seconds": 32297.450963020325,
+  "ended_at": "2026-09-28T11:13:30.403683+08:00",
+  "exclusion": null,
+  "final_checkpoint_metadata": {
+    "step": 5000000,
+    "updates": 77934,
+    "path": "/data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_medium_s0/ckpt/20260928T111305F327917-000005000000",
+    "synchronous": true,
+    "elapsed_seconds": 32205.77137875557
+  },
+  "metric_source_bytes": 5972364,
+  "metric_source_records": 48785,
+  "incomplete_or_malformed_lines": 0,
+  "training_scalar_records": 534,
+  "nonfinite_training_records": [],
+  "exported_at": "2026-09-28T15:30:40.335912+08:00",
+  "source_run_directory": "/data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_medium_s0",
+  "exported_directory": "runs/v2/dreamerv3_size12m_repeat_medium_s0",
+  "gpu": 3
+}

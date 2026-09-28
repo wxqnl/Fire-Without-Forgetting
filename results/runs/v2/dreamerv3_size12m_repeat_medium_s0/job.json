@@ -1,0 +1,43 @@
+{
+  "name": "dreamerv3_size12m_repeat_medium_s0",
+  "gpu": 3,
+  "command": [
+    "taskset",
+    "-c",
+    "112-127",
+    "/data/Minko/fire-without-forgetting/envs/dreamerv3/bin/python",
+    "-u",
+    "/data/Minko/fire-without-forgetting/code/dreamerv3-v1/dreamerv3/main.py",
+    "--configs",
+    "size12m",
+    "fwf_popgym",
+    "--logdir",
+    "/data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_medium_s0",
+    "--seed",
+    "0",
+    "--run.steps",
+    "5000000",
+    "--run.log_every",
+    "60",
+    "--logger.timer",
+    "True",
+    "--task",
+    "popgym_RepeatPreviousMedium"
+  ],
+  "env": {
+    "PATH": "/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/cuda_nvcc/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "XLA_FLAGS": "--xla_gpu_cuda_data_dir=/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/cuda_nvcc",
+    "LD_LIBRARY_PATH": "/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/cuda_runtime/lib:/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/cuda_cupti/lib:/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/cublas/lib:/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/cusolver/lib:/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/cuda_nvcc/lib:/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/cusparse/lib:/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/cudnn/lib:/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/nvjitlink/lib:/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/cufft/lib:/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/nccl/lib",
+    "XLA_PYTHON_CLIENT_MEM_FRACTION": "0.45",
+    "XLA_PYTHON_CLIENT_PREALLOCATE": "false"
+  },
+  "enabled": true,
+  "seed": 0,
+  "code": "dreamerv3-v1",
+  "timeout_hours": 36,
+  "device_memory_budget_mib": 40000,
+  "device_headroom_mib": 6000,
+  "purpose": "E1 complete official DreamerV3 baseline, bounded 5M seed0 stage; not a matched SNN comparison.",
+  "integration_validation": "docs/dreamerv3_v1_integration.json",
+  "activation": "Validated 16384 transitions, 65 real updates, two independent 20-episode evaluations and synchronous final checkpoint; docs/dreamerv3_v1_integration.json."
+}

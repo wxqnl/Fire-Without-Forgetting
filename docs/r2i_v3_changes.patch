@@ -1,0 +1,50 @@
+diff -ru '--exclude=__pycache__' '--exclude=*.pyc' fire-without-forgetting/code/r2i-v2/recall2imagine/agent.py fire-without-forgetting/code/r2i-v3/recall2imagine/agent.py
+--- fire-without-forgetting/code/r2i-v2/recall2imagine/agent.py	2026-09-27 16:04:17.969340025 +0800
++++ fire-without-forgetting/code/r2i-v3/recall2imagine/agent.py	2026-09-27 22:10:42.314418624 +0800
+@@ -112,6 +112,7 @@
+       else:
+         value = value.astype(jnp.float32)
+       obs[key] = value
++    obs['reward'] = obs['reward'] * self.config.training_reward_scale
+     obs['cont'] = 1.0 - obs['is_terminal'].astype(jnp.float32)
+     return obs
+ 
+diff -ru '--exclude=__pycache__' '--exclude=*.pyc' fire-without-forgetting/code/r2i-v2/recall2imagine/configs.yaml fire-without-forgetting/code/r2i-v3/recall2imagine/configs.yaml
+--- fire-without-forgetting/code/r2i-v2/recall2imagine/configs.yaml	2026-09-27 16:04:17.969340025 +0800
++++ fire-without-forgetting/code/r2i-v3/recall2imagine/configs.yaml	2026-09-27 22:10:42.314418624 +0800
+@@ -1,6 +1,7 @@
+ defaults:
+ 
+   seed: 0
++  training_reward_scale: 1.0
+   method: name
+   task: dummy_disc
+   logdir: /dev/null
+diff -ru '--exclude=__pycache__' '--exclude=*.pyc' fire-without-forgetting/code/r2i-v2/recall2imagine/embodied/run/train_eval.py fire-without-forgetting/code/r2i-v3/recall2imagine/embodied/run/train_eval.py
+--- fire-without-forgetting/code/r2i-v2/recall2imagine/embodied/run/train_eval.py	2026-09-27 21:01:22.917413347 +0800
++++ fire-without-forgetting/code/r2i-v3/recall2imagine/embodied/run/train_eval.py	2026-09-27 22:15:50.926783489 +0800
+@@ -1,4 +1,6 @@
+ import re
++import json
++import time
+ 
+ import embodied
+ import numpy as np
+@@ -101,8 +103,9 @@
+       logger.write(fps=True)
+   driver_train.on_step(train_step)
+ 
+-  checkpoint = embodied.Checkpoint(logdir / 'checkpoint.ckpt')
++  checkpoint = embodied.Checkpoint(logdir / 'checkpoint.ckpt', parallel=False)
+   checkpoint.step = step
++  checkpoint.updates = updates
+   checkpoint.agent = agent
+   checkpoint.train_replay = train_replay
+   checkpoint.eval_replay = eval_replay
+@@ -127,5 +130,5 @@
+     driver_train(policy_train, steps=min(100, args.steps-int(step)))
+     if should_save(step): checkpoint.save()
+   checkpoint.save()
+-  logger.write()
++  (logdir / 'final_checkpoint.json').write(json.dumps(dict(environment_steps=int(step), update_count=int(updates), saved_at=time.time(), write_mode='synchronous')))
+   logger.write()

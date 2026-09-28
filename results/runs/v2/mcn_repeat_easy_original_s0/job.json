@@ -1,0 +1,25 @@
+{
+  "name": "mcn_repeat_easy_original_s0",
+  "command": [
+    "/data/Minko/fire-without-forgetting/envs/torch/bin/python",
+    "-u",
+    "/data/Minko/fire-without-forgetting/code/mcn-v2/dreamer.py",
+    "--configs",
+    "memory",
+    "--task",
+    "popgym_RepeatPreviousEasy",
+    "--seed",
+    "0",
+    "--steps",
+    "1000000",
+    "--eval_every",
+    "25000",
+    "--logdir",
+    "/data/Minko/fire-without-forgetting/runs/v2/mcn_repeat_easy_original_s0"
+  ],
+  "allowed_gpus": [
+    2
+  ],
+  "purpose": "MCN \u77ed\u8bb0\u5fc6\u5b66\u4e60\u5bf9\u7167\uff1b\u4fdd\u6301\u539f\u7248\u89c4\u6a21\u548c\u590d\u4f4d\u3002",
+  "seed": 0
+}

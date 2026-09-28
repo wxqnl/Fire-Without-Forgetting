@@ -1,0 +1,215 @@
+{
+  "run": "/data/Minko/fire-without-forgetting/runs/v2/r2i_repeat_medium_s0_cuda",
+  "checkpoint": "/data/Minko/fire-without-forgetting/runs/v2/r2i_repeat_medium_s0_cuda/checkpoint.ckpt",
+  "training_step": 926744,
+  "source": "Shared official POPGym Medium held-out trajectories from phase0 original eval_eps, identical to the SNN probe reference.",
+  "episodes": 120,
+  "k": 32,
+  "scored_trials": 72,
+  "reward_alignment_max_error": 0.0,
+  "reconstruction_accuracy": 0.9104166666666667,
+  "posterior_entropy_mean": 103.61481475830078,
+  "posterior_entropy_std": 0.010789848864078522,
+  "reward_sign_accuracy": 0.747800925925926,
+  "reward_balanced_sign_accuracy": 0.5,
+  "reward_mse": 0.00014568684855476022,
+  "random_policy_constant_reward_mse": 0.00014552433276548982,
+  "reward_prediction_mean": -0.007288030348718166,
+  "reward_prediction_std": 2.3880789740360342e-05,
+  "predicted_positive_fraction": 0.0,
+  "actual_positive_fraction": 0.25219907407407405,
+  "predicted_reward_on_positive": -0.0072881681844592094,
+  "predicted_reward_on_negative": -0.007287984248250723,
+  "interpretation": "held-out reconstruction and reward diagnosis of a fixed checkpoint; no training or architecture change",
+  "memory_probe": {
+    "reference": "/data/Minko/fire-without-forgetting/runs/phase0_initial/original_tau2_seed0/eval_eps",
+    "fit_episodes": 80,
+    "test_episodes": 40,
+    "ridge": 0.1,
+    "split": "whole episodes, disjoint; training-only standardization; sampled posterior; conditional episode intervals",
+    "results": [
+      {
+        "view": "policy_readout",
+        "delay": 1,
+        "accuracy": 0.27766990291262134,
+        "episode_bootstrap_interval": [
+          0.26529126213592236,
+          0.2890776699029126
+        ],
+        "features": 1792
+      },
+      {
+        "view": "policy_readout",
+        "delay": 4,
+        "accuracy": 0.2725,
+        "episode_bootstrap_interval": [
+          0.25749375,
+          0.2875
+        ],
+        "features": 1792
+      },
+      {
+        "view": "policy_readout",
+        "delay": 8,
+        "accuracy": 0.265625,
+        "episode_bootstrap_interval": [
+          0.2544270833333333,
+          0.2786458333333333
+        ],
+        "features": 1792
+      },
+      {
+        "view": "policy_readout",
+        "delay": 16,
+        "accuracy": 0.25795454545454544,
+        "episode_bootstrap_interval": [
+          0.24261363636363636,
+          0.2747159090909091
+        ],
+        "features": 1792
+      },
+      {
+        "view": "policy_readout",
+        "delay": 32,
+        "accuracy": 0.2541666666666667,
+        "episode_bootstrap_interval": [
+          0.2416666666666667,
+          0.26771701388888886
+        ],
+        "features": 1792
+      },
+      {
+        "view": "policy_readout",
+        "delay": 64,
+        "accuracy": 0.26437499999999997,
+        "episode_bootstrap_interval": [
+          0.24312500000000004,
+          0.28626562499999997
+        ],
+        "features": 1792
+      },
+      {
+        "view": "world_model_readout",
+        "delay": 1,
+        "accuracy": 0.47621359223300963,
+        "episode_bootstrap_interval": [
+          0.4635922330097088,
+          0.4893203883495145
+        ],
+        "features": 2048
+      },
+      {
+        "view": "world_model_readout",
+        "delay": 4,
+        "accuracy": 0.257,
+        "episode_bootstrap_interval": [
+          0.24074374999999998,
+          0.27199999999999996
+        ],
+        "features": 2048
+      },
+      {
+        "view": "world_model_readout",
+        "delay": 8,
+        "accuracy": 0.2427083333333333,
+        "episode_bootstrap_interval": [
+          0.22890625,
+          0.25651692708333335
+        ],
+        "features": 2048
+      },
+      {
+        "view": "world_model_readout",
+        "delay": 16,
+        "accuracy": 0.24119318181818183,
+        "episode_bootstrap_interval": [
+          0.22585227272727276,
+          0.2556818181818182
+        ],
+        "features": 2048
+      },
+      {
+        "view": "world_model_readout",
+        "delay": 32,
+        "accuracy": 0.24861111111111112,
+        "episode_bootstrap_interval": [
+          0.23229166666666665,
+          0.2652864583333333
+        ],
+        "features": 2048
+      },
+      {
+        "view": "world_model_readout",
+        "delay": 64,
+        "accuracy": 0.254375,
+        "episode_bootstrap_interval": [
+          0.23375000000000004,
+          0.27437500000000004
+        ],
+        "features": 2048
+      },
+      {
+        "view": "current_observation",
+        "delay": 1,
+        "accuracy": 0.24975728155339808,
+        "episode_bootstrap_interval": [
+          0.237372572815534,
+          0.2616504854368932
+        ],
+        "features": 4
+      },
+      {
+        "view": "current_observation",
+        "delay": 4,
+        "accuracy": 0.259,
+        "episode_bootstrap_interval": [
+          0.24675000000000002,
+          0.27225
+        ],
+        "features": 4
+      },
+      {
+        "view": "current_observation",
+        "delay": 8,
+        "accuracy": 0.25494791666666666,
+        "episode_bootstrap_interval": [
+          0.24400390624999999,
+          0.26563151041666666
+        ],
+        "features": 4
+      },
+      {
+        "view": "current_observation",
+        "delay": 16,
+        "accuracy": 0.26732954545454546,
+        "episode_bootstrap_interval": [
+          0.2556818181818182,
+          0.28096590909090907
+        ],
+        "features": 4
+      },
+      {
+        "view": "current_observation",
+        "delay": 32,
+        "accuracy": 0.26701388888888883,
+        "episode_bootstrap_interval": [
+          0.253125,
+          0.2815972222222222
+        ],
+        "features": 4
+      },
+      {
+        "view": "current_observation",
+        "delay": 64,
+        "accuracy": 0.236875,
+        "episode_bootstrap_interval": [
+          0.216875,
+          0.25626562499999994
+        ],
+        "features": 4
+      }
+    ]
+  },
+  "training_run_final_evaluation_step": 1000000,
+  "checkpoint_note": "Final evaluation reached 1M; final asynchronous checkpoint did not finish. Diagnose the actual saved step only."
+}

@@ -1,0 +1,22 @@
+{
+  "status": "passed",
+  "source": "actual saved original R2I training replay chunks, not newly generated evaluation trajectories",
+  "action_convention": "stored outgoing action[t-1] produced reward[t]; RSSM receives incoming action after official WM shift",
+  "results": [
+    {
+      "task": "easy",
+      "files": 32,
+      "complete_episodes": 600,
+      "checked_transitions": 31200,
+      "reward_alignment_max_error": 0.0
+    },
+    {
+      "task": "medium",
+      "files": 32,
+      "complete_episodes": 288,
+      "checked_transitions": 29952,
+      "reward_alignment_max_error": 0.0
+    }
+  ],
+  "scope": "checks stored training data alignment; not proof of replay sampler or learned performance"
+}

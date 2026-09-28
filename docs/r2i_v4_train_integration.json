@@ -1,0 +1,18 @@
+{
+  "status": "passed",
+  "run": "r2i_recipe_resetfix_repeat_easy_s0",
+  "step": 72865,
+  "latest_logged_update_count": 660.0,
+  "metrics": {
+    "train/actor_opt_grad_norm": 0.006620096091806303,
+    "train/cont_loss_mean": 0.029503597156895746,
+    "train/dyn_loss_mean": 1.137299660713442,
+    "train/extr_critic_critic_opt_grad_norm": 11.6648516385786,
+    "train/model_loss_mean": 1.8597831495346562,
+    "train/model_opt_grad_norm": 3.2708993323387636,
+    "train/observation_loss_mean": 0.23817297119286754,
+    "train/rep_loss_mean": 1.137299660713442,
+    "train/reward_loss_mean": 0.909726801418489
+  },
+  "scope": "full official entry and FIFO_LFS path; not a learned-policy result"
+}

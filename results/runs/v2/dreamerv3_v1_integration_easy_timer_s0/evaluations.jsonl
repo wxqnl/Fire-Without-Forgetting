@@ -1,0 +1,2 @@
+{"step": 0, "updates": 0.0, "eval_return": -0.4687500139698386, "eval_return_std": 0.09760589270156951, "eval_episodes": 20.0, "elapsed_seconds": 6.809250593185425}
+{"step": 16384, "updates": 65.0, "eval_return": -0.4979166815057397, "eval_return_std": 0.09724950303979268, "eval_episodes": 20.0, "elapsed_seconds": 51.36673593521118}

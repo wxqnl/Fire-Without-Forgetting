@@ -1,0 +1,102 @@
+[
+  {
+    "job": "persistent_ssm_v2_repeat_easy_s0",
+    "checkpoint": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_easy_s0/checkpoints/20260927T235421_training_state.pt",
+    "step": 477500,
+    "bytes": 127972546,
+    "has_optimizer": true,
+    "top_level_keys": [
+      "agent",
+      "environment_steps",
+      "update_count",
+      "world_model_optimizer",
+      "actor_optimizer",
+      "value_optimizer",
+      "reward_ema",
+      "torch_rng",
+      "cuda_rng",
+      "numpy_rng",
+      "python_rng",
+      "resume_note"
+    ],
+    "optimizer_state_keys": [
+      "world_model_optimizer",
+      "actor_optimizer",
+      "value_optimizer"
+    ]
+  },
+  {
+    "job": "persistent_ssm_v2_repeat_hard_s0",
+    "checkpoint": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_hard_s0/checkpoints/20260927T235412_training_state.pt",
+    "step": 502500,
+    "bytes": 127972546,
+    "has_optimizer": true,
+    "top_level_keys": [
+      "agent",
+      "environment_steps",
+      "update_count",
+      "world_model_optimizer",
+      "actor_optimizer",
+      "value_optimizer",
+      "reward_ema",
+      "torch_rng",
+      "cuda_rng",
+      "numpy_rng",
+      "python_rng",
+      "resume_note"
+    ],
+    "optimizer_state_keys": [
+      "world_model_optimizer",
+      "actor_optimizer",
+      "value_optimizer"
+    ]
+  },
+  {
+    "job": "mcn_repeat_easy_original_s0",
+    "checkpoint": "/data/Minko/fire-without-forgetting/runs/v2/mcn_repeat_easy_original_s0/checkpoints/20260927T234141_latest_model.pt",
+    "step": null,
+    "bytes": 42681890,
+    "has_optimizer": false,
+    "top_level_keys": [
+      "_wm.encoder._mlp.layers.0.weight",
+      "_wm.encoder._mlp.layers.1.weight",
+      "_wm.encoder._mlp.layers.1.bias",
+      "_wm.encoder._mlp.layers.2.threshold",
+      "_wm.encoder._mlp.layers.2.act_fun.alpha",
+      "_wm.encoder._mlp.layers.3.weight",
+      "_wm.encoder._mlp.layers.4.weight",
+      "_wm.encoder._mlp.layers.4.bias",
+      "_wm.encoder._mlp.layers.5.threshold",
+      "_wm.encoder._mlp.layers.5.act_fun.alpha",
+      "_wm.dynamics.W",
+      "_wm.dynamics._inp_layers.0.weight"
+    ],
+    "optimizer_state_keys": []
+  },
+  {
+    "job": "persistent_ssm_v2_repeat_medium_s0",
+    "checkpoint": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_medium_s0/checkpoints/20260927T235454_training_state.pt",
+    "step": 577500,
+    "bytes": 127972546,
+    "has_optimizer": true,
+    "top_level_keys": [
+      "agent",
+      "environment_steps",
+      "update_count",
+      "world_model_optimizer",
+      "actor_optimizer",
+      "value_optimizer",
+      "reward_ema",
+      "torch_rng",
+      "cuda_rng",
+      "numpy_rng",
+      "python_rng",
+      "resume_note"
+    ],
+    "optimizer_state_keys": [
+      "world_model_optimizer",
+      "actor_optimizer",
+      "value_optimizer"
+    ]
+  }
+]

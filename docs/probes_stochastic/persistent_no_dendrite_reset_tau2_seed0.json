@@ -1,0 +1,232 @@
+{
+  "run": "/data/Minko/fire-without-forgetting/runs/phase0_initial/persistent_no_dendrite_reset_tau2_seed0",
+  "code": "/data/Minko/fire-without-forgetting/code/spiking-wm",
+  "checkpoint": "/data/Minko/fire-without-forgetting/runs/phase0_initial/persistent_no_dendrite_reset_tau2_seed0/latest_model.pt",
+  "training_step": null,
+  "reference": "/data/Minko/fire-without-forgetting/runs/phase0_initial/original_tau2_seed0/eval_eps",
+  "inference": "sample posterior; same held-out trajectories and inference RNG seed 0 for all models",
+  "training_seed": 0,
+  "train_probe_episodes": 80,
+  "test_probe_episodes": 40,
+  "ridge": 0.1,
+  "split": "whole episodes, disjoint fit and test; standardization fit on train only",
+  "interval_scope": "conditional episode variability; not variability across model training seeds",
+  "results": [
+    {
+      "view": "readout",
+      "delay": 1,
+      "accuracy": 0.6529126167297363,
+      "episode_bootstrap_interval": [
+        0.6385922431945801,
+        0.6665048599243164
+      ],
+      "features": 3584,
+      "fit_examples": 8240,
+      "test_examples": 4120
+    },
+    {
+      "view": "readout",
+      "delay": 4,
+      "accuracy": 0.2512499988079071,
+      "episode_bootstrap_interval": [
+        0.23849999904632568,
+        0.2655062586069107
+      ],
+      "features": 3584,
+      "fit_examples": 8000,
+      "test_examples": 4000
+    },
+    {
+      "view": "readout",
+      "delay": 8,
+      "accuracy": 0.2434895783662796,
+      "episode_bootstrap_interval": [
+        0.22889973409473896,
+        0.25807942301034925
+      ],
+      "features": 3584,
+      "fit_examples": 7680,
+      "test_examples": 3840
+    },
+    {
+      "view": "readout",
+      "delay": 16,
+      "accuracy": 0.24744316935539246,
+      "episode_bootstrap_interval": [
+        0.23238637968897818,
+        0.26137075647711755
+      ],
+      "features": 3584,
+      "fit_examples": 7040,
+      "test_examples": 3520
+    },
+    {
+      "view": "readout",
+      "delay": 32,
+      "accuracy": 0.2541666626930237,
+      "episode_bootstrap_interval": [
+        0.24097223579883575,
+        0.269097238779068
+      ],
+      "features": 3584,
+      "fit_examples": 5760,
+      "test_examples": 2880
+    },
+    {
+      "view": "readout",
+      "delay": 64,
+      "accuracy": 0.22874999046325684,
+      "episode_bootstrap_interval": [
+        0.20937499403953552,
+        0.24875000156462193
+      ],
+      "features": 3584,
+      "fit_examples": 3200,
+      "test_examples": 1600
+    },
+    {
+      "view": "full_state",
+      "delay": 1,
+      "accuracy": 0.7492718696594238,
+      "episode_bootstrap_interval": [
+        0.7364016890525817,
+        0.7628701224923133
+      ],
+      "features": 5120,
+      "fit_examples": 8240,
+      "test_examples": 4120
+    },
+    {
+      "view": "full_state",
+      "delay": 4,
+      "accuracy": 0.2592499852180481,
+      "episode_bootstrap_interval": [
+        0.24524998664855957,
+        0.27100624814629554
+      ],
+      "features": 5120,
+      "fit_examples": 8000,
+      "test_examples": 4000
+    },
+    {
+      "view": "full_state",
+      "delay": 8,
+      "accuracy": 0.24765625596046448,
+      "episode_bootstrap_interval": [
+        0.2335872370749712,
+        0.26172526031732557
+      ],
+      "features": 5120,
+      "fit_examples": 7680,
+      "test_examples": 3840
+    },
+    {
+      "view": "full_state",
+      "delay": 16,
+      "accuracy": 0.24630682170391083,
+      "episode_bootstrap_interval": [
+        0.23237924873828888,
+        0.2613636553287506
+      ],
+      "features": 5120,
+      "fit_examples": 7040,
+      "test_examples": 3520
+    },
+    {
+      "view": "full_state",
+      "delay": 32,
+      "accuracy": 0.2576388716697693,
+      "episode_bootstrap_interval": [
+        0.24375000596046448,
+        0.271883674710989
+      ],
+      "features": 5120,
+      "fit_examples": 5760,
+      "test_examples": 2880
+    },
+    {
+      "view": "full_state",
+      "delay": 64,
+      "accuracy": 0.22875002026557922,
+      "episode_bootstrap_interval": [
+        0.20999999344348907,
+        0.25062498450279236
+      ],
+      "features": 5120,
+      "fit_examples": 3200,
+      "test_examples": 1600
+    },
+    {
+      "view": "current_observation",
+      "delay": 1,
+      "accuracy": 0.24975726008415222,
+      "episode_bootstrap_interval": [
+        0.23737257421016694,
+        0.2616504728794098
+      ],
+      "features": 4,
+      "fit_examples": 8240,
+      "test_examples": 4120
+    },
+    {
+      "view": "current_observation",
+      "delay": 4,
+      "accuracy": 0.2590000033378601,
+      "episode_bootstrap_interval": [
+        0.24674999713897705,
+        0.2722499966621399
+      ],
+      "features": 4,
+      "fit_examples": 8000,
+      "test_examples": 4000
+    },
+    {
+      "view": "current_observation",
+      "delay": 8,
+      "accuracy": 0.2549479305744171,
+      "episode_bootstrap_interval": [
+        0.2440038938075304,
+        0.26563151031732557
+      ],
+      "features": 4,
+      "fit_examples": 7680,
+      "test_examples": 3840
+    },
+    {
+      "view": "current_observation",
+      "delay": 16,
+      "accuracy": 0.26732951402664185,
+      "episode_bootstrap_interval": [
+        0.2556818127632141,
+        0.2809658944606781
+      ],
+      "features": 4,
+      "fit_examples": 7040,
+      "test_examples": 3520
+    },
+    {
+      "view": "current_observation",
+      "delay": 32,
+      "accuracy": 0.26701387763023376,
+      "episode_bootstrap_interval": [
+        0.25312501192092896,
+        0.28159722685813904
+      ],
+      "features": 4,
+      "fit_examples": 5760,
+      "test_examples": 2880
+    },
+    {
+      "view": "current_observation",
+      "delay": 64,
+      "accuracy": 0.2368750125169754,
+      "episode_bootstrap_interval": [
+        0.21687500178813934,
+        0.25626561865210534
+      ],
+      "features": 4,
+      "fit_examples": 3200,
+      "test_examples": 1600
+    }
+  ]
+}

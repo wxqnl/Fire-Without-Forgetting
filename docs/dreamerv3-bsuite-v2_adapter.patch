@@ -1,0 +1,203 @@
+--- dreamerv3-v1/dreamerv3/main.py
++++ dreamerv3-bsuite-v2/dreamerv3/main.py
+@@ -211,6 +211,10 @@
+ 
+ def make_env(config, index, evaluation=False, **overrides):
+   suite, task = config.task.split('_', 1)
++  if suite == 'bsuite':
++    from embodied.envs.bsuite import BSuite
++    seed = config.seed + index + (1000000 if evaluation else 0)
++    return wrap_env(BSuite(task, seed=seed), config)
+   if suite == 'popgym':
+     from embodied.envs.popgym import POPGym
+     seed = config.seed + index + (1000000 if evaluation else 0)
+--- dreamerv3-v1/dreamerv3/configs.yaml
++++ dreamerv3-bsuite-v2/dreamerv3/configs.yaml
+@@ -46,6 +46,7 @@
+     chunksize: 1024
+ 
+   run:
++    train_fill: 32768
+     steps: 1e10
+     duration: 0
+     train_ratio: 32.0
+--- dreamerv3-v1/embodied/envs/bsuite.py
++++ dreamerv3-bsuite-v2/embodied/envs/bsuite.py
+@@ -1,51 +1,40 @@
+-import time
+-
++"""Official BSuite experiment loader with seed-separated, unscaled observations."""
++import importlib
++import functools
++import elements
+ import embodied
+ import numpy as np
+-
++from bsuite import sweep
+ 
+ class BSuite(embodied.Env):
++  def __init__(self, task, seed=0):
++    experiment, _ = task.rsplit('/', 1)
++    module = importlib.import_module(f'bsuite.experiments.{experiment}.{experiment}')
++    settings = dict(sweep.SETTINGS[task])
++    settings['seed'] = seed
++    self._env = module.load(**settings)
++    self._done = True
+ 
+-  def __init__(self, task):
+-    print(
+-        'Warning: BSuite result logging is stateful and therefore training ' +
+-        'runs cannot be interrupted or restarted.')
+-    np.int = int  # Patch deprecated Numpy alias used inside BSuite.
+-    from . import from_dm
+-    if '/' not in task:
+-      task = f'{task}/0'
+-    import bsuite
+-    env = bsuite.from_checkpoint_id(task)
+-    self.num_episodes = 0
+-    self.max_episodes = env.bsuite_num_episodes
+-    self.exit_after = None
+-    env = from_dm.FromDM(env)
+-    env = embodied.wrappers.ForceDtypes(env)
+-    env = embodied.wrappers.FlattenTwoDimObs(env)
+-    self.env = env
++  @functools.cached_property
++  def obs_space(self):
++    size = int(np.prod(self._env.observation_spec().shape))
++    return dict(vector=elements.Space(np.float32, (size,)),
++                reward=elements.Space(np.float32),
++                is_first=elements.Space(bool), is_last=elements.Space(bool),
++                is_terminal=elements.Space(bool))
+ 
+-  @property
+-  def obs_space(self):
+-    return self.env.obs_space
+-
+-  @property
++  @functools.cached_property
+   def act_space(self):
+-    return self.env.act_space
++    return dict(action=elements.Space(np.int32, (), 0, self._env.action_spec().num_values),
++                reset=elements.Space(bool))
+ 
+   def step(self, action):
+-    obs = self.env.step(action)
+-    if obs['is_last']:
+-      self.num_episodes += 1
+-    if self.num_episodes >= self.max_episodes:
+-      # After reaching the target number of episodes, continue running for 10
+-      # minutes to make sure logs are flushed and then raise an exception to
+-      # terminate the program.
+-      if not self.exit_after:
+-        self.exit_after = time.time() + 600
+-      if time.time() > self.exit_after:
+-        if self.xm:
+-          wu = self.xm.get_current_work_unit()
+-          wu.stop(mark_as_completed=True, message='BSuite run complete')
+-        else:
+-          raise RuntimeError('BSuite run complete')
+-    return obs
++    ts = self._env.reset() if action['reset'] or self._done else self._env.step(int(action['action']))
++    self._done = ts.last()
++    return dict(vector=np.asarray(ts.observation, np.float32).reshape(-1),
++                reward=np.float32(0 if ts.first() else ts.reward),
++                is_first=np.bool_(ts.first()), is_last=np.bool_(ts.last()),
++                is_terminal=np.bool_(not ts.first() and ts.discount == 0))
++
++  def close(self):
++    pass
+--- dreamerv3-v1/embodied/run/train_eval.py
++++ dreamerv3-bsuite-v2/embodied/run/train_eval.py
+@@ -28,6 +28,7 @@
+   logdir.mkdir()
+   print('Logdir', logdir)
+   step = logger.step
++  action_steps = elements.Counter()
+   usage = elements.Usage(**args.usage)
+   agg = elements.Agg()
+   train_episodes = collections.defaultdict(elements.Agg)
+@@ -79,6 +80,7 @@
+   fns = [bind(make_env_train, i) for i in range(args.envs)]
+   driver_train = embodied.Driver(fns, parallel=(not args.debug))
+   driver_train.on_step(lambda tran, _: step.increment())
++  driver_train.on_step(lambda tran, _: action_steps.increment() if not tran['is_first'] else None)
+   driver_train.on_step(lambda tran, _: policy_fps.step())
+   driver_train.on_step(replay_train.add)
+   driver_train.on_step(bind(logfn, mode='train'))
+@@ -98,9 +100,9 @@
+   carry_eval = agent.init_report(args.batch_size)
+ 
+   def trainfn(tran, worker):
+-    if len(replay_train) < args.batch_size * args.batch_length:
++    if action_steps < args.train_fill or len(replay_train) < args.batch_size * args.batch_length:
+       return
+-    for _ in range(should_train(step)):
++    for _ in range(should_train(action_steps)):
+       with elements.timer.section('stream_next'):
+         batch = next(stream_train)
+       carry_train[0], outs, mets = agent.train(carry_train[0], batch)
+@@ -123,6 +125,7 @@
+ 
+   cp = elements.Checkpoint(logdir / 'ckpt', keep=None, step=step)
+   cp.step = step
++  cp.action_steps = action_steps
+   cp.agent = agent
+   cp.replay_train = replay_train
+   cp.replay_eval = replay_eval
+@@ -143,7 +146,7 @@
+     driver_eval.reset(agent.init_policy)
+     driver_eval(eval_policy, episodes=args.eval_eps)
+     assert len(eval_returns) == args.eval_eps, len(eval_returns)
+-    record = dict(step=int(step), updates=int(agent.n_updates),
++    record = dict(step=int(step), train_action_steps=int(action_steps), updates=int(agent.n_updates),
+                   eval_return=float(np.mean(eval_returns)),
+                   eval_return_std=float(np.std(eval_returns)),
+                   eval_episodes=len(eval_returns), returns=eval_returns.copy(),
+@@ -155,10 +158,10 @@
+     logger.write()
+     print('Independent evaluation:', json.dumps(record), flush=True)
+ 
+-  while step < args.steps:
+-    if int(step) - last_eval >= args.eval_every:
++  while action_steps < args.steps:
++    if int(action_steps) - last_eval >= args.eval_every:
+       evaluate()
+-      last_eval = int(step)
++      last_eval = int(action_steps)
+ 
+     if should_report(step):
+       if len(replay_train):
+@@ -168,11 +171,11 @@
+         carry_eval, mets = reportfn(carry_eval, stream_eval)
+         logger.add(mets, prefix='eval')
+ 
+-    driver_train(train_policy, steps=10)
++    driver_train(train_policy, steps=min(10, args.steps-int(action_steps)))
+ 
+     if should_log(step):
+       logger.add(agg.result())
+-      logger.add({'updates': int(agent.n_updates)})
++      logger.add({'updates': int(agent.n_updates), 'train_action_steps': int(action_steps)})
+       logger.add(train_epstats.result(), prefix='epstats')
+       logger.add(replay_train.stats(), prefix='replay')
+       logger.add(usage.stats(), prefix='usage')
+@@ -184,16 +187,16 @@
+     if should_save(step):
+       cp.save()
+ 
+-  if int(step) != last_eval:
++  if int(action_steps) != last_eval:
+     evaluate()
+   logger.add(agg.result())
+-  logger.add({'updates': int(agent.n_updates)})
++  logger.add({'updates': int(agent.n_updates), 'train_action_steps': int(action_steps)})
+   logger.write()
+   cp.save()
+   latest = pathlib.Path(str(cp.latest()))
+   assert (latest / 'done').exists(), latest
+   (pathlib.Path(args.logdir) / 'final_checkpoint.json').write_text(json.dumps(
+-      dict(step=int(step), updates=int(agent.n_updates), path=str(latest),
++      dict(step=int(step), action_steps=int(action_steps), updates=int(agent.n_updates), path=str(latest),
+            synchronous=True, elapsed_seconds=time.time()-started_at), indent=2))
+   driver_train.close()
+   driver_eval.close()

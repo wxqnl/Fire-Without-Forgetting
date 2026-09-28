@@ -1,0 +1,48 @@
+{
+  "state": "running",
+  "queue_pid": 3526692,
+  "active": [
+    {
+      "job": "mcn_repeat_easy_original_s0",
+      "gpu": 2,
+      "pid": 3526697,
+      "started_at": "2026-09-27T21:01:23.195862+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/mcn_repeat_easy_original_s0/train.log"
+    }
+  ],
+  "completed": [
+    "persistent_ssm_v2_repeat_medium_s0",
+    "persistent_ssm_v2_repeat_easy_s0",
+    "persistent_ssm_v2_repeat_hard_s0",
+    "r2i_repeat_easy_s0_cuda",
+    "r2i_repeat_medium_s0_cuda"
+  ],
+  "failed": [
+    "r2i_repeat_easy_s0",
+    "r2i_repeat_medium_s0",
+    "persistent_ssm_repeat_medium_s0"
+  ],
+  "pending": [
+    "r2i_repeat_easy_rewardscale48_s0",
+    "persistent_ssm_repeat_easy_s0",
+    "persistent_ssm_repeat_hard_s0",
+    "mcn_repeat_medium_tau160_stepreset0_dendreset0_s0",
+    "mcn_repeat_medium_tau160_stepreset1_dendreset1_s0",
+    "mcn_repeat_medium_tau160_stepreset1_dendreset0_s0",
+    "mcn_repeat_medium_tau160_stepreset0_dendreset1_s0",
+    "mcn_repeat_medium_tau2_stepreset0_dendreset0_s0",
+    "mcn_repeat_medium_tau8_stepreset0_dendreset0_s0",
+    "mcn_repeat_medium_tau32_stepreset0_dendreset0_s0",
+    "mcn_repeat_medium_tau2_stepreset1_dendreset1_s0",
+    "mcn_repeat_medium_tau2_stepreset1_dendreset0_s0",
+    "mcn_repeat_medium_tau2_stepreset0_dendreset1_s0",
+    "mcn_repeat_medium_tau8_stepreset1_dendreset1_s0",
+    "mcn_repeat_medium_tau8_stepreset1_dendreset0_s0",
+    "mcn_repeat_medium_tau8_stepreset0_dendreset1_s0",
+    "mcn_repeat_medium_tau32_stepreset1_dendreset1_s0",
+    "mcn_repeat_medium_tau32_stepreset1_dendreset0_s0",
+    "mcn_repeat_medium_tau32_stepreset0_dendreset1_s0"
+  ],
+  "seed_policy": "seed 0 only",
+  "updated_at": "2026-09-28T15:30:36.384264+08:00"
+}

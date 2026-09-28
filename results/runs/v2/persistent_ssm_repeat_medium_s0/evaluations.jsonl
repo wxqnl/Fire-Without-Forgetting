@@ -1,0 +1,5 @@
+{"step": 2500, "eval_return": -0.5125000268220902, "eval_length": 103.0, "eval_episodes": 20.0}
+{"step": 27500, "eval_return": -0.48194445967674254, "eval_length": 103.0, "eval_episodes": 20.0}
+{"step": 52500, "eval_return": -0.4902778029441833, "eval_length": 103.0, "eval_episodes": 20.0}
+{"step": 77500, "eval_return": -0.4972222469747066, "eval_length": 103.0, "eval_episodes": 20.0}
+{"step": 102500, "eval_return": -0.4916666835546494, "eval_length": 103.0, "eval_episodes": 20.0}

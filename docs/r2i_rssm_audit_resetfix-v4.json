@@ -1,0 +1,50 @@
+{
+  "code": "/data/Minko/fire-without-forgetting/code/r2i-resetfix-v4",
+  "checkpoint_step": 949312,
+  "batch": [
+    4,
+    128
+  ],
+  "source": "saved real Easy replay; coupled posterior samples; complete RSSM parallel path vs recurrent img_step with obs_step reset semantics",
+  "reset_positions": [
+    [
+      0,
+      12,
+      64,
+      116
+    ],
+    [
+      0,
+      12,
+      64,
+      116
+    ],
+    [
+      0,
+      12,
+      64,
+      116
+    ],
+    [
+      0,
+      12,
+      64,
+      116
+    ]
+  ],
+  "errors": {
+    "hidden": {
+      "max": 7.864199687901419e-06,
+      "mean": 2.1951966289179836e-07
+    },
+    "deter": {
+      "max": 7.152557373046875e-06,
+      "mean": 1.5563946931251849e-07
+    },
+    "logit": {
+      "max": 3.337860107421875e-06,
+      "mean": 1.683231403148966e-07
+    }
+  },
+  "scope": "numerical consistency, not a learning result"
+}

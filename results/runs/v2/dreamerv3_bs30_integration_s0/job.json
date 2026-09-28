@@ -1,0 +1,42 @@
+{
+  "name": "dreamerv3_bs30_integration_s0",
+  "gpu": 1,
+  "command": [
+    "taskset",
+    "-c",
+    "80-95",
+    "/data/Minko/fire-without-forgetting/envs/dreamerv3/bin/python",
+    "-u",
+    "/data/Minko/fire-without-forgetting/code/dreamerv3-bsuite-v2/dreamerv3/main.py",
+    "--configs",
+    "size12m",
+    "fwf_popgym",
+    "--logdir",
+    "/data/Minko/fire-without-forgetting/runs/v2/dreamerv3_bs30_integration_s0",
+    "--seed",
+    "0",
+    "--run.steps",
+    "34816",
+    "--run.log_every",
+    "15",
+    "--logger.timer",
+    "True",
+    "--task",
+    "bsuite_memory_len/15"
+  ],
+  "env": {
+    "PATH": "/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/cuda_nvcc/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "XLA_FLAGS": "--xla_gpu_cuda_data_dir=/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/cuda_nvcc",
+    "LD_LIBRARY_PATH": "/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/cuda_runtime/lib:/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/cuda_cupti/lib:/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/cublas/lib:/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/cusolver/lib:/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/cuda_nvcc/lib:/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/cusparse/lib:/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/cudnn/lib:/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/nvjitlink/lib:/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/cufft/lib:/data/Minko/fire-without-forgetting/envs/dreamerv3/lib/python3.10/site-packages/nvidia/nccl/lib",
+    "XLA_PYTHON_CLIENT_MEM_FRACTION": "0.45",
+    "XLA_PYTHON_CLIENT_PREALLOCATE": "false"
+  },
+  "enabled": true,
+  "seed": 0,
+  "code": "dreamerv3-bsuite-v2",
+  "timeout_hours": 2,
+  "device_memory_budget_mib": 40000,
+  "device_headroom_mib": 6000,
+  "purpose": "BSuite actual-action budget integration; full official DreamerV3 size12m.",
+  "activation": "All three official BSuite lengths matched stepwise observations/rewards/terminals on20 real episodes in the corresponding environment."
+}

@@ -1,0 +1,53 @@
+{
+  "checked_at": "2026-09-28T03:06:05.968618+08:00",
+  "checkpoints": [
+    {
+      "run": "persistent_ssm_v2_repeat_easy_s0",
+      "checkpoint": "fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_easy_s0/checkpoints/20260928T025855_training_state.pt",
+      "actual_action_steps": 877500,
+      "actual_updates": 27444,
+      "bytes": 127972546,
+      "completed": false
+    },
+    {
+      "run": "persistent_ssm_v3_longseq_repeat_easy_s0",
+      "checkpoint": "fire-without-forgetting/runs/v2/persistent_ssm_v3_longseq_repeat_easy_s0/checkpoints/20260928T030231_training_state.pt",
+      "actual_action_steps": 332768,
+      "actual_updates": 4788,
+      "bytes": 127972546,
+      "completed": false
+    },
+    {
+      "run": "dreamerv3_size12m_repeat_easy_s0",
+      "checkpoint": "fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_easy_s0/ckpt/20260928T025632F771105-000000334144",
+      "done": true,
+      "actual_driver_transitions": 334144,
+      "actual_updates": 5030,
+      "bytes": 120133969
+    },
+    {
+      "run": "dreamerv3_size12m_repeat_medium_s0",
+      "checkpoint": "fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_medium_s0/ckpt/20260928T025630F850112-000000345072",
+      "done": true,
+      "actual_driver_transitions": 345072,
+      "actual_updates": 5200,
+      "bytes": 120133971
+    },
+    {
+      "run": "dreamerv3_size12m_repeat_hard_s0",
+      "checkpoint": "fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_hard_s0/ckpt/20260928T025632F948016-000000315792",
+      "done": true,
+      "actual_driver_transitions": 315792,
+      "actual_updates": 4743,
+      "bytes": 120133971
+    },
+    {
+      "run": "persistent_ssm_v2_repeat_hard_s0",
+      "checkpoint": "fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_hard_s0/training_state.pt",
+      "actual_action_steps": 1000000,
+      "actual_updates": 31272,
+      "bytes": 127972546,
+      "completed": true
+    }
+  ]
+}

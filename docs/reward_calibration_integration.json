@@ -1,0 +1,34 @@
+{
+  "status": "passed",
+  "source": "actual saved official POPGym Easy replay; one full world-model/actor/critic update on CPU",
+  "source_checkpoint_step": 949312,
+  "batch_size": 16,
+  "batch_length": 128,
+  "training_reward_scale": 48.0,
+  "raw_reward_range": [
+    -0.02083333395421505,
+    0.02083333395421505
+  ],
+  "scaled_target_range": [
+    -1.0,
+    1.0
+  ],
+  "environment_reward_max_abs": 0.02083333395421505,
+  "core_metrics": {
+    "actor_opt_grad_norm": 0.0029641089495271444,
+    "actor_opt_loss": -0.005304121412336826,
+    "cont_loss_mean": 9.74750510067679e-05,
+    "dyn_loss_mean": 1.002946376800537,
+    "extr_critic_critic_opt_grad_norm": 1.3237097263336182,
+    "extr_critic_critic_opt_loss": 0.916165828704834,
+    "model_loss_mean": 22.514856338500977,
+    "model_opt_grad_norm": 30.064266204833984,
+    "model_opt_loss": 22.514856338500977,
+    "observation_loss_mean": 0.08092346042394638,
+    "rep_loss_mean": 1.002946376800537,
+    "reward_loss_mean": 21.832069396972656,
+    "reward_max_data": 1.0
+  },
+  "synchronous_checkpoint_saved_step": 1,
+  "interpretation": "integration only; not an additional seed, learning result, or calibration outcome"
+}

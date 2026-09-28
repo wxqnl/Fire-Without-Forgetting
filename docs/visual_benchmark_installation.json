@@ -1,0 +1,24 @@
+{
+  "dmc_walker_walk": {
+    "render_shape": [
+      64,
+      64,
+      3
+    ],
+    "action_shape": [
+      6
+    ]
+  },
+  "memory_maze_9x9": {
+    "observation_shapes": {
+      "image": [
+        64,
+        64,
+        3
+      ],
+      "target_color": [
+        3
+      ]
+    }
+  }
+}

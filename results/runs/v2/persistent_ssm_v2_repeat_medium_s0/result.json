@@ -1,0 +1,24 @@
+{
+  "returncode": 0,
+  "gpu": 3,
+  "elapsed_seconds": 18186.00569844246,
+  "command": [
+    "/data/Minko/fire-without-forgetting/envs/torch/bin/python",
+    "-u",
+    "/data/Minko/fire-without-forgetting/code/persistent-ssm-v2/dreamer.py",
+    "--configs",
+    "memory",
+    "persistent",
+    "--task",
+    "popgym_RepeatPreviousMedium",
+    "--seed",
+    "0",
+    "--steps",
+    "1000000",
+    "--eval_every",
+    "25000",
+    "--logdir",
+    "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_medium_s0"
+  ],
+  "ended_at": "2026-09-28T02:44:39.135805+08:00"
+}

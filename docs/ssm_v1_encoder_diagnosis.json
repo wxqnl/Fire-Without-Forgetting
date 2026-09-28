@@ -1,0 +1,8 @@
+{
+  "encoder_spike_rate": 0.0,
+  "encoder_unique_vectors": 1,
+  "posterior_hidden_spike_rate": 0.0,
+  "posterior_hidden_unique_vectors": 1,
+  "posterior_logit_temporal_std": 0.0,
+  "observation_unique_values": 4
+}

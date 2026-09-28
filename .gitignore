@@ -1,0 +1,28 @@
+# Runtime state stays on the experiment server.
+/runs/
+/models/
+/logs/
+/envs/*/
+/data/*
+!/data/assets.json
+
+# Local caches and generated model artifacts.
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.pt
+*.pth
+*.ckpt
+events.out.tfevents.*
+
+# Authentication and machine-local files.
+.env
+.env.*
+!.env.example
+.netrc
+.git-credentials
+*.pem
+*.key
+.DS_Store

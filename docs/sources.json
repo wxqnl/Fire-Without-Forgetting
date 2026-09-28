@@ -1,0 +1,44 @@
+[
+  {
+    "name": "Recall2Imagine",
+    "url": "https://github.com/chandar-lab/Recall2Imagine.git",
+    "branch": "main",
+    "source_date": "2024-06-04T10:32:27-04:00",
+    "retrieved_at": "2026-09-27T16:25:53.967237+08:00"
+  },
+  {
+    "name": "Spiking-WM",
+    "url": "https://github.com/Brain-Cog-Lab/Spiking-WM.git",
+    "branch": "main",
+    "source_date": "2025-12-14T23:13:01+08:00",
+    "retrieved_at": "2026-09-27T16:25:53.972761+08:00"
+  },
+  {
+    "name": "bsuite",
+    "url": "https://github.com/google-deepmind/bsuite.git",
+    "branch": "main",
+    "source_date": "2026-09-09T07:51:42-07:00",
+    "retrieved_at": "2026-09-27T16:25:53.978688+08:00"
+  },
+  {
+    "name": "dreamerv3",
+    "url": "https://github.com/danijar/dreamerv3.git",
+    "branch": "main",
+    "source_date": "2026-05-24T23:40:27-07:00",
+    "retrieved_at": "2026-09-27T16:25:53.983464+08:00"
+  },
+  {
+    "name": "memory-maze",
+    "url": "https://github.com/jurgisp/memory-maze.git",
+    "branch": "main",
+    "source_date": "2023-06-23T13:04:50+03:00",
+    "retrieved_at": "2026-09-27T16:25:53.989113+08:00"
+  },
+  {
+    "name": "popgym",
+    "url": "https://github.com/proroklab/popgym.git",
+    "branch": "master",
+    "source_date": "2026-06-11T20:26:18+08:00",
+    "retrieved_at": "2026-09-27T16:25:53.994298+08:00"
+  }
+]

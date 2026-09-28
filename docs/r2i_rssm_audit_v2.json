@@ -1,0 +1,50 @@
+{
+  "code": "/data/Minko/fire-without-forgetting/code/r2i-v2",
+  "checkpoint_step": 949312,
+  "batch": [
+    4,
+    128
+  ],
+  "source": "saved real Easy replay; coupled posterior samples; complete RSSM parallel path vs recurrent img_step with obs_step reset semantics",
+  "reset_positions": [
+    [
+      0,
+      12,
+      64,
+      116
+    ],
+    [
+      0,
+      12,
+      64,
+      116
+    ],
+    [
+      0,
+      12,
+      64,
+      116
+    ],
+    [
+      0,
+      12,
+      64,
+      116
+    ]
+  ],
+  "errors": {
+    "hidden": {
+      "max": 15.33215045928955,
+      "mean": 0.17038315534591675
+    },
+    "deter": {
+      "max": 1.1424779891967773,
+      "mean": 0.007614804897457361
+    },
+    "logit": {
+      "max": 0.008597135543823242,
+      "mean": 0.00024430445046164095
+    }
+  },
+  "scope": "numerical consistency, not a learning result"
+}

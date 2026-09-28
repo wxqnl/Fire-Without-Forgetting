@@ -1,0 +1,404 @@
+--- sources/Spiking-WM/configs.yaml
++++ code/spiking-wm/configs.yaml
+@@ -70,6 +70,12 @@
+   action_unimix_ratio: 0.01
+   initial: 'learned'
+ 
++  # Phase-0 causal interventions; defaults reproduce the MCN reset behavior.
++  reset_between_steps: True
++  reset_dendrites: True
++  mcn_tau: 2.0
++  mcn_threshold: 0.5
++
+   # neuron
+   spike_times: 5
+   LIFNode:
+@@ -225,3 +231,25 @@
+   prefill: 1
+   batch_size: 10
+   batch_length: 20
++
++memory:
++  task: 'popgym_RepeatPreviousEasy'
++  steps: 100000
++  action_repeat: 1
++  envs: 1
++  parallel: False
++  time_limit: 1000
++  train_ratio: 64
++  batch_size: 16
++  batch_length: 128
++  prefill: 2500
++  pretrain: 100
++  eval_every: 10000
++  log_every: 1000
++  eval_episode_num: 20
++  compile: False
++  video_pred_log: False
++  actor_dist: 'onehot'
++  imag_gradient: 'reinforce'
++  encoder: {mlp_keys: 'observation', cnn_keys: '$^'}
++  decoder: {mlp_keys: 'observation', cnn_keys: '$^'}
+--- sources/Spiking-WM/dreamer.py
++++ code/spiking-wm/dreamer.py
+@@ -118,8 +118,8 @@
+ 
+     def _policy(self, obs, state, training):
+         if state is None:
+-            batch_size = len(obs["image"])
+-            latent = self._wm.dynamics.initial(len(obs["image"]))
++            batch_size = len(obs["is_first"])
++            latent = self._wm.dynamics.initial(len(obs["is_first"]))
+             action = torch.zeros((batch_size, self._config.num_actions)).to(
+                 self._config.device
+             )
+@@ -194,9 +194,14 @@
+     return dataset
+ 
+ 
+-def make_env(config, mode):
++def make_env(config, mode, env_index=0):
+     suite, task = config.task.split("_", 1)
+-    if suite == "dmc":
++    if suite in ("popgym", "bsuite"):
++        from envs.memory_tasks import MemoryTask
++        seed = config.seed + env_index + (10000 if mode == "eval" else 0)
++        env = MemoryTask(suite, task, seed)
++        env = wrappers.OneHotAction(env)
++    elif suite == "dmc":
+         import envs.dmc as dmc
+ 
+         env = dmc.DeepMindControl(
+@@ -255,6 +260,11 @@
+ 
+ 
+ def main(config):
++    if config.dyn_cell != "MCRNN" or config.dyn_rec_depth != 1 or config.dyn_shared:
++        raise ValueError("The phase-0 intervention requires the original single-layer, non-shared MCN RSSM.")
++    config.MCNode.update(tau=config.mcn_tau, tau_basal=config.mcn_tau,
++                         tau_apical=config.mcn_tau, threshold=config.mcn_threshold,
++                         reset_dendrites=config.reset_dendrites, surrogate_alpha=2.0)
+     tools.set_seed_everywhere(config.seed)
+     if config.deterministic_run:
+         tools.enable_deterministic_run()
+@@ -270,6 +280,8 @@
+     print("seed: ", config.seed)
+     print("spike times: ", config.spike_times)
+     logdir.mkdir(parents=True, exist_ok=True)
++    import json
++    (logdir / "resolved_config.json").write_text(json.dumps(vars(config), indent=2, default=str))
+     config.traindir.mkdir(parents=True, exist_ok=True)
+     config.evaldir.mkdir(parents=True, exist_ok=True)
+     step = count_steps(config.traindir)
+@@ -288,8 +300,8 @@
+         directory = config.evaldir
+     eval_eps = tools.load_episodes(directory, limit=1)
+     make = lambda mode: make_env(config, mode)
+-    train_envs = [make("train") for _ in range(config.envs)]
+-    eval_envs = [make("eval") for _ in range(config.envs)]
++    train_envs = [make_env(config, "train", i) for i in range(config.envs)]
++    eval_envs = [make_env(config, "eval", i) for i in range(config.envs)]
+     if config.parallel:
+         train_envs = [Parallel(env, "process") for env in train_envs]
+         eval_envs = [Parallel(env, "process") for env in eval_envs]
+@@ -349,7 +361,7 @@
+         agent._should_pretrain._once = False
+ 
+     # make sure eval will be executed once after config.steps
+-    while agent._step < config.steps + config.eval_every:
++    while True:
+         logger.write()
+         if config.eval_episode_num > 0:
+             print("Start evaluation.")
+@@ -366,6 +378,8 @@
+             if config.video_pred_log:
+                 video_pred = agent._wm.video_pred(next(eval_dataset))
+                 logger.video("eval_openl", to_np(video_pred))
++        if agent._step >= config.steps:
++            break
+         print("Start training.")
+         state = tools.simulate(
+             agent,
+@@ -374,7 +388,7 @@
+             config.traindir,
+             logger,
+             limit=config.dataset_size,
+-            steps=config.eval_every,
++            steps=min(config.eval_every, config.steps - agent._step),
+             state=state,
+         )
+         torch.save(agent.state_dict(), logdir / "latest_model.pt")
+--- sources/Spiking-WM/envs/memory_tasks.py
++++ code/spiking-wm/envs/memory_tasks.py
+@@ -0,0 +1,74 @@
++"""Official BSuite/POPGym tasks adapted to the upstream Dreamer interaction API."""
++import importlib
++import inspect
++import gym
++import numpy as np
++
++
++class MemoryTask(gym.Env):
++    def __init__(self, suite, task, seed):
++        self._suite = suite
++        self._seed = seed
++        if suite == "popgym":
++            import gymnasium
++            import popgym
++            self._gymnasium = gymnasium
++            name = task if task.startswith("popgym-") else "popgym-" + task
++            if not name.endswith("-v0"):
++                name += "-v0"
++            self._env = gymnasium.make(name)
++            self._obs_space = self._env.observation_space
++            size = gymnasium.spaces.flatdim(self._obs_space)
++            if not isinstance(self._env.action_space, gymnasium.spaces.Discrete):
++                raise ValueError("Phase-0 tasks require discrete actions")
++            actions = self._env.action_space.n
++        else:
++            from bsuite import sweep
++            name, setting = task.rsplit("/", 1)
++            module = importlib.import_module("bsuite.experiments." + name + "." + name)
++            kwargs = dict(sweep.SETTINGS[task])
++            if "seed" in inspect.signature(module.load).parameters:
++                kwargs["seed"] = seed
++            self._env = module.load(**kwargs)
++            size = int(np.prod(self._env.observation_spec().shape))
++            actions = self._env.action_spec().num_values
++        self.action_space = gym.spaces.Discrete(actions)
++        self.observation_space = gym.spaces.Dict({
++            "observation": gym.spaces.Box(-np.inf, np.inf, (size,), np.float32),
++            "is_first": gym.spaces.Box(0, 1, (), bool),
++            "is_last": gym.spaces.Box(0, 1, (), bool),
++            "is_terminal": gym.spaces.Box(0, 1, (), bool),
++        })
++
++    def _obs(self, obs, first=False, last=False, terminal=False):
++        if self._suite == "popgym":
++            obs = self._gymnasium.spaces.flatten(self._obs_space, obs)
++        return dict(observation=np.asarray(obs, np.float32).reshape(-1),
++                    is_first=first, is_last=last, is_terminal=terminal)
++
++    def reset(self):
++        if self._suite == "popgym":
++            obs, _ = self._env.reset(seed=self._seed)
++            self._seed = None
++        else:
++            obs = self._env.reset().observation
++        return self._obs(obs, first=True)
++
++    def step(self, action):
++        if self._suite == "popgym":
++            obs, reward, terminated, truncated, _ = self._env.step(int(action))
++            done = terminated or truncated
++            discount = 0.0 if terminated else 1.0
++        else:
++            timestep = self._env.step(int(action))
++            obs, reward = timestep.observation, timestep.reward
++            done = timestep.last()
++            discount = float(timestep.discount)
++            terminated = done and discount == 0.0
++        return (self._obs(obs, last=done, terminal=terminated), float(reward),
++                done, {"discount": np.float32(discount)})
++
++    def close(self):
++        close = getattr(self._env, "close", None)
++        if close:
++            close()
+--- sources/Spiking-WM/models.py
++++ code/spiking-wm/models.py
+@@ -161,6 +161,10 @@
+             metrics = self._model_opt(model_loss, self.parameters())
+ 
+         metrics.update({f"{name}_loss": to_np(loss) for name, loss in losses.items()})
++        metrics["mcn_spike_rate"] = to_np(post["deter"].float().mean())
++        for comp in ("basal", "apical", "soma"):
++            if "mem_" + comp in post:
++                metrics["mcn_" + comp + "_rms"] = to_np(post["mem_" + comp].square().mean().sqrt())
+         metrics["kl_free"] = kl_free
+         metrics["dyn_scale"] = dyn_scale
+         metrics["rep_scale"] = rep_scale
+@@ -186,7 +190,8 @@
+     # this function is called during both rollout and training
+     def preprocess(self, obs):
+         obs = obs.copy()
+-        obs["image"] = torch.Tensor(obs["image"]) / 255.0 - 0.5
++        if "image" in obs:
++            obs["image"] = torch.as_tensor(obs["image"]) / 255.0 - 0.5
+         if "discount" in obs:
+             obs["discount"] *= self._config.discount
+             # (batch_size, batch_length) -> (batch_size, batch_length, 1)
+@@ -471,12 +476,12 @@
+         elif self._config.imag_gradient == "reinforce":
+             actor_target = (
+                 policy.log_prob(imag_action)[:-1][:, :, None]
+-                * (target - self.value(imag_feat[:-1]).mode()).detach()
++                * (target - self.value(imag_feat[:, :-1]).mode()).detach()
+             )
+         elif self._config.imag_gradient == "both":
+             actor_target = (
+                 policy.log_prob(imag_action)[:-1][:, :, None]
+-                * (target - self.value(imag_feat[:-1]).mode()).detach()
++                * (target - self.value(imag_feat[:, :-1]).mode()).detach()
+             )
+             mix = self._config.imag_gradient_mix()
+             actor_target = mix * target + (1 - mix) * actor_target
+--- sources/Spiking-WM/networks.py
++++ code/spiking-wm/networks.py
+@@ -60,6 +60,7 @@
+         self._device = device
+ 
+         self.T = config.spike_times
++        self._persistent_mcn = not config.reset_between_steps
+ 
+         inp_layers = []
+         if self._discrete:
+@@ -151,6 +152,9 @@
+                 stoch=torch.zeros([batch_size, self._stoch]).to(self._device),
+                 deter=deter,
+             )
++        if self._persistent_mcn:
++            for comp in self._cell.neuron.mems:
++                state["mem_" + comp] = torch.zeros(batch_size, self._deter, device=self._device)
+         if self._initial == "zeros":
+             return state
+         # TODO
+@@ -277,6 +281,8 @@
+             else:
+                 stoch = self.get_dist(stats).mode()
+             post = {"stoch": stoch, "deter": prior["deter"], **stats}
++            if self._persistent_mcn:
++                post.update({k: v for k, v in prior.items() if k.startswith("mem_")})
+         return post, prior
+ 
+     # this is used for making future image
+@@ -317,7 +323,9 @@
+         for _ in range(self._rec_depth):  # rec depth is not correctly implemented
+             # (batch, hidden), (batch, deter) -> (batch, deter), (batch, deter)
+             # deter 为[x_spikes]
+-            x_spikes, deter = self._cell(x_spikes, [deter])
++            mems = ({comp: prev_state["mem_" + comp] for comp in self._cell.neuron.mems}
++                    if self._persistent_mcn else None)
++            x_spikes, deter = self._cell(x_spikes, [deter], mems=mems)
+             deter = deter[0]  # Keras wraps the state in a list.
+         # (batch, deter) -> (batch, hidden)
+         xs = []
+@@ -332,6 +340,8 @@
+         else:
+             stoch = self.get_dist(stats).mode()
+         prior = {"stoch": stoch, "deter": deter, **stats}
++        if self._persistent_mcn:
++            prior.update({"mem_" + comp: value for comp, value in self._cell.neuron.mems.items()})
+         return prior
+ 
+ 
+@@ -446,16 +456,16 @@
+             )
+             self.outdim += self._cnn.outdim
+         if self.mlp_shapes:
+-            input_size = sum([sum(v) for v in self.mlp_shapes.values()])
++            input_size = sum(int(np.prod(v)) for v in self.mlp_shapes.values())
+             self._mlp = SpikeMLP(
+                 input_size,
+                 None,
+                 mlp_layers,
+                 mlp_units,
+                 act,
+-                config[act],
++                getattr(config, act),
+                 norm,
+-                config[norm],
++                getattr(config, norm),
+                 symlog_inputs=symlog_inputs,
+                 spike_times=config.spike_times
+             )
+@@ -815,10 +825,9 @@
+             print("features shape: ", features.shape)
+         for step in range(self.T):
+             outs.append(self.layers(features[step]))
+-        outs =  sum(outs) / self.T
+-        
+         if self._shape is None:
+             return outs
++        outs = sum(outs) / self.T
+         if isinstance(self._shape, dict):
+             dists = {}
+             for name, shape in self._shape.items():
+@@ -1013,10 +1022,14 @@
+             self.soma_norm=norm(size, **eval("config."+self._norm))
+     
+ 
+-    def forward(self, inputs, state):
++    def forward(self, inputs, state, mems=None):
+         # input spike list or tensor [spike_T, batch, ...]
+         # state spike list or tensor [spike_T, batch, ...]
+         self.reset()
++        # Restore explicit recurrent state after clearing temporary module buffers.
++        # This makes replay, policy collection, and imagined branches independent.
++        if mems is not None:
++            self.neuron.mems = dict(mems)
+         # combined = torch.cat((inputs, hidden), -1) # [T, batch, dims]
+         # assert combined.shape[0] == self.T
+         outputs = []
+--- sources/Spiking-WM/node.py
++++ code/spiking-wm/node.py
+@@ -313,15 +313,18 @@
+                  tau_apical=2.0,
+                  v_reset=0.0,
+                  comps=['basal', 'apical', 'soma'],
+-                 act_fun=QGateGrad):
++                 act_fun=QGateGrad,
++                 reset_dendrites=True,
++                 surrogate_alpha=None):
+         super().__init__(threshold, v_reset, comps)
++        self.reset_dendrites = reset_dendrites
+ 
+         self.tau = tau
+         self.tau_basal = tau_basal
+         self.tau_apical = tau_apical
+         if isinstance(act_fun, str):
+             act_fun = eval(act_fun)
+-        self.act_fun = act_fun(alpha=tau, requires_grad=False)
++        self.act_fun = act_fun(alpha=tau if surrogate_alpha is None else surrogate_alpha, requires_grad=False)
+ 
+     def integral(self, basal_inputs, apical_inputs, soma_inputs):
+         '''
+@@ -339,5 +342,6 @@
+     def calc_spike(self):
+         self.spike = self.act_fun(self.mems['soma'] - self.threshold)
+         self.mems['soma'] = self.mems['soma']  * (1. - self.spike.detach())
+-        self.mems['basal'] = self.mems['basal'] * (1. - self.spike.detach())
+-        self.mems['apical'] = self.mems['apical']  * (1. - self.spike.detach())
++        if self.reset_dendrites:
++            self.mems['basal'] = self.mems['basal'] * (1. - self.spike.detach())
++            self.mems['apical'] = self.mems['apical'] * (1. - self.spike.detach())
+--- sources/Spiking-WM/tools.py
++++ code/spiking-wm/tools.py
+@@ -205,7 +205,7 @@
+                 save_episodes(directory, {envs[i].id: cache[envs[i].id]})
+                 length = len(cache[envs[i].id]["reward"]) - 1
+                 score = float(np.array(cache[envs[i].id]["reward"]).sum())
+-                video = cache[envs[i].id]["image"]
++                video = cache[envs[i].id].get("image")
+                 # record logs given from environments
+                 for key in list(cache[envs[i].id].keys()):
+                     if "log_" in key:
+@@ -233,7 +233,8 @@
+ 
+                     score = sum(eval_scores) / len(eval_scores)
+                     length = sum(eval_lengths) / len(eval_lengths)
+-                    logger.video(f"eval_policy", np.array(video)[None])
++                    if video is not None:
++                        logger.video(f"eval_policy", np.array(video)[None])
+ 
+                     if len(eval_scores) >= episodes and not eval_done:
+                         logger.scalar(f"eval_return", score)
+@@ -338,7 +339,7 @@
+             if not ret:
+                 index = int(np_random.randint(0, total - 1))
+                 ret = {
+-                    k: v[index : min(index + length, total)]
++                    k: np.array(v[index : min(index + length, total)], copy=True)
+                     for k, v in episode.items()
+                     if "log_" not in k
+                 }

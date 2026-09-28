@@ -1,0 +1,52 @@
+{
+  "description": "Time-limited initial screen: four reset conditions, seed 0 only, tau=2, 100000 steps per condition. Original 512-wide MCN and 32x32 latent; not a final paper result.",
+  "timeout_hours_per_run": 12,
+  "jobs": [
+    {
+      "name": "original_tau2_seed0",
+      "task": "popgym_RepeatPreviousMedium",
+      "seed": 0,
+      "reset_between_steps": true,
+      "reset_dendrites": true,
+      "mcn_tau": 2.0,
+      "mcn_threshold": 0.5,
+      "steps": 100000
+    },
+    {
+      "name": "persistent_tau2_seed0",
+      "task": "popgym_RepeatPreviousMedium",
+      "seed": 0,
+      "reset_between_steps": false,
+      "reset_dendrites": true,
+      "mcn_tau": 2.0,
+      "mcn_threshold": 0.5,
+      "steps": 100000
+    },
+    {
+      "name": "no_dendrite_reset_tau2_seed0",
+      "task": "popgym_RepeatPreviousMedium",
+      "seed": 0,
+      "reset_between_steps": true,
+      "reset_dendrites": false,
+      "mcn_tau": 2.0,
+      "mcn_threshold": 0.5,
+      "steps": 100000
+    },
+    {
+      "name": "persistent_no_dendrite_reset_tau2_seed0",
+      "task": "popgym_RepeatPreviousMedium",
+      "seed": 0,
+      "reset_between_steps": false,
+      "reset_dendrites": false,
+      "mcn_tau": 2.0,
+      "mcn_threshold": 0.5,
+      "steps": 100000
+    }
+  ],
+  "gpus": [
+    0,
+    1,
+    2,
+    3
+  ]
+}

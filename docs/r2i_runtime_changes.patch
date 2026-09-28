@@ -1,0 +1,134 @@
+--- official/recall2imagine/train.py
++++ r2i-v2/recall2imagine/train.py
+@@ -75,7 +75,7 @@
+       replay = make_replay(config, logdir / 'replay')
+       eval_replay = make_replay(config, logdir / 'eval_replay', is_eval=True)
+       env = make_envs(config)
+-      eval_env = make_envs(config)  # mode='eval'
++      eval_env = make_envs(config.update({"envs.amount": 1}), evaluation=True)
+       cleanup += [env, eval_env]
+       agent = agt.Agent(env.obs_space, env.act_space, step, config)
+       embodied.run.train_eval(
+@@ -130,7 +130,7 @@
+       embodied.logger.JSONLOutput(logdir, 'metrics.jsonl'),
+       embodied.logger.JSONLOutput(logdir, 'scores.jsonl', 'episode/score'),
+       # embodied.logger.TensorBoardOutput(logdir),
+-      embodied.logger.WandBOutput('.*', str(logdir), config),
++      # Local JSONL logging; no external telemetry.
+       # embodied.logger.MLFlowOutput(logdir.name),
+   ], multiplier)
+   return logger
+@@ -169,11 +169,11 @@
+   return replay
+ 
+ 
+-def make_envs(config, **overrides):
++def make_envs(config, evaluation=False, **overrides):
+   suite, task = config.task.split('_', 1)
+   ctors = []
+   for index in range(config.envs.amount):
+-    ctor = lambda: make_env(config, **overrides)
++    ctor = bind(make_env, config, seed=config.seed + index + (1000000 if evaluation else 0), **overrides)
+     if config.envs.parallel != 'none':
+       ctor = bind(embodied.Parallel, ctor, config.envs.parallel)
+     if config.envs.restart:
+@@ -241,4 +241,4 @@
+     main()
+   except (mujoco.FatalError, EOFError, RuntimeError) as e:
+     traceback.print_exc()
+-    print('Gracefully stopping...')
++    raise
+--- official/recall2imagine/embodied/envs/from_gym.py
++++ r2i-v2/recall2imagine/embodied/envs/from_gym.py
+@@ -30,8 +30,9 @@
+   return newa
+ 
+ class MyObsPopgym(gym_.Wrapper):
+-  def __init__(self, env):
++  def __init__(self, env, seed=None):
+     super().__init__(env)
++    self._initial_seed = seed
+     self.tr, space_ = flatten(self.observation_space)
+     self.maction = self.action_space if isinstance(self.action_space, gym_.spaces.MultiDiscrete) else None
+     if self.maction is not None:
+@@ -46,19 +47,20 @@
+     return {'observation': obs}, reward, ter | trun, info
+ 
+   def reset(self):
+-    obs, info = super().reset()
++    obs, info = super().reset(seed=self._initial_seed)
++    self._initial_seed = None
+     return {'observation': self.tr(obs)}
+ 
+ class FromGym(embodied.Env):
+ 
+-  def __init__(self, env, obs_key='image', act_key='action', **kwargs):
++  def __init__(self, env, obs_key='image', act_key='action', seed=None, **kwargs):
+     if isinstance(env, str):
+       try:
+         self._env = gym.make(env, **kwargs)
+       except:
+         self._env = gym_.make(env, **kwargs)
+         if 'popgym' in env:
+-          self._env = MyObsPopgym(self._env)
++          self._env = MyObsPopgym(self._env, seed=seed)
+     else:
+       assert not kwargs, kwargs
+       self._env = env
+--- official/recall2imagine/embodied/run/train_eval.py
++++ r2i-v2/recall2imagine/embodied/run/train_eval.py
+@@ -29,9 +29,11 @@
+     timer.wrap('replay', train_replay, ['_sample'])
+ 
+   nonzeros = set()
++  evaluation_returns = []
+   def per_episode(ep, mode):
+     length = len(ep['reward']) - 1
+     score = float(ep['reward'].astype(np.float64).sum())
++    if mode == 'eval': evaluation_returns.append(score)
+     logger.add({
+         'length': length, 'score': score,
+         'reward_rate': (ep['reward'] - ep['reward'].min() >= 0.1).mean(),
+@@ -71,8 +73,8 @@
+   logger.add(metrics.result())
+   logger.write()
+ 
+-  dataset_train = agent.dataset(train_replay.dataset)
+-  dataset_eval = agent.dataset(eval_replay.dataset)
++  dataset_train = agent.dataset(train_replay.dataset, shared_memory=False)
++  dataset_eval = agent.dataset(eval_replay.dataset, shared_memory=False)
+   state = [None]  # To be writable from train step function below.
+   batch = [None]
+   def train_step(tran, worker):
+@@ -88,6 +90,7 @@
+       agent.sync()
+     if should_log(step):
+       logger.add(metrics.result())
++      logger.add({'update_count': int(updates)})
+       logger.add(agent.report(batch[0]), prefix='report')
+       with timer.scope('dataset_eval'):
+         eval_batch = next(dataset_eval)
+@@ -112,13 +115,17 @@
+   policy_train = lambda *args: agent.policy(
+       *args, mode='explore' if should_expl(step) else 'train')
+   policy_eval = lambda *args: agent.policy(*args, mode='eval')
+-  while step < args.steps:
+-    if should_eval(step):
++  while True:
++    if should_eval(step) or int(step) >= args.steps:
+       print('Starting evaluation at step', int(step))
++      evaluation_returns.clear()
+       driver_eval.reset()
+-      driver_eval(policy_eval, episodes=max(len(eval_env), args.eval_eps))
+-    driver_train(policy_train, steps=100)
+-    if should_save(step):
+-      checkpoint.save()
++      driver_eval(policy_eval, episodes=args.eval_eps)
++      logger.add({'eval_return': float(np.mean(evaluation_returns)), 'eval_return_std': float(np.std(evaluation_returns)), 'eval_episodes': len(evaluation_returns), 'update_count': int(updates)})
++      logger.write()
++    if int(step) >= args.steps: break
++    driver_train(policy_train, steps=min(100, args.steps-int(step)))
++    if should_save(step): checkpoint.save()
++  checkpoint.save()
+   logger.write()
+   logger.write()

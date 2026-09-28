@@ -1,0 +1,22 @@
+[
+  "taskset",
+  "-c",
+  "112-127",
+  "/data/Minko/fire-without-forgetting/envs/torch/bin/python",
+  "-u",
+  "/data/Minko/fire-without-forgetting/code/persistent-ssm-longseq-v3/dreamer.py",
+  "--configs",
+  "memory",
+  "persistent",
+  "longseq",
+  "--task",
+  "bsuite_memory_len/3",
+  "--seed",
+  "0",
+  "--steps",
+  "1000000",
+  "--eval_every",
+  "25000",
+  "--logdir",
+  "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_bsuite_memory4_s0"
+]

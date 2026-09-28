@@ -1,0 +1,122 @@
+{
+  "run": "r2i_bsuite_memory4_s0",
+  "checked_at": "2026-09-28T15:30:06.908557+08:00",
+  "actual_saved_counters": {
+    "step": 1200000,
+    "action_steps": 1000000,
+    "updates": 15112
+  },
+  "optimizer_steps": {
+    "agent/task_behavior/ac/actor_opt/step/value": 15112,
+    "agent/task_behavior/critic/critic_opt/step/value": 15112,
+    "agent/wm/model_opt/step/value": 15112
+  },
+  "result": {
+    "returncode": 0,
+    "gpu": 0,
+    "elapsed_seconds": 1302.302612543106,
+    "command": [
+      "taskset",
+      "-c",
+      "64-79",
+      "/data/Minko/fire-without-forgetting/envs/r2i/bin/python",
+      "-u",
+      "/data/Minko/fire-without-forgetting/code/r2i-bsuite-v5/recall2imagine/train.py",
+      "--configs",
+      "popgym",
+      "--task",
+      "bsuite_memory_len/3",
+      "--logdir",
+      "/data/Minko/fire-without-forgetting/runs/v2/r2i_bsuite_memory4_s0",
+      "--seed",
+      "0",
+      "--run.steps",
+      "1000000",
+      "--run.eval_every",
+      "25000",
+      "--run.eval_eps",
+      "20",
+      "--run.log_every",
+      "60",
+      "--run.save_every",
+      "600",
+      "--envs.restart",
+      "False",
+      "--jax.prealloc",
+      "False"
+    ],
+    "ended_at": "2026-09-28T15:23:30.039741+08:00"
+  },
+  "final_evaluation": {
+    "step": 1200000,
+    "episode/length": 5.0,
+    "episode/score": -1.0,
+    "episode/sum_abs_reward": 1.0,
+    "episode/reward_rate": 0.16666666666666666,
+    "eval_return": -0.1,
+    "eval_return_std": 0.9949874371066201,
+    "eval_episodes": 20.0,
+    "update_count": 15112.0,
+    "train_action_steps": 1000000.0
+  },
+  "last_five_evaluations": [
+    {
+      "step": 1080040,
+      "eval_return": 0.5,
+      "eval_return_std": 0.8660254037844386,
+      "eval_episodes": 20.0,
+      "update_count": 13550.0,
+      "train_action_steps": 900032.0
+    },
+    {
+      "step": 1110096,
+      "episode/length": 5.0,
+      "episode/score": 1.0,
+      "episode/sum_abs_reward": 1.0,
+      "episode/reward_rate": 0.16666666666666666,
+      "eval_return": -0.3,
+      "eval_return_std": 0.9539392014169455,
+      "eval_episodes": 20.0,
+      "update_count": 13942.0,
+      "train_action_steps": 925080.0
+    },
+    {
+      "step": 1140048,
+      "episode/length": 5.0,
+      "episode/score": 1.0,
+      "episode/sum_abs_reward": 1.0,
+      "episode/reward_rate": 0.16666666666666666,
+      "eval_return": 0.2,
+      "eval_return_std": 0.9797958971132713,
+      "eval_episodes": 20.0,
+      "update_count": 14332.0,
+      "train_action_steps": 950040.0
+    },
+    {
+      "step": 1170000,
+      "episode/length": 5.0,
+      "episode/score": -1.0,
+      "episode/sum_abs_reward": 1.0,
+      "episode/reward_rate": 0.16666666666666666,
+      "eval_return": -0.1,
+      "eval_return_std": 0.99498743710662,
+      "eval_episodes": 20.0,
+      "update_count": 14722.0,
+      "train_action_steps": 975000.0
+    },
+    {
+      "step": 1200000,
+      "episode/length": 5.0,
+      "episode/score": -1.0,
+      "episode/sum_abs_reward": 1.0,
+      "episode/reward_rate": 0.16666666666666666,
+      "eval_return": -0.1,
+      "eval_return_std": 0.9949874371066201,
+      "eval_episodes": 20.0,
+      "update_count": 15112.0,
+      "train_action_steps": 1000000.0
+    }
+  ],
+  "checkpoint_bytes": 144113443,
+  "interpretation": "Fixed one-million-action, seed0 BSuite length4 stage; random expected return0; does not establish a cross-method result."
+}

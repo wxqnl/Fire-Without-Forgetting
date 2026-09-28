@@ -1,0 +1,35 @@
+{
+  "status": "passed",
+  "run": "dreamerv3_v1_integration_easy_timer_s0",
+  "actual_checkpoint_step": 16384,
+  "actual_agent_counters": {
+    "updates": 65,
+    "batches": 69,
+    "actions": 4128
+  },
+  "checkpoint_bytes": 120133967,
+  "finite_training_metrics": true,
+  "complete_optimizer_updates": 65,
+  "evaluation_episodes": [
+    20,
+    20
+  ],
+  "sampled_process_memory_peak_mib": 3704,
+  "memory_scope": "30-second polling, not an instantaneous allocator peak",
+  "actual_trainable_parameters": 9725191,
+  "batch": [
+    4,
+    1024
+  ],
+  "compute_dtype": "bfloat16",
+  "official_model_unchanged": true,
+  "changed_python_files": [
+    "dreamerv3/main.py",
+    "embodied/envs/popgym.py",
+    "embodied/run/train_eval.py",
+    "embodied/jax/internal.py"
+  ],
+  "scope": "Real official POPGym, full official size12m world model and actor-critic. This short integration validates execution and memory, not task learning.",
+  "initial_failure": "dreamerv3_v1_integration_easy_s0: logger.timer=False caused KeyError(summary) before first update; corrected CLI restores True and original failure is preserved.",
+  "validated_at": "2026-09-28T02:15:03.341998+08:00"
+}

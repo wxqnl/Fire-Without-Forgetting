@@ -1,0 +1,232 @@
+{
+  "run": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_medium_s0",
+  "code": "/data/Minko/fire-without-forgetting/code/persistent-ssm-v2",
+  "checkpoint": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_medium_s0/checkpoints/20260927T215744_training_state.pt",
+  "training_step": 77500,
+  "reference": "/data/Minko/fire-without-forgetting/runs/phase0_initial/original_tau2_seed0/eval_eps",
+  "inference": "sample posterior; same held-out trajectories and inference RNG seed 0 for all models",
+  "training_seed": 0,
+  "train_probe_episodes": 80,
+  "test_probe_episodes": 40,
+  "ridge": 0.1,
+  "split": "whole episodes, disjoint fit and test; standardization fit on train only",
+  "interval_scope": "conditional episode variability; not variability across model training seeds",
+  "results": [
+    {
+      "view": "readout",
+      "delay": 1,
+      "accuracy": 0.25,
+      "episode_bootstrap_interval": [
+        0.2402912676334381,
+        0.25873786211013794
+      ],
+      "features": 1536,
+      "fit_examples": 8240,
+      "test_examples": 4120
+    },
+    {
+      "view": "readout",
+      "delay": 4,
+      "accuracy": 0.24774999916553497,
+      "episode_bootstrap_interval": [
+        0.23474373742938043,
+        0.2605000138282776
+      ],
+      "features": 1536,
+      "fit_examples": 8000,
+      "test_examples": 4000
+    },
+    {
+      "view": "readout",
+      "delay": 8,
+      "accuracy": 0.2330729216337204,
+      "episode_bootstrap_interval": [
+        0.21848960146307944,
+        0.24688151367008684
+      ],
+      "features": 1536,
+      "fit_examples": 7680,
+      "test_examples": 3840
+    },
+    {
+      "view": "readout",
+      "delay": 16,
+      "accuracy": 0.24403409659862518,
+      "episode_bootstrap_interval": [
+        0.22982954904437064,
+        0.2590909004211426
+      ],
+      "features": 1536,
+      "fit_examples": 7040,
+      "test_examples": 3520
+    },
+    {
+      "view": "readout",
+      "delay": 32,
+      "accuracy": 0.2559027671813965,
+      "episode_bootstrap_interval": [
+        0.24165796525776387,
+        0.27118057012557983
+      ],
+      "features": 1536,
+      "fit_examples": 5760,
+      "test_examples": 2880
+    },
+    {
+      "view": "readout",
+      "delay": 64,
+      "accuracy": 0.24062499403953552,
+      "episode_bootstrap_interval": [
+        0.22062501311302185,
+        0.260015644133091
+      ],
+      "features": 1536,
+      "fit_examples": 3200,
+      "test_examples": 1600
+    },
+    {
+      "view": "full_state",
+      "delay": 1,
+      "accuracy": 0.4014562666416168,
+      "episode_bootstrap_interval": [
+        0.38956314250826835,
+        0.413106769323349
+      ],
+      "features": 3072,
+      "fit_examples": 8240,
+      "test_examples": 4120
+    },
+    {
+      "view": "full_state",
+      "delay": 4,
+      "accuracy": 0.34299999475479126,
+      "episode_bootstrap_interval": [
+        0.32899999618530273,
+        0.3582499921321869
+      ],
+      "features": 3072,
+      "fit_examples": 8000,
+      "test_examples": 4000
+    },
+    {
+      "view": "full_state",
+      "delay": 8,
+      "accuracy": 0.29765623807907104,
+      "episode_bootstrap_interval": [
+        0.2815104126930237,
+        0.31172527149319645
+      ],
+      "features": 3072,
+      "fit_examples": 7680,
+      "test_examples": 3840
+    },
+    {
+      "view": "full_state",
+      "delay": 16,
+      "accuracy": 0.2821022868156433,
+      "episode_bootstrap_interval": [
+        0.26761361956596375,
+        0.2971591055393219
+      ],
+      "features": 3072,
+      "fit_examples": 7040,
+      "test_examples": 3520
+    },
+    {
+      "view": "full_state",
+      "delay": 32,
+      "accuracy": 0.2614583373069763,
+      "episode_bootstrap_interval": [
+        0.24930556043982505,
+        0.2753472037613392
+      ],
+      "features": 3072,
+      "fit_examples": 5760,
+      "test_examples": 2880
+    },
+    {
+      "view": "full_state",
+      "delay": 64,
+      "accuracy": 0.2574999928474426,
+      "episode_bootstrap_interval": [
+        0.23310937620699407,
+        0.2806406110525131
+      ],
+      "features": 3072,
+      "fit_examples": 3200,
+      "test_examples": 1600
+    },
+    {
+      "view": "current_observation",
+      "delay": 1,
+      "accuracy": 0.24975726008415222,
+      "episode_bootstrap_interval": [
+        0.23737257421016694,
+        0.2616504728794098
+      ],
+      "features": 4,
+      "fit_examples": 8240,
+      "test_examples": 4120
+    },
+    {
+      "view": "current_observation",
+      "delay": 4,
+      "accuracy": 0.2590000033378601,
+      "episode_bootstrap_interval": [
+        0.24674999713897705,
+        0.2722499966621399
+      ],
+      "features": 4,
+      "fit_examples": 8000,
+      "test_examples": 4000
+    },
+    {
+      "view": "current_observation",
+      "delay": 8,
+      "accuracy": 0.2549479305744171,
+      "episode_bootstrap_interval": [
+        0.2440038938075304,
+        0.26563151031732557
+      ],
+      "features": 4,
+      "fit_examples": 7680,
+      "test_examples": 3840
+    },
+    {
+      "view": "current_observation",
+      "delay": 16,
+      "accuracy": 0.26732951402664185,
+      "episode_bootstrap_interval": [
+        0.2556818127632141,
+        0.2809658944606781
+      ],
+      "features": 4,
+      "fit_examples": 7040,
+      "test_examples": 3520
+    },
+    {
+      "view": "current_observation",
+      "delay": 32,
+      "accuracy": 0.26701387763023376,
+      "episode_bootstrap_interval": [
+        0.25312501192092896,
+        0.28159722685813904
+      ],
+      "features": 4,
+      "fit_examples": 5760,
+      "test_examples": 2880
+    },
+    {
+      "view": "current_observation",
+      "delay": 64,
+      "accuracy": 0.2368750125169754,
+      "episode_bootstrap_interval": [
+        0.21687500178813934,
+        0.25626561865210534
+      ],
+      "features": 4,
+      "fit_examples": 3200,
+      "test_examples": 1600
+    }
+  ]
+}

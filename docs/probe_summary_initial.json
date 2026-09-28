@@ -1,0 +1,34 @@
+[
+  {
+    "run": "no_dendrite_reset_tau2_seed0",
+    "readout_k1": 1.0,
+    "readout_k4": 0.26500001549720764,
+    "readout_k32": 0.25138887763023376,
+    "state_k4": 0.26500001549720764,
+    "state_k32": 0.25138887763023376
+  },
+  {
+    "run": "original_tau2_seed0",
+    "readout_k1": 1.0,
+    "readout_k4": 0.2827499806880951,
+    "readout_k32": 0.2517361044883728,
+    "state_k4": 0.2827499806880951,
+    "state_k32": 0.2517361044883728
+  },
+  {
+    "run": "persistent_no_dendrite_reset_tau2_seed0",
+    "readout_k1": 1.0,
+    "readout_k4": 0.328499972820282,
+    "readout_k32": 0.26423612236976624,
+    "state_k4": 0.4449999928474426,
+    "state_k32": 0.25138887763023376
+  },
+  {
+    "run": "persistent_tau2_seed0",
+    "readout_k1": 1.0,
+    "readout_k4": 0.4217499792575836,
+    "readout_k32": 0.2597222328186035,
+    "state_k4": 0.4645000100135803,
+    "state_k32": 0.25138887763023376
+  }
+]

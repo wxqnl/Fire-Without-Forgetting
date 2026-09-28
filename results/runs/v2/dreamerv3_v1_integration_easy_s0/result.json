@@ -1,0 +1,25 @@
+{
+  "returncode": 1,
+  "gpu": 0,
+  "elapsed_seconds": 90.07522821426392,
+  "command": [
+    "taskset",
+    "-c",
+    "64-79",
+    "/data/Minko/fire-without-forgetting/envs/dreamerv3/bin/python",
+    "-u",
+    "/data/Minko/fire-without-forgetting/code/dreamerv3-v1/dreamerv3/main.py",
+    "--configs",
+    "size12m",
+    "fwf_popgym",
+    "--logdir",
+    "/data/Minko/fire-without-forgetting/runs/v2/dreamerv3_v1_integration_easy_s0",
+    "--seed",
+    "0",
+    "--run.steps",
+    "16384",
+    "--run.log_every",
+    "15"
+  ],
+  "ended_at": "2026-09-28T02:11:27.527486+08:00"
+}

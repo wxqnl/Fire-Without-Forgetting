@@ -1,0 +1,2 @@
+{"step": 33904, "train_action_steps": 32840.0, "update_count": 0.0, "eval_return": 0.3, "eval_return_std": 0.9539392014169455, "eval_episodes": 20.0}
+{"step": 35944, "train_action_steps": 34816.0, "update_count": 31.0, "eval_return": 0.0, "eval_return_std": 1.0, "eval_episodes": 20.0}

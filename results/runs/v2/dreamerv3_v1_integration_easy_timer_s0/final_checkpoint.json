@@ -1,0 +1,7 @@
+{
+  "step": 16384,
+  "updates": 65,
+  "path": "/data/Minko/fire-without-forgetting/runs/v2/dreamerv3_v1_integration_easy_timer_s0/ckpt/20260928T021401F273756-000000016384",
+  "synchronous": true,
+  "elapsed_seconds": 56.09416127204895
+}

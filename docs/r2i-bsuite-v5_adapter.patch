@@ -1,0 +1,98 @@
+--- r2i-resetfix-v4/recall2imagine/train.py
++++ r2i-bsuite-v5/recall2imagine/train.py
+@@ -189,6 +189,16 @@
+   # instance here. Environments with different interfaces can be converted
+   # using `embodied.envs.from_gym.FromGym` and `embodied.envs.from_dm.FromDM`.
+   suite, task = config.task.split('_', 1)
++  if suite == 'bsuite':
++    from bsuite import sweep
++    from embodied.envs.from_dm import FromDM
++    experiment, _ = task.rsplit('/', 1)
++    module = importlib.import_module(
++        f'bsuite.experiments.{experiment}.{experiment}')
++    settings = dict(sweep.SETTINGS[task])
++    settings['seed'] = overrides.pop('seed', config.seed)
++    assert not overrides, overrides
++    return wrap_env(FromDM(module.load(**settings)), config)
+   ctor = {
+       'dummy': 'embodied.envs.dummy:Dummy',
+       'gym': 'embodied.envs.from_gym:FromGym',
+--- r2i-resetfix-v4/recall2imagine/embodied/run/train.py
++++ r2i-bsuite-v5/recall2imagine/embodied/run/train.py
+@@ -21,6 +21,7 @@
+   should_profile = args.profile_path != 'none'
+   should_eval = embodied.when.Every(args.eval_every, args.eval_initial)
+   step = logger.step
++  action_steps = embodied.Counter()
+   updates = embodied.Counter()
+   metrics = embodied.Metrics()
+   print('Observation space:', embodied.format(env.obs_space), sep='\n')
+@@ -72,11 +73,12 @@
+         'eval_return': float(np.mean(evaluation_returns)),
+         'eval_return_std': float(np.std(evaluation_returns)),
+         'eval_episodes': len(evaluation_returns),
+-        'update_count': int(updates)})
++        'update_count': int(updates), 'train_action_steps': int(action_steps)})
+     logger.write()
+   driver = embodied.Driver(env)
+   driver.on_episode(lambda ep, worker: per_episode(ep))
+   driver.on_step(lambda tran, _: step.increment())
++  driver.on_step(lambda tran, _: action_steps.increment() if not tran['is_first'] else None)
+   driver.on_step(replay.add)
+ 
+   replay.maybe_restore()
+@@ -85,7 +87,7 @@
+   random_agent = embodied.RandomAgent(env.act_space)
+   for space in random_agent.act_space.values():
+     space._random.seed(config.seed)
+-  while len(replay) < max(args.batch_steps * config.envs.amount, args.train_fill):
++  while action_steps < max(args.batch_steps * config.envs.amount, args.train_fill):
+     driver(random_agent.policy, steps=100)
+   logger.add(metrics.result())
+   logger.write()
+@@ -97,7 +99,7 @@
+   state = [None]  # To be writable from train step function below.
+   batch = [None]
+   def train_step(tran, worker):
+-    for _ in range(should_train(step)):
++    for _ in range(should_train(action_steps)):
+       with timer.scope('dataset'):
+         batch[0] = next(dataset)
+       if should_profile:
+@@ -117,7 +119,7 @@
+       report = agent.report(batch[0])
+       report = {k: v for k, v in report.items() if 'train/' + k not in agg}
+       logger.add(agg)
+-      logger.add({'update_count': int(updates)})
++      logger.add({'update_count': int(updates), 'train_action_steps': int(action_steps)})
+       # TODO: do this rarely
+       if should_report(step):
+         logger.add(report, prefix='report')
+@@ -130,6 +132,7 @@
+   timer.wrap('checkpoint', checkpoint, ['save', 'load'])
+   checkpoint.step = step
+   checkpoint.updates = updates
++  checkpoint.action_steps = action_steps
+   checkpoint.agent = agent
+   checkpoint.replay = replay
+   if args.from_checkpoint:
+@@ -140,15 +143,15 @@
+   print('Start training loop.')
+   policy = lambda *args: agent.policy(
+       *args, mode='explore' if should_expl(step) else 'train')
+-  while step < args.steps:
+-    if should_eval(step):
++  while action_steps < args.steps:
++    if should_eval(action_steps):
+       evaluate()
+-    driver(policy, steps=min(100, args.steps-int(step)))
++    driver(policy, steps=min(100, args.steps-int(action_steps)))
+     if should_save(step):
+       checkpoint.save()
+   evaluate()
+   checkpoint.save()
+   (logdir / 'final_checkpoint.json').write(json.dumps(dict(
+-      environment_steps=int(step), update_count=int(updates),
++      environment_steps=int(step), action_steps=int(action_steps), update_count=int(updates),
+       saved_at=time.time(), write_mode='synchronous')))
+   logger.write()

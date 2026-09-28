@@ -1,0 +1,330 @@
+[
+  {
+    "name": "r2i_recipe_reference_repeat_easy_s0",
+    "result": {
+      "returncode": 0,
+      "gpu": 0,
+      "elapsed_seconds": 7008.057693004608,
+      "command": [
+        "taskset",
+        "-c",
+        "64-79",
+        "/data/Minko/fire-without-forgetting/envs/r2i/bin/python",
+        "-u",
+        "/data/Minko/fire-without-forgetting/code/r2i-recipe-reference-v4/recall2imagine/train.py",
+        "--configs",
+        "popgym",
+        "--task",
+        "gym_popgym:popgym-RepeatPreviousEasy-v0",
+        "--logdir",
+        "/data/Minko/fire-without-forgetting/runs/v2/r2i_recipe_reference_repeat_easy_s0",
+        "--seed",
+        "0",
+        "--run.steps",
+        "5000000",
+        "--run.eval_every",
+        "25000",
+        "--run.eval_eps",
+        "20",
+        "--run.log_every",
+        "60",
+        "--run.save_every",
+        "600",
+        "--envs.restart",
+        "False",
+        "--jax.prealloc",
+        "False"
+      ],
+      "ended_at": "2026-09-28T01:41:03.345954+08:00"
+    },
+    "final_checkpoint": {
+      "environment_steps": 5000000,
+      "update_count": 77612,
+      "saved_at": 1790530851.3455787,
+      "write_mode": "synchronous"
+    },
+    "actual_saved_step": 5000000,
+    "actual_saved_updates": 77612,
+    "last_evals": [
+      {
+        "step": 4900064,
+        "eval_return": 0.7791666898876428,
+        "eval_return_std": 0.08133009115692191,
+        "eval_episodes": 20.0
+      },
+      {
+        "step": 4925024,
+        "eval_return": 0.7729166897013784,
+        "eval_return_std": 0.059621201865409326,
+        "eval_episodes": 20.0
+      },
+      {
+        "step": 4950088,
+        "eval_return": 0.7291666883975267,
+        "eval_return_std": 0.10416666977107523,
+        "eval_episodes": 20.0
+      },
+      {
+        "step": 4975048,
+        "eval_return": 0.7916666902601719,
+        "eval_return_std": 0.07095577863934026,
+        "eval_episodes": 20.0
+      },
+      {
+        "step": 5000000,
+        "eval_return": 0.7895833568647503,
+        "eval_return_std": 0.09635276187026247,
+        "eval_episodes": 20.0
+      }
+    ],
+    "max_return": 0.8395833583548665,
+    "passed_two_consecutive_eval_threshold": true,
+    "medium_gate": false
+  },
+  {
+    "name": "r2i_recipe_resetfix_repeat_easy_s0",
+    "result": {
+      "returncode": 0,
+      "gpu": 1,
+      "elapsed_seconds": 6948.375557184219,
+      "command": [
+        "taskset",
+        "-c",
+        "80-95",
+        "/data/Minko/fire-without-forgetting/envs/r2i/bin/python",
+        "-u",
+        "/data/Minko/fire-without-forgetting/code/r2i-resetfix-v4/recall2imagine/train.py",
+        "--configs",
+        "popgym",
+        "--task",
+        "gym_popgym:popgym-RepeatPreviousEasy-v0",
+        "--logdir",
+        "/data/Minko/fire-without-forgetting/runs/v2/r2i_recipe_resetfix_repeat_easy_s0",
+        "--seed",
+        "0",
+        "--run.steps",
+        "5000000",
+        "--run.eval_every",
+        "25000",
+        "--run.eval_eps",
+        "20",
+        "--run.log_every",
+        "60",
+        "--run.save_every",
+        "600",
+        "--envs.restart",
+        "False",
+        "--jax.prealloc",
+        "False"
+      ],
+      "ended_at": "2026-09-28T01:36:53.076085+08:00"
+    },
+    "final_checkpoint": {
+      "environment_steps": 5000000,
+      "update_count": 77612,
+      "saved_at": 1790530608.1957788,
+      "write_mode": "synchronous"
+    },
+    "actual_saved_step": 5000000,
+    "actual_saved_updates": 77612,
+    "last_evals": [
+      {
+        "step": 4900064,
+        "eval_return": 0.804166690632701,
+        "eval_return_std": 0.08848650506041703,
+        "eval_episodes": 20.0
+      },
+      {
+        "step": 4925024,
+        "eval_return": 0.8208333577960729,
+        "eval_return_std": 0.09780579120071882,
+        "eval_episodes": 20.0
+      },
+      {
+        "step": 4950088,
+        "eval_return": 0.808333357423544,
+        "eval_return_std": 0.0887803182819534,
+        "eval_episodes": 20.0
+      },
+      {
+        "step": 4975048,
+        "eval_return": 0.8104166908189654,
+        "eval_return_std": 0.08687775034746299,
+        "eval_episodes": 20.0
+      },
+      {
+        "step": 5000000,
+        "eval_return": 0.8166666910052299,
+        "eval_return_std": 0.07728015643225893,
+        "eval_episodes": 20.0
+      }
+    ],
+    "max_return": 0.8729166926816105,
+    "passed_two_consecutive_eval_threshold": true,
+    "medium_gate": false
+  },
+  {
+    "name": "r2i_recipe_reference_repeat_medium_s0",
+    "result": {
+      "returncode": 0,
+      "gpu": 2,
+      "elapsed_seconds": 7888.605154752731,
+      "command": [
+        "taskset",
+        "-c",
+        "96-111",
+        "/data/Minko/fire-without-forgetting/envs/r2i/bin/python",
+        "-u",
+        "/data/Minko/fire-without-forgetting/code/r2i-recipe-reference-v4/recall2imagine/train.py",
+        "--configs",
+        "popgym",
+        "--task",
+        "gym_popgym:popgym-RepeatPreviousMedium-v0",
+        "--logdir",
+        "/data/Minko/fire-without-forgetting/runs/v2/r2i_recipe_reference_repeat_medium_s0",
+        "--seed",
+        "0",
+        "--run.steps",
+        "5000000",
+        "--run.eval_every",
+        "25000",
+        "--run.eval_eps",
+        "20",
+        "--run.log_every",
+        "60",
+        "--run.save_every",
+        "600",
+        "--envs.restart",
+        "False",
+        "--jax.prealloc",
+        "False"
+      ],
+      "ended_at": "2026-09-28T01:55:44.290076+08:00"
+    },
+    "final_checkpoint": {
+      "environment_steps": 5000000,
+      "update_count": 77612,
+      "saved_at": 1790531736.1927485,
+      "write_mode": "synchronous"
+    },
+    "actual_saved_step": 5000000,
+    "actual_saved_updates": 77612,
+    "last_evals": [
+      {
+        "step": 4900064,
+        "eval_return": -0.5347222262062132,
+        "eval_return_std": 0.0916561448600938,
+        "eval_episodes": 20.0
+      },
+      {
+        "step": 4925024,
+        "eval_return": -0.504166670423001,
+        "eval_return_std": 0.08926785602188299,
+        "eval_episodes": 20.0
+      },
+      {
+        "step": 4950088,
+        "eval_return": -0.4972222259268165,
+        "eval_return_std": 0.09816998432626944,
+        "eval_episodes": 20.0
+      },
+      {
+        "step": 4975048,
+        "eval_return": -0.5236111150123179,
+        "eval_return_std": 0.09012808168765998,
+        "eval_episodes": 20.0
+      },
+      {
+        "step": 5000000,
+        "eval_return": -0.5486111151985824,
+        "eval_return_std": 0.10966946774071056,
+        "eval_episodes": 20.0
+      }
+    ],
+    "max_return": -0.43888889215886595,
+    "passed_two_consecutive_eval_threshold": false,
+    "medium_gate": false
+  },
+  {
+    "name": "r2i_recipe_resetfix_repeat_medium_s0",
+    "result": {
+      "returncode": 0,
+      "gpu": 3,
+      "elapsed_seconds": 7457.724311590195,
+      "command": [
+        "taskset",
+        "-c",
+        "112-127",
+        "/data/Minko/fire-without-forgetting/envs/r2i/bin/python",
+        "-u",
+        "/data/Minko/fire-without-forgetting/code/r2i-resetfix-v4/recall2imagine/train.py",
+        "--configs",
+        "popgym",
+        "--task",
+        "gym_popgym:popgym-RepeatPreviousMedium-v0",
+        "--logdir",
+        "/data/Minko/fire-without-forgetting/runs/v2/r2i_recipe_resetfix_repeat_medium_s0",
+        "--seed",
+        "0",
+        "--run.steps",
+        "5000000",
+        "--run.eval_every",
+        "25000",
+        "--run.eval_eps",
+        "20",
+        "--run.log_every",
+        "60",
+        "--run.save_every",
+        "600",
+        "--envs.restart",
+        "False",
+        "--jax.prealloc",
+        "False"
+      ],
+      "ended_at": "2026-09-28T01:48:33.857987+08:00"
+    },
+    "final_checkpoint": {
+      "environment_steps": 5000000,
+      "update_count": 77612,
+      "saved_at": 1790531304.567289,
+      "write_mode": "synchronous"
+    },
+    "actual_saved_step": 5000000,
+    "actual_saved_updates": 77612,
+    "last_evals": [
+      {
+        "step": 4900064,
+        "eval_return": -0.48888889253139495,
+        "eval_return_std": 0.10950224161822762,
+        "eval_episodes": 20.0
+      },
+      {
+        "step": 4925024,
+        "eval_return": -0.46527778124436736,
+        "eval_return_std": 0.10388851830158945,
+        "eval_episodes": 20.0
+      },
+      {
+        "step": 4950088,
+        "eval_return": -0.5166666705161334,
+        "eval_return_std": 0.11500134277062926,
+        "eval_episodes": 20.0
+      },
+      {
+        "step": 4975048,
+        "eval_return": -0.4902777814306319,
+        "eval_return_std": 0.0839215358476019,
+        "eval_episodes": 20.0
+      },
+      {
+        "step": 5000000,
+        "eval_return": -0.46527778124436736,
+        "eval_return_std": 0.09933226210640926,
+        "eval_episodes": 20.0
+      }
+    ],
+    "max_return": -0.4194444475695491,
+    "passed_two_consecutive_eval_threshold": false,
+    "medium_gate": false
+  }
+]

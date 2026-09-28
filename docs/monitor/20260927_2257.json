@@ -1,0 +1,240 @@
+{
+  "checked_at": "2026-09-27T22:59:33.227590+08:00",
+  "status": {
+    "checked_at": "2026-09-27T22:59:33.227590+08:00",
+    "queue_state": "running",
+    "runs": [
+      {
+        "job": "persistent_ssm_v2_repeat_easy_s0",
+        "gpu": 0,
+        "pid": 3594834,
+        "started_at": "2026-09-27T21:50:49.586844+08:00",
+        "log": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_easy_s0/train.log",
+        "process_alive": true,
+        "latest_step": 289578,
+        "metrics_age_seconds": 0.1,
+        "latest_evaluations": [
+          {
+            "step": 227500,
+            "eval_return": -0.49374999701976774,
+            "eval_episodes": 20.0
+          },
+          {
+            "step": 252500,
+            "eval_return": -0.4520833343267441,
+            "eval_episodes": 20.0
+          },
+          {
+            "step": 277500,
+            "eval_return": -0.48541668951511385,
+            "eval_episodes": 20.0
+          }
+        ],
+        "nonfinite_core_metrics": [],
+        "nonfinite_auxiliary_metrics": [],
+        "checkpoints": [
+          {
+            "name": "latest_model.pt",
+            "bytes": 45835840
+          },
+          {
+            "name": "training_state.pt",
+            "bytes": 127972546
+          }
+        ]
+      },
+      {
+        "job": "persistent_ssm_v2_repeat_hard_s0",
+        "gpu": 1,
+        "pid": 3596036,
+        "started_at": "2026-09-27T21:51:52.299245+08:00",
+        "log": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_hard_s0/train.log",
+        "process_alive": true,
+        "latest_step": 295275,
+        "metrics_age_seconds": 0.5,
+        "latest_evaluations": [
+          {
+            "step": 227500,
+            "eval_return": -0.5173912853002548,
+            "eval_episodes": 20.0
+          },
+          {
+            "step": 252500,
+            "eval_return": -0.5010869354009628,
+            "eval_episodes": 20.0
+          },
+          {
+            "step": 277500,
+            "eval_return": -0.5021738961338997,
+            "eval_episodes": 20.0
+          }
+        ],
+        "nonfinite_core_metrics": [],
+        "nonfinite_auxiliary_metrics": [],
+        "checkpoints": [
+          {
+            "name": "latest_model.pt",
+            "bytes": 45835840
+          },
+          {
+            "name": "training_state.pt",
+            "bytes": 127972546
+          }
+        ]
+      },
+      {
+        "job": "mcn_repeat_easy_original_s0",
+        "gpu": 2,
+        "pid": 3526697,
+        "started_at": "2026-09-27T21:01:23.195862+08:00",
+        "log": "/data/Minko/fire-without-forgetting/runs/v2/mcn_repeat_easy_original_s0/train.log",
+        "process_alive": true,
+        "latest_step": 74817,
+        "metrics_age_seconds": 0.4,
+        "latest_evaluations": [
+          {
+            "step": 2500,
+            "eval_return": -0.49374998807907106,
+            "eval_episodes": 20.0
+          },
+          {
+            "step": 27500,
+            "eval_return": -0.5291666686534882,
+            "eval_episodes": 20.0
+          },
+          {
+            "step": 52500,
+            "eval_return": -0.4895833369344473,
+            "eval_episodes": 20.0
+          }
+        ],
+        "nonfinite_core_metrics": [],
+        "nonfinite_auxiliary_metrics": [],
+        "checkpoints": [
+          {
+            "name": "latest_model.pt",
+            "bytes": 42681890
+          }
+        ]
+      },
+      {
+        "job": "persistent_ssm_v2_repeat_medium_s0",
+        "gpu": 3,
+        "pid": 3583034,
+        "started_at": "2026-09-27T21:41:33.130102+08:00",
+        "log": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_medium_s0/train.log",
+        "process_alive": true,
+        "latest_step": 358749,
+        "metrics_age_seconds": 0.6,
+        "latest_evaluations": [
+          {
+            "step": 302500,
+            "eval_return": -0.48333335369825364,
+            "eval_episodes": 20.0
+          },
+          {
+            "step": 327500,
+            "eval_return": -0.5194444626569747,
+            "eval_episodes": 20.0
+          },
+          {
+            "step": 352500,
+            "eval_return": -0.48888890594244006,
+            "eval_episodes": 20.0
+          }
+        ],
+        "nonfinite_core_metrics": [],
+        "nonfinite_auxiliary_metrics": [],
+        "checkpoints": [
+          {
+            "name": "latest_model.pt",
+            "bytes": 45835840
+          },
+          {
+            "name": "training_state.pt",
+            "bytes": 127972546
+          }
+        ]
+      }
+    ],
+    "completed": [
+      "r2i_repeat_easy_s0_cuda",
+      "r2i_repeat_medium_s0_cuda"
+    ],
+    "failed": [
+      "r2i_repeat_easy_s0",
+      "r2i_repeat_medium_s0",
+      "persistent_ssm_repeat_medium_s0"
+    ],
+    "pending": [
+      "r2i_repeat_easy_rewardscale48_s0",
+      "persistent_ssm_repeat_easy_s0",
+      "persistent_ssm_repeat_hard_s0",
+      "mcn_repeat_medium_tau160_stepreset0_dendreset0_s0",
+      "mcn_repeat_medium_tau160_stepreset1_dendreset1_s0",
+      "mcn_repeat_medium_tau160_stepreset1_dendreset0_s0",
+      "mcn_repeat_medium_tau160_stepreset0_dendreset1_s0",
+      "mcn_repeat_medium_tau2_stepreset0_dendreset0_s0",
+      "mcn_repeat_medium_tau8_stepreset0_dendreset0_s0",
+      "mcn_repeat_medium_tau32_stepreset0_dendreset0_s0",
+      "mcn_repeat_medium_tau2_stepreset1_dendreset1_s0",
+      "mcn_repeat_medium_tau2_stepreset1_dendreset0_s0",
+      "mcn_repeat_medium_tau2_stepreset0_dendreset1_s0",
+      "mcn_repeat_medium_tau8_stepreset1_dendreset1_s0",
+      "mcn_repeat_medium_tau8_stepreset1_dendreset0_s0",
+      "mcn_repeat_medium_tau8_stepreset0_dendreset1_s0",
+      "mcn_repeat_medium_tau32_stepreset1_dendreset1_s0",
+      "mcn_repeat_medium_tau32_stepreset1_dendreset0_s0",
+      "mcn_repeat_medium_tau32_stepreset0_dendreset1_s0"
+    ],
+    "gpu": "0, 9521, 17, 167.73\n1, 9521, 17, 170.04\n2, 31919, 23, 157.12\n3, 9521, 57, 196.99\n4, 79949, 100, 634.46\n5, 79947, 100, 647.72\n6, 79949, 100, 624.15\n7, 79947, 100, 665.79\n"
+  },
+  "checkpoint_checks": [
+    {
+      "job": "persistent_ssm_v2_repeat_easy_s0",
+      "archive": "20260927T225615_training_state.pt",
+      "stored_step": 277500,
+      "updates": 8694,
+      "deserialization": "passed",
+      "nonfinite_parameter_tensors": []
+    },
+    {
+      "job": "persistent_ssm_v2_repeat_hard_s0",
+      "archive": "20260927T225519_training_state.pt",
+      "stored_step": 277500,
+      "updates": 8694,
+      "deserialization": "passed",
+      "nonfinite_parameter_tensors": []
+    },
+    {
+      "job": "mcn_repeat_easy_original_s0",
+      "archive": "20260927T222442_latest_model.pt",
+      "stored_step": null,
+      "updates": null,
+      "note": "Original MCN saves model weights only; no optimizer or step embedded.",
+      "deserialization": "passed",
+      "nonfinite_parameter_tensors": []
+    },
+    {
+      "job": "persistent_ssm_v2_repeat_medium_s0",
+      "archive": "20260927T225207_training_state.pt",
+      "stored_step": 327500,
+      "updates": 10257,
+      "deserialization": "passed",
+      "nonfinite_parameter_tensors": []
+    }
+  ],
+  "queue_change": "none; all four authorized GPUs remain occupied by their existing jobs",
+  "ready_next_jobs": [
+    "r2i_repeat_easy_rewardscale48_s0"
+  ],
+  "learning_gate_passed": false,
+  "new_failures": [],
+  "new_completions": [],
+  "numerical_health": "core losses, gradients, encoder activity and all inspected checkpoint parameters finite",
+  "stall_check": "all four PIDs alive, metrics and episode counters advancing; resource sampler and checkpoint archiver active",
+  "decision": "continue fixed 1M budgets; reward-scale calibration starts on the next idle authorized GPU; E2 remains disabled",
+  "notification": "quiet; no material result, new failure, or scheduling change since the previous check",
+  "offline_memory_maze": "still absent from project data directory; awaiting user-supplied data",
+  "remaining_scope_reference": "docs/experiment_protocol_v2.md"
+}

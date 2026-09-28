@@ -1,0 +1,58 @@
+{
+  "state": "running",
+  "queue_pid": 3946099,
+  "active": [
+    {
+      "job": "persistent_ssm_v3_longseq_repeat_easy_s0",
+      "gpu": 2,
+      "pid": 3956124,
+      "started_at": "2026-09-28T02:19:04.335148+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v3_longseq_repeat_easy_s0/train.log"
+    },
+    {
+      "job": "dreamerv3_bsuite_memory4_s0",
+      "gpu": 1,
+      "pid": 741290,
+      "started_at": "2026-09-28T15:01:48.076245+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/dreamerv3_bsuite_memory4_s0/train.log"
+    },
+    {
+      "job": "persistent_ssm_bsuite_memory4_s0",
+      "gpu": 3,
+      "pid": 741300,
+      "started_at": "2026-09-28T15:01:48.390230+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_bsuite_memory4_s0/train.log"
+    },
+    {
+      "job": "r2i_bsuite_memory30_s0",
+      "gpu": 0,
+      "pid": 776306,
+      "started_at": "2026-09-28T15:23:30.407716+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/r2i_bsuite_memory30_s0/train.log"
+    }
+  ],
+  "completed": [
+    "dreamerv3_v1_integration_easy_timer_s0",
+    "dreamerv3_size12m_repeat_easy_s0",
+    "dreamerv3_size12m_repeat_medium_s0",
+    "dreamerv3_size12m_repeat_hard_s0",
+    "persistent_ssm_v3_longseq_integration_easy_s0",
+    "r2i_bs30_integration_s0",
+    "dreamerv3_bs30_integration_s0",
+    "persistent_ssm_bs30_integration_s0",
+    "r2i_bsuite_memory4_s0"
+  ],
+  "failed": [
+    "dreamerv3_v1_integration_easy_s0"
+  ],
+  "pending": [
+    "r2i_bsuite_memory100_s0",
+    "dreamerv3_bsuite_memory30_s0",
+    "dreamerv3_bsuite_memory100_s0",
+    "persistent_ssm_bsuite_memory30_s0",
+    "persistent_ssm_bsuite_memory100_s0"
+  ],
+  "blocked": {},
+  "seed_policy": "seed 0 only",
+  "updated_at": "2026-09-28T15:30:30.916541+08:00"
+}

@@ -1,0 +1,306 @@
+[
+  {
+    "job": "r2i_recipe_resetfix_repeat_easy_s0",
+    "points": [
+      {
+        "step": 500032,
+        "score": -0.4729166807606816
+      },
+      {
+        "step": 1000064,
+        "score": -0.4604166803881526
+      },
+      {
+        "step": 1500096,
+        "score": -0.5187500154599547
+      },
+      {
+        "step": 2000024,
+        "score": -0.5041666816920042
+      },
+      {
+        "step": 2500056,
+        "score": 0.808333357423544
+      },
+      {
+        "step": 3000088,
+        "score": 0.7916666902601719
+      }
+    ],
+    "first_two_consecutive": {
+      "-0.25": [
+        {
+          "step": 2025088,
+          "score": 0.17500000521540643
+        },
+        {
+          "step": 2050048,
+          "score": 0.3604166774079204
+        }
+      ],
+      "0.0": [
+        {
+          "step": 2025088,
+          "score": 0.17500000521540643
+        },
+        {
+          "step": 2050048,
+          "score": 0.3604166774079204
+        }
+      ],
+      "0.5": [
+        {
+          "step": 2175056,
+          "score": 0.7479166889563202
+        },
+        {
+          "step": 2200016,
+          "score": 0.7791666898876428
+        }
+      ],
+      "0.8": [
+        {
+          "step": 2450032,
+          "score": 0.8479166919365525
+        },
+        {
+          "step": 2475096,
+          "score": 0.804166690632701
+        }
+      ]
+    },
+    "last_evals": [
+      {
+        "step": 3325088,
+        "score": 0.8270833579823375
+      },
+      {
+        "step": 3350048,
+        "score": 0.8229166911914945
+      },
+      {
+        "step": 3375008,
+        "score": 0.854166692122817
+      },
+      {
+        "step": 3400072,
+        "score": 0.829166691377759
+      },
+      {
+        "step": 3425032,
+        "score": 0.841666691750288
+      }
+    ],
+    "checkpoint": "/data/Minko/fire-without-forgetting/runs/v2/r2i_recipe_resetfix_repeat_easy_s0/checkpoints/20260928T005144_checkpoint.ckpt"
+  },
+  {
+    "job": "r2i_recipe_reference_repeat_easy_s0",
+    "points": [
+      {
+        "step": 500032,
+        "score": -0.48125001434236764
+      },
+      {
+        "step": 1000064,
+        "score": -0.4270833460614085
+      },
+      {
+        "step": 1500096,
+        "score": -0.5354166826233268
+      },
+      {
+        "step": 2000024,
+        "score": -0.5000000149011612
+      },
+      {
+        "step": 2500056,
+        "score": -0.5270833490416408
+      },
+      {
+        "step": 3000088,
+        "score": 0.7145833546295762
+      }
+    ],
+    "first_two_consecutive": {
+      "-0.25": [
+        {
+          "step": 2950064,
+          "score": 0.16250000484287738
+        },
+        {
+          "step": 2975024,
+          "score": 0.5750000171363354
+        }
+      ],
+      "0.0": [
+        {
+          "step": 2950064,
+          "score": 0.16250000484287738
+        },
+        {
+          "step": 2975024,
+          "score": 0.5750000171363354
+        }
+      ],
+      "0.5": [
+        {
+          "step": 2975024,
+          "score": 0.5750000171363354
+        },
+        {
+          "step": 3000088,
+          "score": 0.7145833546295762
+        }
+      ],
+      "0.8": [
+        {
+          "step": 3125096,
+          "score": 0.808333357423544
+        },
+        {
+          "step": 3150056,
+          "score": 0.8187500244006515
+        }
+      ]
+    },
+    "last_evals": [
+      {
+        "step": 3175016,
+        "score": 0.7937500236555934
+      },
+      {
+        "step": 3200080,
+        "score": 0.8020833572372794
+      },
+      {
+        "step": 3225040,
+        "score": 0.8145833576098085
+      },
+      {
+        "step": 3250000,
+        "score": 0.804166690632701
+      },
+      {
+        "step": 3275064,
+        "score": 0.8395833583548665
+      }
+    ],
+    "checkpoint": "/data/Minko/fire-without-forgetting/runs/v2/r2i_recipe_reference_repeat_easy_s0/checkpoints/20260928T005453_checkpoint.ckpt"
+  },
+  {
+    "job": "r2i_recipe_reference_repeat_medium_s0",
+    "points": [
+      {
+        "step": 500032,
+        "score": -0.4763888924382627
+      },
+      {
+        "step": 1000064,
+        "score": -0.5027777815237642
+      },
+      {
+        "step": 1500096,
+        "score": -0.5236111150123179
+      },
+      {
+        "step": 2000024,
+        "score": -0.4833333369344473
+      },
+      {
+        "step": 2500056,
+        "score": -0.522222226113081
+      },
+      {
+        "step": 2900040,
+        "score": -0.5097222260199488
+      }
+    ],
+    "first_two_consecutive": {
+      "-0.25": null,
+      "0.0": null,
+      "0.5": null,
+      "0.8": null
+    },
+    "last_evals": [
+      {
+        "step": 2800096,
+        "score": -0.5111111149191856
+      },
+      {
+        "step": 2825056,
+        "score": -0.5180555594153702
+      },
+      {
+        "step": 2850016,
+        "score": -0.4861111147329211
+      },
+      {
+        "step": 2875080,
+        "score": -0.4930555592291057
+      },
+      {
+        "step": 2900040,
+        "score": -0.5097222260199488
+      }
+    ],
+    "checkpoint": "/data/Minko/fire-without-forgetting/runs/v2/r2i_recipe_reference_repeat_medium_s0/checkpoints/20260928T005500_checkpoint.ckpt"
+  },
+  {
+    "job": "r2i_recipe_resetfix_repeat_medium_s0",
+    "points": [
+      {
+        "step": 500032,
+        "score": -0.505555559322238
+      },
+      {
+        "step": 1000064,
+        "score": -0.5194444483146071
+      },
+      {
+        "step": 1500096,
+        "score": -0.48194444803521036
+      },
+      {
+        "step": 2000024,
+        "score": -0.4833333369344473
+      },
+      {
+        "step": 2500056,
+        "score": -0.4847222258336842
+      },
+      {
+        "step": 3000088,
+        "score": -0.4833333369344473
+      }
+    ],
+    "first_two_consecutive": {
+      "-0.25": null,
+      "0.0": null,
+      "0.5": null,
+      "0.8": null
+    },
+    "last_evals": [
+      {
+        "step": 2975024,
+        "score": -0.49583333702757953
+      },
+      {
+        "step": 3000088,
+        "score": -0.4833333369344473
+      },
+      {
+        "step": 3025048,
+        "score": -0.4930555592291057
+      },
+      {
+        "step": 3050008,
+        "score": -0.5263888928107917
+      },
+      {
+        "step": 3075072,
+        "score": -0.48194444803521036
+      }
+    ],
+    "checkpoint": "/data/Minko/fire-without-forgetting/runs/v2/r2i_recipe_resetfix_repeat_medium_s0/checkpoints/20260928T005503_checkpoint.ckpt"
+  }
+]

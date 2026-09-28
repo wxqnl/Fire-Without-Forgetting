@@ -1,0 +1,26 @@
+{
+  "name": "persistent_ssm_repeat_medium_s0",
+  "command": [
+    "/data/Minko/fire-without-forgetting/envs/torch/bin/python",
+    "-u",
+    "/data/Minko/fire-without-forgetting/code/persistent-ssm-v1/dreamer.py",
+    "--configs",
+    "memory",
+    "persistent",
+    "--task",
+    "popgym_RepeatPreviousMedium",
+    "--seed",
+    "0",
+    "--steps",
+    "1000000",
+    "--eval_every",
+    "25000",
+    "--logdir",
+    "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_repeat_medium_s0"
+  ],
+  "allowed_gpus": [
+    3
+  ],
+  "purpose": "\u5b8c\u6574\u6301\u4e45\u6001\u8109\u51b2 SSM\uff1a3 \u5c42\u590d\u6570\u72b6\u6001\u3001T=1\u3001\u89c2\u6d4b\u72ec\u7acb\u540e\u9a8c\u3001\u7cbe\u786e\u4eff\u5c04\u626b\u63cf\u3001\u5b8c\u6574\u4e16\u754c\u6a21\u578b\u548c Actor-Critic\u3002",
+  "seed": 0
+}

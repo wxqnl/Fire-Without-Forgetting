@@ -1,0 +1,42 @@
+{
+  "run": "persistent_ssm_v2_repeat_hard_s0",
+  "actual_saved_action_steps": 1000000,
+  "actual_saved_updates": 31272,
+  "optimizer_entries": {
+    "world_model_optimizer": 77,
+    "actor_optimizer": 10,
+    "value_optimizer": 10
+  },
+  "checkpoint_bytes": 127972546,
+  "checkpoint_time": "2026-09-28T03:04:14.998526+08:00",
+  "result": {
+    "returncode": 0,
+    "gpu": 1,
+    "elapsed_seconds": 18798.940012454987,
+    "command": [
+      "/data/Minko/fire-without-forgetting/envs/torch/bin/python",
+      "-u",
+      "/data/Minko/fire-without-forgetting/code/persistent-ssm-v2/dreamer.py",
+      "--configs",
+      "memory",
+      "persistent",
+      "--task",
+      "popgym_RepeatPreviousHard",
+      "--seed",
+      "0",
+      "--steps",
+      "1000000",
+      "--eval_every",
+      "25000",
+      "--logdir",
+      "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v2_repeat_hard_s0"
+    ],
+    "ended_at": "2026-09-28T03:05:11.239263+08:00"
+  },
+  "final_evaluation": {
+    "step": 1000000,
+    "eval_return": -0.49999998360872266,
+    "eval_length": 155.0,
+    "eval_episodes": 20.0
+  }
+}

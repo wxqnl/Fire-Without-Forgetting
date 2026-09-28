@@ -1,0 +1,7 @@
+{
+  "step": 5000000,
+  "updates": 77934,
+  "path": "/data/Minko/fire-without-forgetting/runs/v2/dreamerv3_size12m_repeat_easy_s0/ckpt/20260928T112312F299862-000005000000",
+  "synchronous": true,
+  "elapsed_seconds": 32811.34388422966
+}

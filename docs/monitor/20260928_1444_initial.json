@@ -1,0 +1,126 @@
+{
+  "checked_at": "2026-09-28T14:44:17.420624+08:00",
+  "queue_state": "running",
+  "runs": [
+    {
+      "job": "mcn_repeat_easy_original_s0",
+      "gpu": 2,
+      "pid": 3526697,
+      "started_at": "2026-09-27T21:01:23.195862+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/mcn_repeat_easy_original_s0/train.log",
+      "process_alive": true,
+      "latest_step": 579819,
+      "metrics_age_seconds": 1.0,
+      "latest_evaluations": [
+        {
+          "step": 527500,
+          "eval_return": 0.25625000409781934,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 552500,
+          "eval_return": 0.28750000819563865,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 577500,
+          "eval_return": 0.28750000409781934,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [],
+      "checkpoint_metadata": null,
+      "checkpoints": [
+        {
+          "name": "latest_model.pt",
+          "bytes": 42681890
+        }
+      ]
+    },
+    {
+      "job": "persistent_ssm_v3_longseq_repeat_easy_s0",
+      "gpu": 2,
+      "pid": 3956124,
+      "started_at": "2026-09-28T02:19:04.335148+08:00",
+      "log": "/data/Minko/fire-without-forgetting/runs/v2/persistent_ssm_v3_longseq_repeat_easy_s0/train.log",
+      "process_alive": true,
+      "latest_step": 2801736,
+      "metrics_age_seconds": 1.4,
+      "latest_evaluations": [
+        {
+          "step": 2732768,
+          "eval_return": -0.089583339728415,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 2757768,
+          "eval_return": -0.1374999988824129,
+          "eval_episodes": 20.0
+        },
+        {
+          "step": 2782768,
+          "eval_return": -0.1604166679084301,
+          "eval_episodes": 20.0
+        }
+      ],
+      "nonfinite_core_metrics": [],
+      "nonfinite_auxiliary_metrics": [],
+      "checkpoint_metadata": null,
+      "checkpoints": [
+        {
+          "name": "latest_model.pt",
+          "bytes": 45835840
+        },
+        {
+          "name": "training_state.pt",
+          "bytes": 127972546
+        }
+      ]
+    }
+  ],
+  "completed": [
+    "persistent_ssm_v2_repeat_medium_s0",
+    "persistent_ssm_v2_repeat_easy_s0",
+    "persistent_ssm_v2_repeat_hard_s0",
+    "r2i_repeat_easy_s0_cuda",
+    "r2i_repeat_medium_s0_cuda",
+    "r2i_recipe_reference_repeat_easy_s0",
+    "r2i_recipe_resetfix_repeat_easy_s0",
+    "r2i_recipe_reference_repeat_medium_s0",
+    "r2i_recipe_resetfix_repeat_medium_s0",
+    "dreamerv3_v1_integration_easy_timer_s0",
+    "dreamerv3_size12m_repeat_easy_s0",
+    "dreamerv3_size12m_repeat_medium_s0",
+    "dreamerv3_size12m_repeat_hard_s0",
+    "persistent_ssm_v3_longseq_integration_easy_s0"
+  ],
+  "failed": [
+    "r2i_repeat_easy_s0",
+    "r2i_repeat_medium_s0",
+    "persistent_ssm_repeat_medium_s0",
+    "dreamerv3_v1_integration_easy_s0"
+  ],
+  "pending": [
+    "r2i_repeat_easy_rewardscale48_s0",
+    "persistent_ssm_repeat_easy_s0",
+    "persistent_ssm_repeat_hard_s0",
+    "mcn_repeat_medium_tau160_stepreset0_dendreset0_s0",
+    "mcn_repeat_medium_tau160_stepreset1_dendreset1_s0",
+    "mcn_repeat_medium_tau160_stepreset1_dendreset0_s0",
+    "mcn_repeat_medium_tau160_stepreset0_dendreset1_s0",
+    "mcn_repeat_medium_tau2_stepreset0_dendreset0_s0",
+    "mcn_repeat_medium_tau8_stepreset0_dendreset0_s0",
+    "mcn_repeat_medium_tau32_stepreset0_dendreset0_s0",
+    "mcn_repeat_medium_tau2_stepreset1_dendreset1_s0",
+    "mcn_repeat_medium_tau2_stepreset1_dendreset0_s0",
+    "mcn_repeat_medium_tau2_stepreset0_dendreset1_s0",
+    "mcn_repeat_medium_tau8_stepreset1_dendreset1_s0",
+    "mcn_repeat_medium_tau8_stepreset1_dendreset0_s0",
+    "mcn_repeat_medium_tau8_stepreset0_dendreset1_s0",
+    "mcn_repeat_medium_tau32_stepreset1_dendreset1_s0",
+    "mcn_repeat_medium_tau32_stepreset1_dendreset0_s0",
+    "mcn_repeat_medium_tau32_stepreset0_dendreset1_s0"
+  ],
+  "gpu": "0, 0, 0, 70.52\n1, 0, 0, 68.92\n2, 50703, 97, 129.42\n3, 0, 0, 72.89\n4, 0, 0, 71.83\n5, 0, 0, 71.56\n6, 0, 0, 71.08\n7, 0, 0, 73.89\n"
+}

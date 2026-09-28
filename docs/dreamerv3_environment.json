@@ -1,0 +1,7 @@
+{
+  "baseline": "DreamerV3",
+  "jax": "0.4.33",
+  "devices": [
+    "cuda:0"
+  ]
+}

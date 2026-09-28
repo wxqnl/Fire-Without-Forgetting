@@ -1,0 +1,518 @@
+[
+  {
+    "query": "memory-maze",
+    "status": 200,
+    "response": {
+      "success": true,
+      "request_id": "2de01439-eac2-4cb2-8ff1-a00f30435d2c",
+      "data": {
+        "datasets": [],
+        "total_count": 0,
+        "page_number": 1,
+        "page_size": 50
+      }
+    }
+  },
+  {
+    "query": "memory_maze",
+    "status": 200,
+    "response": {
+      "success": true,
+      "request_id": "0be75f72-ccd6-453c-b0ae-cc1f39470301",
+      "data": {
+        "datasets": [],
+        "total_count": 0,
+        "page_number": 1,
+        "page_size": 50
+      }
+    }
+  },
+  {
+    "query": "maze",
+    "status": 200,
+    "response": {
+      "success": true,
+      "request_id": "0237da32-6dd7-44e2-bca9-111e463c799c",
+      "data": {
+        "datasets": [
+          {
+            "id": "meituan-longcat/SOP-Maze",
+            "display_name": "SOP-Maze",
+            "description": "SOP-Maze is a benchmark designed to evaluate the comprehensive capabilities of large language models (LLMs) in executing tasks that follow Standard Operating Procedures (SOPs).",
+            "file_size": 7845713,
+            "downloads": 412,
+            "likes": 0,
+            "license": "Apache License 2.0",
+            "tasks": [],
+            "created_at": "2025-11-14T09:53:42Z",
+            "last_modified": "2025-11-17T08:44:30Z",
+            "tags": [
+              "license:Apache License 2.0"
+            ],
+            "private": false,
+            "gated": false,
+            "login_required": false
+          },
+          {
+            "id": "sapientinc/maze-30x30-hard-1k",
+            "display_name": "maze-30x30-hard-1k",
+            "description": "",
+            "file_size": 3618575,
+            "downloads": 186,
+            "likes": 0,
+            "license": "Apache License 2.0",
+            "tasks": [],
+            "created_at": "2025-08-11T01:34:30Z",
+            "last_modified": "2025-08-11T01:38:36Z",
+            "tags": [
+              "license:Apache License 2.0"
+            ],
+            "private": false,
+            "gated": false,
+            "login_required": false
+          },
+          {
+            "id": "AI-ModelScope/SocialMaze",
+            "display_name": "SocialMaze",
+            "description": "",
+            "file_size": 275634834,
+            "downloads": 609,
+            "likes": 0,
+            "license": "Apache License 2.0",
+            "tasks": [],
+            "created_at": "2025-05-18T03:00:59Z",
+            "last_modified": "2025-05-18T03:03:31Z",
+            "tags": [
+              "license:Apache License 2.0"
+            ],
+            "private": false,
+            "gated": false,
+            "login_required": false
+          },
+          {
+            "id": "polymathic-ai/acoustic_scattering_maze",
+            "display_name": "acoustic_scattering_maze",
+            "description": "",
+            "file_size": 319619538055,
+            "downloads": 149,
+            "likes": 0,
+            "license": "cc-by-4.0",
+            "tasks": [],
+            "created_at": "2025-11-24T02:31:41Z",
+            "last_modified": "2025-11-24T03:03:03Z",
+            "tags": [
+              "license:cc-by-4.0",
+              "custom_tag:physics"
+            ],
+            "private": false,
+            "gated": false,
+            "login_required": false
+          },
+          {
+            "id": "MBZUAI/SocialMaze",
+            "display_name": "SocialMaze",
+            "description": "",
+            "file_size": 275634545,
+            "downloads": 635,
+            "likes": 0,
+            "license": "Apache License 2.0",
+            "tasks": [],
+            "created_at": "2025-05-15T05:00:33Z",
+            "last_modified": "2025-05-15T05:05:46Z",
+            "tags": [
+              "license:Apache License 2.0"
+            ],
+            "private": false,
+            "gated": false,
+            "login_required": false
+          },
+          {
+            "id": "multimodal-reasoning-lab/Maze",
+            "display_name": "Maze",
+            "description": "",
+            "file_size": 5958262031,
+            "downloads": 290,
+            "likes": 0,
+            "license": "Apache License 2.0",
+            "tasks": [],
+            "created_at": "2025-08-01T11:52:01Z",
+            "last_modified": "2025-08-01T11:54:32Z",
+            "tags": [
+              "license:Apache License 2.0"
+            ],
+            "private": false,
+            "gated": false,
+            "login_required": false
+          },
+          {
+            "id": "laion/strategic_game_maze",
+            "display_name": "strategic_game_maze",
+            "description": "",
+            "file_size": 80967013473,
+            "downloads": 73,
+            "likes": 0,
+            "license": "cc-by-4.0",
+            "tasks": [],
+            "created_at": "2025-10-03T04:20:44Z",
+            "last_modified": "2025-10-09T23:01:31Z",
+            "tags": [
+              "license:cc-by-4.0"
+            ],
+            "private": false,
+            "gated": false,
+            "login_required": false
+          },
+          {
+            "id": "SakanaAI/mazes-small",
+            "display_name": "mazes-small",
+            "description": "",
+            "file_size": 1397013,
+            "downloads": 140,
+            "likes": 0,
+            "license": "apache-2.0",
+            "tasks": [],
+            "created_at": "2025-10-14T05:48:59Z",
+            "last_modified": "2025-10-14T05:51:40Z",
+            "tags": [
+              "license:apache-2.0"
+            ],
+            "private": false,
+            "gated": false,
+            "login_required": false
+          },
+          {
+            "id": "SakanaAI/mazes-medium",
+            "display_name": "mazes-medium",
+            "description": "",
+            "file_size": 10813033,
+            "downloads": 72,
+            "likes": 0,
+            "license": "Apache License 2.0",
+            "tasks": [],
+            "created_at": "2025-10-14T05:48:07Z",
+            "last_modified": "2025-10-14T06:02:48Z",
+            "tags": [
+              "license:Apache License 2.0"
+            ],
+            "private": false,
+            "gated": false,
+            "login_required": false
+          },
+          {
+            "id": "SakanaAI/mazes-large",
+            "display_name": "mazes-large",
+            "description": "",
+            "file_size": 24712583,
+            "downloads": 79,
+            "likes": 0,
+            "license": "Apache License 2.0",
+            "tasks": [],
+            "created_at": "2025-10-14T05:46:22Z",
+            "last_modified": "2025-10-14T07:13:09Z",
+            "tags": [
+              "license:Apache License 2.0"
+            ],
+            "private": false,
+            "gated": false,
+            "login_required": false
+          },
+          {
+            "id": "SakanaAI/mazes-extralarge",
+            "display_name": "mazes-extralarge",
+            "description": "",
+            "file_size": 121031444,
+            "downloads": 71,
+            "likes": 0,
+            "license": "Apache License 2.0",
+            "tasks": [],
+            "created_at": "2025-10-14T05:46:42Z",
+            "last_modified": "2025-10-14T06:02:33Z",
+            "tags": [
+              "license:Apache License 2.0"
+            ],
+            "private": false,
+            "gated": false,
+            "login_required": false
+          },
+          {
+            "id": "Shanghai_AI_Laboratory/ETCHR-GRPO-10K",
+            "display_name": "ETCHR-GRPO-10K",
+            "description": "",
+            "file_size": 1831142027,
+            "downloads": 86,
+            "likes": 0,
+            "license": "mit",
+            "tasks": [],
+            "created_at": "2026-05-23T02:08:26Z",
+            "last_modified": "2026-05-25T08:34:22Z",
+            "tags": [
+              "license:mit",
+              "custom_tag:Jigsaw Puzzle",
+              "custom_tag:Fine-grained Perception",
+              "custom_tag:Chart Understanding",
+              "custom_tag:Spatial Understanding",
+              "custom_tag:Maze Solving"
+            ],
+            "private": false,
+            "gated": false,
+            "login_required": false
+          },
+          {
+            "id": "Shanghai_AI_Laboratory/ETCHR-SFT-400K",
+            "display_name": "ETCHR-SFT-400K",
+            "description": "",
+            "file_size": 0,
+            "downloads": 29,
+            "likes": 0,
+            "license": "mit",
+            "tasks": [],
+            "created_at": "2026-05-24T02:07:49Z",
+            "last_modified": "2026-05-24T02:08:14Z",
+            "tags": [
+              "license:mit",
+              "custom_tag:Jigsaw Puzzle",
+              "custom_tag:Fine-grained Perception",
+              "custom_tag:Chart Understanding",
+              "custom_tag:Spatial Understanding",
+              "custom_tag:Maze Solving"
+            ],
+            "private": false,
+            "gated": false,
+            "login_required": false
+          }
+        ],
+        "total_count": 13,
+        "page_number": 1,
+        "page_size": 50
+      }
+    }
+  },
+  {
+    "query": "MemoryMaze",
+    "status": 200,
+    "response": {
+      "success": true,
+      "request_id": "98ecbe90-18f3-4299-a9a9-febd26007572",
+      "data": {
+        "datasets": [],
+        "total_count": 0,
+        "page_number": 1,
+        "page_size": 50
+      }
+    }
+  },
+  {
+    "query": "9x9",
+    "status": 200,
+    "response": {
+      "success": true,
+      "request_id": "707c3104-320c-4a38-8247-373c2bf0e9cd",
+      "data": {
+        "datasets": [
+          {
+            "id": "katamonk/kata18b_9x9_shuffle",
+            "display_name": "kata18b_9x9_shuffle",
+            "description": "",
+            "file_size": 28940701002,
+            "downloads": 12,
+            "likes": 0,
+            "license": "Apache License 2.0",
+            "tasks": [],
+            "created_at": "2025-09-14T10:03:28Z",
+            "last_modified": "2025-09-14T10:31:07Z",
+            "tags": [
+              "license:Apache License 2.0"
+            ],
+            "private": false,
+            "gated": false,
+            "login_required": false
+          },
+          {
+            "id": "katamonk/kata18b_9x9_600_150",
+            "display_name": "kata18b_9x9_600_150",
+            "description": "",
+            "file_size": 28189680097,
+            "downloads": 18,
+            "likes": 0,
+            "license": "Apache License 2.0",
+            "tasks": [],
+            "created_at": "2025-08-21T09:02:43Z",
+            "last_modified": "2025-09-24T09:36:24Z",
+            "tags": [
+              "license:Apache License 2.0"
+            ],
+            "private": false,
+            "gated": false,
+            "login_required": false
+          },
+          {
+            "id": "empero-ai/tasklist-qwen3.5-9B-7500x-unfiltered",
+            "display_name": "tasklist-qwen3.5-9B-7500x-unfiltered",
+            "description": "",
+            "file_size": 7232787,
+            "downloads": 8,
+            "likes": 0,
+            "license": "other",
+            "tasks": [],
+            "created_at": "2026-06-22T01:41:14Z",
+            "last_modified": "2026-06-22T01:49:15Z",
+            "tags": [
+              "license:other"
+            ],
+            "private": false,
+            "gated": false,
+            "login_required": false
+          },
+          {
+            "id": "greghavens/vcf-9x-version-tagged-sft",
+            "display_name": "vcf-9x-version-tagged-sft",
+            "description": "",
+            "file_size": 0,
+            "downloads": 42,
+            "likes": 0,
+            "license": "other",
+            "tasks": [],
+            "created_at": "2026-09-02T02:17:51Z",
+            "last_modified": "2026-09-02T02:28:19Z",
+            "tags": [
+              "license:other",
+              "custom_tag:sft",
+              "custom_tag:synthetic",
+              "custom_tag:version-aware",
+              "custom_tag:infrastructure",
+              "custom_tag:vmware",
+              "custom_tag:vmware-cloud-foundation"
+            ],
+            "private": false,
+            "gated": false,
+            "login_required": false
+          },
+          {
+            "id": "sigmoid/katago-nogo-2025",
+            "display_name": "KataGo不围棋数据集2025",
+            "description": "KataGo “不围棋”数据集。包含<=9x9和<=13x13的两部分数据集。源码与训练脚本https://github.com/hzyhhzy/KataGomo/tree/Nogo2025",
+            "file_size": 14894593444,
+            "downloads": 112,
+            "likes": 1,
+            "license": "Apache License 2.0",
+            "tasks": [],
+            "created_at": "2025-09-26T19:23:01Z",
+            "last_modified": "2025-09-26T20:57:42Z",
+            "tags": [
+              "license:Apache License 2.0"
+            ],
+            "private": false,
+            "gated": false,
+            "login_required": false
+          },
+          {
+            "id": "evelyn007/DoubanBookHigh-scoringNovelsDataset2026",
+            "display_name": "豆瓣读书高分小说信息数据集（2026）",
+            "description": "豆瓣读书高分小说信息数据集(2026)DoubanBookHigh-scoringNovelsDataset(2026)本数据集从豆瓣读书(book.douban.com)标签\"小说\"下按评分排序取前15页(共约300条)爬取整理而成,适用于图书推荐、评分预测、文本摘要等方向的教学与实验用途.数据来源:豆瓣读书https://book.douban.com/tag/小说;筛选条件:tag=小说,按评分降序,取前15页(start=0~280,每页20条);采集工具:WebScraper/八爪鱼采集器;采集方式:列表页+图书详情页两级爬取(内容简介需进详情页获取).数据采集时间:2026年x月x日.理论条数:15页×20条=300条;实际采集:约295–300条(豆瓣偶因旧书下架导致单页不足20条,属源站问题);完整度≥98%;字段完整情况:书名、评分、作者、评价人数、定价5项在列表页获取,完整率近100%;内容简介来自详情页,极少数冷门书详情页无intro字段,约为空,已保留空值而非丢弃该行.字段说明:title(string)书名;rating(float)豆瓣评分(0–10,如9.1);author(string)作者(含译者,格式如\"玛格丽特·米切尔/李美华\");summary(string)内容简介(截取自详情页\"内容简介\"段落,部分书籍为空);votes(int)评价人数(如\"12345人评价\"中的12345);price(string)定价(如\"128.00元\",取自pub字段末项).License:CC-BY4.0.免责声明:本数据集为课程作业教学用途采集,数据归豆瓣所有,仅用于学习研究,不得用于商业用途.如涉及侵权请联系删除.",
+            "file_size": 94798,
+            "downloads": 39,
+            "likes": 0,
+            "license": "Apache License 2.0",
+            "tasks": [],
+            "created_at": "2026-07-08T20:42:56Z",
+            "last_modified": "2026-07-08T20:46:58Z",
+            "tags": [
+              "license:Apache License 2.0"
+            ],
+            "private": false,
+            "gated": false,
+            "login_required": false
+          },
+          {
+            "id": "Jasonnn258/rpent_g05_g06_trajectory_bundle",
+            "display_name": "rpent_g05_g06_trajectory_bundle",
+            "description": "RPent Stage G0.5/G0.6 final dataset: 180 matched episodes (P0/P2/P4 x t3/t5/t9 x s1-s20) text-level trajectory bundle",
+            "file_size": 0,
+            "downloads": 3,
+            "likes": 0,
+            "license": "Apache-2.0",
+            "tasks": [],
+            "created_at": "2026-09-23T06:18:11Z",
+            "last_modified": "2026-09-23T06:26:32Z",
+            "tags": [
+              "license:Apache-2.0"
+            ],
+            "private": false,
+            "gated": false,
+            "login_required": false
+          },
+          {
+            "id": "swordoffer/global-wheat-challenge-2021",
+            "display_name": "2021 年全球小麦头数据集",
+            "description": "该数据集由6000多张1024x1024像素的图像组成，包含300k+独特的麦头，并带有相应的边界框。这些图像来自 11 个国家/地区，涵盖了 44 个独特的测量会话。测量会话是在同一位置，在相干的时间戳（通常为几个小时）内，使用特定传感器采集的一组图像。与 Kaggle 上的 2020 年比赛相比，它代表了 4 个新国家、22 个新测量会话、1200 张新图像和 120k 个新麦头。如此多的新情况将有助于提高测试数据集的质量。2020 年的数据集由来自 7 个国家的 9 个机构的研究人员和学生进行标记。这些额外数据已由道德人工智能标签公司 Human in the Loop 标记。我们希望这些变化将有助于找到最强大的算法！任务是定位每个图像中包含的麦头。目标是获得一个对形状、照明、传感器和位置变化具有鲁棒性的模型。为每个图像提供一组框坐标。训练数据集将在欧洲和加拿大获取的图像，涵盖约 4000 张图像，测试数据集将由来自北美（加拿大除外）、亚洲、大洋洲和非洲的图像组成，涵盖约 2000 张图像。它代表了 7 个可用于培训的新测量会话，但测试有 17 个新的测量会话！",
+            "file_size": 10215194349,
+            "downloads": 120,
+            "likes": 0,
+            "license": "MIT License",
+            "tasks": [],
+            "created_at": "2025-09-11T08:30:58Z",
+            "last_modified": "2025-09-11T10:34:30Z",
+            "tags": [
+              "license:MIT License"
+            ],
+            "private": false,
+            "gated": false,
+            "login_required": false
+          },
+          {
+            "id": "zwRuan/easy-mem-lme-controlled-ingest-qwen3.5-9b",
+            "display_name": "Easy-Mem LME Controlled Ingest Qwen3.5-9B",
+            "description": "Pre-built LME controlled/hybrid-filler ingest DBs (Qwen3.5-9B manager). N0-N8 x add_all/relation_decision/mem0/evermemos.",
+            "file_size": 5369732609,
+            "downloads": 275,
+            "likes": 0,
+            "license": "Apache-2.0",
+            "tasks": [],
+            "created_at": "2026-08-08T11:09:55Z",
+            "last_modified": "2026-08-08T15:43:54Z",
+            "tags": [
+              "license:Apache-2.0",
+              "custom_tag:longmemeval",
+              "custom_tag:memory",
+              "custom_tag:qwen"
+            ],
+            "private": false,
+            "gated": false,
+            "login_required": false
+          }
+        ],
+        "total_count": 9,
+        "page_number": 1,
+        "page_size": 50
+      }
+    }
+  },
+  {
+    "query": "jurgisp",
+    "status": 200,
+    "response": {
+      "success": true,
+      "request_id": "7b7d016a-a62e-4fcc-aaa9-96ab610001d9",
+      "data": {
+        "datasets": [],
+        "total_count": 0,
+        "page_number": 1,
+        "page_size": 50
+      }
+    }
+  },
+  {
+    "query": "memory maze",
+    "status": 200,
+    "response": {
+      "success": true,
+      "request_id": "2a61b7a4-3744-4752-aaea-5e95e05df4dc",
+      "data": {
+        "datasets": [],
+        "total_count": 0,
+        "page_number": 1,
+        "page_size": 50
+      }
+    }
+  }
+]

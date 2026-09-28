@@ -1,0 +1,92 @@
+[
+  {
+    "suite": "popgym",
+    "task": "RepeatPreviousEasy",
+    "observation_shape": [
+      4
+    ],
+    "episode_length": 51,
+    "completed": true
+  },
+  {
+    "suite": "popgym",
+    "task": "RepeatPreviousMedium",
+    "observation_shape": [
+      4
+    ],
+    "episode_length": 103,
+    "completed": true
+  },
+  {
+    "suite": "popgym",
+    "task": "RepeatPreviousHard",
+    "observation_shape": [
+      4
+    ],
+    "episode_length": 155,
+    "completed": true
+  },
+  {
+    "suite": "popgym",
+    "task": "AutoencodeEasy",
+    "observation_shape": [
+      6
+    ],
+    "episode_length": 103,
+    "completed": true
+  },
+  {
+    "suite": "popgym",
+    "task": "AutoencodeMedium",
+    "observation_shape": [
+      6
+    ],
+    "episode_length": 207,
+    "completed": true
+  },
+  {
+    "suite": "popgym",
+    "task": "AutoencodeHard",
+    "observation_shape": [
+      6
+    ],
+    "episode_length": 311,
+    "completed": true
+  },
+  {
+    "suite": "popgym",
+    "task": "ConcentrationEasy",
+    "observation_shape": [
+      156
+    ],
+    "episode_length": 104,
+    "completed": true
+  },
+  {
+    "suite": "bsuite",
+    "task": "memory_len/0",
+    "observation_shape": [
+      3
+    ],
+    "episode_length": 2,
+    "completed": true
+  },
+  {
+    "suite": "bsuite",
+    "task": "memory_len/22",
+    "observation_shape": [
+      3
+    ],
+    "episode_length": 101,
+    "completed": true
+  },
+  {
+    "suite": "bsuite",
+    "task": "discounting_chain/0",
+    "observation_shape": [
+      2
+    ],
+    "episode_length": 100,
+    "completed": true
+  }
+]

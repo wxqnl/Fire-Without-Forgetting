@@ -1,0 +1,12 @@
+{"step": 33904, "train_action_steps": 32840.0, "update_count": 0.0, "eval_return": 0.3, "eval_return_std": 0.9539392014169455, "eval_episodes": 20.0}
+{"step": 51688, "train_action_steps": 50072.0, "update_count": 270.0, "eval_return": 0.0, "eval_return_std": 1.0, "eval_episodes": 20.0}
+{"step": 77480, "train_action_steps": 75056.0, "update_count": 660.0, "eval_return": 0.0, "eval_return_std": 1.0, "eval_episodes": 20.0}
+{"step": 103272, "train_action_steps": 100040.0, "update_count": 1050.0, "eval_return": -0.1, "eval_return_std": 0.99498743710662, "eval_episodes": 20.0}
+{"step": 129064, "train_action_steps": 125024.0, "update_count": 1441.0, "eval_return": 0.0, "eval_return_std": 1.0, "eval_episodes": 20.0}
+{"step": 154856, "train_action_steps": 150016.0, "update_count": 1831.0, "eval_return": 0.6, "eval_return_std": 0.8000000000000002, "eval_episodes": 20.0}
+{"step": 180648, "train_action_steps": 175000.0, "update_count": 2222.0, "eval_return": -0.2, "eval_return_std": 0.9797958971132713, "eval_episodes": 20.0}
+{"step": 206544, "train_action_steps": 200088.0, "update_count": 2614.0, "eval_return": 0.2, "eval_return_std": 0.9797958971132714, "eval_episodes": 20.0}
+{"step": 232336, "train_action_steps": 225072.0, "update_count": 3004.0, "eval_return": 0.0, "eval_return_std": 1.0, "eval_episodes": 20.0}
+{"step": 258128, "train_action_steps": 250056.0, "update_count": 3394.0, "eval_return": 0.2, "eval_return_std": 0.9797958971132714, "eval_episodes": 20.0}
+{"step": 283920, "train_action_steps": 275040.0, "update_count": 3785.0, "eval_return": 0.4, "eval_return_std": 0.9165151389911679, "eval_episodes": 20.0}
+{"step": 309712, "train_action_steps": 300032.0, "update_count": 4175.0, "eval_return": -0.3, "eval_return_std": 0.9539392014169458, "eval_episodes": 20.0}

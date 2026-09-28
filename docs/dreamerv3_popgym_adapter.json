@@ -1,0 +1,45 @@
+{
+  "Easy": {
+    "transitions": 624,
+    "complete_episodes": 12,
+    "reward_alignment": "exact official environment within float32 rounding",
+    "returns": [
+      -0.3749999999999999,
+      -0.5833333333333333,
+      -0.4166666666666665,
+      -0.625,
+      -0.45833333333333315,
+      -0.45833333333333315,
+      -0.3749999999999999,
+      -0.4166666666666665,
+      -0.3749999999999999,
+      -0.4999999999999998,
+      -0.5416666666666665,
+      -0.5416666666666665
+    ]
+  },
+  "Medium": {
+    "transitions": 624,
+    "complete_episodes": 6,
+    "reward_alignment": "exact official environment within float32 rounding",
+    "returns": [
+      -0.6111111111111108,
+      -0.6944444444444439,
+      -0.6666666666666662,
+      -0.4444444444444446,
+      -0.4722222222222224,
+      -0.5000000000000001
+    ]
+  },
+  "Hard": {
+    "transitions": 624,
+    "complete_episodes": 4,
+    "reward_alignment": "exact official environment within float32 rounding",
+    "returns": [
+      -0.47826086956521713,
+      -0.4999999999999997,
+      -0.43478260869565194,
+      -0.5652173913043478
+    ]
+  }
+}

@@ -1,0 +1,233 @@
+--- official/dreamerv3/configs.yaml
++++ project/dreamerv3/configs.yaml
+@@ -51,6 +51,7 @@
+     train_ratio: 32.0
+     log_every: 120
+     report_every: 300
++    eval_every: 25000
+     save_every: 900
+     envs: 16
+     eval_envs: 4
+@@ -218,3 +219,14 @@
+     .*\.hidden: 3
+     .*\.blocks: 4
+     .*\.depth: 2
++
++# Project protocol: complete official size12m architecture is selected separately.
++fwf_popgym:
++  task: popgym_RepeatPreviousEasy
++  script: train_eval
++  batch_size: 4
++  batch_length: 1024
++  report_length: 32
++  logger: {outputs: [jsonl], timer: False}
++  run: {steps: 5000000, train_ratio: 64, envs: 8, eval_envs: 1, eval_eps: 20, eval_every: 25000, log_every: 60, report_every: 300, save_every: 600, debug: True}
++  jax: {prealloc: False}
+--- official/dreamerv3/main.py
++++ project/dreamerv3/main.py
+@@ -80,7 +80,7 @@
+         bind(make_replay, config, 'replay'),
+         bind(make_replay, config, 'eval_replay', 'eval'),
+         bind(make_env, config),
+-        bind(make_env, config),
++        bind(make_env, config, evaluation=True),
+         bind(make_stream, config),
+         bind(make_logger, config),
+         args)
+@@ -192,7 +192,7 @@
+     directory /= f'{config.replica:05}'
+   kwargs = dict(
+       length=length, capacity=int(capacity), online=config.replay.online,
+-      chunksize=config.replay.chunksize, directory=directory)
++      chunksize=config.replay.chunksize, directory=directory, save_wait=True)
+ 
+   if config.replay.fracs.uniform < 1 and mode == 'train':
+     assert config.jax.compute_dtype in ('bfloat16', 'float32'), (
+@@ -209,8 +209,12 @@
+   return embodied.replay.Replay(**kwargs)
+ 
+ 
+-def make_env(config, index, **overrides):
++def make_env(config, index, evaluation=False, **overrides):
+   suite, task = config.task.split('_', 1)
++  if suite == 'popgym':
++    from embodied.envs.popgym import POPGym
++    seed = config.seed + index + (1000000 if evaluation else 0)
++    return wrap_env(POPGym(task, seed=seed), config)
+   if suite == 'memmaze':
+     from embodied.envs import from_gym
+     import memory_maze  # noqa
+--- official/embodied/run/train_eval.py
++++ project/embodied/run/train_eval.py
+@@ -1,4 +1,7 @@
+ import collections
++import json
++import pathlib
++import time
+ from functools import partial as bind
+ 
+ import elements
+@@ -31,6 +34,8 @@
+   train_epstats = elements.Agg()
+   eval_episodes = collections.defaultdict(elements.Agg)
+   eval_epstats = elements.Agg()
++  eval_returns = []
++  started_at = time.time()
+   policy_fps = elements.FPS()
+   train_fps = elements.FPS()
+ 
+@@ -60,10 +65,12 @@
+         episode.add(key + '/sum', value, agg='sum')
+     if tran['is_last']:
+       result = episode.result()
++      if mode == 'eval':
++        eval_returns.append(float(result['score']))
+       logger.add({
+           'score': result.pop('score'),
+           'length': result.pop('length'),
+-      }, prefix='episode')
++      }, prefix='episode' if mode == 'train' else 'eval_episode')
+       rew = result.pop('rewards')
+       if len(rew) > 1:
+         result['reward_rate'] = (np.abs(rew[1:] - rew[:-1]) >= 0.01).mean()
+@@ -100,6 +107,9 @@
+       train_fps.step(batch_steps)
+       if 'replay' in outs:
+         replay_train.update(outs['replay'])
++      for key, value in mets.items():
++        if np.asarray(value).size == 1 and not np.isfinite(value).all():
++          raise FloatingPointError(f'Nonfinite training metric {key}: {value}')
+       agg.add(mets, prefix='train')
+   driver_train.on_step(trainfn)
+ 
+@@ -111,7 +121,7 @@
+       agg.add(mets)
+     return carry, agg.result()
+ 
+-  cp = elements.Checkpoint(logdir / 'ckpt')
++  cp = elements.Checkpoint(logdir / 'ckpt', keep=None, step=step)
+   cp.step = step
+   cp.agent = agent
+   cp.replay_train = replay_train
+@@ -126,13 +136,31 @@
+   train_policy = lambda *args: agent.policy(*args, mode='train')
+   eval_policy = lambda *args: agent.policy(*args, mode='eval')
+   driver_train.reset(agent.init_policy)
++  last_eval = -args.eval_every
++
++  def evaluate():
++    eval_returns.clear()
++    driver_eval.reset(agent.init_policy)
++    driver_eval(eval_policy, episodes=args.eval_eps)
++    assert len(eval_returns) == args.eval_eps, len(eval_returns)
++    record = dict(step=int(step), updates=int(agent.n_updates),
++                  eval_return=float(np.mean(eval_returns)),
++                  eval_return_std=float(np.std(eval_returns)),
++                  eval_episodes=len(eval_returns), returns=eval_returns.copy(),
++                  elapsed_seconds=time.time() - started_at)
++    with (pathlib.Path(args.logdir) / 'evaluations.jsonl').open('a') as file:
++      file.write(json.dumps(record) + '\n')
++    logger.add({k: v for k, v in record.items() if k not in ('step', 'returns')})
++    logger.add(eval_epstats.result(), prefix='eval_epstats')
++    logger.write()
++    print('Independent evaluation:', json.dumps(record), flush=True)
++
+   while step < args.steps:
++    if int(step) - last_eval >= args.eval_every:
++      evaluate()
++      last_eval = int(step)
+ 
+     if should_report(step):
+-      print('Evaluation')
+-      driver_eval.reset(agent.init_policy)
+-      driver_eval(eval_policy, episodes=args.eval_eps)
+-      logger.add(eval_epstats.result(), prefix='epstats')
+       if len(replay_train):
+         carry_report, mets = reportfn(carry_report, stream_report)
+         logger.add(mets, prefix='report')
+@@ -144,6 +172,7 @@
+ 
+     if should_log(step):
+       logger.add(agg.result())
++      logger.add({'updates': int(agent.n_updates)})
+       logger.add(train_epstats.result(), prefix='epstats')
+       logger.add(replay_train.stats(), prefix='replay')
+       logger.add(usage.stats(), prefix='usage')
+@@ -155,4 +184,17 @@
+     if should_save(step):
+       cp.save()
+ 
++  if int(step) != last_eval:
++    evaluate()
++  logger.add(agg.result())
++  logger.add({'updates': int(agent.n_updates)})
++  logger.write()
++  cp.save()
++  latest = pathlib.Path(str(cp.latest()))
++  assert (latest / 'done').exists(), latest
++  (pathlib.Path(args.logdir) / 'final_checkpoint.json').write_text(json.dumps(
++      dict(step=int(step), updates=int(agent.n_updates), path=str(latest),
++           synchronous=True, elapsed_seconds=time.time()-started_at), indent=2))
++  driver_train.close()
++  driver_eval.close()
+   logger.close()
+--- official/embodied/jax/internal.py
++++ project/embodied/jax/internal.py
+@@ -91,7 +91,7 @@
+         '--xla_enable_async_all_gather=true',
+     ]
+   if xlaflags:
+-    os.environ['XLA_FLAGS'] = ' '.join(xlaflags)
++    os.environ['XLA_FLAGS'] = ' '.join([os.environ.get('XLA_FLAGS', ''), *xlaflags])
+ 
+   if num_processes > 1 and platform != 'tpu':
+     # Note that the process_id is unrelated to the jax.process_index() that JAX
+--- official/embodied/envs/popgym.py
++++ project/embodied/envs/popgym.py
+@@ -0,0 +1,46 @@
++"""Gymnasium POPGym adapter; no access to privileged benchmark state."""
++import functools
++import elements
++import embodied
++import gymnasium as gym
++import numpy as np
++import popgym  # Register the official environments.
++
++class POPGym(embodied.Env):
++  def __init__(self, task, seed=0):
++    self._env = gym.make(f"popgym-{task}-v0")
++    assert isinstance(self._env.observation_space, gym.spaces.Discrete)
++    assert isinstance(self._env.action_space, gym.spaces.Discrete)
++    self._seed = seed
++    self._done = True
++    self._eye = np.eye(self._env.observation_space.n, dtype=np.float32)
++
++  @functools.cached_property
++  def obs_space(self):
++    return {
++        'vector': elements.Space(np.float32, (len(self._eye),), 0, 1),
++        'reward': elements.Space(np.float32),
++        'is_first': elements.Space(bool),
++        'is_last': elements.Space(bool),
++        'is_terminal': elements.Space(bool)}
++
++  @functools.cached_property
++  def act_space(self):
++    return {'action': elements.Space(np.int32, (), 0, self._env.action_space.n),
++            'reset': elements.Space(bool)}
++
++  def step(self, action):
++    first = bool(action['reset']) or self._done
++    if first:
++      obs, _ = self._env.reset(seed=self._seed)
++      self._seed = None
++      reward, terminal, truncated = 0.0, False, False
++    else:
++      obs, reward, terminal, truncated, _ = self._env.step(int(action['action']))
++    self._done = bool(terminal or truncated)
++    return dict(vector=self._eye[obs].copy(), reward=np.float32(reward),
++                is_first=np.bool_(first), is_last=np.bool_(self._done),
++                is_terminal=np.bool_(terminal))
++
++  def close(self):
++    self._env.close()

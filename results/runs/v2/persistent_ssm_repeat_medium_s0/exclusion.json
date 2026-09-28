@@ -1,0 +1,6 @@
+{
+  "reason": "All four real observations mapped to the same zero-spike encoder output under inherited T=1 feedforward LIF tau=2. This is a degenerate frontend configuration; not a valid test of the proposed memory architecture.",
+  "valid_for_method_comparison": false,
+  "diagnosis": "docs/ssm_v1_encoder_diagnosis.json",
+  "stopped_at": "2026-09-27T21:35:14.873935+08:00"
+}

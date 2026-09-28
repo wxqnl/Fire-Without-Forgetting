@@ -1,0 +1,47 @@
+--- persistent-ssm-v2/dreamer.py
++++ persistent-ssm-longseq-v3/dreamer.py
+@@ -198,7 +198,7 @@
+     suite, task = config.task.split("_", 1)
+     if suite in ("popgym", "bsuite"):
+         from envs.memory_tasks import MemoryTask
+-        seed = config.seed + env_index + (10000 if mode == "eval" else 0)
++        seed = config.seed + env_index + (config.eval_seed_offset if mode == "eval" else 0)
+         env = MemoryTask(suite, task, seed)
+         env = wrappers.OneHotAction(env)
+     elif suite == "dmc":
+@@ -301,7 +301,7 @@
+     eval_eps = tools.load_episodes(directory, limit=1)
+     make = lambda mode: make_env(config, mode)
+     train_envs = [make_env(config, "train", i) for i in range(config.envs)]
+-    eval_envs = [make_env(config, "eval", i) for i in range(config.envs)]
++    eval_envs = [make_env(config, "eval", i) for i in range(config.eval_envs)]
+     if config.parallel:
+         train_envs = [Parallel(env, "process") for env in train_envs]
+         eval_envs = [Parallel(env, "process") for env in eval_envs]
+--- persistent-ssm-v2/configs.yaml
++++ persistent-ssm-longseq-v3/configs.yaml
+@@ -24,6 +24,8 @@
+   task: 'dmc_walker_walk'
+   size: [64, 64]
+   envs: 1
++  eval_envs: 1
++  eval_seed_offset: 10000
+   action_repeat: 2
+   time_limit: 1000
+   grayscale: False
+@@ -268,3 +270,15 @@
+   initial: zeros
+   reset_between_steps: False
+   reset_dendrites: False
++
++# Same full persistent model; next bounded comparison with the restored R2I recipe.
++longseq:
++  steps: 5000000
++  envs: 8
++  eval_envs: 1
++  eval_seed_offset: 1000000
++  batch_size: 4
++  batch_length: 1024
++  dataset_size: 10000000
++  prefill: 32768
++  eval_every: 25000

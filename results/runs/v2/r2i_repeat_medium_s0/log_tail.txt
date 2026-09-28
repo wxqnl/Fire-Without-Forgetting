@@ -1,0 +1,80 @@
+    self.varibs = self._init_varibs(obs_space, act_space)
+  File "/data/Minko/fire-without-forgetting/code/r2i-v2/recall2imagine/jaxagent.py", line 245, in _init_varibs
+    state, varibs = self._init_train(varibs, rng, data['is_first'])
+  File "/data/Minko/fire-without-forgetting/code/r2i-v2/recall2imagine/ninjax.py", line 199, in wrapper
+    created = init(statics, rng, *args, **kw)
+jaxlib.xla_extension.XlaRuntimeError: INTERNAL: XLA requires ptxas version 11.8 or higher
+SimplifiedTraceback: For simplicity, JAX has removed its internal frames from 
+the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to 
+include these.
+
+The above exception was the direct cause of the following exception:
+
+╭───────────────────── Traceback (most recent call last) ──────────────────────╮
+│ /data/Minko/fire-without-forgetting/code/r2i-v2/recall2imagine/train.py:241  │
+│ in <module>                                                                  │
+│                                                                              │
+│   238                                                                        │
+│   239 if __name__ == '__main__':                                             │
+│   240   try:                                                                 │
+│ ❱ 241 │   main()                                                             │
+│   242   except (mujoco.FatalError, EOFError, RuntimeError) as e:             │
+│   243 │   traceback.print_exc()                                              │
+│   244 │   raise                                                              │
+│                                                                              │
+│ /data/Minko/fire-without-forgetting/code/r2i-v2/recall2imagine/train.py:80   │
+│ in main                                                                      │
+│                                                                              │
+│    77 │     env = make_envs(config)                                          │
+│    78 │     eval_env = make_envs(config.update({"envs.amount": 1}), evaluati │
+│    79 │     cleanup += [env, eval_env]                                       │
+│ ❱  80 │     agent = agt.Agent(env.obs_space, env.act_space, step, config)    │
+│    81 │     embodied.run.train_eval(                                         │
+│    82 │   │     agent, env, eval_env, replay, eval_replay, logger, args)     │
+│    83                                                                        │
+│                                                                              │
+│ /data/Minko/fire-without-forgetting/code/r2i-v2/recall2imagine/jaxagent.py:2 │
+│ 0 in __init__                                                                │
+│                                                                              │
+│    17 │   configs = agent_cls.configs                                        │
+│    18 │   inner = agent_cls                                                  │
+│    19 │   def __init__(self, *args, **kwargs):                               │
+│ ❱  20 │     super().__init__(agent_cls, *args, **kwargs)                     │
+│    21   return Agent                                                         │
+│    22                                                                        │
+│    23                                                                        │
+│                                                                              │
+│ /data/Minko/fire-without-forgetting/code/r2i-v2/recall2imagine/jaxagent.py:5 │
+│ 0 in __init__                                                                │
+│                                                                              │
+│    47 │   self._updates = embodied.Counter()                                 │
+│    48 │   self._should_metrics = embodied.when.Every(self.config.metrics_eve │
+│    49 │   self._transform()                                                  │
+│ ❱  50 │   self.varibs = self._init_varibs(obs_space, act_space)              │
+│    51 │   self.sync()                                                        │
+│    52                                                                        │
+│    53   def policy(self, obs, state=None, mode='train'):                     │
+│                                                                              │
+│ /data/Minko/fire-without-forgetting/code/r2i-v2/recall2imagine/jaxagent.py:2 │
+│ 45 in _init_varibs                                                           │
+│                                                                              │
+│   242 │   dims = (self.batch_size, self.batch_length)                        │
+│   243 │   data = self._dummy_batch({**obs_space, **act_space}, dims)         │
+│   244 │   data = self._convert_inps(data, self.train_devices)                │
+│ ❱ 245 │   state, varibs = self._init_train(varibs, rng, data['is_first'])    │
+│   246 │   varibs = self._train(varibs, rng, data, state, init_only=True)     │
+│   247 │   # obs = self._dummy_batch(obs_space, (1,))                         │
+│   248 │   # state, varibs = self._init_policy(varibs, rng, obs['is_first'])  │
+│                                                                              │
+│ /data/Minko/fire-without-forgetting/code/r2i-v2/recall2imagine/ninjax.py:199 │
+│ in wrapper                                                                   │
+│                                                                              │
+│   196 │   statics = tuple(sorted([(k, v) for k, v in kw.items() if k in stat │
+│   197 │   kw = {k: v for k, v in kw.items() if k not in static}              │
+│   198 │   if not hasattr(wrapper, 'keys'):                                   │
+│ ❱ 199 │     created = init(statics, rng, *args, **kw)                        │
+│   200 │     wrapper.keys = set(created.keys())                               │
+│   201 │     for key, value in created.items():                               │
+│   202 │   │   if key not in state:                                           │
+╰──────────────────────────────────────────────────────────────────────────────╯
+XlaRuntimeError: INTERNAL: XLA requires ptxas version 11.8 or higher

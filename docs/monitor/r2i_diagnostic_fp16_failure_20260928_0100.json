@@ -1,0 +1,15 @@
+{
+  "checked_at": "2026-09-28T01:07:54.017415+08:00",
+  "kind": "diagnostic_runtime_failure",
+  "training_runs_affected": false,
+  "exit_code": 139,
+  "precision": "float16",
+  "platform": "CPU",
+  "stage": "after alignment check before first JIT inference batch",
+  "logs": [
+    "logs/r2i_recipe_reference_easy_learned_diagnosis.log",
+    "logs/r2i_recipe_resetfix_easy_learned_diagnosis.log"
+  ],
+  "cause": "CPU FP16 JIT path terminated with SIGSEGV; exact backend cause not established",
+  "next_action": "Use explicit CPU FP32 diagnostic of the identical saved parameters. Label the precision difference; no training configuration change or repeat."
+}

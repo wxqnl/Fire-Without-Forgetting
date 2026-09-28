@@ -1,0 +1,38 @@
+[
+  {
+    "job": "r2i_recipe_resetfix_repeat_easy_s0",
+    "checkpoint": "/data/Minko/fire-without-forgetting/runs/v2/r2i_recipe_resetfix_repeat_easy_s0/checkpoints/20260928T010146_checkpoint.ckpt",
+    "step": 3475160,
+    "updates": 53786,
+    "bytes": 144212617,
+    "agent_saved": true,
+    "replay_metadata_saved": true
+  },
+  {
+    "job": "r2i_recipe_reference_repeat_easy_s0",
+    "checkpoint": "/data/Minko/fire-without-forgetting/runs/v2/r2i_recipe_reference_repeat_easy_s0/checkpoints/20260928T005453_checkpoint.ckpt",
+    "step": 3003936,
+    "updates": 46423,
+    "bytes": 144199660,
+    "agent_saved": true,
+    "replay_metadata_saved": true
+  },
+  {
+    "job": "r2i_recipe_reference_repeat_medium_s0",
+    "checkpoint": "/data/Minko/fire-without-forgetting/runs/v2/r2i_recipe_reference_repeat_medium_s0/checkpoints/20260928T005500_checkpoint.ckpt",
+    "step": 2673528,
+    "updates": 41261,
+    "bytes": 144190501,
+    "agent_saved": true,
+    "replay_metadata_saved": true
+  },
+  {
+    "job": "r2i_recipe_resetfix_repeat_medium_s0",
+    "checkpoint": "/data/Minko/fire-without-forgetting/runs/v2/r2i_recipe_resetfix_repeat_medium_s0/checkpoints/20260928T005503_checkpoint.ckpt",
+    "step": 2834208,
+    "updates": 43771,
+    "bytes": 144194630,
+    "agent_saved": true,
+    "replay_metadata_saved": true
+  }
+]
