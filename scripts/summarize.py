@@ -20,17 +20,22 @@ import numpy as np
 RUNS = pathlib.Path(__file__).resolve().parents[1] / "runs"
 # round 2 (2026-09-28): thr025 / thr100 = soma threshold 0.25 / 1.0 (Pr4); ABGcap = G with the
 # firing rate capped at 0.06
-COND_ORDER = ["base", "G", "A", "Athr025", "Athr100", "B", "AB", "ABthr025", "ABthr100", "AG", "ABG", "ABGcap",
-              "gru", "ann"]
+COND_ORDER = ["base", "G", "A", "Athr025", "Athr100", "B", "AB", "ABthr025", "ABthr100", "AG", "AGthr025", "AGthr100",
+              "ABG", "ABGthr025", "ABGthr100", "ABGcap", "PD", "PDeuler", "PDfix", "PD2L", "PDT1", "PDcap", "gru", "ann"]
 COND_LABEL = {"base": "base (original)", "A": "A: no inter-step reset", "B": "B: no dendritic reset",
               "AB": "A+B", "G": "G only (resets kept)", "AG": "A + dendritic gain (G)", "ABG": "A+B + dendritic gain (G)",
               "gru": "GRU core (control)", "ann": "all-ANN + GRU (control)",
               "Athr025": "A, threshold 0.25", "Athr100": "A, threshold 1.0",
               "ABthr025": "A+B, threshold 0.25", "ABthr100": "A+B, threshold 1.0",
-              "ABGcap": "A+B+G, rate capped at 0.06"}
+              "ABGcap": "A+B+G, rate capped at 0.06", "AGthr025": "A+G, threshold 0.25", "AGthr100": "A+G, threshold 1.0",
+              "ABGthr025": "A+B+G, threshold 0.25", "ABGthr100": "A+B+G, threshold 1.0",
+              "PD": "method prototype (PDRNN)", "PDeuler": "PDRNN, Euler input gain", "PDfix": "PDRNN, fixed tau",
+              "PD2L": "PDRNN, 2 layers", "PDT1": "PDRNN, T = 1", "PDcap": "PDRNN, rate capped at 0.06"}
 COND_COLOR = dict(base="#6b7280", A="#2563eb", B="#d97706", AB="#059669", gru="#a855f7", ann="#111827", G="#9ca3af",
                   AG="#0891b2", ABG="#dc2626", ABGcap="#f472b6", Athr025="#60a5fa", Athr100="#1e3a8a",
-                  ABthr025="#34d399", ABthr100="#065f46")
+                  ABthr025="#34d399", ABthr100="#065f46", AGthr025="#67e8f9", AGthr100="#155e75",
+                  ABGthr025="#fca5a5", ABGthr100="#7f1d1d", PD="#ea580c", PDeuler="#fdba74", PDfix="#c2410c",
+                  PD2L="#9a3412", PDT1="#facc15", PDcap="#fb923c")
 
 
 def load(path):
@@ -141,7 +146,7 @@ def plot_retention(task, cells):
     import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots(figsize=(6.4, 4.0))
-    styles = {2: "-", 16: "--", 128: ":", 512: "-."}
+    styles = {2: "-", 16: "--", 128: ":", 512: "-.", 1000: "-"}
     colors = COND_COLOR
     for (cond, tau), runs in sorted(cells.items(), key=lambda x: (COND_ORDER.index(x[0][0]), x[0][1])):
         profiles = [[r for r in rows if "eval_cue_h" in r][-1]["eval_cue_h"] for rows in runs.values()

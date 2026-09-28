@@ -156,7 +156,8 @@ class RSSM(nn.Module):
                 deter=deter,
             )
         for c in self._mem_keys:
-            state["mem_" + c] = torch.zeros([batch_size, self._deter]).to(self._device)
+            size = getattr(self._cell, "mem_sizes", {}).get(c, self._deter)
+            state["mem_" + c] = torch.zeros([batch_size, size]).to(self._device)
         if self._initial == "zeros":
             return state
         # TODO
@@ -1119,6 +1120,77 @@ class GRUCtrl(nn.Module):
         update = torch.sigmoid(update - 1)
         h = update * cand + (1 - update) * h
         outputs = [h] * self.T
+        return outputs, [torch.stack(outputs, dim=0)]
+
+
+class PDState(nn.Module):
+    """The dendritic states of PDRNN, under the interface RSSM uses for persist_state."""
+
+    def __init__(self, keys):
+        super().__init__()
+        self.keys = keys
+        self.mems = {k: None for k in keys}
+
+    def n_reset(self):
+        self.mems = {k: None for k in self.keys}
+
+
+class PDRNN(nn.Module):
+    """Method prototype (research plan §4.2): persistent, non-resetting linear dendrites and a
+    stateless spiking soma, updated once per environment step. Per layer, with M dendritic
+    channels per neuron:
+
+        d_t = λ ⊙ d_{t-1} + g(λ) ⊙ LN(B x_t)            λ = exp(-1/τ), τ log-uniform in [tau_min, tau_max]
+        u_t = PopNorm(Σ_m C_m ⊙ d_t,m + D x_t)       s_t = H(u_t - θ)
+
+    g(λ) = sqrt(1 - λ²) (input_norm 'lru', the LRU normalisation; intervention G is the same up to
+    a factor 2) or 1 - λ (input_norm 'euler', the gain of the MCNode Euler update). x_t is the
+    rate of the T input spikes; later layers read the spikes of the previous one. There is no
+    feedback from the spikes into the dendrites, so d is linear in the inputs and a parallel scan
+    could train it (not used here). The output spikes are repeated T times so that the rest of
+    the spiking world model is unchanged. Use with persist_state (configs block pdcell)."""
+
+    def __init__(self, config, input_size, size, act=None, norm="PopNorm", device="cuda"):
+        super().__init__()
+        p = config.PDRNN
+        self.T = config.spike_times
+        self._layers, self._channels, self._size = p["layers"], p["channels"], size
+        self._input_norm = p["input_norm"]
+        self.threshold = p["threshold"]
+        keys = [f"d{i}" for i in range(self._layers)]
+        self.neuron = PDState(keys)
+        self.mem_sizes = {k: size * self._channels for k in keys}
+        norm_cls = getattr(normalization, norm)
+        self.B, self.D = nn.ModuleList(), nn.ModuleList()
+        self.in_norm, self.soma_norm = nn.ModuleList(), nn.ModuleList()
+        self.log_tau, self.C = nn.ParameterList(), nn.ParameterList()
+        in_dim = input_size
+        for _ in range(self._layers):
+            n = size * self._channels
+            self.B.append(nn.Linear(in_dim, n, bias=False))
+            self.in_norm.append(nn.LayerNorm(n, eps=1e-3))
+            self.D.append(nn.Linear(in_dim, size, bias=False))
+            self.soma_norm.append(norm_cls(size, **getattr(config, norm)))
+            log_tau = torch.empty(n).uniform_(math.log(p["tau_min"]), math.log(p["tau_max"] + 1e-6))
+            self.log_tau.append(nn.Parameter(log_tau, requires_grad=p["learn_tau"]))
+            self.C.append(nn.Parameter(torch.randn(size, self._channels) / math.sqrt(self._channels)))
+            in_dim = size
+        self.act_fun = node.QGateGrad(alpha=2.0, requires_grad=False)
+
+    def forward(self, inputs, state):
+        x = sum(inputs) / self.T
+        for i in range(self._layers):
+            key = f"d{i}"
+            d = self.neuron.mems[key]
+            if d is None:
+                d = torch.zeros(x.shape[0], self._size * self._channels, device=x.device)
+            lam = torch.exp(-torch.exp(-self.log_tau[i]))
+            gain = torch.sqrt(1 - lam**2) if self._input_norm == "lru" else 1 - lam
+            d = lam * d + gain * self.in_norm[i](self.B[i](x))
+            self.neuron.mems[key] = d
+            u = (d.view(-1, self._size, self._channels) * self.C[i]).sum(-1) + self.D[i](x)
+            x = self.act_fun(self.soma_norm[i](u) - self.threshold)
+        outputs = [x] * self.T
         return outputs, [torch.stack(outputs, dim=0)]
 
 

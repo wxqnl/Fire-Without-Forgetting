@@ -85,7 +85,7 @@ class WorldModel(nn.Module):
         else:
             self.heads["reward"] = networks.SpikeMLP(
                 feat_size,  # pytorch version
-                [],
+                (config.num_actions,) if config.reward_by_action else [],
                 config.reward_layers,
                 config.units,
                 config.act,
@@ -124,6 +124,15 @@ class WorldModel(nn.Module):
         )
         self._scales = dict(reward=config.reward_scale, cont=config.cont_scale)
 
+    def reward(self, feat, prev_action):
+        """Reward distribution of the states in feat. With reward_by_action the head predicts one
+        reward per discrete action and the entry of prev_action, the action that led to the
+        state, is used."""
+        dist = self.heads["reward"](feat)
+        if not self._config.reward_by_action:
+            return dist
+        return tools.SymlogDist((dist._mode * prev_action).sum(-1, keepdim=True))
+
     def _train(self, data):
         # action (batch_size, batch_length, act_dim)
         # image (batch_size, batch_length, h, w, ch)
@@ -148,7 +157,7 @@ class WorldModel(nn.Module):
                     grad_head = name in self._config.grad_heads
                     feat = self.dynamics.get_feat(post)
                     feat = feat if grad_head else feat.detach()
-                    pred = head(feat)
+                    pred = self.reward(feat, data["action"]) if name == "reward" else head(feat)
                     if type(pred) is dict:
                         preds.update(pred)
                     else:
@@ -216,11 +225,11 @@ class WorldModel(nn.Module):
         recon = self.heads["decoder"](self.dynamics.get_feat(states))["image"].mode()[
             :6
         ]
-        reward_post = self.heads["reward"](self.dynamics.get_feat(states)).mode()[:6]
+        reward_post = self.reward(self.dynamics.get_feat(states), data["action"][:6, :5]).mode()[:6]
         init = {k: v[:, -1] for k, v in states.items()}
         prior = self.dynamics.imagine(data["action"][:6, 5:], init)
         openl = self.heads["decoder"](self.dynamics.get_feat(prior))["image"].mode()
-        reward_prior = self.heads["reward"](self.dynamics.get_feat(prior)).mode()
+        reward_prior = self.reward(self.dynamics.get_feat(prior), data["action"][:6, 5:]).mode()
         # observed image is given until 5 steps
         model = torch.cat([recon[:, :5], openl], 1)
         truth = data["image"][:6] + 0.5

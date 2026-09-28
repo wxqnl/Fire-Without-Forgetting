@@ -173,8 +173,68 @@ def round2():
     return jobs
 
 
+def rl2_jobs(task, cells, steps=2e5, seed=0, train_ratio=64, extra=""):
+    """RL with the action-indexed reward head (configs block rewardbyact, MSE reward head)."""
+    for cell, cfgs in cells.items():
+        name = f"rl2/{task}/{cell}/s{seed}"
+        logdir = RUNS / name
+        cmd = (f"{{python}} dreamer.py --configs {' '.join([suite(task), *cfgs, 'rewardbyact'])} --task {task} "
+               f"--seed {seed} --steps {steps:g} --train_ratio {train_ratio} --reward_head symlog_mse "
+               f"--eval_every 1e4 {extra} --logdir {logdir}")
+        yield dict(name=name, cmd=" ".join(cmd.split()), logdir=str(logdir), mem_gb=14.5)
+
+
+def round3():
+    """2026-09-28, GPUs 2-5, one seed (s0): close the open links of the idea instead of adding
+    seeds (PHASE0.md §6). Mechanism: Pr4 threshold sweep, G at a matched firing rate, A tau128
+    at memlen-32. RL: the action-indexed reward head turns the (cue x action) reward into a
+    linear read-out; check it in the probe, then run E2 as RL on the standard memlen task."""
+    A128, AB128 = CONDS["A"] + TAUS[128], CONDS["AB"] + TAUS[128]
+    cells = {"base_tau2": [], "A_tau128": A128, "AB_tau128": AB128, "AG_tau128": A128 + ["dendgain"],
+             "ABG_tau128": AB128 + ["dendgain"], "gru_tau2": ["grucell"]}
+    jobs = list(rl2_jobs("bsuite_memlen-16", {k: cells[k] for k in ("base_tau2", "AB_tau128", "ABG_tau128", "gru_tau2")}))
+    # the probe on the original XOR reward, with the action-indexed head
+    jobs += recall_jobs("bsuite_memlen-8", {**{k: cells[k] + ["rewardbyact"] for k in ("base_tau2", "AB_tau128", "ABG_tau128", "gru_tau2")},
+                                            "ann_tau2": ["grucell", "annwm", "rewardbyact"]},
+                        seeds=(0,), updates=6000, extra="--batch_length 32", group="xor")
+    jobs += recall_jobs("bsuite_memlen-32-recall", {"A_tau128": A128, "ABGcap_tau128": cells["ABG_tau128"] + ["ratecap"]}, seeds=(0,))
+    jobs += recall_jobs("bsuite_memlen-16-recall", {"ABGcap_tau128": cells["ABG_tau128"] + ["ratecap"],
+                                                    "AG_tau128": cells["AG_tau128"]}, seeds=(0,))
+    # Pr4: a lower threshold means more somatic spikes; with the dendritic reset (A, AG) that should
+    # shorten the memory, without it (AB, ABG) it should not matter
+    jobs += recall_jobs("bsuite_memlen-16-recall", {f"{c}thr{t}_tau128": cells[f"{c}_tau128"] + [f"thr{t}"]
+                                                    for c in ("A", "AB", "AG", "ABG") for t in ("025", "100")}, seeds=(0,))
+    return jobs
+
+
+def round4():
+    """2026-09-28 04:15, one seed. (1) The method prototype (networks.PDRNN, research plan §4.2)
+    on the recall probe, with ablations at memlen-32: Euler input gain instead of the LRU
+    normalisation, a single tau of 128, fixed tau, two layers, T = 1, rate cap. (2) RL on the
+    standard memlen task (cue x action reward) at 16 and 32. (3) Pr5: a non-memory control task,
+    DMC walker-walk from proprioception."""
+    PD = ["pdcell"]
+    jobs = list(rl2_jobs("bsuite_memlen-16", {"PD_tau1000": PD}))
+    rl_cells = {"base_tau2": [], "ABG_tau128": ["persist", "nodendreset", "taud128", "dendgain"],
+                "PD_tau1000": PD, "gru_tau2": ["grucell"]}
+    jobs += rl2_jobs("bsuite_memlen-32", rl_cells, steps=3e5)
+    for cell, cfgs in rl_cells.items():  # continuous actions: no rewardbyact, original reward head
+        name = f"rl2/dmc_walker_walk/{cell}/s0"
+        cmd = (f"{{python}} dreamer.py --configs dmc_proprio {' '.join(cfgs)} --task dmc_walker_walk --seed 0 "
+               f"--steps 2e5 --train_ratio 64 --eval_every 2e4 --logdir {RUNS / name}")
+        jobs.append(dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=14.5))
+    jobs += recall_jobs("bsuite_memlen-16-recall", {"PD_tau1000": PD}, seeds=(0,))
+    jobs += recall_jobs("bsuite_memlen-32-recall", {
+        "PD_tau1000": PD, "PDeuler_tau1000": PD + ["pdeuler"], "PD_tau128": PD + ["pdtau128"],
+        "PDfix_tau1000": PD + ["pdfixtau"], "PD2L_tau1000": PD + ["pd2layer"],
+        "PDcap_tau1000": PD + ["ratecap"]}, seeds=(0,))
+    jobs += recall_jobs("bsuite_memlen-32-recall", {"PDT1_tau1000": PD}, seeds=(0,), extra="--spike_times 1")
+    jobs += recall_jobs("bsuite_memlen-64-recall", {"PD_tau1000": PD}, seeds=(0,), extra="--batch_length 80")
+    return jobs
+
+
 def main():
-    jobs = round2()
+    jobs = round3() + round4()
     RUNS.mkdir(exist_ok=True)
     out = RUNS / "jobs.jsonl"
     tmp = out.with_suffix(".tmp")

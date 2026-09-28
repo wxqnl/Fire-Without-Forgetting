@@ -60,6 +60,8 @@ defaults:
     {mlp_keys: '$^', cnn_keys: 'image', act: 'LIFNode', norm: 'PopNorm', cnn_depth: 32, kernel_size: 4, minres: 4, mlp_layers: 2, mlp_units: 512, cnn_sigmoid: False, image_dist: mse, vector_dist: symlog_mse}
   value_head: 'symlog_disc'
   reward_head: 'symlog_disc'
+  # one reward output per discrete action, indexed by the action that led to the state
+  reward_by_action: False
   dyn_scale: '0.5'
   rep_scale: '0.1'
   kl_free: '1.0'
@@ -86,6 +88,8 @@ defaults:
 
   # Intervention A: keep the recurrent cell's membrane potentials across env steps
   persist_state: False
+  # method prototype (dyn_cell PDRNN, configs block pdcell); tau in environment steps
+  PDRNN: {layers: 1, channels: 4, tau_min: 1.0, tau_max: 1000.0, learn_tau: True, threshold: 0.5, input_norm: 'lru'}
 
   # Training
   batch_size: 16
@@ -297,6 +301,25 @@ dendgain:
 # G at the firing rate of A+B tau128 (0.059 at memlen-16): one-sided penalty above rate_target
 ratecap:
   rate_scale: 1000.0
+
+# rewards of the form (remembered cue x action) are an XOR for a scalar reward head, which a
+# DreamerV3 world model does not learn within our budget (PHASE0.md 2.7); indexed by the
+# action they are linear. Needs reward_head symlog_mse and discrete actions.
+rewardbyact:
+  reward_by_action: True
+
+# method prototype (research plan §4.2), see networks.PDRNN; ablations below
+pdcell:
+  dyn_cell: 'PDRNN'
+  persist_state: True
+pdeuler:
+  PDRNN: {input_norm: 'euler'}
+pdtau128:
+  PDRNN: {tau_min: 128.0, tau_max: 128.0}
+pdfixtau:
+  PDRNN: {learn_tau: False}
+pd2layer:
+  PDRNN: {layers: 2}
 
 # positive control: continuous-state GRU core, everything else spiking
 grucell:

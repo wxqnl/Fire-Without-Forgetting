@@ -96,7 +96,7 @@ def evaluate(wm, eval_eps, config, chunk=128):
         embed = wm.encoder(data)
         post, _ = wm.dynamics.observe(embed, data["action"], data["is_first"])
         feat = wm.dynamics.get_feat(post)
-        preds.append(wm.heads["reward"](feat).mode()[..., 0].cpu().numpy())
+        preds.append(wm.reward(feat, data["action"]).mode()[..., 0].cpu().numpy())
         rates.append(post["deter"].mean().item())
         states.append(post["deter"].float().mean(0))  # [B, rows, deter]: what the heads read
         mem_keys = sorted(k for k in post if k.startswith("mem_"))
@@ -139,7 +139,7 @@ def grad_profile(wm, eval_eps, n=64):
         embed = wm.encoder(data)
     embed = embed.detach().requires_grad_(True)
     post, _ = wm.dynamics.observe(embed, data["action"], data["is_first"])
-    pred = wm.heads["reward"](wm.dynamics.get_feat(post)).mode()[..., 0]
+    pred = wm.reward(wm.dynamics.get_feat(post), data["action"]).mode()[..., 0]
     pred[:, -1].sum().backward()
     g = embed.grad.abs().sum(dim=(0, 1, 3)).cpu().numpy()  # embed is [T, B, rows, dim]
     if g[-1] == 0:  # reward head is zero-initialised

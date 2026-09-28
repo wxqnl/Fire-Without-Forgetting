@@ -25,6 +25,12 @@ from torch import distributions as torchd
 to_np = lambda x: x.detach().cpu().numpy()
 
 
+def prev_actions(actions):
+    """Imagined actions [horizon, batch, act] -> the action that led to each imagined state.
+    The start state gets zeros; its reward is not used by the lambda return."""
+    return torch.cat([torch.zeros_like(actions[:1]), actions[:-1]], 0)
+
+
 class Dreamer(nn.Module):
     def __init__(self, obs_space, act_space, config, logger, dataset):
         super(Dreamer, self).__init__()
@@ -60,7 +66,7 @@ class Dreamer(nn.Module):
         ):  # compilation is not supported on windows
             self._wm = torch.compile(self._wm)
             self._task_behavior = torch.compile(self._task_behavior)
-        reward = lambda f, s, a: self._wm.heads["reward"](f).mean()
+        reward = lambda f, s, a: self._wm.reward(f, prev_actions(a)).mean()
         self._expl_behavior = dict(
             greedy=lambda: self._task_behavior,
             random=lambda: expl.Random(config, act_space),
@@ -169,9 +175,7 @@ class Dreamer(nn.Module):
         post, context, mets = self._wm._train(data)
         metrics.update(mets)
         start = post
-        reward = lambda f, s, a: self._wm.heads["reward"](
-            self._wm.dynamics.get_feat(s)
-        ).mode()
+        reward = lambda f, s, a: self._wm.reward(self._wm.dynamics.get_feat(s), prev_actions(a)).mode()
         metrics.update(self._task_behavior._train(start, reward)[-1])
         if self._config.expl_behavior != "greedy":
             mets = self._expl_behavior.train(start, context, data)[-1]
