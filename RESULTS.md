@@ -2,20 +2,20 @@
 
 Single seed (s0). A value with (NN%) is from a run still in progress; · = not started.
 
-Queue at 2026-09-28 05:32:50: 5/136 done, 46 running, 85 pending.
+Queue at 2026-09-28 07:55:24: 13/142 done, 48 running, 81 pending.
 
 ## Table 2. Memory tasks, RL: evaluation return (mean of the last 3 evaluations)
 
 | model | L8 | L16 | L32 | L64 | RepeatFirstEasy | RepeatPreviousEasy | CountRecallEasy | RepeatPreviousMedium | AutoencodeEasy | RepeatPreviousHard |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Spiking-WM | · | 0.25 (26%) | 0.17 (14%) | · | · | · | · | · | · | · |
+| Spiking-WM | · | -0.08 (61%) | -0.08 (41%) | · | · | · | · | · | · | · |
 | LIF | · | · | · | · | · | · | · | · | · | · |
 | GRSN | · | · | · | · | · | · | · | · | · | · |
-| Spiking-WM + A+B+G | · | 1.00 (26%) | 0.17 (14%) | · | · | · | · | · | · | · |
+| Spiking-WM + A+B+G | · | 1.00 (61%) | 1.00 (38%) | · | · | · | · | · | · | · |
 | **Ours** | · | · | · | · | · | · | · | · | · | · |
 | DreamerV3 (ANN) | · | · | · | · | · | · | · | · | · | · |
-| spiking enc. + GRU | · | 1.00 (36%) | 0.00 (21%) | · | · | · | · | · | · | · |
-| ours, 1 layer | · | 1.00 (26%) | 0.60 (21%) | · | · | · | · | · | · | · |
+| spiking enc. + GRU | · | 1.00 (81%) | 1.00 (54%) | · | · | · | · | · | · | · |
+| ours, 1 layer | · | 1.00 (71%) | -0.08 (54%) | · | · | · | · | · | · | · |
 
 BSuite memory length L: return 1 = always recalls the cue, 0 = chance. POPGym: return in [−1, 1].
 
@@ -23,13 +23,13 @@ BSuite memory length L: return 1 = always recalls the cue, 0 = chance. POPGym: r
 
 | model | L8 | L16 | L32 | L64 |
 |---|---|---|---|---|
-| Spiking-WM | · | > 52k … | > 42k … | · |
+| Spiking-WM | · | > 122k … | > 122k … | · |
 | LIF | · | · | · | · |
 | GRSN | · | · | · | · |
-| Spiking-WM + A+B+G | · | 22k | > 42k … | · |
+| Spiking-WM + A+B+G | · | 22k | 52k | · |
 | **Ours** | · | · | · | · |
 | DreamerV3 (ANN) | · | · | · | · |
-| spiking enc. + GRU | · | 32k | > 62k … | · |
+| spiking enc. + GRU | · | 32k | 102k | · |
 | ours, 1 layer | · | 32k | 62k | · |
 
 ## Table 4. World-model probe (memlen-L-recall, random-policy data)
@@ -38,14 +38,14 @@ Updates until reward AUC > 0.9 / final AUC (firing rate of the recurrent state).
 
 | model | L8 updates | L16 updates | L32 updates | L64 updates | L8 AUC | L16 AUC | L32 AUC | L64 AUC |
 |---|---|---|---|---|---|---|---|---|
-| Spiking-WM | > 12000 | > 12000 | 12000 | · | 0.493 (0.081) | 0.537 (0.083) | 0.660 (0.101) | · |
-| LIF | > 2000 … | > 1000 … | > 0 … | · | 0.500 (0.105) (17%) | 0.492 (0.106) (8%) | 0.500 (0.042) (0%) | · |
-| GRSN | 1500 | > 1500 … | > 0 … | · | 0.836 (0.085) (17%) | 0.474 (0.093) (12%) | 0.500 (0.017) (0%) | · |
-| Spiking-WM + A+B+G | 500 | 500 | 2000 | · | 1.000 (0.119) | 1.000 (0.176) | 1.000 (0.193) | · |
-| **Ours** | 500 | 1000 | 1500 | · | 1.000 (0.199) (17%) | 0.715 (0.195) (8%) | 0.999 (0.208) (33%) | · |
-| DreamerV3 (ANN) | 500 | 1000 | · | · | 1.000 (-0.001) | 1.000 (0.025) | · | · |
+| Spiking-WM | > 12000 | > 12000 | 12000 | > 0 … | 0.493 (0.081) | 0.537 (0.083) | 0.660 (0.101) | 0.500 (0.008) (0%) |
+| LIF | 6000 | > 6500 … | > 7000 … | > 2000 … | 1.000 (0.086) (92%) | 0.509 (0.100) (54%) | 0.478 (0.105) (58%) | 0.479 (0.100) (17%) |
+| GRSN | 1500 | 4000 | > 7000 … | > 2000 … | 0.999 (0.079) | 0.995 (0.081) (67%) | 0.481 (0.096) (58%) | 0.478 (0.108) (17%) |
+| Spiking-WM + A+B+G | 500 | 500 | 2000 | > 0 … | 1.000 (0.119) | 1.000 (0.176) | 1.000 (0.193) | 0.500 (0.113) (0%) |
+| **Ours** | 500 | 1000 | 1500 | > 1000 … | 1.000 (0.171) (92%) | 1.000 (0.185) (62%) | 0.999 (0.177) (88%) | 0.501 (0.215) (8%) |
+| DreamerV3 (ANN) | 500 | 1000 | 6000 | > 0 … | 1.000 (-0.001) | 1.000 (0.025) | 0.999 (0.015) | 0.500 (-0.008) (0%) |
 | spiking enc. + GRU | 500 | 1000 | 5000 | > 12000 | 1.000 (0.018) | 1.000 (0.030) | 1.000 (0.031) | 0.502 (0.012) |
-| ours, 1 layer | · | 1000 | 3000 | > 3500 … | · | 0.996 (0.183) (33%) | 0.996 (0.181) (38%) | 0.527 (0.191) (29%) |
+| ours, 1 layer | · | 1000 | 3000 | > 10000 … | · | 0.999 (0.154) (83%) | 0.993 (0.179) | 0.491 (0.192) (83%) |
 
 ## Table 5. Memory Maze 9×9, offline probe (second half of the episode)
 
@@ -64,14 +64,14 @@ Updates until reward AUC > 0.9 / final AUC (firing rate of the recurrent state).
 
 | model | walker_walk | cheetah_run | cartpole_swingup |
 |---|---|---|---|
-| Spiking-WM | 25 (32%) | · | · |
+| Spiking-WM | 116 (102%) | · | · |
 | LIF | · | · | · |
 | GRSN | · | · | · |
-| Spiking-WM + A+B+G | 29 (32%) | · | · |
+| Spiking-WM + A+B+G | 131 (102%) | · | · |
 | **Ours** | · | · | · |
 | DreamerV3 (ANN) | · | · | · |
-| spiking enc. + GRU | 155 (42%) | · | · |
-| ours, 1 layer | 61 (42%) | · | · |
+| spiking enc. + GRU | 233 | · | · |
+| ours, 1 layer | 122 | · | · |
 
 ## Table 7. Ablations of our model (probe, memlen-32-recall)
 
@@ -79,13 +79,13 @@ Updates until reward AUC > 0.9 / final AUC (firing rate).
 
 | variant | updates | AUC (rate) |
 |---|---|---|
-| ours | 1500 | 0.999 (0.208) (33%) |
-| Euler input gain 1 − λ | · | · |
+| ours | 1500 | 0.999 (0.177) (88%) |
+| Euler input gain 1 − λ | > 0 … | 0.500 (0.137) (0%) |
 | single τ = 128 | · | · |
 | τ fixed (not learned) | · | · |
 | firing rate capped at 0.06 | · | · |
-| 1 layer | 3000 | 0.996 (0.181) (38%) |
-| 1 layer, T = 1 | 6000 | 0.974 (0.172) (71%) |
+| 1 layer | 3000 | 0.993 (0.179) |
+| 1 layer, T = 1 | 6000 | 0.959 (0.201) |
 
 ## Table 8. Operations and energy per environment step (world-model filter: encoder + posterior)
 
