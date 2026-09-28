@@ -5,7 +5,7 @@ import numpy as np
 class DeepMindControl:
     metadata = {}
 
-    def __init__(self, name, action_repeat=1, size=(64, 64), camera=None, seed=0):
+    def __init__(self, name, action_repeat=1, size=(64, 64), camera=None, seed=0, render=True):
         domain, task = name.split("_", 1)
         if domain == "cup":  # Only domain with multiple words.
             domain = "ball_in_cup"
@@ -25,6 +25,9 @@ class DeepMindControl:
         if camera is None:
             camera = dict(quadruped=2).get(domain, 0)
         self._camera = camera
+        # render=False (proprioceptive configs): no image key, no MuJoCo rendering, which aborts
+        # under the GPU job setup (MPS client) and is unused when the encoder has no CNN keys
+        self._render = render
         self.reward_range = [-np.inf, np.inf]
 
     @property
@@ -36,7 +39,8 @@ class DeepMindControl:
             else:
                 shape = value.shape
             spaces[key] = gym.spaces.Box(-np.inf, np.inf, shape, dtype=np.float32)
-        spaces["image"] = gym.spaces.Box(0, 255, self._size + (3,), dtype=np.uint8)
+        if self._render:
+            spaces["image"] = gym.spaces.Box(0, 255, self._size + (3,), dtype=np.uint8)
         return gym.spaces.Dict(spaces)
 
     @property
@@ -54,7 +58,8 @@ class DeepMindControl:
                 break
         obs = dict(time_step.observation)
         obs = {key: [val] if len(val.shape) == 0 else val for key, val in obs.items()}
-        obs["image"] = self.render()
+        if self._render:
+            obs["image"] = self.render()
         # There is no terminal state in DMC
         obs["is_terminal"] = False if time_step.first() else time_step.discount == 0
         obs["is_first"] = time_step.first()
@@ -66,7 +71,8 @@ class DeepMindControl:
         time_step = self._env.reset()
         obs = dict(time_step.observation)
         obs = {key: [val] if len(val.shape) == 0 else val for key, val in obs.items()}
-        obs["image"] = self.render()
+        if self._render:
+            obs["image"] = self.render()
         obs["is_terminal"] = False if time_step.first() else time_step.discount == 0
         obs["is_first"] = time_step.first()
         return obs

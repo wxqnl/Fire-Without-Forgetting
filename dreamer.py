@@ -204,7 +204,8 @@ def make_env(config, mode):
         import envs.dmc as dmc
 
         env = dmc.DeepMindControl(
-            task, config.action_repeat, config.size, seed=config.seed
+            task, config.action_repeat, config.size, seed=config.seed,
+            render=config.encoder["cnn_keys"] != "$^",
         )
         env = wrappers.NormalizeActions(env)
     elif suite == "atari":

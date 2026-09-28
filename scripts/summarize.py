@@ -6,7 +6,8 @@ recall: the same for the memlen-L-recall grid, plus cue retention: held-out accu
         linear probe decoding the cue from the recurrent state (h: the spikes the heads
         read; mem: membrane potentials, only for A/AB) at the last row, and its profile
         over rows (plots/retention_*.png).
-rl:     evaluation return, mean of the last 3 evaluations of each seed.
+rl:     evaluation return, mean of the last 3 evaluations of each seed (rl2: round 3/4 RL with
+        the action-indexed reward head).
 xor:    the original memlen-L reward (cue XOR action) with a longer budget (round 2).
 
 runs/learning_speed.md: updates until the reward AUC first exceeds 0.9, per seed.
@@ -124,7 +125,7 @@ def plot(kind, task, cells, key, ylabel):
                     ax.plot([r["step"] for r in evals], [r[key] for r in evals], color=colors[cond],
                             alpha=0.85, lw=1.4, label=COND_LABEL[cond] if i == 0 else None)
         ax.set_title(f"{task}  τ_d={tau}", fontsize=9)
-        ax.set_xlabel("env step" if kind == "rl" else "update")
+        ax.set_xlabel("env step" if kind.startswith("rl") else "update")
         ax.grid(alpha=0.3)
     axes[0][0].set_ylabel(ylabel)
     if kind in ("probe", "recall", "xor"):
@@ -206,6 +207,9 @@ def main():
     for task, cells in sorted(collect("rl").items()):
         lines += rl_table(task, cells)
         plot("rl", task, cells, "eval_return", "eval return")
+    for task, cells in sorted(collect("rl2").items()):  # round 3/4: action-indexed reward head
+        lines += rl_table(task, cells)
+        plot("rl2", task, cells, "eval_return", "eval return")
     for task, cells in sorted(collect("xor").items()):
         lines += probe_table(task, cells)
         plot("xor", task, cells, "eval_auc", "reward-prediction AUC (cue XOR action)")
