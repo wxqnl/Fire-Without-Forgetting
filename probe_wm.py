@@ -183,7 +183,7 @@ def main(config, args):
     running = {}
     for update in range(1, args.updates + 1):
         _, _, mets = wm._train(next(dataset))
-        for k in ("model_loss", "reward_loss", "vector_loss", "kl", "deter_rate"):
+        for k in ("model_loss", "reward_loss", "vector_loss", "kl", "deter_rate", "rate_loss"):
             if k in mets:
                 running.setdefault(k, []).append(float(mets[k]))
         if update % args.eval_every == 0 or update == args.updates:

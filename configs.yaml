@@ -65,6 +65,9 @@ defaults:
   kl_free: '1.0'
   cont_scale: 1.0
   reward_scale: 1.0
+  # cap on the mean firing rate of the recurrent cell, for rate-matched comparisons (off at 0)
+  rate_scale: 0.0
+  rate_target: 0.06
   weight_decay: 0.0
   unimix_ratio: 0.01
   action_unimix_ratio: 0.01
@@ -290,6 +293,10 @@ taud512:
 # intervention G: dendritic input gain sqrt(tau_d / 2), decoupled from the retention time
 dendgain:
   MCNode: {dend_gain: True}
+
+# G at the firing rate of A+B tau128 (0.059 at memlen-16): one-sided penalty above rate_target
+ratecap:
+  rate_scale: 1000.0
 
 # positive control: continuous-state GRU core, everything else spiking
 grucell:

@@ -157,6 +157,10 @@ class WorldModel(nn.Module):
                 for name, pred in preds.items():
                     like = pred.log_prob(data[name])
                     losses[name] = -torch.mean(like) * self._scales.get(name, 1.0)
+                if self._config.rate_scale > 0:
+                    # one-sided: penalise the recurrent cell's mean firing rate above rate_target
+                    excess = torch.relu(torch.mean(post["deter"]) - self._config.rate_target)
+                    losses["rate"] = self._config.rate_scale * excess**2
                 model_loss = sum(losses.values()) + kl_loss
             metrics = self._model_opt(model_loss, self.parameters())
 

@@ -7,6 +7,9 @@ recall: the same for the memlen-L-recall grid, plus cue retention: held-out accu
         read; mem: membrane potentials, only for A/AB) at the last row, and its profile
         over rows (plots/retention_*.png).
 rl:     evaluation return, mean of the last 3 evaluations of each seed.
+xor:    the original memlen-L reward (cue XOR action) with a longer budget (round 2).
+
+runs/learning_speed.md: updates until the reward AUC first exceeds 0.9, per seed.
 """
 import collections
 import json
@@ -15,10 +18,19 @@ import pathlib
 import numpy as np
 
 RUNS = pathlib.Path(__file__).resolve().parents[1] / "runs"
-COND_ORDER = ["base", "G", "A", "B", "AB", "AG", "ABG", "gru", "ann"]
+# round 2 (2026-09-28): thr025 / thr100 = soma threshold 0.25 / 1.0 (Pr4); ABGcap = G with the
+# firing rate capped at 0.06
+COND_ORDER = ["base", "G", "A", "Athr025", "Athr100", "B", "AB", "ABthr025", "ABthr100", "AG", "ABG", "ABGcap",
+              "gru", "ann"]
 COND_LABEL = {"base": "base (original)", "A": "A: no inter-step reset", "B": "B: no dendritic reset",
               "AB": "A+B", "G": "G only (resets kept)", "AG": "A + dendritic gain (G)", "ABG": "A+B + dendritic gain (G)",
-              "gru": "GRU core (control)", "ann": "all-ANN + GRU (control)"}
+              "gru": "GRU core (control)", "ann": "all-ANN + GRU (control)",
+              "Athr025": "A, threshold 0.25", "Athr100": "A, threshold 1.0",
+              "ABthr025": "A+B, threshold 0.25", "ABthr100": "A+B, threshold 1.0",
+              "ABGcap": "A+B+G, rate capped at 0.06"}
+COND_COLOR = dict(base="#6b7280", A="#2563eb", B="#d97706", AB="#059669", gru="#a855f7", ann="#111827", G="#9ca3af",
+                  AG="#0891b2", ABG="#dc2626", ABGcap="#f472b6", Athr025="#60a5fa", Athr100="#1e3a8a",
+                  ABthr025="#34d399", ABthr100="#065f46")
 
 
 def load(path):
@@ -98,7 +110,7 @@ def plot(kind, task, cells, key, ylabel):
 
     taus = sorted({t for _, t in cells})
     fig, axes = plt.subplots(1, len(taus), figsize=(4.2 * len(taus), 3.4), sharey=True, squeeze=False)
-    colors = dict(base="#6b7280", A="#2563eb", B="#d97706", AB="#059669", gru="#a855f7", ann="#111827", G="#9ca3af", AG="#0891b2", ABG="#dc2626")
+    colors = COND_COLOR
     for ax, tau in zip(axes[0], taus):
         for cond in COND_ORDER:
             for i, rows in enumerate(cells.get((cond, tau), {}).values()):
@@ -110,7 +122,7 @@ def plot(kind, task, cells, key, ylabel):
         ax.set_xlabel("env step" if kind == "rl" else "update")
         ax.grid(alpha=0.3)
     axes[0][0].set_ylabel(ylabel)
-    if kind in ("probe", "recall"):
+    if kind in ("probe", "recall", "xor"):
         for ax in axes[0]:
             ax.axhline(0.5, color="k", lw=0.8, ls=":")
     axes[0][-1].legend(fontsize=7, loc="best")
@@ -130,7 +142,7 @@ def plot_retention(task, cells):
 
     fig, ax = plt.subplots(figsize=(6.4, 4.0))
     styles = {2: "-", 16: "--", 128: ":", 512: "-."}
-    colors = dict(base="#6b7280", A="#2563eb", B="#d97706", AB="#059669", gru="#a855f7", ann="#111827", G="#9ca3af", AG="#0891b2", ABG="#dc2626")
+    colors = COND_COLOR
     for (cond, tau), runs in sorted(cells.items(), key=lambda x: (COND_ORDER.index(x[0][0]), x[0][1])):
         profiles = [[r for r in rows if "eval_cue_h" in r][-1]["eval_cue_h"] for rows in runs.values()
                     if any("eval_cue_h" in r for r in rows)]
@@ -147,6 +159,29 @@ def plot_retention(task, cells):
     out.parent.mkdir(exist_ok=True)
     fig.savefig(out, dpi=130)
     plt.close(fig)
+
+
+def learning_speed(kind, thresh=0.9):
+    """Rows: cells; columns: tasks. Per seed, the first update with reward AUC > thresh."""
+    by_task = collect(kind)
+    tasks = sorted(by_task, key=lambda t: int(t.split("-")[1]))
+    keys = sorted({c for cells in by_task.values() for c in cells}, key=lambda c: (COND_ORDER.index(c[0]), c[1]))
+    lines = [f"## {kind}: updates until reward AUC > {thresh} (per seed; '–' = not within the run)", "",
+             "| condition | " + " | ".join(tasks) + " |", "|---|" + "---|" * len(tasks)]
+    for cond, tau in keys:
+        row = []
+        for task in tasks:
+            runs = by_task[task].get((cond, tau), {})
+            hits = []
+            for seed in sorted(runs, key=lambda x: int(x[1:])):
+                step = next((r["step"] for r in runs[seed] if r.get("eval_auc", 0) > thresh), None)
+                last = max((r["step"] for r in runs[seed]), default=0)
+                hits.append(str(step) if step is not None else f"–@{last}")
+            rates = [r["eval_deter_rate"] for rows in runs.values() for r in rows[-1:] if "eval_deter_rate" in r]
+            rate = f" ({np.mean(rates):.3f})" if rates and cond not in ("gru", "ann") else ""
+            row.append(" / ".join(hits) + rate if hits else "")
+        lines.append(f"| {cond} τ{tau} | " + " | ".join(row) + " |")
+    return lines + [""]
 
 
 def main():
@@ -166,6 +201,11 @@ def main():
     for task, cells in sorted(collect("rl").items()):
         lines += rl_table(task, cells)
         plot("rl", task, cells, "eval_return", "eval return")
+    for task, cells in sorted(collect("xor").items()):
+        lines += probe_table(task, cells)
+        plot("xor", task, cells, "eval_auc", "reward-prediction AUC (cue XOR action)")
+    speed = learning_speed("recall") + (learning_speed("xor") if collect("xor") else [])
+    (RUNS / "learning_speed.md").write_text("\n".join(speed))
     (RUNS / "summary.md").write_text("\n".join(lines))
     print("\n".join(lines))
 

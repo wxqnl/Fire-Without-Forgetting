@@ -96,15 +96,15 @@ def ladder_jobs(task="bsuite_memlen-4", variants=LADDER, updates=4000, extra="--
         yield dict(name=name, cmd=" ".join(cmd.split()), logdir=str(logdir), mem_gb=2.5)
 
 
-def recall_jobs(task, cells, seeds=(0, 1), updates=12000, extra=""):
+def recall_jobs(task, cells, seeds=(0, 1), updates=12000, extra="", group="recall", eval_every=500):
     """Main Phase 0 grid after 12:45 (see PHASE0.md 2.7): memlen-L-recall, MSE reward head,
     cue-retention probe. cells: {"cond_tauX": config blocks}."""
     for cell, cfgs in cells.items():
         for seed in seeds:
-            name = f"recall/{task}/{cell}/s{seed}"
+            name = f"{group}/{task}/{cell}/s{seed}"
             logdir = RUNS / name
             cmd = (f"{{python}} probe_wm.py --configs {' '.join([suite(task), *cfgs])} --task {task} "
-                   f"--seed {seed} --updates {updates} --eval_every 500 --reward_head symlog_mse "
+                   f"--seed {seed} --updates {updates} --eval_every {eval_every} --reward_head symlog_mse "
                    f"{extra} --logdir {logdir}")
             yield dict(name=name, cmd=" ".join(cmd.split()), logdir=str(logdir), mem_gb=2.5)
 
@@ -116,7 +116,7 @@ def grid_cells():
     return cells
 
 
-def main():
+def round1():
     # 2026-09-27 11:15: GPUs 1-6 are available for 8 more hours (hard stop 18:50).
     # 12:45: the memlen-L reward is an XOR of cue and action. Trained world models keep the
     # cue in their state (linear probe 0.97-1.00) but their reward head does not learn the
@@ -146,6 +146,35 @@ def main():
     jobs += recall_jobs("bsuite_memlen-64-recall", {
         "ABG_tau512": ["persist", "nodendreset", "taud512", "dendgain"], "gru_tau2": ["grucell"]},
         extra="--batch_length 80")
+    return jobs
+
+
+def round2():
+    """2026-09-28 (PHASE0.md §5): 5 seeds for the headline cells at memlen-16/32; G with the
+    firing rate capped at A+B tau128's (0.06); the threshold sweep of Pr4; and whether the world
+    model learns the original XOR reward (cue x action) with a longer budget, which decides the
+    tasks for the RL half of E2."""
+    AB128 = CONDS["AB"] + TAUS[128]
+    core = {"base_tau2": [], "A_tau128": CONDS["A"] + TAUS[128], "AB_tau128": AB128,
+            "ABG_tau128": AB128 + ["dendgain"], "gru_tau2": ["grucell"]}
+    # longest jobs first
+    jobs = list(recall_jobs("bsuite_memlen-8", {"ann_tau2": ["grucell", "annwm"], "gru_tau2": ["grucell"],
+                                                "ABG_tau128": core["ABG_tau128"]},
+                            updates=20000, eval_every=1000, extra="--batch_length 32", group="xor"))
+    for L in (16, 32):
+        jobs += recall_jobs(f"bsuite_memlen-{L}-recall", core, seeds=(2, 3, 4))
+    jobs += recall_jobs("bsuite_memlen-32-recall", {"A_tau128": core["A_tau128"]})
+    for L in (16, 32):
+        jobs += recall_jobs(f"bsuite_memlen-{L}-recall", {"ABGcap_tau128": core["ABG_tau128"] + ["ratecap"]})
+    # Pr4: a lower threshold means more somatic spikes; with the dendritic reset (A) that should
+    # shorten the memory, without it (A+B) it should not matter
+    jobs += recall_jobs("bsuite_memlen-16-recall", {f"{c}thr{t}_tau128": CONDS[c] + TAUS[128] + [f"thr{t}"]
+                                                    for c in ("A", "AB") for t in ("025", "100")})
+    return jobs
+
+
+def main():
+    jobs = round2()
     RUNS.mkdir(exist_ok=True)
     out = RUNS / "jobs.jsonl"
     tmp = out.with_suffix(".tmp")
