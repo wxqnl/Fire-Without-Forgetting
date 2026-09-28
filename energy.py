@@ -1,0 +1,147 @@
+"""Operation counts and energy per environment step of the world-model filter (E5).
+
+For a trained world model (probe run: <logdir>/wm.pt; RL run: <logdir>/latest_model.pt) runs the
+encoder and the posterior filter (dynamics.observe), the part that runs at every step on the
+agent, over held-out episodes and counts with forward hooks:
+
+  AC   accumulate operations of Linear layers whose input is binary spikes (nonzero inputs x
+       fan-out) or a spike rate over the T SNN steps (spike count x fan-out)
+  MAC  multiply-accumulate operations: Linear layers with real-valued input (rows x in x out),
+       normalisation layers (2 per element) and neuron state updates per element and call
+       (LIF 1 per SNN step, MCN 4 per SNN step, PDRNN 3 per dendritic channel, GRSN 4, GRU 4)
+
+Energy with the 45 nm figures common in SNN papers (Horowitz 2014): 0.9 pJ per AC, 4.6 pJ per
+MAC. Memory access is not counted; the hardware-aware accounting of research plan §4.4 is a
+later step.
+
+usage: python energy.py --configs bsuite ours --task bsuite_memlen-32-recall --logdir <run dir>
+       (the configs and task of the run; writes <logdir>/energy.json)
+"""
+import json
+import pathlib
+import sys
+
+sys.path.append(str(pathlib.Path(__file__).parent))
+
+import numpy as np
+import torch
+from torch import nn
+
+import models
+import networks
+import node
+import normalization
+import probe_wm
+import tools
+
+E_AC, E_MAC = 0.9e-12, 4.6e-12
+
+
+def spike_count(x, T):
+    """Number of spikes if x is binary spikes or a rate over T steps, else None."""
+    y = x * T
+    if bool((x >= 0).all() and (x <= 1).all() and ((y - y.round()).abs() < 1e-4).all()):
+        return float(y.sum())
+    return None
+
+
+class Counter:
+    def __init__(self, T):
+        self.T = T
+        self.ac = self.mac = 0.0
+        self.spikes = self.neurons = 0.0
+
+    def linear(self, mod, inp, out):
+        x = inp[0]
+        n = spike_count(x, self.T if x.dtype.is_floating_point else 1)
+        if n is not None:
+            self.ac += n * mod.out_features
+        else:
+            self.mac += x[..., 0].numel() * mod.in_features * mod.out_features
+
+    def norm(self, mod, inp, out):
+        self.mac += 2 * out.numel()
+
+    def elementwise(self, per_element):
+        def hook(mod, inp, out):
+            out = out[0][0] if isinstance(out, tuple) else out  # cells return (outputs, [state])
+            self.mac += per_element * out.numel()
+        return hook
+
+    def spiking(self, per_element):
+        def hook(mod, inp, out):
+            self.mac += per_element * out.numel()
+            self.spikes += float(out.sum())
+            self.neurons += out.numel()
+        return hook
+
+
+def attach(wm, counter):
+    handles = []
+    for part in (wm.encoder, wm.dynamics):
+        for mod in part.modules():
+            if isinstance(mod, nn.Linear):
+                handles.append(mod.register_forward_hook(counter.linear))
+            elif isinstance(mod, (normalization.PopNorm, nn.LayerNorm)):
+                handles.append(mod.register_forward_hook(counter.norm))
+            elif isinstance(mod, node.MCNode):
+                handles.append(mod.register_forward_hook(counter.spiking(4)))
+            elif isinstance(mod, node.LIFNode):
+                handles.append(mod.register_forward_hook(counter.spiking(1)))
+            elif isinstance(mod, node.ANNAct):
+                handles.append(mod.register_forward_hook(counter.elementwise(1)))
+            elif isinstance(mod, networks.PDRNN):
+                handles.append(mod.register_forward_hook(counter.elementwise(3 * mod._channels * mod._layers)))
+            elif isinstance(mod, (networks.GRSNCell, networks.GRUCtrl)):
+                handles.append(mod.register_forward_hook(counter.elementwise(4)))
+            elif isinstance(mod, networks.LIFRNN):
+                handles.append(mod.register_forward_hook(counter.elementwise(counter.T)))  # T updates per call
+    return handles
+
+
+def episodes(config, logdir, n):
+    eval_dir = logdir / "eval_eps"
+    if eval_dir.exists():  # RL run: the agent's own evaluation episodes
+        eps = tools.load_episodes(eval_dir, limit=None)
+        eps = list(eps.values())[:n]
+        length = min(len(ep["reward"]) for ep in eps)
+        return [{k: v[:length] for k, v in ep.items()} for ep in eps]
+    eps, _ = probe_wm.collect(config, n, 12345 + 1, "eval")  # probe: same held-out data as training
+    return list(eps.values())
+
+
+@torch.no_grad()
+def main():
+    argv = sys.argv[1:]
+    logdir = pathlib.Path(argv[argv.index("--logdir") + 1])
+    config, args = probe_wm.parse_config(argv + ["--train_episodes", "1"])
+    eps = episodes(config, logdir, 64)
+    env = probe_wm.dreamer.make_env(config, "eval")
+    config.num_actions = env.action_space.n if hasattr(env.action_space, "n") else env.action_space.shape[0]
+    wm = models.WorldModel(env.observation_space, env.action_space, 0, config).to(config.device)
+    if (logdir / "wm.pt").exists():
+        wm.load_state_dict(torch.load(logdir / "wm.pt", map_location=config.device))
+    else:
+        state = torch.load(logdir / "latest_model.pt", map_location=config.device)
+        wm.load_state_dict({k[len("_wm."):]: v for k, v in state.items() if k.startswith("_wm.")})
+    wm.eval()
+    counter = Counter(config.spike_times)
+    attach(wm, counter)
+    batch = {k: np.stack([ep[k] for ep in eps]) for k in eps[0]}
+    data = wm.preprocess(batch)
+    post, _ = wm.dynamics.observe(wm.encoder(data), data["action"], data["is_first"])
+    steps = data["action"].shape[0] * data["action"].shape[1]
+    out = {
+        "ac_per_step": counter.ac / steps,
+        "mac_per_step": counter.mac / steps,
+        "energy_nj_per_step": (E_AC * counter.ac + E_MAC * counter.mac) / steps * 1e9,
+        "ff_spike_rate": counter.spikes / max(counter.neurons, 1),  # LIF/MCN neurons of the filter
+        "deter_rate": float(post["deter"].float().mean()),
+        "steps": steps,
+    }
+    print(json.dumps(out))
+    (logdir / "energy.json").write_text(json.dumps(out, indent=1))
+
+
+if __name__ == "__main__":
+    main()

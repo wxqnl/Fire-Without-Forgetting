@@ -202,7 +202,9 @@ def main(config, args):
     done_file.write_text(json.dumps(log, indent=1))
 
 
-if __name__ == "__main__":
+def parse_config(argv=None):
+    """(config, args) from the command line: configs.yaml blocks named by --configs, then
+    overrides of any config key, as in dreamer.py."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--configs", nargs="+")
     parser.add_argument("--updates", type=int, default=20000)
@@ -211,8 +213,8 @@ if __name__ == "__main__":
     parser.add_argument("--eval_episodes", type=int, default=512)
     parser.add_argument("--train_steps", type=int, default=200000)
     parser.add_argument("--data_seed", type=int, default=12345)
-    args, remaining = parser.parse_known_args()
-    configs = yaml.safe_load((pathlib.Path(sys.argv[0]).parent / "configs.yaml").read_text())
+    args, remaining = parser.parse_known_args(argv)
+    configs = yaml.safe_load((pathlib.Path(__file__).parent / "configs.yaml").read_text())
 
     def recursive_update(base, update):
         for key, value in update.items():
@@ -238,4 +240,8 @@ if __name__ == "__main__":
             _, _, done, _ = probe_env.step({"action": np.eye(probe_env.action_space.shape[0], dtype=np.float32)[0]})
             n += 1
         args.train_episodes = max(1, args.train_steps // n)
-    main(config, args)
+    return config, args
+
+
+if __name__ == "__main__":
+    main(*parse_config())
