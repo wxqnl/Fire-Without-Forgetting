@@ -308,11 +308,21 @@ def round6():
     return jobs
 
 
+def round7():
+    """2026-09-28 09:30: the ablations of the proposed model again at L = 64. At L = 32 all 2-layer
+    variants learn within 1000-2500 updates, so L = 32 does not separate them; at L = 64 only the
+    proposed model learns (4000 updates; 1 layer, GRU core, ANN and A+B+G tau 512 do not)."""
+    return list(recall_jobs("bsuite_memlen-64-recall", {
+        "PD2Leuler_tau1000": ["ours", "pdeuler"], "PD2L_tau128": ["ours", "pdtau128"],
+        "PD2Lfix_tau1000": ["ours", "pdfixtau"], "PD2Lcap_tau1000": ["ours", "ratecap"]},
+        seeds=(0,), extra=MEMLEN_EXTRA[64]))
+
+
 def main():
-    # priority: rounds 3-4, round 5 probes and BSuite RL, Memory Maze, then POPGym and DMC
+    # priority: rounds 3-4, round 5 probes and BSuite RL, Memory Maze, L64 ablations, then POPGym and DMC
     r5 = round5()
     late = [j for j in r5 if "/popgym_" in j["name"] or "/dmc_" in j["name"]]
-    jobs = round3() + round4() + [j for j in r5 if j not in late] + round6() + late
+    jobs = round3() + round4() + [j for j in r5 if j not in late] + round6() + round7() + late
     RUNS.mkdir(exist_ok=True)
     out = RUNS / "jobs.jsonl"
     tmp = out.with_suffix(".tmp")

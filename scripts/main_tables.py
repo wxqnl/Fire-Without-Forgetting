@@ -8,7 +8,7 @@ A cell of a run that is still going shows its current value and progress, e.g. "
   Table 4  world-model probe (memlen-L-recall): updates until reward AUC > 0.9, final AUC
   Table 5  Memory Maze offline probe: objects MSE and walls accuracy, second half of the episode
   Table 6  DMC (proprioception), non-memory control
-  Table 7  ablations of our model (probe, memlen-32-recall)
+  Table 7  ablations of our model (probe, memlen-32-recall and memlen-64-recall)
   Table 8  operations and energy per environment step (energy.json of the runs)
 
 usage: python scripts/main_tables.py
@@ -186,10 +186,13 @@ def main():
     out += table(["model"] + [short(t) for t in DMC], [[label] + [rl_cell(f"rl2/{t}/{m}", fmt="{:.0f}") for t in DMC]
                                                        for m, label in models])
 
-    out += ["", "## Table 7. Ablations of our model (probe, memlen-32-recall)", "",
+    out += ["", "## Table 7. Ablations of our model (probe, memlen-L-recall)", "",
             "Updates until reward AUC > 0.9 / final AUC (firing rate).", ""]
-    out += table(["variant", "updates", "AUC (rate)"],
-                 [[label, *probe_cells(f"recall/bsuite_memlen-32-recall/{m}")] for m, label in ABLATIONS])
+    body = []
+    for m, label in ABLATIONS:
+        l32, l64 = (probe_cells(f"recall/bsuite_memlen-{n}-recall/{m}") for n in (32, 64))
+        body.append([label, *l32, *l64])
+    out += table(["variant", "L32 updates", "L32 AUC (rate)", "L64 updates", "L64 AUC (rate)"], body)
 
     out += ["", "## Table 8. Operations and energy per environment step (world-model filter: encoder + posterior)", "",
             "45 nm: 0.9 pJ per AC, 4.6 pJ per MAC; memory access not counted. Models of the BSuite L32 RL runs.", ""]
