@@ -183,15 +183,10 @@ def main():
     base = mm_baseline()
     out += ["", "## Table 5. Memory Maze 9×9 offline probing benchmark (Pasukonis et al. 2023; official data and probe)", "",
             "Second half of the 1k evaluation trajectories. State probe / no-memory probe (current image embedding),",
-            "both with the agent pose as input. Paper rows: 1M gradient steps. Training data: the 1.5k complete",
-            "episodes (5%) that Google Drive served of the official 29k, 50k updates (53 passes, as the paper's",
-            "1M updates over 29k), or all 29k episodes and 200k updates.", ""]
+            "both with the agent pose as input. Paper rows: 1M gradient steps.", ""]
     if base:
         out += [f"Constant predictor on our split: objects MSE {base[0]:.1f}, walls accuracy {100 * base[1]:.1f}.", ""]
-    body = []
-    for sub, data in (("mmaze_subset", "1.5k episodes"), ("mmaze_official", "29k episodes")):
-        body += [[f"{label} ({data})", *mm_cells(f"{sub}/memory_maze_9x9/{m}")] for m, label in models
-                 if (RUNS / sub / "memory_maze_9x9" / m).exists()]
+    body = [[label, *mm_cells(f"mmaze_official/memory_maze_9x9/{m}")] for m, label in models]
     body += [[label, obj, "", walls, ""] for label, obj, walls in MM_PAPER]
     out += table(["model", "objects MSE ↓", "no-memory", "walls acc. (%) ↑", "no-memory"], body)
 

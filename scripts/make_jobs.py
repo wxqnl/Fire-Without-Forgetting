@@ -330,19 +330,20 @@ def round9():
 
 
 def round10():
-    """2026-09-29 06:30: Memory Maze offline probing on the part of the official training data that
-    Google Drive served (its download quota refuses the rest): the 1471 complete episodes at the head
-    of 9 of the 10 archives (scripts/salvage_memory_maze.py), 5% of the 29k, with the official
-    evaluation set and probe. 50k updates of 32 x 48 pass over these 1.47M steps as often as the
-    paper's 1M updates pass over its 29M (53 times). Ours and DreamerV3 first."""
+    """2026-09-29 07:00: pipeline check for Memory Maze, not a paper result. Google Drive serves only
+    a few MB of the official training archives (download quota), so the main runs wait for the full
+    data (round 8). Meanwhile ours and DreamerV3 run 5k updates on the 1471 complete episodes at the
+    head of the partial archives (scripts/salvage_memory_maze.py), with the official evaluation set
+    and probe: checks the whole probe_mm.py path and measures the update speed for the budget of the
+    full runs."""
     data = ROOT / "data" / "memory_maze_9x9_official_subset"
     if not (data / "train").is_dir():
         return []
     jobs = []
-    for cell in ("PD2L_tau1000", "ann_tau2", "base_tau2", "ABG_tau128", "LIF_tau2", "GRSN_tau2"):
-        name = f"mmaze_subset/memory_maze_9x9/{cell}/s0"
+    for cell in ("PD2L_tau1000", "ann_tau2"):
+        name = f"mmaze_pilot/memory_maze_9x9/{cell}/s0"
         cmd = (f"{{python}} probe_mm.py --configs mmprobe {' '.join(MAIN[cell])} --data {data} --seed 0 "
-               f"--mm_updates 50000 --mm_eval_every 5000 --logdir {RUNS / name}")
+               f"--mm_updates 5000 --mm_eval_every 2500 --logdir {RUNS / name}")
         jobs.append(dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=20))
     return jobs
 
@@ -403,8 +404,8 @@ def round8():
 
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
-    # Memory Maze on the served part of the official data (round 10), round 8 (BSuite long memory,
-    # POPGym as in R2I), DMC (round 11), then Memory Maze on all official data once downloaded.
+    # Memory Maze pipeline check (round 10), Memory Maze on the official data once downloaded, round 8
+    # (BSuite long memory, POPGym as in R2I), then DMC (round 11).
     # Superseded: the POPGym runs of round 5 (tasks and budget not those of R2I) by round 8, round 6
     # (own Memory Maze data) by rounds 10 and 8, the DMC runs of round 5 (train ratio 64) by round 11.
     r5 = round5()
@@ -412,7 +413,7 @@ def main():
     r8 = round8()
     mm_full = [j for j in r8 if j["name"].startswith("mmaze_official/")]
     r8 = [j for j in r8 if j not in mm_full]
-    jobs = round3() + round4() + r5 + round7() + round9() + round10() + r8 + round11() + mm_full
+    jobs = round3() + round4() + r5 + round7() + round9() + round10() + mm_full + r8 + round11()
     RUNS.mkdir(exist_ok=True)
     out = RUNS / "jobs.jsonl"
     tmp = out.with_suffix(".tmp")

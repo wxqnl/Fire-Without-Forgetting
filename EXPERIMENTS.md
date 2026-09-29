@@ -174,9 +174,11 @@ L64 上只有本文模型学会。L32 上 2 层模型的各项消融都在 1000�
 
 新版 `probe_mm.py` 全部按官方协议实现，并从官方 zip 包直接读取（`data/memory_maze_9x9_official/`，`download.sh`），另加一个"无记忆探针"（同一 MLP 读当前图像的编码 + 位姿），对应原文的 VAE 基线，两者之差就是状态从过去带来的信息。
 
-数据下载（2026-09-29 更新）：评估集（1k 局）已完整下载。训练集的 10 个包被 Google Drive 的下载配额拦住，普通下载只返回 "Quota exceeded"，分段请求绝大多数也被拒；没有其他镜像。每个包只下到开头 0.5–0.7 GB，part7 为 0。zip 里每局轨迹前面都有本地文件头，截断点之前的轨迹都是完整的：`scripts/salvage_memory_maze.py` 按文件头逐个读出并用 CRC 校验，得到 1471 局（官方训练集 29k 局的 5%，147 万步），放在 `data/memory_maze_9x9_official_subset/`（`train/` + 指向官方评估集的 `eval.zip`）。
-
-先在这 5% 的官方训练数据上跑表 5（`make_jobs.round10()`）：官方评估集、官方探针，6 个主模型，每个 5 万次更新。原文用 100 万次 × 32 × 48 遍历 29M 步约 53 遍；5 万次 × 32 × 48 遍历 147 万步也是约 53 遍，两者对数据的利用程度相同。所有模型用同一份数据，比较是公平的；原文的参考行用的是全量数据，只作参照。下载循环（`download_all.sh`）继续每 10 分钟重试一次，训练集下全后自动加入全量数据的任务（round 8）。
+数据下载（2026-09-29 07:00）：评估集（1k 局）已完整下载，训练集的 10 个包没有下全。没有其他镜像，Hugging Face 上也没有。
+- Drive 对匿名下载的限制：分段请求累计几 MB 后，所有文件都返回"Quota exceeded（太多用户下载过此文件）"页面，包括前一天完整下载过的评估集。之前每 10 分钟一轮的分段重试只会不断重新触发限制，已停止。
+- 已经下载的部分：每个包开头 0.5–0.7 GB（part7 为 0），其中截断点之前的 1471 局是完整的（`scripts/salvage_memory_maze.py` 按 zip 本地文件头逐个读出，并做 CRC 校验）。这只有 29k 局的 5%，不能作为论文结果，只用于流程验证（round 10：本文模型与 DreamerV3 各 5000 次更新，检查 `probe_mm.py` 全流程，并测出更新速度，用来定全量训练的预算）。
+- 可靠的办法：用 Google 账号把 10 个训练包复制到自己的 Drive（"制作副本"），设为"知道链接的人可查看"，再从副本下载。副本是新文件，没有别人的下载记录。需要约 101 GB 的 Drive 空间；空间不够就分批复制，下完一批删一批。
+- 数据下全后，全量任务（round 8，6 个模型，20 万次更新）自动加入队列，优先级排在 POPGym Medium 之前。
 
 训练预算：原文 100 万次更新，我们先跑 20 万次（`make_jobs.MM_UPDATES`），同预算下与我们自己跑的 DreamerV3 比较；原文的 RSSM、RSSM-TBTT、VAE+GRU 在 100 万次下的数值作为参考行列入表 5（物体 23.9 / 17.2 / 8.3 / 7.8 / 6.2，墙体 80.8 / 84.1 / 89.0 / 90.0 / 94.0）。
 
@@ -294,10 +296,10 @@ R2I 选了 POPGym 中记忆需求最高的 RepeatPrevious、Autoencode、Concent
 |---|---|---|---|
 | 1 | R2I 协议 BSuite L51 / L71 / L101：Spiking-WM、A+B+G、本文模型（DreamerV3 已完成） | 9 | 在跑，36–53% |
 | 2 | POPGym RepeatPrevious Easy：6 个模型 | 6 | 在跑，DreamerV3 36%，脉冲模型 11–19% |
-| 3 | Memory Maze，官方训练数据中下载到的 5%（round 10）：6 个模型 | 6 | 排队，等显存 |
+| 3 | Memory Maze 流程验证（round 10）：本文模型、DreamerV3 各 5000 次更新，不进论文 | 2 | 排队 |
 | 4 | POPGym RepeatPrevious Medium：Spiking-WM（在跑）、A+B+G、本文模型、DreamerV3 | 4 | 1 个在跑，3 个排队 |
 | 5 | DMC walker_walk / cheetah_run / cartpole_swingup：Spiking-WM、本文模型、DreamerV3；20 万步，train ratio 512（round 11） | 9 | 排队 |
-| 6 | Memory Maze 全量官方训练数据 | 6 | 只在训练集下全后自动加入，优先级最低 |
+| 3′ | Memory Maze 全量官方数据：6 个模型，20 万次更新 | 6 | 等训练集下载（§10.1）；下全后自动加入，排在 POPGym Medium 之前 |
 
 ### 12.4 不做的及原因
 
@@ -312,7 +314,7 @@ R2I 选了 POPGym 中记忆需求最高的 RepeatPrevious、Autoencode、Concent
 
 - R2I 协议 BSuite：今天 15:00–23:00。
 - POPGym Easy：DreamerV3 今天约 15:00；脉冲模型 10 月 1 日下午到 10 月 2 日凌晨。
-- Memory Maze（5% 数据）：今天下午开始，9 月 30 日晚到 10 月 1 日凌晨完成。
+- Memory Maze：取决于训练集什么时候下全。流程验证跑完后才知道更新速度，然后再定全量训练的时间。
 - POPGym Medium：10 月 1 日晚到 10 月 2 日。
 - DMC：R2I 任务结束后开始，每个脉冲模型约 25 小时，10 月 2 日前后完成。
-- 全部完成：约 10 月 2 日晚。显存是瓶颈，4 张卡都已用了 68–78 GB，新任务只能在已有任务结束后启动。
+- 除 Memory Maze 外全部完成：约 10 月 2 日晚。显存是瓶颈，4 张卡都已用了 68–78 GB，新任务只能在已有任务结束后启动。
