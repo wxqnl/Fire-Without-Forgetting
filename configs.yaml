@@ -6,6 +6,7 @@ defaults:
   offline_traindir: ''
   offline_evaldir: ''
   seed: 0
+  env_seed_per_env: False  # True: a different seed for each parallel env (dreamer.env_seed)
   deterministic_run: False
   steps: 1e6
   parallel: False
@@ -343,12 +344,13 @@ lifgain:
   LIFRNN: {gain: True}
 
 # Memory Maze offline probe (probe_mm.py): 64x64 first-person images, 6 discrete actions
+# Memory Maze offline probing (probe_mm.py); batch 32 x 48 as in the benchmark (Pasukonis et al. 2022, Table E.1)
 mmprobe:
   encoder: {mlp_keys: '$^', cnn_keys: 'image'}
   decoder: {mlp_keys: '$^', cnn_keys: 'image'}
   reward_head: 'symlog_mse'
-  batch_size: 16
-  batch_length: 64
+  batch_size: 32
+  batch_length: 48
   video_pred_log: False
 
 # positive control: continuous-state GRU core, everything else spiking

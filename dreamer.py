@@ -198,7 +198,14 @@ def make_dataset(episodes, config):
     return dataset
 
 
-def make_env(config, mode):
+def env_seed(config, mode, index):
+    """Seed of the index-th parallel env. With env_seed_per_env False (runs before 2026-09-28 21:00)
+    all parallel envs of a mode share one seed and so produce the same episode sequence."""
+    seed = config.seed + (0 if "train" in mode else 10_000)
+    return seed + 1000 * index if config.env_seed_per_env else seed
+
+
+def make_env(config, mode, index=0):
     suite, task = config.task.split("_", 1)
     if suite == "dmc":
         import envs.dmc as dmc
@@ -242,12 +249,12 @@ def make_env(config, mode):
     elif suite == "popgym":
         from envs.popgym_env import PopGym
 
-        env = PopGym(task, seed=config.seed + (0 if "train" in mode else 10_000))
+        env = PopGym(task, seed=env_seed(config, mode, index))
         env = wrappers.OneHotAction(env)
     elif suite == "bsuite":
         from envs.bsuite_env import MemoryChain
 
-        env = MemoryChain(task, seed=config.seed + (0 if "train" in mode else 10_000))
+        env = MemoryChain(task, seed=env_seed(config, mode, index))
         env = wrappers.OneHotAction(env)
     elif suite == "crafter":
         import envs.crafter as crafter
@@ -302,9 +309,9 @@ def main(config):
     else:
         directory = config.evaldir
     eval_eps = tools.load_episodes(directory, limit=1)
-    make = lambda mode: make_env(config, mode)
-    train_envs = [make("train") for _ in range(config.envs)]
-    eval_envs = [make("eval") for _ in range(config.envs)]
+    make = lambda mode, index: make_env(config, mode, index)
+    train_envs = [make("train", i) for i in range(config.envs)]
+    eval_envs = [make("eval", i) for i in range(config.envs)]
     if config.parallel:
         train_envs = [Parallel(env, "process") for env in train_envs]
         eval_envs = [Parallel(env, "process") for env in eval_envs]

@@ -25,8 +25,10 @@ MAIN = [("base_tau2", "Spiking-WM"), ("LIF_tau2", "LIF"), ("GRSN_tau2", "GRSN"),
         ("ABG_tau128", "Spiking-WM + A+B+G"), ("PD2L_tau1000", "**Ours**"), ("ann_tau2", "DreamerV3 (ANN)")]
 EXTRA = [("gru_tau2", "spiking enc. + GRU"), ("PD_tau1000", "ours, 1 layer")]
 BSUITE = [f"bsuite_memlen-{n}" for n in (8, 16, 32, 64)]
-POPGYM = ["popgym_RepeatFirstEasy", "popgym_RepeatPreviousEasy", "popgym_CountRecallEasy",
-          "popgym_RepeatPreviousMedium", "popgym_AutoencodeEasy", "popgym_RepeatPreviousHard"]
+BSUITE_LONG = [f"bsuite_memlen-{n}" for n in (51, 71, 101)]  # round 8, R2I protocol (1M steps)
+POPGYM = ["popgym_RepeatPreviousEasy", "popgym_RepeatPreviousMedium"]  # round 8, R2I tasks (2M steps)
+MM_PAPER = [("constant (paper)", "23.9", "80.8"), ("VAE, no memory (paper)", "17.2", "84.1"),
+            ("RSSM (paper)", "8.3", "89.0"), ("VAE+GRU TBTT (paper)", "7.8", "90.0"), ("RSSM TBTT (paper)", "6.2", "94.0")]
 DMC = ["dmc_walker_walk", "dmc_cheetah_run", "dmc_cartpole_swingup"]
 ABLATIONS = [("PD2L_tau1000", "ours"), ("PD2Leuler_tau1000", "Euler input gain 1 − λ"),
              ("PD2L_tau128", "single τ = 128"), ("PD2Lfix_tau1000", "τ fixed (not learned)"),
@@ -117,23 +119,20 @@ def short(task):
 
 
 def mm_cells(run):
-    path = RUNS / run / "s0"
-    res = path / "results.json"
-    if res.exists():
-        r = json.loads(res.read_text())
-        return f"{r['final_eval_objects_mse']:.2f}", f"{r['final_eval_walls_acc']:.3f}"
+    """Objects MSE and walls accuracy (%) of the state probe and of the no-memory probe."""
     evals = [r for r in rows(run) if "eval_objects_mse" in r]
     if not evals:
-        return "·", "·"
-    p = progress(run, evals[-1]["step"])
-    return f"{evals[-1]['eval_objects_mse']:.2f}{p}", f"{evals[-1]['eval_walls_acc']:.3f}{p}"
+        return ["·"] * 4
+    r, p = evals[-1], progress(run, evals[-1]["step"])
+    return [f"{r['eval_objects_mse']:.1f}{p}", f"{r['nomem_eval_objects_mse']:.1f}",
+            f"{100 * r['eval_walls_acc']:.1f}{p}", f"{100 * r['nomem_eval_walls_acc']:.1f}"]
 
 
 def mm_baseline():
-    for path in sorted((RUNS / "mmaze").glob("*/*/s0/metrics.jsonl")):
+    for path in sorted((RUNS / "mmaze_official").glob("*/*/s0/metrics.jsonl")):
         first = json.loads(path.read_text().splitlines()[0])
-        if "baseline_objects_mse" in first:
-            return first["baseline_objects_mse"], first["baseline_walls_acc"]
+        if "const_objects_mse" in first:
+            return first["const_objects_mse"], first["const_walls_acc"]
     return None
 
 
@@ -156,14 +155,18 @@ def main():
         out += [f"Queue at {s['time']}: {s['done']}/{s['total']} done, {len(s['running'])} running, "
                 f"{s['pending']} pending.", ""]
 
-    out += ["## Table 2. Memory tasks, RL: evaluation return (mean of the last 3 evaluations)", ""]
-    tasks = BSUITE + POPGYM
-    out += table(["model"] + [short(t) for t in tasks],
-                 [[label] + [rl_cell(f"rl2/{t}/{m}") for t in tasks] for m, label in models])
-    out += ["", "BSuite memory length L: return 1 = always recalls the cue, 0 = chance. POPGym: return in [−1, 1].", ""]
+    out += ["## Table 2. Memory tasks, RL: evaluation return (mean of the last 3 evaluations)", "",
+            "BSuite memory length L (return 1 = always recalls the cue, 0 = chance). L8-L64: 0.15-0.5M env steps;",
+            "L51-L101 and POPGym RepeatPrevious (return in [-1, 1], -0.5 = chance): protocol of R2I (Samsonov et al.",
+            "2024), 1M / 2M env steps, a different seed per parallel env.", ""]
+    rl_runs = [(f"rl2/{t}", short(t)) for t in BSUITE] + [(f"r2i/{t}", short(t)) for t in BSUITE_LONG + POPGYM]
+    out += table(["model"] + [lab for _, lab in rl_runs],
+                 [[label] + [rl_cell(f"{r}/{m}") for r, _ in rl_runs] for m, label in models])
+    out += [""]
 
     out += ["## Table 3. BSuite: env steps until the evaluation return first reaches 0.9", ""]
-    out += table(["model"] + [short(t) for t in BSUITE], [[label] + [steps_to(f"rl2/{t}/{m}") for t in BSUITE]
+    bs_runs = [(f"rl2/{t}", short(t)) for t in BSUITE] + [(f"r2i/{t}", short(t)) for t in BSUITE_LONG]
+    out += table(["model"] + [lab for _, lab in bs_runs], [[label] + [steps_to(f"{r}/{m}") for r, _ in bs_runs]
                                                           for m, label in models])
 
     out += ["", "## Table 4. World-model probe (memlen-L-recall, random-policy data)", "",
@@ -176,11 +179,14 @@ def main():
     out += table(["model"] + [f"L{n} updates" for n in (8, 16, 32, 64)] + [f"L{n} AUC" for n in (8, 16, 32, 64)], body)
 
     base = mm_baseline()
-    out += ["", "## Table 5. Memory Maze 9×9, offline probe (second half of the episode)", ""]
+    out += ["", "## Table 5. Memory Maze 9×9 offline probing benchmark (Pasukonis et al. 2023; official data and probe)", "",
+            "Second half of the 1k evaluation trajectories. State probe / no-memory probe (current image embedding),",
+            "both with the agent pose as input. Paper rows: 1M gradient steps.", ""]
     if base:
-        out += [f"Constant predictor: objects MSE {base[0]:.2f}, walls accuracy {base[1]:.3f}.", ""]
-    body = [[label, *mm_cells(f"mmaze/memory_maze_9x9/{m}")] for m, label in models]
-    out += table(["model", "objects MSE ↓", "walls acc. ↑"], body)
+        out += [f"Constant predictor on our split: objects MSE {base[0]:.1f}, walls accuracy {100 * base[1]:.1f}.", ""]
+    body = [[label, *mm_cells(f"mmaze_official/memory_maze_9x9/{m}")] for m, label in models]
+    body += [[label, obj, "", walls, ""] for label, obj, walls in MM_PAPER]
+    out += table(["model", "objects MSE ↓", "no-memory", "walls acc. (%) ↑", "no-memory"], body)
 
     out += ["", "## Table 6. DMC (proprioception), non-memory control: evaluation return", ""]
     out += table(["model"] + [short(t) for t in DMC], [[label] + [rl_cell(f"rl2/{t}/{m}", fmt="{:.0f}") for t in DMC]

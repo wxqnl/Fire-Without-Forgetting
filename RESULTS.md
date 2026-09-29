@@ -6,31 +6,33 @@ Queue at 2026-09-28 20:26:18: 89/146 done, 17 running, 40 pending.
 
 ## Table 2. Memory tasks, RL: evaluation return (mean of the last 3 evaluations)
 
-| model | L8 | L16 | L32 | L64 | RepeatFirstEasy | RepeatPreviousEasy | CountRecallEasy | RepeatPreviousMedium | AutoencodeEasy | RepeatPreviousHard |
-|---|---|---|---|---|---|---|---|---|---|---|
-| Spiking-WM | 0.08 | -0.25 | -0.08 | -0.25 (78%) | -0.34 (94%) | -0.47 (14%) | · | · | · | · |
-| LIF | 1.00 | -0.25 | -0.08 | -0.17 (90%) | -0.45 | -0.49 (21%) | · | · | · | · |
-| GRSN | 0.98 | 0.94 | -0.08 | 0.00 (94%) | -0.50 | -0.48 (21%) | · | · | · | · |
-| Spiking-WM + A+B+G | 1.00 | 1.00 | 0.79 | 0.33 (64%) | -0.33 (81%) | -0.52 (1%) | · | · | · | · |
-| **Ours** | 0.98 | 1.00 | 1.00 | 0.98 (78%) | -0.43 (94%) | -0.47 (1%) | · | · | · | · |
-| DreamerV3 (ANN) | 0.98 | 0.94 | 0.98 | -0.08 | -0.50 | -0.48 (14%) | · | · | · | · |
-| spiking enc. + GRU | · | 1.00 | 1.00 | · | · | · | · | · | · | · |
-| ours, 1 layer | · | 1.00 | 1.00 | · | · | · | · | · | · | · |
+BSuite memory length L (return 1 = always recalls the cue, 0 = chance). L8-L64: 0.15-0.5M env steps;
+L51-L101 and POPGym RepeatPrevious (return in [-1, 1], -0.5 = chance): protocol of R2I (Samsonov et al.
+2024), 1M / 2M env steps, a different seed per parallel env.
 
-BSuite memory length L: return 1 = always recalls the cue, 0 = chance. POPGym: return in [−1, 1].
+| model | L8 | L16 | L32 | L64 | L51 | L71 | L101 | RepeatPreviousEasy | RepeatPreviousMedium |
+|---|---|---|---|---|---|---|---|---|---|
+| Spiking-WM | 0.08 | -0.25 | -0.08 | -0.25 (78%) | · | · | · | · | · |
+| LIF | 1.00 | -0.25 | -0.08 | -0.17 (94%) | · | · | · | · | · |
+| GRSN | 0.98 | 0.94 | -0.08 | 0.17 (98%) | · | · | · | · | · |
+| Spiking-WM + A+B+G | 1.00 | 1.00 | 0.79 | 0.33 (64%) | · | · | · | · | · |
+| **Ours** | 0.98 | 1.00 | 1.00 | 0.98 (78%) | · | · | · | · | · |
+| DreamerV3 (ANN) | 0.98 | 0.94 | 0.98 | -0.08 | · | · | · | · | · |
+| spiking enc. + GRU | · | 1.00 | 1.00 | · | · | · | · | · | · |
+| ours, 1 layer | · | 1.00 | 1.00 | · | · | · | · | · | · |
 
 ## Table 3. BSuite: env steps until the evaluation return first reaches 0.9
 
-| model | L8 | L16 | L32 | L64 |
-|---|---|---|---|---|
-| Spiking-WM | > 152k | > 202k | > 302k | > 392k … |
-| LIF | 62k | > 202k | > 302k | > 452k … |
-| GRSN | 32k | 112k | > 302k | > 472k … |
-| Spiking-WM + A+B+G | 12k | 22k | 52k | > 322k … |
-| **Ours** | 12k | 22k | 32k | 82k |
-| DreamerV3 (ANN) | 12k | 32k | 62k | > 502k |
-| spiking enc. + GRU | · | 32k | 102k | · |
-| ours, 1 layer | · | 32k | 62k | · |
+| model | L8 | L16 | L32 | L64 | L51 | L71 | L101 |
+|---|---|---|---|---|---|---|---|
+| Spiking-WM | > 152k | > 202k | > 302k | > 392k … | · | · | · |
+| LIF | 62k | > 202k | > 302k | > 472k … | · | · | · |
+| GRSN | 32k | 112k | > 302k | > 492k … | · | · | · |
+| Spiking-WM + A+B+G | 12k | 22k | 52k | > 322k … | · | · | · |
+| **Ours** | 12k | 22k | 32k | 82k | · | · | · |
+| DreamerV3 (ANN) | 12k | 32k | 62k | > 502k | · | · | · |
+| spiking enc. + GRU | · | 32k | 102k | · | · | · | · |
+| ours, 1 layer | · | 32k | 62k | · | · | · | · |
 
 ## Table 4. World-model probe (memlen-L-recall, random-policy data)
 
@@ -47,20 +49,26 @@ Updates until reward AUC > 0.9 / final AUC (firing rate of the recurrent state).
 | spiking enc. + GRU | 500 | 1000 | 5000 | > 12000 | 1.000 (0.018) | 1.000 (0.030) | 1.000 (0.031) | 0.502 (0.012) |
 | ours, 1 layer | · | 1000 | 3000 | > 12000 | · | 1.000 (0.152) | 0.993 (0.179) | 0.502 (0.170) |
 
-## Table 5. Memory Maze 9×9, offline probe (second half of the episode)
+## Table 5. Memory Maze 9×9 offline probing benchmark (Pasukonis et al. 2023; official data and probe)
 
-Constant predictor: objects MSE 11.68, walls accuracy 0.806.
+Second half of the 1k evaluation trajectories. State probe / no-memory probe (current image embedding),
+both with the agent pose as input. Paper rows: 1M gradient steps.
 
-| model | objects MSE ↓ | walls acc. ↑ |
-|---|---|---|
-| Spiking-WM | 8.78 | 0.806 |
-| LIF | 8.85 | 0.806 |
-| GRSN | 8.82 | 0.806 |
-| Spiking-WM + A+B+G | 9.14 (50%) | 0.801 (50%) |
-| **Ours** | 9.05 (60%) | 0.801 (60%) |
-| DreamerV3 (ANN) | 7.68 (90%) | 0.801 (90%) |
-| spiking enc. + GRU | · | · |
-| ours, 1 layer | · | · |
+| model | objects MSE ↓ | no-memory | walls acc. (%) ↑ | no-memory |
+|---|---|---|---|---|
+| Spiking-WM | · | · | · | · |
+| LIF | · | · | · | · |
+| GRSN | · | · | · | · |
+| Spiking-WM + A+B+G | · | · | · | · |
+| **Ours** | · | · | · | · |
+| DreamerV3 (ANN) | · | · | · | · |
+| spiking enc. + GRU | · | · | · | · |
+| ours, 1 layer | · | · | · | · |
+| constant (paper) | 23.9 |  | 80.8 |  |
+| VAE, no memory (paper) | 17.2 |  | 84.1 |  |
+| RSSM (paper) | 8.3 |  | 89.0 |  |
+| VAE+GRU TBTT (paper) | 7.8 |  | 90.0 |  |
+| RSSM TBTT (paper) | 6.2 |  | 94.0 |  |
 
 ## Table 6. DMC (proprioception), non-memory control: evaluation return
 

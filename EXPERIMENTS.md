@@ -155,3 +155,38 @@ L64 上只有本文模型学会。L32 上 2 层模型的各项消融都在 1000�
 - 保留运行到结束的 6 个任务：Memory Maze ANN，BSuite L64 的 GRSN、LIF，POPGym RepeatFirstEasy 的 Spiking-WM、A+B+G、本文模型。
 - 手动停止的 11 个任务（`.exit` = 143）：BSuite L64 的 Spiking-WM、A+B+G、本文模型；POPGym RepeatPreviousEasy 的 6 个模型；Memory Maze 的 A+B+G、本文模型。RL 任务重新启动后从 `latest_model.pt` 和已有回放数据续跑；`probe_mm.py` 不支持续跑，会从头开始。
 - 恢复：`setsid nohup python scripts/queue.py --jobs runs/jobs.jsonl --gpus 2,3,4,5 --max_per_gpu 12 > /dev/null 2>&1 &`。恢复前先决定 Memory Maze 和 POPGym 的新设计，并从 `runs/jobs.jsonl` 中去掉不再需要的任务。
+
+## 10. 重新设计：只用世界模型文献中已有 ANN 结果的记忆 benchmark（2026-09-28 21:00）
+
+原则：主表的记忆任务必须是世界模型文献里的标准 benchmark，并且有已发表的 ANN 世界模型结果可以对照；按原文协议运行，不自己构造任务。
+
+### 10.1 Memory Maze 离线探针：改用官方数据和官方协议
+
+原设计（§3）在 2 万次更新时所有模型都停在"无记忆"水平。对照原文（Pasukonis et al., ICLR 2023，§3.3、§5、表 E.1/E.3）后，发现三处偏离：
+
+| 项 | 原设计 | 官方协议 |
+|---|---|---|
+| 探针输入 | 只有模型状态 | 模型状态 + 智能体位置和朝向（墙体标注在全局坐标下，不给位置就无法预测，这就是墙体准确率全部等于常数基线的原因） |
+| 探针 | 2 层 512 单元 SiLU | 4 层 1024 单元，LayerNorm + ELU，Adam 3e-4 / eps 1e-5 |
+| 数据 | 自己生成 2000 局 | 官方 Memory Maze 9x9 (30M)：29k 训练局 + 1k 评估局 |
+| 训练 | 2 万次更新，16 × 64 | 100 万次梯度更新，32 × 48，TBTT |
+| 指标 | 物体误差按坐标平均 | 按物体平均的平方距离；后半局（最后 500 步） |
+
+新版 `probe_mm.py` 全部按官方协议实现，并从官方 zip 包直接读取（`data/memory_maze_9x9_official/`，`download.sh`），另加一个"无记忆探针"（同一 MLP 读当前图像的编码 + 位姿），对应原文的 VAE 基线，两者之差就是状态从过去带来的信息。
+
+训练预算：原文 100 万次更新，我们先跑 20 万次（`make_jobs.MM_UPDATES`），同预算下与我们自己跑的 DreamerV3 比较；原文的 RSSM、RSSM-TBTT、VAE+GRU 在 100 万次下的数值作为参考行列入表 5（物体 23.9 / 17.2 / 8.3 / 7.8 / 6.2，墙体 80.8 / 84.1 / 89.0 / 90.0 / 94.0）。
+
+### 10.2 BSuite Memory Length：按 R2I 协议延长到 101 步
+
+R2I（Samsonov et al., ICLR 2024，图 3、图 7）在 BSuite Memory Length 上每个记忆长度训练 100 万环境步：DreamerV3 超过约 30 步失败，R2I 到 70–100 步。我们已有的 L8–L64 与之一致（DreamerV3 学会 L32、L64 失败）。新增 L51、L71、L101，每个 100 万步，训练窗口覆盖整局（64 / 80 / 128），模型为 Spiking-WM、A+B+G、本文模型、DreamerV3。
+
+### 10.3 POPGym：改用 R2I 的任务
+
+R2I 选了 POPGym 中记忆需求最高的 RepeatPrevious、Autoencode、Concentration（各 Easy/Medium/Hard），每个任务 5000 万环境步。按其训练曲线（图 9），R2I 在 RepeatPrevious Easy 和 Medium 上 100–200 万步内就学会，而 DreamerV3 在 Medium 上到 2000 万步仍在 −0.5（随机）。所以在 200 万步的预算下，RepeatPrevious Easy / Medium 已能区分有无长程记忆。原来的 RepeatFirst、CountRecall 等不是 R2I 的任务，预算也只有 30 万步，已作废（移到 `runs/_superseded/`）。
+
+### 10.4 其他
+
+- 所有新实验每个并行环境用不同的种子（`--env_seed_per_env True`，见 §9.3）。
+- 考察过但不用：BSuite Discounting Chain（观测中直接包含第一步的动作，是信用分配任务，不考察记忆）；S4WM 的记忆任务（Deng et al., NeurIPS 2023，代码和数据未公开，只能按描述重建）。
+- 任务定义在 `make_jobs.py` 的 `round8()`，结果汇总在 `RESULTS.md` 表 2、表 3、表 5。
+- 算力排序：Memory Maze（图像，最贵）> POPGym（200 万步）> BSuite 长记忆（100 万步，向量观测）。算力不够时，BSuite 长记忆和 POPGym RepeatPrevious 是最省的一组，两者都有 R2I 发表的 DreamerV3 / R2I 曲线可以对照。

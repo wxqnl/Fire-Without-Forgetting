@@ -318,11 +318,54 @@ def round7():
         seeds=(0,), extra=MEMLEN_EXTRA[64]))
 
 
+MM_UPDATES = 200000  # Memory Maze gradient steps; the benchmark paper trains 1M
+
+
+def round8():
+    """2026-09-28 21:00, after the GPU reclaim: memory benchmarks of the world-model literature with
+    published ANN results, run with their protocols (EXPERIMENTS.md §10). All with a different seed
+    per parallel env (env_seed_per_env).
+
+    1. Memory Maze offline probing (Pasukonis et al. 2023) on the official 9x9 dataset, replacing
+       round 6 (own data, probe without the agent pose, 20k updates: no model left the no-memory
+       level). Reference: RSSM / RSSM-TBTT / VAE+GRU at 1M steps.
+    2. BSuite Memory Length as in R2I (Samsonov et al. 2024, Fig. 3/7): 1M env steps per memory
+       length; DreamerV3 fails beyond ~30 steps, R2I reaches ~70-100. The window covers the episode.
+    3. POPGym RepeatPrevious as in R2I (Fig. 4/9): R2I learns Easy and Medium within the first
+       1-2M steps while DreamerV3 stays near -0.5 on Medium until 20M; 2M steps each."""
+    jobs = []
+    data = ROOT / "data" / "memory_maze_9x9_official"
+    for cell, cfgs in MAIN.items():
+        name = f"mmaze_official/memory_maze_9x9/{cell}/s0"
+        cmd = (f"{{python}} probe_mm.py --configs mmprobe {' '.join(cfgs)} --data {data} --seed 0 "
+               f"--mm_updates {MM_UPDATES} --mm_eval_every 10000 --logdir {RUNS / name}")
+        jobs.append(dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=20))
+    long_cells = {k: MAIN[k] for k in ("base_tau2", "ABG_tau128", "PD2L_tau1000", "ann_tau2")}
+    for L, window in ((51, 64), (71, 80), (101, 128)):
+        for job in rl2_jobs(f"bsuite_memlen-{L}", long_cells, steps=1e6,
+                            extra=f"--batch_length {window} --env_seed_per_env True", eval_every=2e4):
+            job["name"] = job["name"].replace("rl2/", "r2i/")
+            job["cmd"] = job["cmd"].replace("/runs/rl2/", "/runs/r2i/")
+            job["logdir"] = job["logdir"].replace("/runs/rl2/", "/runs/r2i/")
+            jobs.append(job)
+    for task, window in (("RepeatPreviousEasy", 64), ("RepeatPreviousMedium", 64)):
+        for job in rl2_jobs(f"popgym_{task}", MAIN, steps=2e6,
+                            extra=f"--batch_length {window} --env_seed_per_env True", eval_every=5e4):
+            job["name"] = job["name"].replace("rl2/", "r2i/")
+            job["cmd"] = job["cmd"].replace("/runs/rl2/", "/runs/r2i/")
+            job["logdir"] = job["logdir"].replace("/runs/rl2/", "/runs/r2i/")
+            jobs.append(job)
+    return jobs
+
+
 def main():
-    # priority: rounds 3-4, round 5 probes and BSuite RL, Memory Maze, L64 ablations, then POPGym and DMC
+    # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations, round 8 (Memory Maze
+    # official, BSuite long memory, POPGym as in R2I), then DMC. Superseded by round 8: the POPGym
+    # runs of round 5 (tasks and budget not those of R2I) and round 6 (own Memory Maze data).
     r5 = round5()
-    late = [j for j in r5 if "/popgym_" in j["name"] or "/dmc_" in j["name"]]
-    jobs = round3() + round4() + [j for j in r5 if j not in late] + round6() + round7() + late
+    popgym5 = [j for j in r5 if "/popgym_" in j["name"]]
+    dmc = [j for j in r5 if "/dmc_" in j["name"]]
+    jobs = (round3() + round4() + [j for j in r5 if j not in popgym5 + dmc] + round7() + round8() + dmc)
     RUNS.mkdir(exist_ok=True)
     out = RUNS / "jobs.jsonl"
     tmp = out.with_suffix(".tmp")
