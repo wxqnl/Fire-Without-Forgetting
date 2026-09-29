@@ -1172,10 +1172,11 @@ class PDRNN(nn.Module):
             self.D.append(nn.Linear(in_dim, size, bias=False))
             self.soma_norm.append(norm_cls(size, **getattr(config, norm)))
             log_tau = torch.empty(n).uniform_(math.log(p["tau_min"]), math.log(p["tau_max"] + 1e-6))
-            self.log_tau.append(nn.Parameter(log_tau, requires_grad=p["learn_tau"]))
+            self.log_tau.append(nn.Parameter(log_tau))
             self.C.append(nn.Parameter(torch.randn(size, self._channels) / math.sqrt(self._channels)))
             in_dim = size
         self.act_fun = node.QGateGrad(alpha=2.0, requires_grad=False)
+        self._learn_tau = p["learn_tau"]
 
     def forward(self, inputs, state):
         x = sum(inputs) / self.T
@@ -1184,7 +1185,9 @@ class PDRNN(nn.Module):
             d = self.neuron.mems[key]
             if d is None:
                 d = torch.zeros(x.shape[0], self._size * self._channels, device=x.device)
-            lam = torch.exp(-torch.exp(-self.log_tau[i]))
+            # detach instead of requires_grad=False: tools.RequiresGrad turns on every parameter in training
+            log_tau = self.log_tau[i] if self._learn_tau else self.log_tau[i].detach()
+            lam = torch.exp(-torch.exp(-log_tau))
             gain = torch.sqrt(1 - lam**2) if self._input_norm == "lru" else 1 - lam
             d = lam * d + gain * self.in_norm[i](self.B[i](x))
             self.neuron.mems[key] = d

@@ -2,20 +2,20 @@
 
 Single seed (s0). A value with (NN%) is from a run still in progress; · = not started.
 
-Queue at 2026-09-28 09:24:16: 37/142 done, 35 running, 70 pending.
+Queue at 2026-09-28 20:26:18: 89/146 done, 17 running, 40 pending.
 
 ## Table 2. Memory tasks, RL: evaluation return (mean of the last 3 evaluations)
 
 | model | L8 | L16 | L32 | L64 | RepeatFirstEasy | RepeatPreviousEasy | CountRecallEasy | RepeatPreviousMedium | AutoencodeEasy | RepeatPreviousHard |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Spiking-WM | 0.08 (22%) | -0.17 (86%) | -0.17 (58%) | · | · | · | · | · | · | · |
-| LIF | 0.08 (22%) | 0.00 (1%) | · | · | · | · | · | · | · | · |
-| GRSN | 0.75 (28%) | 0.00 (1%) | · | · | · | · | · | · | · | · |
-| Spiking-WM + A+B+G | 0.69 (15%) | 1.00 (86%) | 0.98 (54%) | · | · | · | · | · | · | · |
-| **Ours** | 0.53 (8%) | · | · | · | · | · | · | · | · | · |
-| DreamerV3 (ANN) | 0.59 (8%) | · | · | · | · | · | · | · | · | · |
-| spiking enc. + GRU | · | 1.00 | 1.00 (78%) | · | · | · | · | · | · | · |
-| ours, 1 layer | · | 1.00 (101%) | 1.00 (78%) | · | · | · | · | · | · | · |
+| Spiking-WM | 0.08 | -0.25 | -0.08 | -0.25 (78%) | -0.34 (94%) | -0.47 (14%) | · | · | · | · |
+| LIF | 1.00 | -0.25 | -0.08 | -0.17 (90%) | -0.45 | -0.49 (21%) | · | · | · | · |
+| GRSN | 0.98 | 0.94 | -0.08 | 0.00 (94%) | -0.50 | -0.48 (21%) | · | · | · | · |
+| Spiking-WM + A+B+G | 1.00 | 1.00 | 0.79 | 0.33 (64%) | -0.33 (81%) | -0.52 (1%) | · | · | · | · |
+| **Ours** | 0.98 | 1.00 | 1.00 | 0.98 (78%) | -0.43 (94%) | -0.47 (1%) | · | · | · | · |
+| DreamerV3 (ANN) | 0.98 | 0.94 | 0.98 | -0.08 | -0.50 | -0.48 (14%) | · | · | · | · |
+| spiking enc. + GRU | · | 1.00 | 1.00 | · | · | · | · | · | · | · |
+| ours, 1 layer | · | 1.00 | 1.00 | · | · | · | · | · | · | · |
 
 BSuite memory length L: return 1 = always recalls the cue, 0 = chance. POPGym: return in [−1, 1].
 
@@ -23,12 +23,12 @@ BSuite memory length L: return 1 = always recalls the cue, 0 = chance. POPGym: r
 
 | model | L8 | L16 | L32 | L64 |
 |---|---|---|---|---|
-| Spiking-WM | > 32k … | > 172k … | > 172k … | · |
-| LIF | > 32k … | > 2k … | · | · |
-| GRSN | 32k | > 2k … | · | · |
-| Spiking-WM + A+B+G | 12k | 22k | 52k | · |
-| **Ours** | 12k | · | · | · |
-| DreamerV3 (ANN) | 12k | · | · | · |
+| Spiking-WM | > 152k | > 202k | > 302k | > 392k … |
+| LIF | 62k | > 202k | > 302k | > 452k … |
+| GRSN | 32k | 112k | > 302k | > 472k … |
+| Spiking-WM + A+B+G | 12k | 22k | 52k | > 322k … |
+| **Ours** | 12k | 22k | 32k | 82k |
+| DreamerV3 (ANN) | 12k | 32k | 62k | > 502k |
 | spiking enc. + GRU | · | 32k | 102k | · |
 | ours, 1 layer | · | 32k | 62k | · |
 
@@ -38,25 +38,27 @@ Updates until reward AUC > 0.9 / final AUC (firing rate of the recurrent state).
 
 | model | L8 updates | L16 updates | L32 updates | L64 updates | L8 AUC | L16 AUC | L32 AUC | L64 AUC |
 |---|---|---|---|---|---|---|---|---|
-| Spiking-WM | > 12000 | > 12000 | 12000 | > 3000 … | 0.493 (0.081) | 0.537 (0.083) | 0.660 (0.101) | 0.471 (0.096) (25%) |
-| LIF | 6000 | > 10500 … | > 11000 … | > 5500 … | 0.999 (0.085) | 0.532 (0.101) (88%) | 0.510 (0.108) (92%) | 0.497 (0.100) (46%) |
-| GRSN | 1500 | 4000 | > 12000 | > 6000 … | 0.999 (0.079) | 0.998 (0.080) | 0.507 (0.096) | 0.496 (0.109) (50%) |
-| Spiking-WM + A+B+G | 500 | 500 | 2000 | > 2500 … | 1.000 (0.119) | 1.000 (0.176) | 1.000 (0.193) | 0.509 (0.250) (21%) |
-| **Ours** | 500 | 1000 | 1500 | 4000 | 1.000 (0.169) | 1.000 (0.178) (92%) | 0.998 (0.175) | 0.998 (0.202) (42%) |
-| DreamerV3 (ANN) | 500 | 1000 | 6000 | > 11500 … | 1.000 (-0.001) | 1.000 (0.025) | 0.999 (0.015) | 0.491 (0.034) (96%) |
+| Spiking-WM | > 12000 | > 12000 | 12000 | > 12000 | 0.493 (0.081) | 0.537 (0.083) | 0.660 (0.101) | 0.516 (0.089) |
+| LIF | 6000 | > 12000 | > 12000 | > 12000 | 0.999 (0.085) | 0.521 (0.099) | 0.503 (0.103) | 0.505 (0.092) |
+| GRSN | 1500 | 4000 | > 12000 | > 12000 | 0.999 (0.079) | 0.998 (0.080) | 0.507 (0.096) | 0.508 (0.119) |
+| Spiking-WM + A+B+G | 500 | 500 | 2000 | > 12000 | 1.000 (0.119) | 1.000 (0.176) | 1.000 (0.193) | 0.514 (0.246) |
+| **Ours** | 500 | 1000 | 1500 | 4000 | 1.000 (0.169) | 1.000 (0.174) | 0.998 (0.175) | 1.000 (0.169) |
+| DreamerV3 (ANN) | 500 | 1000 | 6000 | > 12000 | 1.000 (-0.001) | 1.000 (0.025) | 0.999 (0.015) | 0.497 (0.035) |
 | spiking enc. + GRU | 500 | 1000 | 5000 | > 12000 | 1.000 (0.018) | 1.000 (0.030) | 1.000 (0.031) | 0.502 (0.012) |
 | ours, 1 layer | · | 1000 | 3000 | > 12000 | · | 1.000 (0.152) | 0.993 (0.179) | 0.502 (0.170) |
 
 ## Table 5. Memory Maze 9×9, offline probe (second half of the episode)
 
+Constant predictor: objects MSE 11.68, walls accuracy 0.806.
+
 | model | objects MSE ↓ | walls acc. ↑ |
 |---|---|---|
-| Spiking-WM | · | · |
-| LIF | · | · |
-| GRSN | · | · |
-| Spiking-WM + A+B+G | · | · |
-| **Ours** | · | · |
-| DreamerV3 (ANN) | · | · |
+| Spiking-WM | 8.78 | 0.806 |
+| LIF | 8.85 | 0.806 |
+| GRSN | 8.82 | 0.806 |
+| Spiking-WM + A+B+G | 9.14 (50%) | 0.801 (50%) |
+| **Ours** | 9.05 (60%) | 0.801 (60%) |
+| DreamerV3 (ANN) | 7.68 (90%) | 0.801 (90%) |
 | spiking enc. + GRU | · | · |
 | ours, 1 layer | · | · |
 
@@ -79,11 +81,11 @@ Updates until reward AUC > 0.9 / final AUC (firing rate).
 
 | variant | L32 updates | L32 AUC (rate) | L64 updates | L64 AUC (rate) |
 |---|---|---|---|---|
-| ours | 1500 | 0.998 (0.175) | 4000 | 0.998 (0.202) (42%) |
-| Euler input gain 1 − λ | 2000 | 0.999 (0.200) (38%) | · | · |
-| single τ = 128 | 1000 | 0.999 (0.219) (33%) | · | · |
-| τ fixed (not learned) | 1500 | 0.999 (0.208) (33%) | · | · |
-| firing rate capped at 0.06 | 2500 | 0.995 (0.058) (33%) | · | · |
+| ours | 1500 | 0.998 (0.175) | 4000 | 1.000 (0.169) |
+| Euler input gain 1 − λ | 2000 | 0.996 (0.180) | > 12000 | 0.559 (0.176) |
+| single τ = 128 | 1000 | 0.999 (0.202) | 3000 | 0.995 (0.190) |
+| τ fixed (not learned) | · | · | · | · |
+| firing rate capped at 0.06 | 2500 | 0.999 (0.056) | 7500 | 1.000 (0.057) |
 | 1 layer | 3000 | 0.993 (0.179) | > 12000 | 0.502 (0.170) |
 | 1 layer, T = 1 | 6000 | 0.959 (0.201) | · | · |
 
@@ -93,11 +95,11 @@ Updates until reward AUC > 0.9 / final AUC (firing rate).
 
 | model | AC (M) | MAC (M) | energy (µJ) | recurrent firing rate |
 |---|---|---|---|---|
-| Spiking-WM | · | · | · | · |
-| LIF | · | · | · | · |
-| GRSN | · | · | · | · |
-| Spiking-WM + A+B+G | · | · | · | · |
-| **Ours** | · | · | · | · |
-| DreamerV3 (ANN) | · | · | · | · |
-| spiking enc. + GRU | · | · | · | · |
-| ours, 1 layer | · | · | · | · |
+| Spiking-WM | 6.58 | 0.30 | 7.32 | 0.101 |
+| LIF | 4.33 | 0.21 | 4.86 | 0.094 |
+| GRSN | 3.36 | 0.13 | 3.61 | 0.108 |
+| Spiking-WM + A+B+G | 7.23 | 0.30 | 7.91 | 0.139 |
+| **Ours** | 5.90 | 0.15 | 5.99 | 0.160 |
+| DreamerV3 (ANN) | 0.02 | 3.73 | 17.18 | 0.038 |
+| spiking enc. + GRU | 1.46 | 5.63 | 27.23 | 0.017 |
+| ours, 1 layer | 4.84 | 0.13 | 4.98 | 0.171 |
