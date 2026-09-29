@@ -2,7 +2,7 @@
 
 Single seed (s0). A value with (NN%) is from a run still in progress; · = not started.
 
-Queue at 2026-09-29 01:48:41: 88/130 done, 20 running, 22 pending.
+Queue at 2026-09-29 06:23:28: 93/136 done, 18 running, 25 pending.
 
 ## Table 2. Memory tasks, RL: evaluation return (mean of the last 3 evaluations)
 
@@ -12,12 +12,12 @@ L51-L101 and POPGym RepeatPrevious (return in [-1, 1], -0.5 = chance): protocol 
 
 | model | L8 | L16 | L32 | L64 | L51 | L71 | L101 | RepeatPreviousEasy | RepeatPreviousMedium |
 |---|---|---|---|---|---|---|---|---|---|
-| Spiking-WM | 0.08 | -0.25 | -0.08 | -0.33 | 0.06 (18%) | -0.04 (20%) | -0.04 (20%) | -0.45 (8%) | · |
-| LIF | 1.00 | -0.25 | -0.08 | -0.08 | · | · | · | -0.45 (8%) | · |
-| GRSN | 0.98 | 0.94 | -0.08 | 0.08 | · | · | · | -0.51 (5%) | · |
-| Spiking-WM + A+B+G | 1.00 | 1.00 | 0.79 | -0.04 | 0.06 (18%) | -0.04 (20%) | -0.08 (22%) | -0.51 (3%) | · |
-| **Ours** | 0.98 | 1.00 | 1.00 | 0.98 | 0.94 (22%) | -0.19 (24%) | 1.00 (26%) | -0.51 (0%) | · |
-| DreamerV3 (ANN) | 0.98 | 0.94 | 0.98 | -0.08 | -0.08 (70%) | 0.19 (80%) | 0.00 (92%) | -0.50 (0%) | · |
+| Spiking-WM | 0.08 | -0.25 | -0.08 | -0.33 | 0.10 (34%) | 0.06 (38%) | 0.02 (40%) | -0.43 (18%) | -0.50 (8%) |
+| LIF | 1.00 | -0.25 | -0.08 | -0.08 | · | · | · | -0.39 (18%) | -0.48 (5%) |
+| GRSN | 0.98 | 0.94 | -0.08 | 0.08 | · | · | · | -0.45 (18%) | -0.52 (5%) |
+| Spiking-WM + A+B+G | 1.00 | 1.00 | 0.79 | -0.04 | 0.02 (36%) | 0.06 (38%) | 0.00 (42%) | -0.48 (13%) | -0.48 (0%) |
+| **Ours** | 0.98 | 1.00 | 1.00 | 0.98 | 1.00 (44%) | 1.00 (48%) | 0.96 (52%) | -0.38 (10%) | · |
+| DreamerV3 (ANN) | 0.98 | 0.94 | 0.98 | -0.08 | 0.98 | 0.04 | 0.04 | -0.10 (35%) | · |
 | spiking enc. + GRU | · | 1.00 | 1.00 | · | · | · | · | · | · |
 | ours, 1 layer | · | 1.00 | 1.00 | · | · | · | · | · | · |
 
@@ -25,12 +25,12 @@ L51-L101 and POPGym RepeatPrevious (return in [-1, 1], -0.5 = chance): protocol 
 
 | model | L8 | L16 | L32 | L64 | L51 | L71 | L101 |
 |---|---|---|---|---|---|---|---|
-| Spiking-WM | > 152k | > 202k | > 302k | > 503k | > 182k … | > 202k … | > 202k … |
+| Spiking-WM | > 152k | > 202k | > 302k | > 503k | > 342k … | > 382k … | > 402k … |
 | LIF | 62k | > 202k | > 302k | > 502k | · | · | · |
 | GRSN | 32k | 112k | > 302k | > 502k | · | · | · |
-| Spiking-WM + A+B+G | 12k | 22k | 52k | > 507k | > 182k … | > 202k … | > 222k … |
-| **Ours** | 12k | 22k | 32k | 82k | 62k | > 242k … | 202k |
-| DreamerV3 (ANN) | 12k | 32k | 62k | > 502k | > 702k … | > 802k … | > 922k … |
+| Spiking-WM + A+B+G | 12k | 22k | 52k | > 507k | > 362k … | > 382k … | > 422k … |
+| **Ours** | 12k | 22k | 32k | 82k | 62k | 382k | 202k |
+| DreamerV3 (ANN) | 12k | 32k | 62k | > 502k | 902k | > 1002k | > 1002k |
 | spiking enc. + GRU | · | 32k | 102k | · | · | · | · |
 | ours, 1 layer | · | 32k | 62k | · | · | · | · |
 
@@ -52,18 +52,12 @@ Updates until reward AUC > 0.9 / final AUC (firing rate of the recurrent state).
 ## Table 5. Memory Maze 9×9 offline probing benchmark (Pasukonis et al. 2023; official data and probe)
 
 Second half of the 1k evaluation trajectories. State probe / no-memory probe (current image embedding),
-both with the agent pose as input. Paper rows: 1M gradient steps.
+both with the agent pose as input. Paper rows: 1M gradient steps. Training data: the 1.5k complete
+episodes (5%) that Google Drive served of the official 29k, 50k updates (53 passes, as the paper's
+1M updates over 29k), or all 29k episodes and 200k updates.
 
 | model | objects MSE ↓ | no-memory | walls acc. (%) ↑ | no-memory |
 |---|---|---|---|---|
-| Spiking-WM | · | · | · | · |
-| LIF | · | · | · | · |
-| GRSN | · | · | · | · |
-| Spiking-WM + A+B+G | · | · | · | · |
-| **Ours** | · | · | · | · |
-| DreamerV3 (ANN) | · | · | · | · |
-| spiking enc. + GRU | · | · | · | · |
-| ours, 1 layer | · | · | · | · |
 | constant (paper) | 23.9 |  | 80.8 |  |
 | VAE, no memory (paper) | 17.2 |  | 84.1 |  |
 | RSSM (paper) | 8.3 |  | 89.0 |  |
@@ -90,8 +84,8 @@ Updates until reward AUC > 0.9 / final AUC (firing rate).
 | variant | L32 updates | L32 AUC (rate) | L64 updates | L64 AUC (rate) |
 |---|---|---|---|---|
 | ours | 1500 | 0.998 (0.175) | 4000 | 1.000 (0.169) |
-| dendrites cleared every env step | · | · | > 5500 … | 0.488 (0.182) (46%) |
-| single τ = 16 | · | · | > 5000 … | 0.500 (0.213) (42%) |
+| dendrites cleared every env step | · | · | > 12000 | 0.491 (0.175) |
+| single τ = 16 | · | · | > 12000 | 0.503 (0.172) |
 | single τ = 128 | 1000 | 0.999 (0.202) | 3000 | 0.995 (0.190) |
 | Euler input gain 1 − λ | 2000 | 0.996 (0.180) | > 12000 | 0.559 (0.176) |
 | τ fixed (not learned) | 1500 | 0.998 (0.172) | 4000 | 1.000 (0.182) |

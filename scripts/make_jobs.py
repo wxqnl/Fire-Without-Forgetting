@@ -329,6 +329,24 @@ def round9():
         seeds=(0,), extra=MEMLEN_EXTRA[64]))
 
 
+def round10():
+    """2026-09-29 06:30: Memory Maze offline probing on the part of the official training data that
+    Google Drive served (its download quota refuses the rest): the 1471 complete episodes at the head
+    of 9 of the 10 archives (scripts/salvage_memory_maze.py), 5% of the 29k, with the official
+    evaluation set and probe. 50k updates of 32 x 48 pass over these 1.47M steps as often as the
+    paper's 1M updates pass over its 29M (53 times). Ours and DreamerV3 first."""
+    data = ROOT / "data" / "memory_maze_9x9_official_subset"
+    if not (data / "train").is_dir():
+        return []
+    jobs = []
+    for cell in ("PD2L_tau1000", "ann_tau2", "base_tau2", "ABG_tau128", "LIF_tau2", "GRSN_tau2"):
+        name = f"mmaze_subset/memory_maze_9x9/{cell}/s0"
+        cmd = (f"{{python}} probe_mm.py --configs mmprobe {' '.join(MAIN[cell])} --data {data} --seed 0 "
+               f"--mm_updates 50000 --mm_eval_every 5000 --logdir {RUNS / name}")
+        jobs.append(dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=20))
+    return jobs
+
+
 MM_UPDATES = 200000  # Memory Maze gradient steps; the benchmark paper trains 1M
 
 
@@ -371,13 +389,13 @@ def round8():
 
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
-    # round 8 (Memory Maze official, BSuite long memory, POPGym as in R2I), then DMC. Superseded by
-    # round 8: the POPGym runs of round 5 (tasks and budget not those of R2I) and round 6 (own Memory
-    # Maze data).
+    # Memory Maze on the served part of the official data (round 10), round 8 (Memory Maze official,
+    # BSuite long memory, POPGym as in R2I), then DMC. Superseded by round 8: the POPGym runs of
+    # round 5 (tasks and budget not those of R2I) and round 6 (own Memory Maze data).
     r5 = round5()
     popgym5 = [j for j in r5 if "/popgym_" in j["name"]]
     dmc = [j for j in r5 if "/dmc_" in j["name"]]
-    jobs = (round3() + round4() + [j for j in r5 if j not in popgym5 + dmc] + round7() + round9() + round8() + dmc)
+    jobs = (round3() + round4() + [j for j in r5 if j not in popgym5 + dmc] + round7() + round9() + round10() + round8() + dmc)
     RUNS.mkdir(exist_ok=True)
     out = RUNS / "jobs.jsonl"
     tmp = out.with_suffix(".tmp")
