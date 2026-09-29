@@ -182,7 +182,7 @@ L64 上只有本文模型学会。L32 上 2 层模型的各项消融都在 1000�
 
 ### 10.2 BSuite Memory Length：按 R2I 协议延长到 101 步
 
-R2I（Samsonov et al., ICLR 2024，图 3、图 7）在 BSuite Memory Length 上每个记忆长度训练 100 万环境步：DreamerV3 超过约 30 步失败，R2I 到 70–100 步。我们已有的 L8–L64 与之一致（DreamerV3 学会 L32、L64 失败）。新增 L51、L71、L101，每个 100 万步，训练窗口覆盖整局（64 / 80 / 128），模型为 Spiking-WM、A+B+G、本文模型、DreamerV3。
+R2I（Samsami et al., ICLR 2024，图 3、图 7）在 BSuite Memory Length 上每个记忆长度训练 100 万环境步：DreamerV3 超过约 30 步失败，R2I 到 70–100 步。我们已有的 L8–L64 与之一致（DreamerV3 学会 L32、L64 失败）。新增 L51、L71、L101，每个 100 万步，训练窗口覆盖整局（64 / 80 / 128），模型为 Spiking-WM、A+B+G、本文模型、DreamerV3。
 
 ### 10.3 POPGym：改用 R2I 的任务
 
@@ -264,3 +264,55 @@ R2I 选了 POPGym 中记忆需求最高的 RepeatPrevious、Autoencode、Concent
 - 树突状态量化：LIF、GRSN、Spiking-WM 在仿真中同样使用浮点膜电位；
 - 去掉循环中的归一化：PopNorm 是所有脉冲模型共用的世界模型组件；
 - 单一 τ = 128 在 L ≥ 256 上的对照：本文主张的是"保留时间要覆盖记忆长度，τ 谱不用调就能满足"，不主张"必须用多个时间尺度"。
+
+## 12. 论文实验总规划（2026-09-29，单 seed）
+
+目标是一篇 9 页正文的论文：每个实验都对应一个主张，只用世界模型文献中的标准 benchmark，并且都有已发表的 ANN 结果可以对照。多 seed 先不做。
+
+### 12.1 主张、证据与状态
+
+| 主张 | 证据 | 论文中的位置 | 状态 |
+|---|---|---|---|
+| C1 脉冲世界模型记不住，原因是复位 | Phase 0 的 A/B/G 干预（`docs/PHASE0.md`）；脉冲基线在 BSuite L ≥ 32 上失败；本文模型只改成每步清零树突，L64 就学不会（§11.4） | 图 1，表 1，表 4 | 完成 |
+| C2 本文模型在标准记忆 benchmark 上解决了这个问题，并且记得比 ANN 世界模型更远 | BSuite Memory Length L8–L64；按 R2I 协议的 L51 / L71 / L101；POPGym RepeatPrevious Easy / Medium（R2I 的任务）；Memory Maze 离线探针（官方数据与探针） | 表 1，图 2，表 2 | L8–L64 完成；R2I 协议下本文模型三个长度都已学会，DreamerV3 只学会 L51；其余在跑或排队 |
+| C3 起作用的是不复位的线性树突，以及覆盖记忆长度的保留时间 | L64 探针：清零 / τ = 16 / τ = 128 / τ 谱，欧拉增益，1 层，固定 τ，发放率上限 0.06 | 表 4，图 3（保留时间扫描） | 完成 |
+| C4 能耗低，在非记忆任务上不退化 | 每步能耗与发放率（L32 RL 模型）；DMC 本体感觉 3 个任务 | 表 3 | 能耗完成；DMC 排队 |
+
+### 12.2 正文的表和图
+
+- 图 1：问题与方法。原模型每个环境步的两级复位，与本文模型"树突负责存，脉冲负责传"对照。
+- 表 1：BSuite Memory Length，回报首次达到 0.9 的环境步数，L8–L101。L8–L64 有 6 个模型；L51–L101 有 4 个模型，并附 R2I 论文的结果作参照。
+- 图 2：R2I 协议下 L51 / L71 / L101 的学习曲线（本文模型、DreamerV3、Spiking-WM、A+B+G）。
+- 表 2：POPGym RepeatPrevious Easy / Medium 的回报；Memory Maze 的物体误差和墙体准确率。
+- 表 3：每步能耗、发放率、DMC 回报。
+- 表 4 / 图 3：L64 消融；保留时间扫描（清零 → 16 → 128 → [1, 1000]）。
+- 附录：探针 L8–L64 全表，Phase 0，1 层且 T = 1，脉冲编码器 + GRU，LIF 持久化，原始 XOR 奖励与按动作索引的奖励头。
+
+### 12.3 剩余任务（队列按此顺序分配 GPU）
+
+| 顺序 | 任务 | 数量 | 状态 |
+|---|---|---|---|
+| 1 | R2I 协议 BSuite L51 / L71 / L101：Spiking-WM、A+B+G、本文模型（DreamerV3 已完成） | 9 | 在跑，36–53% |
+| 2 | POPGym RepeatPrevious Easy：6 个模型 | 6 | 在跑，DreamerV3 36%，脉冲模型 11–19% |
+| 3 | Memory Maze，官方训练数据中下载到的 5%（round 10）：6 个模型 | 6 | 排队，等显存 |
+| 4 | POPGym RepeatPrevious Medium：Spiking-WM（在跑）、A+B+G、本文模型、DreamerV3 | 4 | 1 个在跑，3 个排队 |
+| 5 | DMC walker_walk / cheetah_run / cartpole_swingup：Spiking-WM、本文模型、DreamerV3；20 万步，train ratio 512（round 11） | 9 | 排队 |
+| 6 | Memory Maze 全量官方训练数据 | 6 | 只在训练集下全后自动加入，优先级最低 |
+
+### 12.4 不做的及原因
+
+- 多 seed：先不做。
+- POPGym Medium 上的 LIF、GRSN：两者在 Easy 上停在随机水平，Medium 更难，已从任务列表中删除。已经启动的两个任务没能停下（停止操作被权限系统拒绝），会跑完，结果放附录。
+- DMC 上的 LIF、GRSN、A+B+G：非记忆对照只需要回答一个问题——改掉 Spiking-WM 的循环核后，它原来的任务会不会退化？Spiking-WM、本文模型、ANN 三者就够了。
+- 旧的 DMC 设置（train ratio 64）作废：训练量太少，walker 上 Spiking-WM 和 A+B+G 的回报都只有 110–130，区分不了模型。改用 DreamerV3 在 DMC 本体感觉观测下的 train ratio 512。
+- R2I 本身不跑：BSuite 和 POPGym 都按它的协议运行，直接引用其论文结果。
+- 非脉冲版本的本文模型、树突量化、去掉归一化：不属于本文主张（§11.4）。
+
+### 12.5 预计完成时间（按 9 月 29 日 06:40 的速度估算）
+
+- R2I 协议 BSuite：今天 15:00–23:00。
+- POPGym Easy：DreamerV3 今天约 15:00；脉冲模型 10 月 1 日下午到 10 月 2 日凌晨。
+- Memory Maze（5% 数据）：今天下午开始，9 月 30 日晚到 10 月 1 日凌晨完成。
+- POPGym Medium：10 月 1 日晚到 10 月 2 日。
+- DMC：R2I 任务结束后开始，每个脉冲模型约 25 小时，10 月 2 日前后完成。
+- 全部完成：约 10 月 2 日晚。显存是瓶颈，4 张卡都已用了 68–78 GB，新任务只能在已有任务结束后启动。

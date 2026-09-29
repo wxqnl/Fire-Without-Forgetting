@@ -2,20 +2,21 @@
 
 Single seed (s0). A value with (NN%) is from a run still in progress; · = not started.
 
-Queue at 2026-09-29 06:26:05: 93/136 done, 18 running, 25 pending.
+Queue at 2026-09-29 06:36:00: 93/127 done, 18 running, 18 pending.
 
 ## Table 2. Memory tasks, RL: evaluation return (mean of the last 3 evaluations)
 
 BSuite memory length L (return 1 = always recalls the cue, 0 = chance). L8-L64: 0.15-0.5M env steps;
-L51-L101 and POPGym RepeatPrevious (return in [-1, 1], -0.5 = chance): protocol of R2I (Samsonov et al.
-2024), 1M / 2M env steps, a different seed per parallel env.
+L51-L101 and POPGym RepeatPrevious (return in [-1, 1], -0.5 = chance): protocol of R2I (Samsami et al.
+2024), 1M / 2M env steps, a different seed per parallel env. RepeatPreviousMedium is planned for
+Spiking-WM, A+B+G, ours and DreamerV3.
 
 | model | L8 | L16 | L32 | L64 | L51 | L71 | L101 | RepeatPreviousEasy | RepeatPreviousMedium |
 |---|---|---|---|---|---|---|---|---|---|
-| Spiking-WM | 0.08 | -0.25 | -0.08 | -0.33 | 0.10 (34%) | 0.06 (38%) | 0.02 (40%) | -0.43 (18%) | -0.50 (8%) |
-| LIF | 1.00 | -0.25 | -0.08 | -0.08 | · | · | · | -0.39 (18%) | -0.48 (5%) |
-| GRSN | 0.98 | 0.94 | -0.08 | 0.08 | · | · | · | -0.45 (18%) | -0.52 (5%) |
-| Spiking-WM + A+B+G | 1.00 | 1.00 | 0.79 | -0.04 | 0.02 (36%) | 0.06 (38%) | -0.04 (44%) | -0.48 (13%) | -0.48 (0%) |
+| Spiking-WM | 0.08 | -0.25 | -0.08 | -0.33 | 0.02 (36%) | -0.02 (40%) | -0.04 (42%) | -0.43 (18%) | -0.50 (8%) |
+| LIF | 1.00 | -0.25 | -0.08 | -0.08 | · | · | · | -0.39 (18%) | -0.50 (…) |
+| GRSN | 0.98 | 0.94 | -0.08 | 0.08 | · | · | · | -0.45 (18%) | -0.52 (…) |
+| Spiking-WM + A+B+G | 1.00 | 1.00 | 0.79 | -0.04 | 0.02 (36%) | -0.10 (40%) | -0.04 (44%) | -0.48 (13%) | -0.48 (0%) |
 | **Ours** | 0.98 | 1.00 | 1.00 | 0.98 | 1.00 (44%) | 1.00 (48%) | 0.96 (52%) | -0.38 (10%) | · |
 | DreamerV3 (ANN) | 0.98 | 0.94 | 0.98 | -0.08 | 0.98 | 0.04 | 0.04 | -0.10 (35%) | · |
 | spiking enc. + GRU | · | 1.00 | 1.00 | · | · | · | · | · | · |
@@ -25,10 +26,10 @@ L51-L101 and POPGym RepeatPrevious (return in [-1, 1], -0.5 = chance): protocol 
 
 | model | L8 | L16 | L32 | L64 | L51 | L71 | L101 |
 |---|---|---|---|---|---|---|---|
-| Spiking-WM | > 152k | > 202k | > 302k | > 503k | > 342k … | > 382k … | > 402k … |
+| Spiking-WM | > 152k | > 202k | > 302k | > 503k | > 362k … | > 402k … | > 422k … |
 | LIF | 62k | > 202k | > 302k | > 502k | · | · | · |
 | GRSN | 32k | 112k | > 302k | > 502k | · | · | · |
-| Spiking-WM + A+B+G | 12k | 22k | 52k | > 507k | > 362k … | > 382k … | > 442k … |
+| Spiking-WM + A+B+G | 12k | 22k | 52k | > 507k | > 362k … | > 402k … | > 442k … |
 | **Ours** | 12k | 22k | 32k | 82k | 62k | 382k | 202k |
 | DreamerV3 (ANN) | 12k | 32k | 62k | > 502k | 902k | > 1002k | > 1002k |
 | spiking enc. + GRU | · | 32k | 102k | · | · | · | · |
@@ -66,16 +67,13 @@ episodes (5%) that Google Drive served of the official 29k, 50k updates (53 pass
 
 ## Table 6. DMC (proprioception), non-memory control: evaluation return
 
+200k env steps, train ratio 512 (DreamerV3's setting for DMC from proprioception).
+
 | model | walker_walk | cheetah_run | cartpole_swingup |
 |---|---|---|---|
-| Spiking-WM | 116 | · | · |
-| LIF | · | · | · |
-| GRSN | · | · | · |
-| Spiking-WM + A+B+G | 131 | · | · |
+| Spiking-WM | · | · | · |
 | **Ours** | · | · | · |
 | DreamerV3 (ANN) | · | · | · |
-| spiking enc. + GRU | 233 | · | · |
-| ours, 1 layer | 122 | · | · |
 
 ## Table 7. Ablations of our model (probe, memlen-L-recall)
 

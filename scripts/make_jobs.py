@@ -245,12 +245,12 @@ MAIN = {
 MEMLEN_EXTRA = {8: "--batch_length 32", 16: "", 32: "", 64: "--batch_length 80"}
 
 
-def dmc_jobs(task, cells, steps=2e5, seed=0):
+def dmc_jobs(task, cells, steps=2e5, seed=0, train_ratio=64, group="rl2"):
     """DMC from proprioception, continuous actions: original reward head, no rewardbyact."""
     for cell, cfgs in cells.items():
-        name = f"rl2/{task}/{cell}/s{seed}"
+        name = f"{group}/{task}/{cell}/s{seed}"
         cmd = (f"{{python}} dreamer.py --configs dmc_proprio {' '.join(cfgs)} --task {task} --seed {seed} "
-               f"--steps {steps:g} --train_ratio 64 --eval_every 2e4 --logdir {RUNS / name}")
+               f"--steps {steps:g} --train_ratio {train_ratio} --eval_every 2e4 --logdir {RUNS / name}")
         yield dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=14.5)
 
 
@@ -347,6 +347,18 @@ def round10():
     return jobs
 
 
+def round11():
+    """2026-09-29: the non-memory control of the paper (claim C4), replacing the DMC runs of round 5.
+    At train ratio 64 and 200k steps Spiking-WM and A+B+G reached a return of only 110-130 on walker,
+    too little training to show whether a model loses anything; now DreamerV3's train ratio for DMC
+    from proprioception (512). Three models: the model we modify, ours, and the ANN world model."""
+    cells = {k: MAIN[k] for k in ("base_tau2", "PD2L_tau1000", "ann_tau2")}
+    jobs = []
+    for task in ("dmc_walker_walk", "dmc_cheetah_run", "dmc_cartpole_swingup"):
+        jobs += dmc_jobs(task, cells, steps=2e5, train_ratio=512, group="dmc")
+    return jobs
+
+
 MM_UPDATES = 200000  # Memory Maze gradient steps; the benchmark paper trains 1M
 
 
@@ -358,7 +370,7 @@ def round8():
     1. Memory Maze offline probing (Pasukonis et al. 2023) on the official 9x9 dataset, replacing
        round 6 (own data, probe without the agent pose, 20k updates: no model left the no-memory
        level). Reference: RSSM / RSSM-TBTT / VAE+GRU at 1M steps.
-    2. BSuite Memory Length as in R2I (Samsonov et al. 2024, Fig. 3/7): 1M env steps per memory
+    2. BSuite Memory Length as in R2I (Samsami et al. 2024, Fig. 3/7): 1M env steps per memory
        length; DreamerV3 fails beyond ~30 steps, R2I reaches ~70-100. The window covers the episode.
     3. POPGym RepeatPrevious as in R2I (Fig. 4/9): R2I learns Easy and Medium within the first
        1-2M steps while DreamerV3 stays near -0.5 on Medium until 20M; 2M steps each."""
@@ -377,8 +389,10 @@ def round8():
             job["cmd"] = job["cmd"].replace("/runs/rl2/", "/runs/r2i/")
             job["logdir"] = job["logdir"].replace("/runs/rl2/", "/runs/r2i/")
             jobs.append(job)
-    for task, window in (("RepeatPreviousEasy", 64), ("RepeatPreviousMedium", 64)):
-        for job in rl2_jobs(f"popgym_{task}", MAIN, steps=2e6,
+    # Medium (2026-09-29): Spiking-WM, A+B+G, ours, DreamerV3; LIF and GRSN stay at chance on Easy
+    medium = {k: MAIN[k] for k in ("base_tau2", "ABG_tau128", "PD2L_tau1000", "ann_tau2")}
+    for task, window, cells in (("RepeatPreviousEasy", 64, MAIN), ("RepeatPreviousMedium", 64, medium)):
+        for job in rl2_jobs(f"popgym_{task}", cells, steps=2e6,
                             extra=f"--batch_length {window} --env_seed_per_env True", eval_every=5e4):
             job["name"] = job["name"].replace("rl2/", "r2i/")
             job["cmd"] = job["cmd"].replace("/runs/rl2/", "/runs/r2i/")
@@ -389,13 +403,16 @@ def round8():
 
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
-    # Memory Maze on the served part of the official data (round 10), round 8 (Memory Maze official,
-    # BSuite long memory, POPGym as in R2I), then DMC. Superseded by round 8: the POPGym runs of
-    # round 5 (tasks and budget not those of R2I) and round 6 (own Memory Maze data).
+    # Memory Maze on the served part of the official data (round 10), round 8 (BSuite long memory,
+    # POPGym as in R2I), DMC (round 11), then Memory Maze on all official data once downloaded.
+    # Superseded: the POPGym runs of round 5 (tasks and budget not those of R2I) by round 8, round 6
+    # (own Memory Maze data) by rounds 10 and 8, the DMC runs of round 5 (train ratio 64) by round 11.
     r5 = round5()
-    popgym5 = [j for j in r5 if "/popgym_" in j["name"]]
-    dmc = [j for j in r5 if "/dmc_" in j["name"]]
-    jobs = (round3() + round4() + [j for j in r5 if j not in popgym5 + dmc] + round7() + round9() + round10() + round8() + dmc)
+    r5 = [j for j in r5 if "/popgym_" not in j["name"] and "/dmc_" not in j["name"]]
+    r8 = round8()
+    mm_full = [j for j in r8 if j["name"].startswith("mmaze_official/")]
+    r8 = [j for j in r8 if j not in mm_full]
+    jobs = round3() + round4() + r5 + round7() + round9() + round10() + r8 + round11() + mm_full
     RUNS.mkdir(exist_ok=True)
     out = RUNS / "jobs.jsonl"
     tmp = out.with_suffix(".tmp")

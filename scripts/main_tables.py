@@ -158,8 +158,9 @@ def main():
 
     out += ["## Table 2. Memory tasks, RL: evaluation return (mean of the last 3 evaluations)", "",
             "BSuite memory length L (return 1 = always recalls the cue, 0 = chance). L8-L64: 0.15-0.5M env steps;",
-            "L51-L101 and POPGym RepeatPrevious (return in [-1, 1], -0.5 = chance): protocol of R2I (Samsonov et al.",
-            "2024), 1M / 2M env steps, a different seed per parallel env.", ""]
+            "L51-L101 and POPGym RepeatPrevious (return in [-1, 1], -0.5 = chance): protocol of R2I (Samsami et al.",
+            "2024), 1M / 2M env steps, a different seed per parallel env. RepeatPreviousMedium is planned for",
+            "Spiking-WM, A+B+G, ours and DreamerV3.", ""]
     rl_runs = [(f"rl2/{t}", short(t)) for t in BSUITE] + [(f"r2i/{t}", short(t)) for t in BSUITE_LONG + POPGYM]
     out += table(["model"] + [lab for _, lab in rl_runs],
                  [[label] + [rl_cell(f"{r}/{m}") for r, _ in rl_runs] for m, label in models])
@@ -194,9 +195,11 @@ def main():
     body += [[label, obj, "", walls, ""] for label, obj, walls in MM_PAPER]
     out += table(["model", "objects MSE ↓", "no-memory", "walls acc. (%) ↑", "no-memory"], body)
 
-    out += ["", "## Table 6. DMC (proprioception), non-memory control: evaluation return", ""]
-    out += table(["model"] + [short(t) for t in DMC], [[label] + [rl_cell(f"rl2/{t}/{m}", fmt="{:.0f}") for t in DMC]
-                                                       for m, label in models])
+    out += ["", "## Table 6. DMC (proprioception), non-memory control: evaluation return", "",
+            "200k env steps, train ratio 512 (DreamerV3's setting for DMC from proprioception).", ""]
+    dmc_models = [(m, label) for m, label in MAIN if m in ("base_tau2", "PD2L_tau1000", "ann_tau2")]
+    out += table(["model"] + [short(t) for t in DMC], [[label] + [rl_cell(f"dmc/{t}/{m}", fmt="{:.0f}") for t in DMC]
+                                                       for m, label in dmc_models])
 
     out += ["", "## Table 7. Ablations of our model (probe, memlen-L-recall)", "",
             "Updates until reward AUC > 0.9 / final AUC (firing rate).", ""]
