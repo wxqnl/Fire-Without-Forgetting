@@ -2,7 +2,7 @@
 
 Single seed (s0). A value with (NN%) is from a run still in progress; · = not started.
 
-Queue at 2026-09-29 06:23:28: 93/136 done, 18 running, 25 pending.
+Queue at 2026-09-29 06:26:05: 93/136 done, 18 running, 25 pending.
 
 ## Table 2. Memory tasks, RL: evaluation return (mean of the last 3 evaluations)
 
@@ -15,7 +15,7 @@ L51-L101 and POPGym RepeatPrevious (return in [-1, 1], -0.5 = chance): protocol 
 | Spiking-WM | 0.08 | -0.25 | -0.08 | -0.33 | 0.10 (34%) | 0.06 (38%) | 0.02 (40%) | -0.43 (18%) | -0.50 (8%) |
 | LIF | 1.00 | -0.25 | -0.08 | -0.08 | · | · | · | -0.39 (18%) | -0.48 (5%) |
 | GRSN | 0.98 | 0.94 | -0.08 | 0.08 | · | · | · | -0.45 (18%) | -0.52 (5%) |
-| Spiking-WM + A+B+G | 1.00 | 1.00 | 0.79 | -0.04 | 0.02 (36%) | 0.06 (38%) | 0.00 (42%) | -0.48 (13%) | -0.48 (0%) |
+| Spiking-WM + A+B+G | 1.00 | 1.00 | 0.79 | -0.04 | 0.02 (36%) | 0.06 (38%) | -0.04 (44%) | -0.48 (13%) | -0.48 (0%) |
 | **Ours** | 0.98 | 1.00 | 1.00 | 0.98 | 1.00 (44%) | 1.00 (48%) | 0.96 (52%) | -0.38 (10%) | · |
 | DreamerV3 (ANN) | 0.98 | 0.94 | 0.98 | -0.08 | 0.98 | 0.04 | 0.04 | -0.10 (35%) | · |
 | spiking enc. + GRU | · | 1.00 | 1.00 | · | · | · | · | · | · |
@@ -28,7 +28,7 @@ L51-L101 and POPGym RepeatPrevious (return in [-1, 1], -0.5 = chance): protocol 
 | Spiking-WM | > 152k | > 202k | > 302k | > 503k | > 342k … | > 382k … | > 402k … |
 | LIF | 62k | > 202k | > 302k | > 502k | · | · | · |
 | GRSN | 32k | 112k | > 302k | > 502k | · | · | · |
-| Spiking-WM + A+B+G | 12k | 22k | 52k | > 507k | > 362k … | > 382k … | > 422k … |
+| Spiking-WM + A+B+G | 12k | 22k | 52k | > 507k | > 362k … | > 382k … | > 442k … |
 | **Ours** | 12k | 22k | 32k | 82k | 62k | 382k | 202k |
 | DreamerV3 (ANN) | 12k | 32k | 62k | > 502k | 902k | > 1002k | > 1002k |
 | spiking enc. + GRU | · | 32k | 102k | · | · | · | · |
