@@ -335,7 +335,7 @@ def round8():
        1-2M steps while DreamerV3 stays near -0.5 on Medium until 20M; 2M steps each."""
     jobs = []
     data = ROOT / "data" / "memory_maze_9x9_official"
-    for cell, cfgs in MAIN.items():
+    for cell, cfgs in MAIN.items() if (data / "train_complete").exists() else ():  # set by download_all.sh
         name = f"mmaze_official/memory_maze_9x9/{cell}/s0"
         cmd = (f"{{python}} probe_mm.py --configs mmprobe {' '.join(cfgs)} --data {data} --seed 0 "
                f"--mm_updates {MM_UPDATES} --mm_eval_every 10000 --logdir {RUNS / name}")
