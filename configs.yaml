@@ -320,6 +320,11 @@ pdeuler:
   PDRNN: {input_norm: 'euler'}
 pdtau128:
   PDRNN: {tau_min: 128.0, tau_max: 128.0}
+pdtau16:
+  PDRNN: {tau_min: 16.0, tau_max: 16.0}
+# the hypothesis inside the proposed model: its dendrites cleared at every environment step
+pdreset:
+  persist_state: False
 pdfixtau:
   PDRNN: {learn_tau: False}
 pd2layer:

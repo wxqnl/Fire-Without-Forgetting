@@ -2,7 +2,7 @@
 
 Single seed (s0). A value with (NN%) is from a run still in progress; · = not started.
 
-Queue at 2026-09-28 23:56:52: 84/128 done, 20 running, 24 pending.
+Queue at 2026-09-29 00:09:18: 84/130 done, 22 running, 24 pending.
 
 ## Table 2. Memory tasks, RL: evaluation return (mean of the last 3 evaluations)
 
@@ -15,9 +15,9 @@ L51-L101 and POPGym RepeatPrevious (return in [-1, 1], -0.5 = chance): protocol 
 | Spiking-WM | 0.08 | -0.25 | -0.08 | -0.33 | 0.23 (10%) | 0.12 (12%) | 0.12 (12%) | -0.48 (5%) | · |
 | LIF | 1.00 | -0.25 | -0.08 | -0.08 | · | · | · | -0.50 (3%) | · |
 | GRSN | 0.98 | 0.94 | -0.08 | 0.08 | · | · | · | -0.49 (0%) | · |
-| Spiking-WM + A+B+G | 1.00 | 1.00 | 0.79 | 0.08 (89%) | 0.10 (10%) | 0.12 (12%) | 0.12 (12%) | -0.51 (0%) | · |
-| **Ours** | 0.98 | 1.00 | 1.00 | 0.98 | 0.98 (14%) | 0.17 (14%) | 0.15 (16%) | · | · |
-| DreamerV3 (ANN) | 0.98 | 0.94 | 0.98 | -0.08 | -0.04 (44%) | 0.08 (50%) | 0.08 (56%) | · | · |
+| Spiking-WM + A+B+G | 1.00 | 1.00 | 0.79 | 0.08 (89%) | 0.00 (12%) | 0.12 (12%) | 0.17 (14%) | -0.51 (0%) | · |
+| **Ours** | 0.98 | 1.00 | 1.00 | 0.98 | 0.98 (14%) | 0.15 (16%) | 0.15 (16%) | · | · |
+| DreamerV3 (ANN) | 0.98 | 0.94 | 0.98 | -0.08 | 0.02 (48%) | -0.02 (54%) | 0.02 (60%) | · | · |
 | spiking enc. + GRU | · | 1.00 | 1.00 | · | · | · | · | · | · |
 | ours, 1 layer | · | 1.00 | 1.00 | · | · | · | · | · | · |
 
@@ -28,9 +28,9 @@ L51-L101 and POPGym RepeatPrevious (return in [-1, 1], -0.5 = chance): protocol 
 | Spiking-WM | > 152k | > 202k | > 302k | > 503k | > 102k … | > 122k … | > 122k … |
 | LIF | 62k | > 202k | > 302k | > 502k | · | · | · |
 | GRSN | 32k | 112k | > 302k | > 502k | · | · | · |
-| Spiking-WM + A+B+G | 12k | 22k | 52k | > 447k … | > 102k … | > 122k … | > 122k … |
-| **Ours** | 12k | 22k | 32k | 82k | 62k | > 142k … | > 162k … |
-| DreamerV3 (ANN) | 12k | 32k | 62k | > 502k | > 442k … | > 502k … | > 562k … |
+| Spiking-WM + A+B+G | 12k | 22k | 52k | > 447k … | > 122k … | > 122k … | > 142k … |
+| **Ours** | 12k | 22k | 32k | 82k | 62k | > 162k … | > 162k … |
+| DreamerV3 (ANN) | 12k | 32k | 62k | > 502k | > 482k … | > 542k … | > 602k … |
 | spiking enc. + GRU | · | 32k | 102k | · | · | · | · |
 | ours, 1 layer | · | 32k | 62k | · | · | · | · |
 
@@ -90,9 +90,11 @@ Updates until reward AUC > 0.9 / final AUC (firing rate).
 | variant | L32 updates | L32 AUC (rate) | L64 updates | L64 AUC (rate) |
 |---|---|---|---|---|
 | ours | 1500 | 0.998 (0.175) | 4000 | 1.000 (0.169) |
-| Euler input gain 1 − λ | 2000 | 0.996 (0.180) | > 12000 | 0.559 (0.176) |
+| dendrites cleared every env step | · | · | · | · |
+| single τ = 16 | · | · | · | · |
 | single τ = 128 | 1000 | 0.999 (0.202) | 3000 | 0.995 (0.190) |
-| τ fixed (not learned) | 1500 | 0.998 (0.175) (79%) | 4000 | 1.000 (0.190) (79%) |
+| Euler input gain 1 − λ | 2000 | 0.996 (0.180) | > 12000 | 0.559 (0.176) |
+| τ fixed (not learned) | 1500 | 0.998 (0.172) (88%) | 4000 | 0.999 (0.184) (83%) |
 | firing rate capped at 0.06 | 2500 | 0.999 (0.056) | 7500 | 1.000 (0.057) |
 | 1 layer | 3000 | 0.993 (0.179) | > 12000 | 0.502 (0.170) |
 | 1 layer, T = 1 | 6000 | 0.959 (0.201) | · | · |

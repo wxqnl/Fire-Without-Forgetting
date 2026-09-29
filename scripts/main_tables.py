@@ -30,8 +30,9 @@ POPGYM = ["popgym_RepeatPreviousEasy", "popgym_RepeatPreviousMedium"]  # round 8
 MM_PAPER = [("constant (paper)", "23.9", "80.8"), ("VAE, no memory (paper)", "17.2", "84.1"),
             ("RSSM (paper)", "8.3", "89.0"), ("VAE+GRU TBTT (paper)", "7.8", "90.0"), ("RSSM TBTT (paper)", "6.2", "94.0")]
 DMC = ["dmc_walker_walk", "dmc_cheetah_run", "dmc_cartpole_swingup"]
-ABLATIONS = [("PD2L_tau1000", "ours"), ("PD2Leuler_tau1000", "Euler input gain 1 − λ"),
-             ("PD2L_tau128", "single τ = 128"), ("PD2Lfix_tau1000", "τ fixed (not learned)"),
+ABLATIONS = [("PD2L_tau1000", "ours"), ("PD2Lreset_tau1000", "dendrites cleared every env step"),
+             ("PD2L_tau16", "single τ = 16"), ("PD2L_tau128", "single τ = 128"),
+             ("PD2Leuler_tau1000", "Euler input gain 1 − λ"), ("PD2Lfix_tau1000", "τ fixed (not learned)"),
              ("PD2Lcap_tau1000", "firing rate capped at 0.06"), ("PD_tau1000", "1 layer"),
              ("PDT1_tau1000", "1 layer, T = 1")]
 

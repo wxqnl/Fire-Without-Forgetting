@@ -318,6 +318,17 @@ def round7():
         seeds=(0,), extra=MEMLEN_EXTRA[64]))
 
 
+def round9():
+    """2026-09-29: two controls at L = 64 that isolate the retention time inside the proposed model.
+    PD2Lreset: the same model with its dendrites cleared at every environment step (the reset of the
+    spiking world model, nothing else changed). PD2L_tau16: a single retention time shorter than the
+    memory; with tau 128 (round 7) and the log-uniform spectrum it shows the memory reaches as far as
+    the retention time, which the spectrum covers without tuning tau to the task."""
+    return list(recall_jobs("bsuite_memlen-64-recall", {
+        "PD2Lreset_tau1000": ["ours", "pdreset"], "PD2L_tau16": ["ours", "pdtau16"]},
+        seeds=(0,), extra=MEMLEN_EXTRA[64]))
+
+
 MM_UPDATES = 200000  # Memory Maze gradient steps; the benchmark paper trains 1M
 
 
@@ -359,13 +370,14 @@ def round8():
 
 
 def main():
-    # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations, round 8 (Memory Maze
-    # official, BSuite long memory, POPGym as in R2I), then DMC. Superseded by round 8: the POPGym
-    # runs of round 5 (tasks and budget not those of R2I) and round 6 (own Memory Maze data).
+    # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
+    # round 8 (Memory Maze official, BSuite long memory, POPGym as in R2I), then DMC. Superseded by
+    # round 8: the POPGym runs of round 5 (tasks and budget not those of R2I) and round 6 (own Memory
+    # Maze data).
     r5 = round5()
     popgym5 = [j for j in r5 if "/popgym_" in j["name"]]
     dmc = [j for j in r5 if "/dmc_" in j["name"]]
-    jobs = (round3() + round4() + [j for j in r5 if j not in popgym5 + dmc] + round7() + round8() + dmc)
+    jobs = (round3() + round4() + [j for j in r5 if j not in popgym5 + dmc] + round7() + round9() + round8() + dmc)
     RUNS.mkdir(exist_ok=True)
     out = RUNS / "jobs.jsonl"
     tmp = out.with_suffix(".tmp")
