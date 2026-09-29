@@ -2,7 +2,7 @@
 
 Single seed (s0). A value with (NN%) is from a run still in progress; · = not started.
 
-Queue at 2026-09-29 06:46:24: 93/127 done, 17 running, 17 pending.
+Queue at 2026-09-29 18:13:06: 97/123 done, 20 running, 6 pending.
 
 ## Table 2. Memory tasks, RL: evaluation return (mean of the last 3 evaluations)
 
@@ -13,12 +13,12 @@ Spiking-WM, A+B+G, ours and DreamerV3.
 
 | model | L8 | L16 | L32 | L64 | L51 | L71 | L101 | RepeatPreviousEasy | RepeatPreviousMedium |
 |---|---|---|---|---|---|---|---|---|---|
-| Spiking-WM | 0.08 | -0.25 | -0.08 | -0.33 | 0.02 (36%) | -0.02 (40%) | -0.04 (42%) | -0.43 (18%) | -0.50 (8%) |
-| LIF | 1.00 | -0.25 | -0.08 | -0.08 | · | · | · | -0.39 (20%) | · |
-| GRSN | 0.98 | 0.94 | -0.08 | 0.08 | · | · | · | -0.45 (18%) | · |
-| Spiking-WM + A+B+G | 1.00 | 1.00 | 0.79 | -0.04 | 0.06 (38%) | -0.10 (40%) | -0.04 (44%) | -0.48 (13%) | -0.49 (0%) |
-| **Ours** | 0.98 | 1.00 | 1.00 | 0.98 | 1.00 (46%) | 1.00 (50%) | 0.96 (54%) | -0.38 (10%) | · |
-| DreamerV3 (ANN) | 0.98 | 0.94 | 0.98 | -0.08 | 0.98 | 0.04 | 0.04 | -0.05 (38%) | · |
+| Spiking-WM | 0.08 | -0.25 | -0.08 | -0.33 | -0.25 (78%) | 0.17 (86%) | 0.08 (92%) | -0.39 (40%) | -0.50 (30%) |
+| LIF | 1.00 | -0.25 | -0.08 | -0.08 | · | · | · | -0.42 (43%) | · |
+| GRSN | 0.98 | 0.94 | -0.08 | 0.08 | · | · | · | -0.42 (45%) | · |
+| Spiking-WM + A+B+G | 1.00 | 1.00 | 0.79 | -0.04 | -0.19 (80%) | -0.10 (86%) | -0.06 (98%) | -0.40 (35%) | -0.48 (23%) |
+| **Ours** | 0.98 | 1.00 | 1.00 | 0.98 | 1.00 (96%) | 1.00 | 0.96 | -0.23 (38%) | -0.49 (5%) |
+| DreamerV3 (ANN) | 0.98 | 0.94 | 0.98 | -0.08 | 0.98 | 0.04 | 0.04 | 0.77 (100%) | -0.48 (8%) |
 | spiking enc. + GRU | · | 1.00 | 1.00 | · | · | · | · | · | · |
 | ours, 1 layer | · | 1.00 | 1.00 | · | · | · | · | · | · |
 
@@ -26,10 +26,10 @@ Spiking-WM, A+B+G, ours and DreamerV3.
 
 | model | L8 | L16 | L32 | L64 | L51 | L71 | L101 |
 |---|---|---|---|---|---|---|---|
-| Spiking-WM | > 152k | > 202k | > 302k | > 503k | > 362k … | > 402k … | > 422k … |
+| Spiking-WM | > 152k | > 202k | > 302k | > 503k | > 782k … | > 862k … | > 922k … |
 | LIF | 62k | > 202k | > 302k | > 502k | · | · | · |
 | GRSN | 32k | 112k | > 302k | > 502k | · | · | · |
-| Spiking-WM + A+B+G | 12k | 22k | 52k | > 507k | > 382k … | > 402k … | > 442k … |
+| Spiking-WM + A+B+G | 12k | 22k | 52k | > 507k | > 802k … | > 862k … | > 982k … |
 | **Ours** | 12k | 22k | 32k | 82k | 62k | 382k | 202k |
 | DreamerV3 (ANN) | 12k | 32k | 62k | > 502k | 902k | > 1002k | > 1002k |
 | spiking enc. + GRU | · | 32k | 102k | · | · | · | · |
@@ -55,6 +55,8 @@ Updates until reward AUC > 0.9 / final AUC (firing rate of the recurrent state).
 Second half of the 1k evaluation trajectories. State probe / no-memory probe (current image embedding),
 both with the agent pose as input. Paper rows: 1M gradient steps.
 
+Constant predictor on our split: objects MSE 24.0, walls accuracy 80.8.
+
 | model | objects MSE ↓ | no-memory | walls acc. (%) ↑ | no-memory |
 |---|---|---|---|---|
 | Spiking-WM | · | · | · | · |
@@ -77,8 +79,8 @@ both with the agent pose as input. Paper rows: 1M gradient steps.
 
 | model | walker_walk | cheetah_run | cartpole_swingup |
 |---|---|---|---|
-| Spiking-WM | · | · | · |
-| **Ours** | · | · | · |
+| Spiking-WM | 25 (2%) | · | · |
+| **Ours** | 27 (2%) | 9 (12%) | · |
 | DreamerV3 (ANN) | · | · | · |
 
 ## Table 7. Ablations of our model (probe, memlen-L-recall)
