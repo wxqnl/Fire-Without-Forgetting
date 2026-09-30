@@ -397,4 +397,4 @@ R2I 选了 POPGym 中记忆需求最高的 RepeatPrevious、Autoencode、Concent
 
 ### 14.3 世界模型探针（round 12）的最终结果
 
-POPGym Easy，奖励 ±1，1 万次更新：DreamerV3 0.95（3k 学会），Spiking-WM 0.98（5k 学会），本文模型 0.94（10k，逐步上升）；原始 ±1/48：DreamerV3 0.64，本文模型 0.60。Easy 只需记 4 步，信号足够时有记忆的模型都能学会，区分长程记忆的是 Medium。Medium（记 32 步），奖励 ±1：DreamerV3 1 万次更新一直 0.50；本文模型 5k 时 0.54，还在跑。
+POPGym Easy，奖励 ±1，1 万次更新：DreamerV3 0.95（3k 学会），Spiking-WM 0.97（5k 学会），本文模型 0.94（10k，逐步上升）；原始 ±1/48：DreamerV3 0.64，本文模型 0.60。Easy 只需记 4 步，信号足够时有记忆的模型都能学会，区分长程记忆的是 Medium。Medium（记 32 步），奖励 ±1，1 万次更新：DreamerV3 一直 0.50；本文模型从 4k 起缓慢上升，到 1 万次为 0.54，两者都没有学会。随机策略数据、1 万次更新的探针不足以学会 32 步回忆，Medium 的结论以 round 13 的 RL 结果为准（2M 环境步，R2I 标准配置）。
