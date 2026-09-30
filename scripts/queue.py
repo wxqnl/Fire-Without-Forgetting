@@ -14,6 +14,11 @@ Scheduling: memory is accounted with each job's mem_gb (plus a live nvidia-smi c
 against other users). When the highest-priority pending job does not fit anywhere, the
 GPU with the most headroom is reserved for it and smaller jobs backfill the others.
 
+GPUs in --idle_gpus are shared with other people: a job is started there only after the GPU
+has had no process of anyone else for --idle_min minutes, and no further job once one appears
+(processes already running are never touched). All work on the machine runs under one user
+account, so "ours" means: in the session of one of our jobs (each job is its own session).
+
 usage: setsid nohup python scripts/queue.py --jobs runs/jobs.jsonl --gpus 1,2,3,4,5,6 &
 """
 import argparse
@@ -36,6 +41,32 @@ def gpu_free_gb(gpu):
         capture_output=True, text=True,
     ).stdout.strip()
     return float(out) / 1024 if out else 0.0
+
+
+def session(pid):
+    try:
+        with open(f"/proc/{pid}/stat") as f:
+            return int(f.read().rsplit(")", 1)[1].split()[3])
+    except (FileNotFoundError, ProcessLookupError, IndexError, ValueError):
+        return None
+
+
+def foreign_procs(gpu, own_sessions):
+    """Compute processes on the GPU that are not ours (MPS servers do not count: their clients do)."""
+    out = subprocess.run(
+        ["nvidia-smi", "-i", str(gpu), "--query-compute-apps=pid,process_name", "--format=csv,noheader"],
+        capture_output=True, text=True,
+    )
+    if out.returncode != 0:
+        return ["nvidia-smi failed"]
+    procs = []
+    for line in out.stdout.strip().splitlines():
+        pid, name = (x.strip() for x in line.split(",", 1))
+        if "nvidia-cuda-mps-server" in name:
+            continue
+        if session(int(pid)) not in own_sessions:
+            procs.append(f"{pid} {name}")
+    return procs
 
 
 def mps_dir(root, gpu):
@@ -128,6 +159,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--jobs", required=True)
     parser.add_argument("--gpus", default="1,2,3,4,5,6")
+    parser.add_argument("--idle_gpus", default="", help="used only while nobody else is on them")
+    parser.add_argument("--idle_min", type=float, default=10.0)
     parser.add_argument("--budget_gb", type=float, default=74.0)
     parser.add_argument("--max_per_gpu", type=int, default=10)
     parser.add_argument("--no_mps", action="store_true")
@@ -136,6 +169,9 @@ def main():
     parser.add_argument("--python", default="/home/user01/miniconda3/envs/fwf/bin/python")
     args = parser.parse_args()
     gpus = [int(g) for g in args.gpus.split(",")]
+    idle_gpus = [int(g) for g in args.idle_gpus.split(",") if g]
+    idle_since = {g: None for g in idle_gpus}  # since when nobody else is on the GPU
+    mps_started = set(gpus)
     root = pathlib.Path(__file__).resolve().parents[1]
     status_file = pathlib.Path(args.jobs).with_suffix(".status")
     running = {}  # name -> Handle
@@ -164,6 +200,20 @@ def main():
             if code is not None:
                 log(f"finished {name} gpu{handle.gpu} exit={code}")
                 del running[name]
+        own = {h.pid for h in running.values()}
+        usable = []
+        for g in idle_gpus:
+            others = foreign_procs(g, own)
+            if others:
+                if idle_since[g] is not None:
+                    log(f"gpu{g}: other processes again ({others[0]}), no new jobs there")
+                idle_since[g] = None
+            else:
+                if idle_since[g] is None:
+                    idle_since[g] = time.time()
+                    log(f"gpu{g}: nobody else on it, usable after {args.idle_min:.0f} min")
+                if time.time() - idle_since[g] >= 60 * args.idle_min:
+                    usable.append(g)
         pending = []
         for job in jobs:
             if job["name"] in running:
@@ -177,13 +227,13 @@ def main():
 
         reserved = None  # GPU held back for the first job that does not fit
         for job in pending:
-            used = {g: 0.0 for g in gpus}
-            count = {g: 0 for g in gpus}
+            used = {g: 0.0 for g in gpus + idle_gpus}
+            count = {g: 0 for g in gpus + idle_gpus}
             for h in running.values():
                 used[h.gpu] += h.mem
                 count[h.gpu] += 1
             choice = None
-            for g in sorted(gpus, key=lambda g: used[g]):
+            for g in sorted(gpus + usable, key=lambda g: used[g]):
                 if g == reserved:
                     continue
                 if count[g] >= args.max_per_gpu or used[g] + job["mem_gb"] > args.budget_gb:
@@ -196,6 +246,9 @@ def main():
                 if reserved is None:
                     reserved = max(gpus, key=lambda g: args.budget_gb - used[g])
                 continue
+            if not args.no_mps and choice not in mps_started:
+                ensure_mps(root, choice)
+                mps_started.add(choice)
             running[job["name"]] = launch(job, choice, args, root)
             attempts[job["name"]] = attempts.get(job["name"], 0) + 1
             log(f"launched {job['name']} on gpu{choice}")
@@ -213,7 +266,7 @@ def main():
         if not running and not pending:
             log("queue empty")
             if not args.no_mps:
-                for g in gpus:
+                for g in mps_started:
                     stop_mps(root, g)
             break
         time.sleep(args.poll)
