@@ -3,7 +3,7 @@
 Single seed (s0). A value with (NN%) is from a run still in progress; · = queued or no evaluation yet;
 — = not part of the plan.
 
-Queue at 2026-09-30 11:57:58: 109/134 done, 25 running, 0 pending.
+Queue at 2026-09-30 19:11:20: 111/134 done, 23 running, 0 pending.
 
 ## Table 2. Memory tasks, RL: evaluation return (mean of the last 3 evaluations)
 
@@ -16,12 +16,12 @@ RepeatPreviousMedium: Spiking-WM, A+B+G, ours and DreamerV3.
 
 | model | L8 | L16 | L32 | L64 | L51 | L71 | L101 | RepeatPreviousEasy | RepeatPreviousMedium |
 |---|---|---|---|---|---|---|---|---|---|
-| Spiking-WM | 0.08 | -0.25 | -0.08 | -0.33 | -0.04 | 0.19 | -0.04 | -0.12 (15%) | -0.50 (15%) |
-| LIF | 1.00 | -0.25 | -0.08 | -0.08 | — | — | — | 0.71 (18%) | — |
-| GRSN | 0.98 | 0.94 | -0.08 | 0.08 | — | — | — | -0.41 (20%) | — |
-| Spiking-WM + A+B+G | 1.00 | 1.00 | 0.79 | -0.04 | -0.04 | 0.08 | -0.04 | -0.51 (15%) | -0.52 (15%) |
-| **Ours** | 0.98 | 1.00 | 1.00 | 0.98 | 0.96 | 1.00 | 0.96 | -0.38 (20%) | -0.51 (20%) |
-| DreamerV3 (ANN) | 0.98 | 0.94 | 0.98 | -0.08 | 0.98 | 0.04 | 0.04 | 0.39 (55%) | -0.50 (60%) |
+| Spiking-WM | 0.08 | -0.25 | -0.08 | -0.33 | -0.04 | 0.19 | -0.04 | 0.52 (28%) | -0.50 (28%) |
+| LIF | 1.00 | -0.25 | -0.08 | -0.08 | — | — | — | 0.68 (33%) | — |
+| GRSN | 0.98 | 0.94 | -0.08 | 0.08 | — | — | — | -0.17 (38%) | — |
+| Spiking-WM + A+B+G | 1.00 | 1.00 | 0.79 | -0.04 | -0.04 | 0.08 | -0.04 | -0.51 (28%) | -0.49 (25%) |
+| **Ours** | 0.98 | 1.00 | 1.00 | 0.98 | 0.96 | 1.00 | 0.96 | 0.07 (35%) | -0.49 (35%) |
+| DreamerV3 (ANN) | 0.98 | 0.94 | 0.98 | -0.08 | 0.98 | 0.04 | 0.04 | 0.40 (93%) | -0.44 |
 | spiking enc. + GRU | — | 1.00 | 1.00 | — | — | — | — | — | — |
 | ours, 1 layer | — | 1.00 | 1.00 | — | — | — | — | — | — |
 
@@ -62,12 +62,12 @@ Constant predictor on our split: objects MSE 24.0, walls accuracy 80.8.
 
 | model | objects MSE ↓ | no-memory | walls acc. (%) ↑ | no-memory |
 |---|---|---|---|---|
-| Spiking-WM | 12.8 (15%) | 12.6 | 81.0 (15%) | 81.0 |
-| LIF | 12.8 (15%) | 12.6 | 80.9 (15%) | 81.0 |
-| GRSN | 12.9 (15%) | 12.7 | 80.9 (15%) | 81.0 |
-| Spiking-WM + A+B+G | 13.2 (10%) | 13.1 | 81.0 (10%) | 81.0 |
-| **Ours** | 12.9 (15%) | 12.7 | 81.0 (15%) | 81.0 |
-| DreamerV3 (ANN) | 11.3 (40%) | 12.1 | 81.5 (40%) | 81.2 |
+| Spiking-WM | 12.7 (25%) | 12.6 | 81.1 (25%) | 81.1 |
+| LIF | 12.6 (25%) | 12.6 | 81.1 (25%) | 81.1 |
+| GRSN | 12.8 (25%) | 12.6 | 81.1 (25%) | 81.1 |
+| Spiking-WM + A+B+G | 12.3 (25%) | 12.6 | 81.3 (25%) | 81.1 |
+| **Ours** | 12.8 (25%) | 12.6 | 81.1 (25%) | 81.1 |
+| DreamerV3 (ANN) | 10.7 (75%) | 11.9 | 82.6 (75%) | 81.9 |
 | spiking enc. + GRU | — | — | — | — |
 | ours, 1 layer | — | — | — | — |
 | constant (paper) | 23.9 |  | 80.8 |  |
@@ -83,9 +83,9 @@ a different seed per parallel env.
 
 | model | walker_walk | cheetah_run | cartpole_swingup |
 |---|---|---|---|
-| Spiking-WM | 140 (9%) | 24 (5%) | 102 (5%) |
-| **Ours** | 206 (13%) | 9 (5%) | 115 (5%) |
-| DreamerV3 (ANN) | 883 (37%) | 522 (37%) | 537 (25%) |
+| Spiking-WM | 214 (21%) | 72 (21%) | 233 (21%) |
+| **Ours** | 480 (29%) | 155 (29%) | 411 (29%) |
+| DreamerV3 (ANN) | 951 (97%) | 667 (93%) | 871 |
 
 ## Table 7. Ablations of our model (probe, memlen-L-recall)
 
