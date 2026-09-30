@@ -161,7 +161,8 @@ def main(config, args):
     t0 = time.time()
     train_eps, env = collect(config, args.train_episodes, args.data_seed, "train")
     eval_eps, _ = collect(config, args.eval_episodes, args.data_seed + 1, "eval")
-    scale = max(np.abs(ep["reward"]).max() for ep in train_eps.values())
+    # --raw_reward keeps the task's reward scale, as in the RL runs
+    scale = 1.0 if args.raw_reward else max(np.abs(ep["reward"]).max() for ep in train_eps.values())
     for eps in (train_eps, eval_eps):  # unit-magnitude rewards, e.g. POPGym's +-1/(N-k)
         for ep in eps.values():
             ep["reward"] = (ep["reward"] / scale).astype(np.float32)
@@ -213,6 +214,7 @@ def parse_config(argv=None):
     parser.add_argument("--eval_episodes", type=int, default=512)
     parser.add_argument("--train_steps", type=int, default=200000)
     parser.add_argument("--data_seed", type=int, default=12345)
+    parser.add_argument("--raw_reward", action="store_true")
     args, remaining = parser.parse_known_args(argv)
     configs = yaml.safe_load((pathlib.Path(__file__).parent / "configs.yaml").read_text())
 

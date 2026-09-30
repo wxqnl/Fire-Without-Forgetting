@@ -360,6 +360,23 @@ def round11():
     return jobs
 
 
+def round12():
+    """2026-09-30: why ours does not learn POPGym RepeatPreviousEasy while DreamerV3 does. At 1M
+    steps its reward head picks the suit of o_{t-4} at 37% (DreamerV3 75%) and its state holds the
+    cards 1-4 steps back at 72/56/44/39% (DreamerV3 91/87/84/81%; scripts/diag_popgym.py). World
+    model only, on random-action data, 10k updates: with unit rewards (x48) it shows whether the
+    model can learn the 4-step memory at all; with the task's own +-1/48 rewards, as in the RL
+    runs, whether the weak reward signal is what holds it back."""
+    task = "popgym_RepeatPreviousEasy"
+    cells = {k: MAIN[k] + ["rewardbyact"] for k in ("PD2L_tau1000", "ann_tau2", "base_tau2")}
+    jobs = list(recall_jobs(task, cells, seeds=(0,), updates=10000, extra="--batch_length 64",
+                            group="diag_rp", eval_every=1000))
+    raw = {k: cells[k] for k in ("PD2L_tau1000", "ann_tau2")}
+    jobs += list(recall_jobs(task, raw, seeds=(0,), updates=10000, extra="--batch_length 64 --raw_reward",
+                             group="diag_rp_raw", eval_every=1000))
+    return jobs
+
+
 MM_UPDATES = 200000  # Memory Maze gradient steps; the benchmark paper trains 1M
 
 
@@ -413,7 +430,7 @@ def main():
     r8 = round8()
     mm_full = [j for j in r8 if j["name"].startswith("mmaze_official/")]
     r8 = [j for j in r8 if j not in mm_full]
-    jobs = round3() + round4() + r5 + round7() + round9() + round10() + mm_full + r8 + round11()
+    jobs = round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + r8 + round11()
     RUNS.mkdir(exist_ok=True)
     out = RUNS / "jobs.jsonl"
     tmp = out.with_suffix(".tmp")
