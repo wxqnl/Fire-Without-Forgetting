@@ -366,6 +366,12 @@ R2I 选了 POPGym 中记忆需求最高的 RepeatPrevious、Autoencode、Concent
 - BSuite 保留按动作输出的 MSE 奖励头，不重跑：奖励为 ±1，不存在尺度问题；所有模型（包括 DreamerV3）使用同一个头；它让所有模型更容易学，我们的 DreamerV3 学会了 L51，而 R2I 报告的 DreamerV3 超过约 30 步学不会，所以基线只会更强。论文中注明。
 - 旧的 POPGym 结果移到 `runs/_superseded/popgym_rewardbyact/`（DreamerV3 Easy 已跑完，其余 9 个在 03:11 停止），可作为附录中奖励头的消融。
 - Memory Maze（不涉及奖励）和 DMC（已用默认奖励头）不受影响。
+- 回退规则（2026-09-30 05:30 确定）：
+  - 判定点：DreamerV3 在 Easy 上跑满 200 万步（预计 9 月 30 日 15:30）。
+  - 条件：最后 3 次评估的均值低于 0.5（旧配置下为 0.77），即在这个预算下 DreamerV3 用默认奖励头学不会 Easy。Medium 不作判据，因为 R2I 报告 DreamerV3 在 Medium 上 2000 万步仍在随机水平。
+  - 触发后：POPGym 全部改回旧配置，即按动作输出的 MSE 奖励头。这与 BSuite 一致，所有模型相同。round 13 停止，移到 `runs/_superseded/popgym_r2i_head/`。旧的 9 个任务从检查点续跑到 200 万步：检查点在 `runs/_superseded/popgym_rewardbyact/`，每 5 万步保存一次，这些任务停在 55 万–125 万步。续跑用 dreamer.py 自带的恢复机制，`latest_model.pt` 只含参数，Adam 状态重新累积，所有续跑任务都一样。DreamerV3 Easy 已经跑完，不动。
+  - 不触发：round 13 照常跑完，旧结果作附录中奖励头的对照。
+  - 旧配置下的已知情况：到 110 万步时，DreamerV3 已经学会 Easy（100 万步 0.80）。本文模型从 70 万步起停在 −0.21 到 −0.25，其他脉冲模型在 −0.30 到 −0.42，都还在缓慢上升。
 
 ## 14. 配置审查（2026-09-30 03:40）
 
