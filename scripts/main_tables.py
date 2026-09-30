@@ -131,7 +131,10 @@ def mm_cells(run):
 
 def mm_baseline():
     for path in sorted(RUNS.glob("mmaze_*/*/*/s0/metrics.jsonl")):
-        first = json.loads(path.read_text().splitlines()[0])
+        lines = path.read_text().splitlines()
+        if not lines:  # run just started
+            continue
+        first = json.loads(lines[0])
         if "const_objects_mse" in first:
             return first["const_objects_mse"], first["const_walls_acc"]
     return None
