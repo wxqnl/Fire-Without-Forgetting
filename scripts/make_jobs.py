@@ -337,8 +337,8 @@ def round10():
     and probe: checks the whole probe_mm.py path and measures the update speed for the budget of the
     full runs."""
     data = ROOT / "data" / "memory_maze_9x9_official_subset"
-    if not (data / "train").is_dir():
-        return []
+    if not (data / "train").is_dir() or (ROOT / "data" / "memory_maze_9x9_official" / "train_complete").exists():
+        return []  # not needed once the full data is there
     jobs = []
     for cell in ("PD2L_tau1000", "ann_tau2"):
         name = f"mmaze_pilot/memory_maze_9x9/{cell}/s0"
