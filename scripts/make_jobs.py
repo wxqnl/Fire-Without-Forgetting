@@ -466,6 +466,9 @@ def main():
     r8 = [j for j in r8 if j not in mm_full and "/popgym_" not in j["name"]]  # POPGym: round 13
     jobs = (round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
             + r8 + round11())
+    for job in jobs:  # DreamerV3 (ANN) needs about 4 GB (measured 2026-09-30), the spiking models 14-20 GB
+        if "/ann_" in job["name"] and job["mem_gb"] > 6:
+            job["mem_gb"] = 7 if job["name"].startswith("mmaze") else 6
     RUNS.mkdir(exist_ok=True)
     out = RUNS / "jobs.jsonl"
     tmp = out.with_suffix(".tmp")
