@@ -381,6 +381,29 @@ def round12():
     return jobs
 
 
+def round13():
+    """2026-09-30: POPGym RepeatPrevious as in R2I (configs.yaml of Recall2Imagine, block popgym):
+    DreamerV3's default reward head (symlog two-hot, 255 bins, zero-initialised, reading [h, z]), no
+    reward scaling, 8 parallel envs, train ratio 64, 2M env steps. Replaces the POPGym runs of round 8,
+    which used the action-indexed MSE reward head of the BSuite runs: with POPGym's per-step rewards
+    of +-1/(N-k) its loss is (N-k)^2 smaller than for unit rewards, and neither DreamerV3 nor ours
+    learned the card memory from it within the probe budget (round 12). BSuite rewards are +-1 and
+    keep that head. Order: ours and DreamerV3 first."""
+    order = [("popgym_RepeatPreviousEasy", c) for c in ("PD2L_tau1000", "ann_tau2")]
+    order += [("popgym_RepeatPreviousMedium", c) for c in ("PD2L_tau1000", "ann_tau2")]
+    order += [("popgym_RepeatPreviousEasy", c) for c in ("base_tau2", "ABG_tau128", "LIF_tau2", "GRSN_tau2")]
+    order += [("popgym_RepeatPreviousMedium", c) for c in ("base_tau2", "ABG_tau128")]
+    jobs = []
+    for task, cell in order:
+        name = f"popgym/{task}/{cell}/s0"
+        logdir = RUNS / name
+        cmd = (f"{{python}} dreamer.py --configs popgym {' '.join(MAIN[cell])} --task {task} --seed 0 "
+               f"--steps 2e6 --train_ratio 64 --envs 8 --batch_length 64 --env_seed_per_env True "
+               f"--eval_every 5e4 --logdir {logdir}")
+        jobs.append(dict(name=name, cmd=" ".join(cmd.split()), logdir=str(logdir), mem_gb=14.5))
+    return jobs
+
+
 MM_UPDATES = 200000  # Memory Maze gradient steps; the benchmark paper trains 1M
 
 
@@ -429,12 +452,14 @@ def main():
     # (BSuite long memory, POPGym as in R2I), then DMC (round 11).
     # Superseded: the POPGym runs of round 5 (tasks and budget not those of R2I) by round 8, round 6
     # (own Memory Maze data) by rounds 10 and 8, the DMC runs of round 5 (train ratio 64) by round 11.
+    # The POPGym runs of round 8 (action-indexed MSE reward head) by round 13.
     r5 = round5()
     r5 = [j for j in r5 if "/popgym_" not in j["name"] and "/dmc_" not in j["name"]]
     r8 = round8()
     mm_full = [j for j in r8 if j["name"].startswith("mmaze_official/")]
-    r8 = [j for j in r8 if j not in mm_full]
-    jobs = round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + r8 + round11()
+    r8 = [j for j in r8 if j not in mm_full and "/popgym_" not in j["name"]]  # POPGym: round 13
+    jobs = (round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
+            + r8 + round11())
     RUNS.mkdir(exist_ok=True)
     out = RUNS / "jobs.jsonl"
     tmp = out.with_suffix(".tmp")

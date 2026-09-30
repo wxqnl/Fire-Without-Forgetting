@@ -26,7 +26,7 @@ MAIN = [("base_tau2", "Spiking-WM"), ("LIF_tau2", "LIF"), ("GRSN_tau2", "GRSN"),
 EXTRA = [("gru_tau2", "spiking enc. + GRU"), ("PD_tau1000", "ours, 1 layer")]
 BSUITE = [f"bsuite_memlen-{n}" for n in (8, 16, 32, 64)]
 BSUITE_LONG = [f"bsuite_memlen-{n}" for n in (51, 71, 101)]  # round 8, R2I protocol (1M steps)
-POPGYM = ["popgym_RepeatPreviousEasy", "popgym_RepeatPreviousMedium"]  # round 8, R2I tasks (2M steps)
+POPGYM = ["popgym_RepeatPreviousEasy", "popgym_RepeatPreviousMedium"]  # round 13, R2I tasks and config
 MM_PAPER = [("constant (paper)", "23.9", "80.8"), ("VAE, no memory (paper)", "17.2", "84.1"),
             ("RSSM (paper)", "8.3", "89.0"), ("VAE+GRU TBTT (paper)", "7.8", "90.0"), ("RSSM TBTT (paper)", "6.2", "94.0")]
 DMC = ["dmc_walker_walk", "dmc_cheetah_run", "dmc_cartpole_swingup"]
@@ -162,9 +162,11 @@ def main():
     out += ["## Table 2. Memory tasks, RL: evaluation return (mean of the last 3 evaluations)", "",
             "BSuite memory length L (return 1 = always recalls the cue, 0 = chance). L8-L64: 0.15-0.5M env steps;",
             "L51-L101 and POPGym RepeatPrevious (return in [-1, 1], -0.5 = chance): protocol of R2I (Samsami et al.",
-            "2024), 1M / 2M env steps, a different seed per parallel env. RepeatPreviousMedium is planned for",
-            "Spiking-WM, A+B+G, ours and DreamerV3.", ""]
-    rl_runs = [(f"rl2/{t}", short(t)) for t in BSUITE] + [(f"r2i/{t}", short(t)) for t in BSUITE_LONG + POPGYM]
+            "2024), 1M / 2M env steps, a different seed per parallel env. BSuite: action-indexed reward head for",
+            "all models; POPGym: DreamerV3's default reward head and R2I's POPGym settings (8 envs, train ratio 64).",
+            "RepeatPreviousMedium: Spiking-WM, A+B+G, ours and DreamerV3.", ""]
+    rl_runs = ([(f"rl2/{t}", short(t)) for t in BSUITE] + [(f"r2i/{t}", short(t)) for t in BSUITE_LONG]
+               + [(f"popgym/{t}", short(t)) for t in POPGYM])
     out += table(["model"] + [lab for _, lab in rl_runs],
                  [[label] + [rl_cell(f"{r}/{m}") for r, _ in rl_runs] for m, label in models])
     out += [""]

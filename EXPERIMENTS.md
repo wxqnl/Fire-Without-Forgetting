@@ -296,9 +296,9 @@ R2I 选了 POPGym 中记忆需求最高的 RepeatPrevious、Autoencode、Concent
 | 顺序 | 任务 | 数量 | 状态 |
 |---|---|---|---|
 | 1 | R2I 协议 BSuite L51 / L71 / L101：Spiking-WM、A+B+G、本文模型（DreamerV3 已完成） | 9 | 在跑，36–53% |
-| 2 | POPGym RepeatPrevious Easy：6 个模型 | 6 | 在跑，DreamerV3 36%，脉冲模型 11–19% |
+| 2 | POPGym RepeatPrevious Easy：6 个模型 | 6 | 2026-09-30 起按 R2I 标准配置重跑（§13） |
 | 3 | Memory Maze 流程验证（round 10）：本文模型、DreamerV3 各 5000 次更新，不进论文 | 2 | 排队 |
-| 4 | POPGym RepeatPrevious Medium：Spiking-WM（在跑）、A+B+G、本文模型、DreamerV3 | 4 | 1 个在跑，3 个排队 |
+| 4 | POPGym RepeatPrevious Medium：Spiking-WM、A+B+G、本文模型、DreamerV3 | 4 | 2026-09-30 起按 R2I 标准配置重跑（§13） |
 | 5 | DMC walker_walk / cheetah_run / cartpole_swingup：Spiking-WM、本文模型、DreamerV3；20 万步，train ratio 512（round 11） | 9 | 排队 |
 | 3′ | Memory Maze 全量官方数据：6 个模型，20 万次更新 | 6 | 等训练集下载（§10.1）；下全后自动加入，排在 POPGym Medium 之前 |
 
@@ -327,3 +327,42 @@ R2I 选了 POPGym 中记忆需求最高的 RepeatPrevious、Autoencode、Concent
 - R2I 是 ANN 世界模型，在本文中是 ANN 对照和 benchmark 协议的来源。相关工作里用一段话说明差别即可：R2I 解决的是 ANN 循环核的长程依赖和并行训练；本文解决的是脉冲神经元的复位，并在"只用脉冲通信"的约束下实现长时记忆。
 - 方法描述不以 SSM/LRU 为中心。√(1−λ²) 写作树突的输入归一化，并引用 LRU。
 - 直接陈述发现和结论，不写防御性的限定语。
+
+## 13. POPGym 改用 R2I 的标准配置（2026-09-30 03:10）
+
+### 13.1 现象与诊断
+
+原来的 POPGym RL（round 8）沿用了 BSuite 的奖励头：按动作输出、MSE 损失（`rewardbyact`，`--reward_head symlog_mse`）。RepeatPrevious Easy 上，DreamerV3 在约 95 万步学会（最终 0.80），本文模型到 105 万步仍在 −0.22。
+
+`scripts/diag_popgym.py` 加载检查点，看奖励头能否认出 4 步前的花色，以及状态里能线性解码出几步前的牌（随机水平 25%）：
+
+| 模型（RL 检查点） | 奖励头认对 | 1 / 2 / 3 / 4 步前 |
+|---|---|---|
+| DreamerV3（200 万步，已学会） | 75% | 91 / 87 / 84 / 81% |
+| 本文模型（100 万步），树突 | 37% | 72 / 56 / 44 / 39% |
+| Spiking-WM（100 万步） | 32% | 72 / 45 / 32 / 30% |
+
+本文模型的奖励预测损失 100 万步没有下降（3.0e-4 → 3.4e-4）。整个世界模型里，只有奖励预测需要记住 4 步前的牌，而 POPGym 每步奖励只有 ±1/(N−k)（Easy 为 ±1/48），所以 MSE 损失比 ±1 奖励小 (N−k)² 倍。
+
+世界模型探针（round 12，随机动作数据，1 万次更新，奖励预测 AUC）：
+
+| 条件 | 3k | 5k | 7k | 10k |
+|---|---|---|---|---|
+| DreamerV3，奖励 ±1 | 0.94 | 0.95 | 0.95 | 0.95 |
+| 本文模型，奖励 ±1 | 0.75 | 0.84 | 0.89 | — |
+| DreamerV3，原始 ±1/48 | 0.56 | 0.59 | 0.60 | 0.64 |
+| 本文模型，原始 ±1/48 | 0.57 | 0.60 | 0.59 | — |
+
+原始奖励下两者一样学不动；奖励为 ±1 时两者都能学会。所以 RL 学不会的原因是这个奖励头配上 POPGym 的奖励尺度，而不是模型结构。
+
+### 13.2 文献中的配置
+
+- POPGym 环境每步奖励 ±1/(N−k)，一局回报在 [−1, 1]，环境不做缩放。
+- R2I 官方代码（`Recall2Imagine/recall2imagine/configs.yaml`，block `popgym`）：DreamerV3 默认奖励头（symlog 两桶编码，255 桶，零初始化，读取 [h, z]），不缩放奖励；回报做百分位数归一化；train ratio 64，8 个并行环境。R2I 论文里的 DreamerV3 基线只调了网络大小，其余为 DreamerV3 默认值。DreamerV3 用 symlog 离散头和回报归一化处理不同的奖励尺度，不需要按任务缩放奖励。
+
+### 13.3 决定
+
+- POPGym（round 13）：按 R2I 的配置重跑，即 DreamerV3 默认奖励头、不缩放奖励、8 个并行环境、train ratio 64、200 万步、batch length 64。Easy 6 个模型，Medium 4 个模型（Spiking-WM、A+B+G、本文模型、DreamerV3）。本文模型和 DreamerV3 先跑。
+- BSuite 保留按动作输出的 MSE 奖励头，不重跑：奖励为 ±1，不存在尺度问题；所有模型（包括 DreamerV3）使用同一个头；它让所有模型更容易学，我们的 DreamerV3 学会了 L51，而 R2I 报告的 DreamerV3 超过约 30 步学不会，所以基线只会更强。论文中注明。
+- 旧的 POPGym 结果移到 `runs/_superseded/popgym_rewardbyact/`（DreamerV3 Easy 已跑完，其余 9 个在 03:11 停止），可作为附录中奖励头的消融。
+- Memory Maze（不涉及奖励）和 DMC（已用默认奖励头）不受影响。
