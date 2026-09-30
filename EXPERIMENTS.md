@@ -366,3 +366,35 @@ R2I 选了 POPGym 中记忆需求最高的 RepeatPrevious、Autoencode、Concent
 - BSuite 保留按动作输出的 MSE 奖励头，不重跑：奖励为 ±1，不存在尺度问题；所有模型（包括 DreamerV3）使用同一个头；它让所有模型更容易学，我们的 DreamerV3 学会了 L51，而 R2I 报告的 DreamerV3 超过约 30 步学不会，所以基线只会更强。论文中注明。
 - 旧的 POPGym 结果移到 `runs/_superseded/popgym_rewardbyact/`（DreamerV3 Easy 已跑完，其余 9 个在 03:11 停止），可作为附录中奖励头的消融。
 - Memory Maze（不涉及奖励）和 DMC（已用默认奖励头）不受影响。
+
+## 14. 配置审查（2026-09-30 03:40）
+
+在主表任务跑完之前，逐项核对了各 benchmark 的配置。`scripts/review_configs.py` 按 dreamer.py / probe_mm.py 的方式展开每个任务的完整配置（configs.yaml 默认值、任务的 config block、命令行覆盖），列出同一 benchmark 内所有模型共同的协议设置和各模型之间不同的键；`--params` 另给参数量。
+
+### 14.1 通过
+
+- 公平性：5 个 benchmark 内，模型之间只在模型本身的键上不同（`dyn_cell`、`PDRNN`、`MCNode`、`persist_state`、`act` / 编解码器激活、`ANNAct`、`spike_times`）。步数、train ratio、batch、学习率、折扣、想象步长、回放容量、评估设置完全一致；没有未识别的参数。
+- DreamerV3 基线：`GRUCtrl` 就是 DreamerV3 的 GRU（投影后 LayerNorm，重置门作用在候选上，更新门偏置 −1）；`PopNorm` 在数学上是 LayerNorm；ANN 版用 SiLU。symlog 解码器、两桶离散价值头、百分位数回报归一化、γ 0.997、λ 0.95、想象 15 步、lr 1e-4 / 3e-5、回放 1M，与 dreamerv3-torch 默认值一致（规模约为 DreamerV3 的 S 档，所有模型相同）。
+- POPGym（round 13）：与 R2I 的配置一致（§13）；每个环境不同种子。
+- BSuite L51–L101（R2I 协议）：每个环境不同种子；奖励头对所有模型相同（§13.3）。
+- Memory Maze：数据、TBTT（32 × 48）、探针（4 × 1024，LayerNorm + ELU，Adam 3e-4 / eps 1e-5）、评估（后 500 步）与原文一致；探针读取的状态和图像编码都做了 detach，梯度不进入世界模型。预算为 20 万次更新（原文 100 万），原文数值列为参考行。
+- 参数量（POPGym Easy）：
+
+| 模型 | 世界模型 | 其中循环核 | actor-critic |
+|---|---|---|---|
+| Spiking-WM、A+B+G | 7.23M | 1.32M | 3.42M |
+| LIF | 6.44M | 0.53M | 3.42M |
+| GRSN | 6.45M | 0.53M | 3.42M |
+| 本文模型 | 8.56M | 2.64M | 3.42M |
+| DreamerV3 | 7.49M | 1.58M | 3.42M |
+
+本文模型比 DreamerV3 多约 10%（整个智能体），来自第二层 PDRNN。容量解释不了结果：GRU 比 MCRNN 大，在 L71 / L101 上仍然失败；L64 上与本文模型结构和参数量相同、只改 τ 或加清零的对照停在 0.49–0.50（§11.3）。论文给出参数量表。
+
+### 14.2 发现的问题与处理
+
+1. DMC（round 11）没有设 `--env_seed_per_env True`：4 个训练环境、4 个评估环境各共用一个种子。评估用确定性策略，4 个评估环境跑出同一局，10 个评估局只有约 3 个不同（DreamerV3 cartpole 的评估回报在 580 → 647 → 794 之间跳动）。预算 20 万帧也不是 DreamerV3 的协议（DMC 本体感觉 50 万帧）。处理：9 个任务按 50 万帧、每个环境不同种子重跑（`runs/dmc500/`）；旧任务 03:40 停止，移到 `runs/_superseded/dmc_200k_shared_seed/`。
+2. BSuite L8–L64（rl2）在 §9.3 修复之前运行，4 个并行环境共用一个种子，训练数据多样性为 1/4，评估有效局数也少。对所有模型相同，比较公平。决定：不重跑，表 2 注明。
+
+### 14.3 世界模型探针（round 12）的最终结果
+
+POPGym Easy，奖励 ±1，1 万次更新：DreamerV3 0.95（3k 学会），Spiking-WM 0.98（5k 学会），本文模型 0.94（10k，逐步上升）；原始 ±1/48：DreamerV3 0.64，本文模型 0.60。Easy 只需记 4 步，信号足够时有记忆的模型都能学会，区分长程记忆的是 Medium。Medium（记 32 步），奖励 ±1：DreamerV3 1 万次更新一直 0.50；本文模型 5k 时 0.54，还在跑。

@@ -2,11 +2,12 @@
 
 Single seed (s0). A value with (NN%) is from a run still in progress; · = not started.
 
-Queue at 2026-09-30 03:11:53: 108/134 done, 20 running, 6 pending.
+Queue at 2026-09-30 03:41:09: 107/134 done, 18 running, 9 pending.
 
 ## Table 2. Memory tasks, RL: evaluation return (mean of the last 3 evaluations)
 
-BSuite memory length L (return 1 = always recalls the cue, 0 = chance). L8-L64: 0.15-0.5M env steps;
+BSuite memory length L (return 1 = always recalls the cue, 0 = chance). L8-L64: 0.15-0.5M env steps,
+the 4 parallel envs share one seed (runs before 2026-09-28 21:00; the same for every model);
 L51-L101 and POPGym RepeatPrevious (return in [-1, 1], -0.5 = chance): protocol of R2I (Samsami et al.
 2024), 1M / 2M env steps, a different seed per parallel env. BSuite: action-indexed reward head for
 all models; POPGym: DreamerV3's default reward head and R2I's POPGym settings (8 envs, train ratio 64).
@@ -14,12 +15,12 @@ RepeatPreviousMedium: Spiking-WM, A+B+G, ours and DreamerV3.
 
 | model | L8 | L16 | L32 | L64 | L51 | L71 | L101 | RepeatPreviousEasy | RepeatPreviousMedium |
 |---|---|---|---|---|---|---|---|---|---|
-| Spiking-WM | 0.08 | -0.25 | -0.08 | -0.33 | -0.04 | 0.19 | -0.04 | · | · |
-| LIF | 1.00 | -0.25 | -0.08 | -0.08 | · | · | · | · | · |
-| GRSN | 0.98 | 0.94 | -0.08 | 0.08 | · | · | · | · | · |
-| Spiking-WM + A+B+G | 1.00 | 1.00 | 0.79 | -0.04 | -0.04 | 0.08 | -0.04 | · | · |
+| Spiking-WM | 0.08 | -0.25 | -0.08 | -0.33 | -0.04 | 0.19 | -0.04 | -0.51 (0%) | -0.48 (0%) |
+| LIF | 1.00 | -0.25 | -0.08 | -0.08 | · | · | · | -0.46 (0%) | · |
+| GRSN | 0.98 | 0.94 | -0.08 | 0.08 | · | · | · | -0.49 (0%) | · |
+| Spiking-WM + A+B+G | 1.00 | 1.00 | 0.79 | -0.04 | -0.04 | 0.08 | -0.04 | -0.51 (0%) | -0.48 (0%) |
 | **Ours** | 0.98 | 1.00 | 1.00 | 0.98 | 0.96 | 1.00 | 0.96 | -0.50 (0%) | -0.51 (0%) |
-| DreamerV3 (ANN) | 0.98 | 0.94 | 0.98 | -0.08 | 0.98 | 0.04 | 0.04 | -0.51 (0%) | -0.54 (0%) |
+| DreamerV3 (ANN) | 0.98 | 0.94 | 0.98 | -0.08 | 0.98 | 0.04 | 0.04 | -0.51 (3%) | -0.51 (3%) |
 | spiking enc. + GRU | · | 1.00 | 1.00 | · | · | · | · | · | · |
 | ours, 1 layer | · | 1.00 | 1.00 | · | · | · | · | · | · |
 
@@ -76,13 +77,14 @@ Constant predictor on our split: objects MSE 24.0, walls accuracy 80.8.
 
 ## Table 6. DMC (proprioception), non-memory control: evaluation return
 
-200k env steps, train ratio 512 (DreamerV3's setting for DMC from proprioception).
+500k env steps, train ratio 512, action repeat 2 (DreamerV3's protocol for DMC from proprioception),
+a different seed per parallel env.
 
 | model | walker_walk | cheetah_run | cartpole_swingup |
 |---|---|---|---|
-| Spiking-WM | 209 (42%) | 61 (32%) | 187 (32%) |
-| **Ours** | 425 (62%) | 155 (72%) | 216 (32%) |
-| DreamerV3 (ANN) | 892 | 558 | 674 |
+| Spiking-WM | · | · | · |
+| **Ours** | · | · | · |
+| DreamerV3 (ANN) | · | · | · |
 
 ## Table 7. Ablations of our model (probe, memlen-L-recall)
 

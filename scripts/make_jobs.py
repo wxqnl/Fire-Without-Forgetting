@@ -352,11 +352,17 @@ def round11():
     """2026-09-29: the non-memory control of the paper (claim C4), replacing the DMC runs of round 5.
     At train ratio 64 and 200k steps Spiking-WM and A+B+G reached a return of only 110-130 on walker,
     too little training to show whether a model loses anything; now DreamerV3's train ratio for DMC
-    from proprioception (512). Three models: the model we modify, ours, and the ANN world model."""
+    from proprioception (512). Three models: the model we modify, ours, and the ANN world model.
+    2026-09-30 (configuration review, EXPERIMENTS.md §14): DreamerV3's budget for DMC from
+    proprioception, 500k env steps, and a different seed per parallel env; the runs at 200k steps
+    (group dmc) had one seed for all 4 envs, so the deterministic evaluation played the same
+    episode in each of them. Group dmc500."""
     cells = {k: MAIN[k] for k in ("base_tau2", "PD2L_tau1000", "ann_tau2")}
     jobs = []
     for task in ("dmc_walker_walk", "dmc_cheetah_run", "dmc_cartpole_swingup"):
-        jobs += dmc_jobs(task, cells, steps=2e5, train_ratio=512, group="dmc")
+        for job in dmc_jobs(task, cells, steps=5e5, train_ratio=512, group="dmc500"):
+            job["cmd"] = job["cmd"].replace(" --logdir ", " --env_seed_per_env True --logdir ")
+            jobs.append(job)
     return jobs
 
 

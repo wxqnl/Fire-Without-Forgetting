@@ -160,7 +160,8 @@ def main():
                 f"{s['pending']} pending.", ""]
 
     out += ["## Table 2. Memory tasks, RL: evaluation return (mean of the last 3 evaluations)", "",
-            "BSuite memory length L (return 1 = always recalls the cue, 0 = chance). L8-L64: 0.15-0.5M env steps;",
+            "BSuite memory length L (return 1 = always recalls the cue, 0 = chance). L8-L64: 0.15-0.5M env steps,",
+            "the 4 parallel envs share one seed (runs before 2026-09-28 21:00; the same for every model);",
             "L51-L101 and POPGym RepeatPrevious (return in [-1, 1], -0.5 = chance): protocol of R2I (Samsami et al.",
             "2024), 1M / 2M env steps, a different seed per parallel env. BSuite: action-indexed reward head for",
             "all models; POPGym: DreamerV3's default reward head and R2I's POPGym settings (8 envs, train ratio 64).",
@@ -196,9 +197,10 @@ def main():
     out += table(["model", "objects MSE ↓", "no-memory", "walls acc. (%) ↑", "no-memory"], body)
 
     out += ["", "## Table 6. DMC (proprioception), non-memory control: evaluation return", "",
-            "200k env steps, train ratio 512 (DreamerV3's setting for DMC from proprioception).", ""]
+            "500k env steps, train ratio 512, action repeat 2 (DreamerV3's protocol for DMC from proprioception),",
+            "a different seed per parallel env.", ""]
     dmc_models = [(m, label) for m, label in MAIN if m in ("base_tau2", "PD2L_tau1000", "ann_tau2")]
-    out += table(["model"] + [short(t) for t in DMC], [[label] + [rl_cell(f"dmc/{t}/{m}", fmt="{:.0f}") for t in DMC]
+    out += table(["model"] + [short(t) for t in DMC], [[label] + [rl_cell(f"dmc500/{t}/{m}", fmt="{:.0f}") for t in DMC]
                                                        for m, label in dmc_models])
 
     out += ["", "## Table 7. Ablations of our model (probe, memlen-L-recall)", "",
