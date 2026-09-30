@@ -328,6 +328,21 @@ R2I 选了 POPGym 中记忆需求最高的 RepeatPrevious、Autoencode、Concent
 - 方法描述不以 SSM/LRU 为中心。√(1−λ²) 写作树突的输入归一化，并引用 LRU。
 - 直接陈述发现和结论，不写防御性的限定语。
 
+### 12.7 结果不理想时的处理（2026-09-30 确定）
+
+- **判定时机：** 以下三项都出来后一起判断：
+  - 本文模型在 POPGym Medium 上的结果，预计 10 月 1 日深夜；
+  - Memory Maze，预计 10 月 2 日；
+  - DMC，预计 10 月 2–3 日。
+- **DMC 的判据：** DMC 回答的是“换掉循环核后，Spiking-WM 原来的任务会不会退化”，比较对象是 Spiking-WM，不是 DreamerV3。
+  - 本文模型不低于 Spiking-WM：DMC 达到目的，保留，即使低于 DreamerV3 也一样。
+  - 本文模型明显低于 Spiking-WM：属于模型在非记忆任务上的退化，按下一条改进模型，不换 benchmark。DMC 是 Spiking-WM 原论文的 benchmark，换掉会被追问。
+  - 如果 DMC 不好但其他 benchmark 都好，且 DMC 的问题与模型无关，才另选一个有已发表 ANN 结果的标准 benchmark 替换。
+- **多个 benchmark 比不过基线时，改进模型：**
+  - 先诊断原因，再针对原因修改，不在测试 benchmark 上反复试。例如在 Memory Maze 上，要区分是物体信息没有存进树突，还是存进去了但没有经脉冲传出。
+  - 修改后，本文模型在所有 benchmark 上重跑：BSuite L8–L101、探针与消融、POPGym、Memory Maze、DMC。表中只保留一个版本的本文模型。基线不重跑。
+  - 8 张卡并行，约需 2–3 天。
+
 ## 13. POPGym 改用 R2I 的标准配置（2026-09-30 03:10）
 
 ### 13.1 现象与诊断
