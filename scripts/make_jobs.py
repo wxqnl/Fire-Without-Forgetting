@@ -374,6 +374,10 @@ def round12():
     raw = {k: cells[k] for k in ("PD2L_tau1000", "ann_tau2")}
     jobs += list(recall_jobs(task, raw, seeds=(0,), updates=10000, extra="--batch_length 64 --raw_reward",
                              group="diag_rp_raw", eval_every=1000))
+    # the same with unit rewards on Medium (the card 32 steps back), window 64 as in the RL runs:
+    # whether a rerun with normalised rewards can separate the models there
+    jobs += list(recall_jobs("popgym_RepeatPreviousMedium", raw, seeds=(0,), updates=10000,
+                             extra="--batch_length 64", group="diag_rp", eval_every=1000))
     return jobs
 
 
