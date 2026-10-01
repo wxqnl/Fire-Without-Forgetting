@@ -126,14 +126,24 @@ def short(task):
     return task.replace("bsuite_memlen-", "L").replace("popgym_", "").replace("dmc_", "")
 
 
-def mm_cells(run):
-    """Objects MSE and walls accuracy (%) of the state probe and of the no-memory probe."""
+def mm_cells(run, key, scale=1.0):
+    """State probe / no-memory probe after 200k and 1M updates; a run below a budget shows its
+    latest value with the update count, e.g. "12.6 / 12.4 (70k)"."""
     evals = [r for r in rows(run) if "eval_objects_mse" in r]
     if not evals:
-        return ["·" if planned(run) else "—"] * 4
-    r, p = evals[-1], progress(run, evals[-1]["step"])
-    return [f"{r['eval_objects_mse']:.1f}{p}", f"{r['nomem_eval_objects_mse']:.1f}",
-            f"{100 * r['eval_walls_acc']:.1f}{p}", f"{100 * r['nomem_eval_walls_acc']:.1f}"]
+        return ["·" if planned(run) else "—"] * 2
+    pair = lambda r: f"{scale * r[f'eval_{key}']:.1f} / {scale * r[f'nomem_eval_{key}']:.1f}"
+    at = {r["step"]: r for r in evals}
+    last = evals[-1]
+    cells = []
+    for budget in (200000, 1000000):
+        if budget in at:
+            cells.append(pair(at[budget]))
+        elif last["step"] < budget and (budget == 200000 or last["step"] > 200000):
+            cells.append(pair(last) + f" ({last['step'] // 1000}k)")
+        else:
+            cells.append("·")
+    return cells
 
 
 def mm_baseline():
@@ -196,13 +206,16 @@ def main():
 
     base = mm_baseline()
     out += ["", "## Table 5. Memory Maze 9×9 offline probing benchmark (Pasukonis et al. 2023; official data and probe)", "",
-            "Second half of the 1k evaluation trajectories. State probe / no-memory probe (current image embedding),",
-            "both with the agent pose as input. Paper rows: 1M gradient steps.", ""]
+            "Second half of the 1k evaluation trajectories. Each cell: state probe / no-memory probe (current image",
+            "embedding), both with the agent pose as input. 1M gradient steps as in the paper; the runs were",
+            "extended from 200k (resumed from the 200k checkpoint, Adam state restarted once).", ""]
     if base:
         out += [f"Constant predictor on our split: objects MSE {base[0]:.1f}, walls accuracy {100 * base[1]:.1f}.", ""]
-    body = [[label, *mm_cells(f"mmaze_official/memory_maze_9x9/{m}")] for m, label in models]
-    body += [[label, obj, "", walls, ""] for label, obj, walls in MM_PAPER]
-    out += table(["model", "objects MSE ↓", "no-memory", "walls acc. (%) ↑", "no-memory"], body)
+    body = [[label, *mm_cells(f"mmaze_official/memory_maze_9x9/{m}", "objects_mse"),
+             *mm_cells(f"mmaze_official/memory_maze_9x9/{m}", "walls_acc", 100)] for m, label in models]
+    body += [[label, "", obj, "", walls] for label, obj, walls in MM_PAPER]
+    out += table(["model", "objects MSE ↓ 200k", "objects MSE ↓ 1M", "walls acc. (%) ↑ 200k", "walls acc. (%) ↑ 1M"],
+                 body)
 
     out += ["", "## Table 6. DMC (proprioception), non-memory control: evaluation return", "",
             "500k env steps, train ratio 512, action repeat 2 (DreamerV3's protocol for DMC from proprioception),",

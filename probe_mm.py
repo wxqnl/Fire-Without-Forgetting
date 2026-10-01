@@ -234,7 +234,8 @@ def main():
     tools.set_seed_everywhere(config.seed)
     logdir = pathlib.Path(args.logdir)
     logdir.mkdir(parents=True, exist_ok=True)
-    if (logdir / "results.json").exists():
+    done = logdir / "results.json"
+    if done.exists() and json.loads(done.read_text())["step"] >= args.mm_updates:
         print("already finished")
         return
     train_src, eval_src = split_sources(args.data)
@@ -252,13 +253,19 @@ def main():
     eval_all = np.arange(len(evals))
     eval_sub = eval_all[:: max(1, len(evals) // args.mm_eval_eps)][: args.mm_eval_eps]
     start, state = 0, None
-    if (logdir / "model.pt").exists():  # resume after an interruption; the TBTT state restarts
+    if (logdir / "model.pt").exists():  # resume after an interruption or to extend the budget
         ckpt = torch.load(logdir / "model.pt", map_location=config.device)
         wm.load_state_dict(ckpt["wm"])
         for k, p in probes.items():
             p.load_state_dict(ckpt["probes"][k])
+        if "opts" in ckpt:  # checkpoints before 2026-10-01 hold no optimizer state: Adam restarts once
+            wm._model_opt._opt.load_state_dict(ckpt["opts"]["wm"])
+            wm._model_opt._scaler.load_state_dict(ckpt["opts"]["scaler"])
+            for k, o in opts.items():
+                o.load_state_dict(ckpt["opts"][k])
         start = ckpt["update"]
-        print(f"resumed at update {start}", flush=True)
+        print(f"resumed at update {start} ({'with' if 'opts' in ckpt else 'without'} optimizer state; "
+              f"the TBTT state restarts)", flush=True)
     metrics = (logdir / "metrics.jsonl").open("a")
     if start == 0:
         log = {"step": 0, "train_trajectories": len(train), "eval_trajectories": len(evals),
@@ -288,12 +295,15 @@ def main():
             final = update == args.mm_updates
             log.update(evaluate(wm, probes, evals, eval_all if final else eval_sub, config, config.batch_length, pool))
             torch.save({"wm": wm.state_dict(), "probes": {k: p.state_dict() for k, p in probes.items()},
+                        "opts": {"wm": wm._model_opt._opt.state_dict(), "scaler": wm._model_opt._scaler.state_dict(),
+                                 **{k: o.state_dict() for k, o in opts.items()}},
                         "update": update}, logdir / "model.pt")
             print(json.dumps(log), flush=True)
             metrics.write(json.dumps(log) + "\n")
             metrics.flush()
             running, t0 = {}, time.time()
     (logdir / "results.json").write_text(json.dumps(log, indent=1))
+    (logdir / f"results_{args.mm_updates // 1000}k.json").write_text(json.dumps(log, indent=1))
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@
 Single seed (s0). A value with (NN%) is from a run still in progress; · = queued or no evaluation yet;
 — = not part of the plan.
 
-Queue at 2026-09-30 23:37:08: 115/134 done, 19 running, 0 pending.
+Queue at 2026-09-30 23:41:37: 114/134 done, 20 running, 0 pending.
 
 ## Table 2. Memory tasks, RL: evaluation return (mean of the last 3 evaluations)
 
@@ -16,7 +16,7 @@ RepeatPreviousMedium: Spiking-WM, A+B+G, ours and DreamerV3.
 
 | model | L8 | L16 | L32 | L64 | L51 | L71 | L101 | RepeatPreviousEasy | RepeatPreviousMedium |
 |---|---|---|---|---|---|---|---|---|---|
-| Spiking-WM | 0.08 | -0.25 | -0.08 | -0.33 | -0.04 | 0.19 | -0.04 | 0.45 (35%) | -0.50 (35%) |
+| Spiking-WM | 0.08 | -0.25 | -0.08 | -0.33 | -0.04 | 0.19 | -0.04 | 0.42 (38%) | -0.50 (35%) |
 | LIF | 1.00 | -0.25 | -0.08 | -0.08 | — | — | — | 0.66 (43%) | — |
 | GRSN | 0.98 | 0.94 | -0.08 | 0.08 | — | — | — | -0.01 (45%) | — |
 | Spiking-WM + A+B+G | 1.00 | 1.00 | 0.79 | -0.04 | -0.04 | 0.08 | -0.04 | -0.48 (35%) | -0.49 (33%) |
@@ -55,26 +55,27 @@ Updates until reward AUC > 0.9 / final AUC (firing rate of the recurrent state).
 
 ## Table 5. Memory Maze 9×9 offline probing benchmark (Pasukonis et al. 2023; official data and probe)
 
-Second half of the 1k evaluation trajectories. State probe / no-memory probe (current image embedding),
-both with the agent pose as input. Paper rows: 1M gradient steps.
+Second half of the 1k evaluation trajectories. Each cell: state probe / no-memory probe (current image
+embedding), both with the agent pose as input. 1M gradient steps as in the paper; the runs were
+extended from 200k (resumed from the 200k checkpoint, Adam state restarted once).
 
 Constant predictor on our split: objects MSE 24.0, walls accuracy 80.8.
 
-| model | objects MSE ↓ | no-memory | walls acc. (%) ↑ | no-memory |
+| model | objects MSE ↓ 200k | objects MSE ↓ 1M | walls acc. (%) ↑ 200k | walls acc. (%) ↑ 1M |
 |---|---|---|---|---|
-| Spiking-WM | 12.5 (35%) | 12.4 | 81.3 (35%) | 81.2 |
-| LIF | 12.4 (35%) | 12.4 | 81.3 (35%) | 81.3 |
-| GRSN | 12.5 (35%) | 12.4 | 81.3 (35%) | 81.2 |
-| Spiking-WM + A+B+G | 12.1 (30%) | 12.5 | 81.3 (30%) | 81.2 |
-| **Ours** | 12.5 (35%) | 12.4 | 81.3 (35%) | 81.2 |
-| DreamerV3 (ANN) | 10.6 | 11.9 | 82.7 | 81.8 |
+| Spiking-WM | 12.5 / 12.4 (70k) | · | 81.3 / 81.2 (70k) | · |
+| LIF | 12.4 / 12.4 (70k) | · | 81.3 / 81.3 (70k) | · |
+| GRSN | 12.5 / 12.4 (70k) | · | 81.3 / 81.2 (70k) | · |
+| Spiking-WM + A+B+G | 12.1 / 12.5 (60k) | · | 81.3 / 81.2 (60k) | · |
+| **Ours** | 12.5 / 12.4 (70k) | · | 81.3 / 81.2 (70k) | · |
+| DreamerV3 (ANN) | 10.6 / 11.9 | · | 82.7 / 81.8 | · |
 | spiking enc. + GRU | — | — | — | — |
 | ours, 1 layer | — | — | — | — |
-| constant (paper) | 23.9 |  | 80.8 |  |
-| VAE, no memory (paper) | 17.2 |  | 84.1 |  |
-| RSSM (paper) | 8.3 |  | 89.0 |  |
-| VAE+GRU TBTT (paper) | 7.8 |  | 90.0 |  |
-| RSSM TBTT (paper) | 6.2 |  | 94.0 |  |
+| constant (paper) |  | 23.9 |  | 80.8 |
+| VAE, no memory (paper) |  | 17.2 |  | 84.1 |
+| RSSM (paper) |  | 8.3 |  | 89.0 |
+| VAE+GRU TBTT (paper) |  | 7.8 |  | 90.0 |
+| RSSM TBTT (paper) |  | 6.2 |  | 94.0 |
 
 ## Table 6. DMC (proprioception), non-memory control: evaluation return
 
@@ -84,7 +85,7 @@ a different seed per parallel env.
 | model | walker_walk | cheetah_run | cartpole_swingup |
 |---|---|---|---|
 | Spiking-WM | 312 (29%) | 160 (33%) | 355 (33%) |
-| **Ours** | 651 (37%) | 256 (41%) | 482 (41%) |
+| **Ours** | 703 (41%) | 256 (41%) | 482 (41%) |
 | DreamerV3 (ANN) | 953 | 699 | 871 |
 
 ## Table 7. Ablations of our model (probe, memlen-L-recall)

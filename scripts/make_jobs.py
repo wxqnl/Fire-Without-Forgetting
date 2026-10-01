@@ -410,7 +410,7 @@ def round13():
     return jobs
 
 
-MM_UPDATES = 200000  # Memory Maze gradient steps; the benchmark paper trains 1M
+MM_UPDATES = 1000000  # Memory Maze gradient steps, as in the benchmark paper (200k until 2026-10-01; runs extended)
 
 
 def round8():
