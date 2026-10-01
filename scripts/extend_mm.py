@@ -2,7 +2,7 @@
 
 The runs were started with --mm_updates 200000; jobs.jsonl now has 1000000. Whenever one of them
 has finished (.exit 0, results.json at fewer updates than its job now asks for), keep its result
-as results_<N>k.json and remove .exit: the queue then launches the job again, and probe_mm.py
+as results_<N>k.json (and the world model as model_<N>k.pt, for probe_mm_frozen.py) and remove .exit: the queue then launches the job again, and probe_mm.py
 resumes from model.pt. Exits once every Memory Maze job has been handed back to the queue.
 
 usage: setsid nohup python scripts/extend_mm.py >> runs/extend_mm.log 2>&1 &
@@ -37,6 +37,8 @@ def main():
             keep = logdir / f"results_{step // 1000}k.json"
             if not keep.exists():
                 shutil.copy(results, keep)
+            if not (logdir / f"model_{step // 1000}k.pt").exists():
+                shutil.copy(logdir / "model.pt", logdir / f"model_{step // 1000}k.pt")
             exit_file.unlink()
             print(time.strftime("%F %T"), f"{job['name']}: kept {keep.name}, back to the queue for {target}",
                   flush=True)
