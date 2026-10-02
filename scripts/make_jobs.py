@@ -491,6 +491,54 @@ def round15():
     return jobs
 
 
+V2 = ["ours", "resonanthalf", "policymem"]  # our model after §18 (resonant dendrites, actor reads the dendrites)
+
+
+def round16():
+    """2026-10-02: our model after §18 on every benchmark, with the protocols of the existing rows
+    (EXPERIMENTS.md §18.3). The world-model probes reuse round 15 (PD2Lreshalf_tau1000: policymem only
+    changes what the actor reads). Longest runs first. Also the RepeatPrevious probes of round 12 for
+    the spiking baselines (precise-lag recall for every model)."""
+    data = ROOT / "data" / "memory_maze_9x9_official"
+    name = "mmaze_official/memory_maze_9x9/PD2Lv2_tau1000/s0"
+    jobs = [dict(name=name, logdir=str(RUNS / name), mem_gb=20, cmd=" ".join((
+        f"{{python}} probe_mm.py --configs mmprobe {' '.join(V2)} --data {data} --seed 0 --mm_updates {MM_UPDATES} "
+        f"--mm_eval_every 10000 --keep 80000 200000 --logdir {RUNS / name}").split()))]
+    for task in ("popgym_RepeatPreviousEasy", "popgym_RepeatPreviousMedium"):
+        name = f"popgym/{task}/PD2Lv2_tau1000/s0"
+        cmd = (f"{{python}} dreamer.py --configs popgym {' '.join(V2)} --task {task} --seed 0 --steps 2e6 "
+               f"--train_ratio 64 --envs 8 --batch_length 64 --env_seed_per_env True --eval_every 5e4 --logdir {RUNS / name}")
+        jobs.append(dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=14.5))
+    for L, window in ((51, 64), (71, 80), (101, 128)):
+        for job in rl2_jobs(f"bsuite_memlen-{L}", {"PD2Lv2_tau1000": V2}, steps=1e6,
+                            extra=f"--batch_length {window} --env_seed_per_env True", eval_every=2e4):
+            jobs.append({k: v.replace("rl2/", "r2i/") if isinstance(v, str) else v for k, v in job.items()})
+    for task in ("dmc_walker_walk", "dmc_cheetah_run", "dmc_cartpole_swingup"):
+        for job in dmc_jobs(task, {"PD2Lv2_tau1000": V2}, steps=5e5, train_ratio=512, group="dmc500"):
+            job["cmd"] = job["cmd"].replace(" --logdir ", " --env_seed_per_env True --logdir ")
+            jobs.append(job)
+    for L, steps in ((8, 1.5e5), (16, 2e5), (32, 3e5), (64, 5e5)):
+        jobs += rl2_jobs(f"bsuite_memlen-{L}", {"PD2Lv2_tau1000": V2}, steps=steps, extra=MEMLEN_EXTRA[L])
+    # table 4: the remaining lengths; table 7: the ablations on top of the new model
+    R = ["ours", "resonanthalf"]
+    for L in (8, 16):
+        jobs += recall_jobs(f"bsuite_memlen-{L}-recall", {"PD2Lreshalf_tau1000": R}, seeds=(0,), extra=MEMLEN_EXTRA[L])
+    abl = {"PD2Lreshalfeuler_tau1000": R + ["pdeuler"], "PD2Lreshalf_tau128": R + ["pdtau128"],
+           "PD2Lreshalffix_tau1000": R + ["pdfixtau"], "PD2Lreshalfcap_tau1000": R + ["ratecap"],
+           "PDreshalf_tau1000": ["pdcell", "resonanthalf"]}
+    for L in (32, 64):
+        jobs += recall_jobs(f"bsuite_memlen-{L}-recall", abl, seeds=(0,), extra=MEMLEN_EXTRA[L])
+    jobs += recall_jobs("bsuite_memlen-64-recall", {"PD2Lreshalfreset_tau1000": R + ["pdreset"],
+                                                   "PD2Lreshalf_tau16": R + ["pdtau16"]}, seeds=(0,), extra=MEMLEN_EXTRA[64])
+    jobs += recall_jobs("bsuite_memlen-32-recall", {"PDT1reshalf_tau1000": ["pdcell", "resonanthalf"]}, seeds=(0,),
+                        extra="--spike_times 1")
+    # precise-lag recall probes (round 12 protocol) for the spiking baselines (DreamerV3 and the old model: round 12)
+    base = {k: MAIN[k] + ["rewardbyact"] for k in ("base_tau2", "LIF_tau2", "GRSN_tau2", "ABG_tau128")}
+    for task in ("popgym_RepeatPreviousMedium", "popgym_RepeatPreviousEasy"):
+        jobs += recall_jobs(task, base, seeds=(0,), updates=10000, extra="--batch_length 64", group="diag_rp", eval_every=1000)
+    return jobs
+
+
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
     # Memory Maze pipeline check (round 10), Memory Maze on the official data once downloaded, round 8
@@ -506,8 +554,10 @@ def main():
     # Round 14 (integrate-and-fire soma) failed check V1 on 2026-10-02 (EXPERIMENTS.md §17.4): its
     # unfinished runs were stopped and are not queued again.
     r14 = [j for j in round14() if j["name"] == "recall/bsuite_memlen-8-recall/PD2Lif_tau1000/s0"]
-    jobs = (round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
+    jobs = (round16() + round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
             + r8 + round11())
+    # the old model's 1M Memory Maze continuation was stopped on 2026-10-02 (superseded, EXPERIMENTS.md §18.4)
+    jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2L_tau1000/s0"]
     for job in jobs:  # DreamerV3 (ANN) needs about 4 GB (measured 2026-09-30), the spiking models 14-20 GB
         if "/ann_" in job["name"] and job["mem_gb"] > 6:
             job["mem_gb"] = 7 if job["name"].startswith("mmaze") else 6
