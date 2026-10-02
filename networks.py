@@ -83,6 +83,14 @@ class RSSM(nn.Module):
         self._cell = eval(cell)(config, self._hidden, self._deter, **config.dyn_cell_p)
         self._cell.apply(tools.weight_init)
         self._mem_keys = list(self._cell.neuron.mems.keys()) if self._persist else []
+        # policy_mem 'onoff' (EXPERIMENTS.md §18.2): the actor and critic also read the cell's state
+        # (policy_mem_layers: the last layer's or all), each value standardised over its layer and sent
+        # as T ON and T OFF spike frames, thresholds ±(k - 1/2)·2/T. The world-model heads read get_feat.
+        self._policy_mem = getattr(config, "policy_mem", "none")
+        last = getattr(config, "policy_mem_layers", "last") == "last"
+        self._policy_keys = self._mem_keys[-1:] if last else self._mem_keys
+        sizes = getattr(self._cell, "mem_sizes", {})
+        self.policy_extra = 0 if self._policy_mem == "none" else 2 * sum(sizes.get(c, self._deter) for c in self._policy_keys)
         # if cell == "gru":
         #     self._cell = GRUCell(self._hidden, self._deter)
         #     self._cell.apply(tools.weight_init)
@@ -212,6 +220,18 @@ class RSSM(nn.Module):
         re_shape =  [1] * len(stoch.shape)
         re_shape[0] = state["deter"].shape[0]  # spike_times
         return torch.cat([stoch.repeat(*re_shape), state["deter"]], -1)
+
+    def get_policy_feat(self, state):
+        feat = self.get_feat(state)
+        if self._policy_mem == "none":
+            return feat
+        z = []
+        for c in self._policy_keys:
+            m = state["mem_" + c].float()
+            z.append((m - m.mean(-1, keepdim=True)) / (m.std(-1, keepdim=True) + 1e-3))
+        z = torch.cat(z, -1)
+        frames = [torch.cat([(z > t).float(), (-z > t).float()], -1) for t in (torch.arange(self.T) + 0.5) * 2 / self.T]
+        return torch.cat([feat, torch.stack(frames, 0).to(feat.dtype)], -1)
 
     def get_dist(self, state, dtype=None):
         if self._discrete:

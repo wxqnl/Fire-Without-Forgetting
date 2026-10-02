@@ -167,7 +167,7 @@ def probe_losses(probe, feat, batch, device):
 
 
 def state_feat(wm, post):
-    return wm.dynamics.get_feat(post).float().mean(0).detach()  # average over the T SNN steps
+    return wm.dynamics.get_policy_feat(post).float().mean(0).detach()  # what the actor reads, averaged over the T SNN steps
 
 
 def embed_feat(embed):
@@ -248,7 +248,7 @@ def main():
     config.num_actions = 6
     wm = models.WorldModel(obs_space, gym.spaces.Discrete(6), 0, config).to(config.device)
     wm.requires_grad_(False)
-    feat_dim = config.dyn_stoch * config.dyn_discrete + config.dyn_deter
+    feat_dim = config.dyn_stoch * config.dyn_discrete + config.dyn_deter + wm.dynamics.policy_extra
     probes = {"state": ProbeMLP(feat_dim + 4).to(config.device),
               "no_memory": ProbeMLP(wm.embed_size + 4).to(config.device)}
     opts = {k: torch.optim.Adam(p.parameters(), lr=args.probe_lr, eps=1e-5) for k, p in probes.items()}

@@ -90,6 +90,8 @@ defaults:
   # Intervention A: keep the recurrent cell's membrane potentials across env steps
   persist_state: False
   # method prototype (dyn_cell PDRNN, configs block pdcell); tau in environment steps
+  policy_mem: 'none'
+  policy_mem_layers: 'last'
   PDRNN: {layers: 1, channels: 4, tau_min: 1.0, tau_max: 1000.0, learn_tau: True, threshold: 0.5, input_norm: 'lru', soma: 'step', resonant: 0.0, max_phase: 6.283}
   # baselines in the same world model (configs blocks lifcell, grsn)
   LIFRNN: {tau: 2.0, threshold: 0.5, gain: False}
@@ -347,6 +349,9 @@ resonant:
   PDRNN: {resonant: 1.0}
 resonanthalf:
   PDRNN: {resonant: 0.5}
+# the actor and critic (and the Memory Maze probes) also read the dendrites as spikes (§18.2)
+policymem:
+  policy_mem: 'onoff'
 
 # baselines: recurrent LIF (T SNN steps per env step, membrane cleared each step unless combined
 # with persist) and GRSN (Qin et al., AAAI 2025; one update per env step, state carried)

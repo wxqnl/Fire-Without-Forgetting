@@ -16,6 +16,8 @@ a third probe reads the full internal state [stoch, deter, mem_*] (diagnostic: i
 stored but not passed on by the spikes?). --mem_code quantises mem_* as a spike code would (each
 channel standardised over its layer): 'onoff' T ON and T OFF thresholds at ±(k - 1/2)·2/T, read as
 their rate (2T + 1 levels); 'sign' one bit. --mem_layers last keeps only the last layer's state.
+--mem_code soma instead reads the last layer's normalised soma current u (graded, before the
+threshold): is the information lost by binarising u, or never routed to u?
 
 usage: python probe_mm_frozen.py --configs mmprobe grucell annwm --ckpt runs/.../model.pt --logdir DIR
 """
@@ -87,8 +89,15 @@ class Probes(nn.Module):
 def features(wm, batch, state):
     data = wm.preprocess(wm_batch(batch))
     embed = wm.encoder(data)
+    if MEM["code"] == "soma":
+        soma = []
+        hook = wm.dynamics._cell.soma_norm[-1].register_forward_hook(lambda m, i, o: soma.append(o.float()))
     post, _ = wm.dynamics.observe(embed, data["action"], data["is_first"], state)
     feats = {"state": state_feat(wm, post), "no_memory": embed_feat(embed)}
+    if MEM["code"] == "soma":
+        hook.remove()
+        feats["full"] = torch.cat([feats["state"], torch.stack(soma, 1)], -1)
+        return feats, last_state(post)
     mems = [post[k].float() for k in sorted(post) if k.startswith("mem_")]
     if MEM["layers"] == "last":
         mems = mems[-1:]
@@ -136,7 +145,7 @@ def main():
     parser.add_argument("--eval_every", type=int, default=10000)
     parser.add_argument("--eval_eps", type=int, default=200)
     parser.add_argument("--probe_lr", type=float, default=3e-4)
-    parser.add_argument("--mem_code", default="graded", choices=["graded", "onoff", "sign"])
+    parser.add_argument("--mem_code", default="graded", choices=["graded", "onoff", "sign", "soma"])
     parser.add_argument("--mem_layers", default="all", choices=["all", "last"])
     args, rest = parser.parse_known_args()
     MEM.update(code=args.mem_code, layers=args.mem_layers)
@@ -153,10 +162,12 @@ def main():
     wm.load_state_dict(ckpt["wm"])
     wm.requires_grad_(False)
     print(f"world model from {args.ckpt} at update {ckpt['update']}", flush=True)
-    feat_dim = config.dyn_stoch * config.dyn_discrete + config.dyn_deter
+    feat_dim = config.dyn_stoch * config.dyn_discrete + config.dyn_deter + wm.dynamics.policy_extra
     probes = {"state": Probes(feat_dim).to(config.device), "no_memory": Probes(wm.embed_size).to(config.device)}
     mem_keys = sorted(wm.dynamics._mem_keys)[-1:] if args.mem_layers == "last" else wm.dynamics._mem_keys
     mem_dim = sum(getattr(wm.dynamics._cell, "mem_sizes", {}).get(c, config.dyn_deter) for c in mem_keys)
+    if args.mem_code == "soma":
+        mem_dim = config.dyn_deter
     if mem_dim:
         probes["full"] = Probes(feat_dim + mem_dim).to(config.device)
     opts = {k: torch.optim.Adam(p.parameters(), lr=args.probe_lr, eps=1e-5) for k, p in probes.items()}

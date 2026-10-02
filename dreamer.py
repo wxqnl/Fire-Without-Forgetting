@@ -138,7 +138,7 @@ class Dreamer(nn.Module):
         )
         if self._config.eval_state_mean:
             latent["stoch"] = latent["mean"]
-        feat = self._wm.dynamics.get_feat(latent)
+        feat = self._wm.dynamics.get_policy_feat(latent)
         if not training:
             actor = self._task_behavior.actor(feat)
             action = actor.mode()

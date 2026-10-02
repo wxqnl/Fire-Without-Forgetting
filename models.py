@@ -253,6 +253,7 @@ class ImagBehavior(nn.Module):
             feat_size = config.dyn_stoch * config.dyn_discrete + config.dyn_deter
         else:
             feat_size = config.dyn_stoch + config.dyn_deter
+        feat_size += world_model.dynamics.policy_extra
         self.actor = networks.ActionHead(
             feat_size,
             config.num_actions,
@@ -414,7 +415,7 @@ class ImagBehavior(nn.Module):
         start = fla_start
         def step(prev, _):
             state, _, _ = prev
-            feat = dynamics.get_feat(state)
+            feat = dynamics.get_policy_feat(state)
             inp = feat.detach() if self._stop_grad_actor else feat
             action = policy(inp).sample()
             succ = dynamics.img_step(state, action, sample=self._config.imag_sample)
