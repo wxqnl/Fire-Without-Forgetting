@@ -532,6 +532,14 @@ def round16():
                                                    "PD2Lreshalf_tau16": R + ["pdtau16"]}, seeds=(0,), extra=MEMLEN_EXTRA[64])
     jobs += recall_jobs("bsuite_memlen-32-recall", {"PDT1reshalf_tau1000": ["pdcell", "resonanthalf"]}, seeds=(0,),
                         extra="--spike_times 1")
+    # the actor and critic read 7680 features (old model: 1536): measured GPU memory of the RL runs (+10%)
+    mem = {"popgym/": 26, "r2i/bsuite_memlen-51/": 28, "r2i/bsuite_memlen-71/": 32, "r2i/bsuite_memlen-101/": 50,
+           "dmc500/": 30, "rl2/bsuite_memlen-8/": 14, "rl2/bsuite_memlen-16/": 28, "rl2/bsuite_memlen-32/": 28,
+           "rl2/bsuite_memlen-64/": 32}
+    for job in jobs:
+        for prefix, gb in mem.items():
+            if job["name"].startswith(prefix):
+                job["mem_gb"] = gb
     # precise-lag recall probes (round 12 protocol) for the spiking baselines (DreamerV3 and the old model: round 12)
     base = {k: MAIN[k] + ["rewardbyact"] for k in ("base_tau2", "LIF_tau2", "GRSN_tau2", "ABG_tau128")}
     for task in ("popgym_RepeatPreviousMedium", "popgym_RepeatPreviousEasy"):
