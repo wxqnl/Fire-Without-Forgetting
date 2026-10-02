@@ -472,6 +472,25 @@ def round14():
     return jobs
 
 
+def round15():
+    """2026-10-02: resonant dendrites (configs blocks resonant, resonanthalf; EXPERIMENTS.md §18).
+    POPGym RepeatPreviousMedium: at the end of the RL runs our world model predicts whether the
+    previous action matched the card 32 steps back at AUC 0.545 (DreamerV3 0.653), and the random-data
+    probe of round 12 stays at 0.54; on Easy (4 steps back) it is the weakest of the spiking models.
+    Integrator dendrites hold a value but blur when it arrived; recalling the input of exactly k
+    steps ago needs channels that also encode the lag. Checks against the existing results of the
+    old model: the RepeatPrevious probes of round 12 (10k updates) and the memlen-L-recall probes of
+    table 4 (memory must not get worse)."""
+    cells = {"PD2Lres_tau1000": ["ours", "resonant"], "PD2Lreshalf_tau1000": ["ours", "resonanthalf"]}
+    jobs = []
+    for task in ("popgym_RepeatPreviousMedium", "popgym_RepeatPreviousEasy"):
+        jobs += recall_jobs(task, {k: v + ["rewardbyact"] for k, v in cells.items()}, seeds=(0,), updates=10000,
+                            extra="--batch_length 64", group="diag_rp", eval_every=1000)
+    for L in (32, 64):
+        jobs += recall_jobs(f"bsuite_memlen-{L}-recall", cells, seeds=(0,), extra=MEMLEN_EXTRA[L])
+    return jobs
+
+
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
     # Memory Maze pipeline check (round 10), Memory Maze on the official data once downloaded, round 8
@@ -484,7 +503,10 @@ def main():
     r8 = round8()
     mm_full = [j for j in r8 if j["name"].startswith("mmaze_official/")]
     r8 = [j for j in r8 if j not in mm_full and "/popgym_" not in j["name"]]  # POPGym: round 13
-    jobs = (round14() + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
+    # Round 14 (integrate-and-fire soma) failed check V1 on 2026-10-02 (EXPERIMENTS.md §17.4): its
+    # unfinished runs were stopped and are not queued again.
+    r14 = [j for j in round14() if j["name"] == "recall/bsuite_memlen-8-recall/PD2Lif_tau1000/s0"]
+    jobs = (round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
             + r8 + round11())
     for job in jobs:  # DreamerV3 (ANN) needs about 4 GB (measured 2026-09-30), the spiking models 14-20 GB
         if "/ann_" in job["name"] and job["mem_gb"] > 6:

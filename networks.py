@@ -1156,7 +1156,18 @@ class PDRNN(nn.Module):
                    subtraction of θ after each spike, so the spike count encodes u_t (rate code,
                    T + 1 levels). The first frame is the 'step' frame. The soma holds no state
                    across environment steps: the memory is in the dendrites.
-    Later layers read the rate of the previous layer's frames."""
+    Later layers read the rate of the previous layer's frames.
+
+    resonant > 0 makes that fraction of each neuron's channels resonant: the channel is a damped
+    oscillator with two state variables (a, b), rotated by its phase θ at every step and decaying
+    with λ,
+
+        (a, b)_t = λ R(θ) (a, b)_{t-1} + (g(λ) LN(B x_t), 0)      u_t = Σ_m C_m a_t,m + C'_m b_t,m + D x_t
+
+    (the complex recurrence d_t = λ e^{iθ} d_{t-1} + g(λ) LN(B x_t) in real form). An integrator
+    channel (θ = 0) holds a value; a resonant one also encodes how long ago its input arrived, which
+    is what recalling the input of exactly k steps ago needs. θ ~ U[0, max_phase] (the LRU's
+    initialisation) and is learned with τ."""
 
     def __init__(self, config, input_size, size, act=None, norm="PopNorm", device="cuda"):
         super().__init__()
@@ -1186,10 +1197,22 @@ class PDRNN(nn.Module):
         self.act_fun = node.QGateGrad(alpha=2.0, requires_grad=False)
         self._learn_tau = p["learn_tau"]
         self._soma = p.get("soma", "step")
+        self._n_res = round(p.get("resonant", 0.0) * self._channels)  # resonant channels per neuron
+        if self._n_res:
+            self.mem_sizes = {k: 2 * size * self._channels for k in keys}
+            self.theta, self.C2 = nn.ParameterList(), nn.ParameterList()
+            for _ in range(self._layers):
+                theta = torch.zeros(size, self._channels)
+                theta[:, : self._n_res].uniform_(0, p["max_phase"])
+                self.theta.append(nn.Parameter(theta.flatten()))
+                self.C2.append(nn.Parameter(torch.randn(size, self._channels) / math.sqrt(self._channels)))
+            self.register_buffer("res_mask", (torch.arange(self._channels) < self._n_res).float().repeat(size))
 
     def soma(self, u):
         if self._soma == "step":
             return [self.act_fun(u - self.threshold)] * self.T
+        if self._soma == "thermo":  # diagnostic: the IF spike count without the IF dynamics, frame k: H(u - kθ/T)
+            return [self.act_fun(u - self.threshold * k / self.T) for k in range(1, self.T + 1)]
         v, frames = torch.zeros_like(u), []
         for _ in range(self.T):
             v = v + u
@@ -1202,16 +1225,28 @@ class PDRNN(nn.Module):
         x = sum(inputs) / self.T
         for i in range(self._layers):
             key = f"d{i}"
+            n = self._size * self._channels
             d = self.neuron.mems[key]
             if d is None:
-                d = torch.zeros(x.shape[0], self._size * self._channels, device=x.device)
+                d = torch.zeros(x.shape[0], 2 * n if self._n_res else n, device=x.device)
             # detach instead of requires_grad=False: tools.RequiresGrad turns on every parameter in training
             log_tau = self.log_tau[i] if self._learn_tau else self.log_tau[i].detach()
             lam = torch.exp(-torch.exp(-log_tau))
             gain = torch.sqrt(1 - lam**2) if self._input_norm == "lru" else 1 - lam
-            d = lam * d + gain * self.in_norm[i](self.B[i](x))
+            inp = gain * self.in_norm[i](self.B[i](x))
+            if self._n_res:
+                theta = self.theta[i] if self._learn_tau else self.theta[i].detach()
+                theta = theta * self.res_mask  # integrator channels stay at θ = 0
+                a, b = d[:, :n], d[:, n:]
+                c, s = lam * torch.cos(theta), lam * torch.sin(theta)
+                a, b = c * a - s * b + inp, s * a + c * b
+                d = torch.cat([a, b], -1)
+                u = ((a.view(-1, self._size, self._channels) * self.C[i]).sum(-1)
+                     + (b.view(-1, self._size, self._channels) * self.C2[i]).sum(-1) + self.D[i](x))
+            else:
+                d = lam * d + inp
+                u = (d.view(-1, self._size, self._channels) * self.C[i]).sum(-1) + self.D[i](x)
             self.neuron.mems[key] = d
-            u = (d.view(-1, self._size, self._channels) * self.C[i]).sum(-1) + self.D[i](x)
             outputs = self.soma(self.soma_norm[i](u))
             x = sum(outputs) / self.T
         return outputs, [torch.stack(outputs, dim=0)]

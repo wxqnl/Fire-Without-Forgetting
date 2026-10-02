@@ -13,7 +13,9 @@ ELU), optimiser and scoring (second half of the evaluation trajectories) of prob
 
 For models that carry a state besides their spikes (the dendrites of PDRNN, mem_* in the posterior),
 a third probe reads the full internal state [stoch, deter, mem_*] (diagnostic: is the information
-stored but not passed on by the spikes?).
+stored but not passed on by the spikes?). --mem_code quantises mem_* as a spike code would (each
+channel standardised over its layer): 'onoff' T ON and T OFF thresholds at ±(k - 1/2)·2/T, read as
+their rate (2T + 1 levels); 'sign' one bit. --mem_layers last keeps only the last layer's state.
 
 usage: python probe_mm_frozen.py --configs mmprobe grucell annwm --ckpt runs/.../model.pt --logdir DIR
 """
@@ -34,6 +36,18 @@ import tools
 from probe_mm import Episodes, Streams, embed_feat, last_state, pose, split_sources, state_feat, wm_batch
 
 PREFIX = {"state": "", "no_memory": "nomem_", "full": "full_"}
+MEM = {"code": "graded", "layers": "all", "T": 5}
+
+
+def encode(m):
+    if MEM["code"] == "graded":
+        return m
+    z = (m - m.mean(-1, keepdim=True)) / (m.std(-1, keepdim=True) + 1e-3)
+    if MEM["code"] == "sign":
+        return (z > 0).float()
+    T = MEM["T"]
+    th = (torch.arange(1, T + 1, device=m.device) - 0.5) * 2 / T
+    return ((z[..., None] > th).float().sum(-1) - (-z[..., None] > th).float().sum(-1)) / T
 
 
 class MLP(nn.Module):
@@ -76,6 +90,9 @@ def features(wm, batch, state):
     post, _ = wm.dynamics.observe(embed, data["action"], data["is_first"], state)
     feats = {"state": state_feat(wm, post), "no_memory": embed_feat(embed)}
     mems = [post[k].float() for k in sorted(post) if k.startswith("mem_")]
+    if MEM["layers"] == "last":
+        mems = mems[-1:]
+    mems = [encode(m) for m in mems]
     if mems:
         feats["full"] = torch.cat([feats["state"], *mems], -1)
     return feats, last_state(post)
@@ -119,7 +136,10 @@ def main():
     parser.add_argument("--eval_every", type=int, default=10000)
     parser.add_argument("--eval_eps", type=int, default=200)
     parser.add_argument("--probe_lr", type=float, default=3e-4)
+    parser.add_argument("--mem_code", default="graded", choices=["graded", "onoff", "sign"])
+    parser.add_argument("--mem_layers", default="all", choices=["all", "last"])
     args, rest = parser.parse_known_args()
+    MEM.update(code=args.mem_code, layers=args.mem_layers)
     config, _ = probe_wm.parse_config(rest + ["--train_episodes", "1"])
     tools.set_seed_everywhere(config.seed)
     logdir = pathlib.Path(args.logdir)
@@ -135,7 +155,8 @@ def main():
     print(f"world model from {args.ckpt} at update {ckpt['update']}", flush=True)
     feat_dim = config.dyn_stoch * config.dyn_discrete + config.dyn_deter
     probes = {"state": Probes(feat_dim).to(config.device), "no_memory": Probes(wm.embed_size).to(config.device)}
-    mem_dim = sum(getattr(wm.dynamics._cell, "mem_sizes", {}).get(c, config.dyn_deter) for c in wm.dynamics._mem_keys)
+    mem_keys = sorted(wm.dynamics._mem_keys)[-1:] if args.mem_layers == "last" else wm.dynamics._mem_keys
+    mem_dim = sum(getattr(wm.dynamics._cell, "mem_sizes", {}).get(c, config.dyn_deter) for c in mem_keys)
     if mem_dim:
         probes["full"] = Probes(feat_dim + mem_dim).to(config.device)
     opts = {k: torch.optim.Adam(p.parameters(), lr=args.probe_lr, eps=1e-5) for k, p in probes.items()}
