@@ -8,7 +8,8 @@ agent, over held-out episodes and counts with forward hooks:
        fan-out) or a spike rate over the T SNN steps (spike count x fan-out)
   MAC  multiply-accumulate operations: Linear layers with real-valued input (rows x in x out),
        normalisation layers (2 per element) and neuron state updates per element and call
-       (LIF 1 per SNN step, MCN 4 per SNN step, PDRNN 3 per dendritic channel, GRSN 4, GRU 4)
+       (LIF 1 per SNN step, MCN 4 per SNN step, PDRNN 3 per integrator and 6 per resonant dendritic
+       channel, GRSN 4, GRU 4)
 
 Energy with the 45 nm figures common in SNN papers (Horowitz 2014): 0.9 pJ per AC, 4.6 pJ per
 MAC. Memory access is not counted; the hardware-aware accounting of research plan §4.4 is a
@@ -91,7 +92,8 @@ def attach(wm, counter):
             elif isinstance(mod, node.ANNAct):
                 handles.append(mod.register_forward_hook(counter.elementwise(1)))
             elif isinstance(mod, networks.PDRNN):
-                handles.append(mod.register_forward_hook(counter.elementwise(3 * mod._channels * mod._layers)))
+                # 3 per integrator channel; a resonant channel rotates (a, b) and is read by C and C': 6
+                handles.append(mod.register_forward_hook(counter.elementwise(3 * (mod._channels + mod._n_res) * mod._layers)))
             elif isinstance(mod, (networks.GRSNCell, networks.GRUCtrl)):
                 handles.append(mod.register_forward_hook(counter.elementwise(4)))
             elif isinstance(mod, networks.LIFRNN):

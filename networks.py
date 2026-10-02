@@ -89,8 +89,11 @@ class RSSM(nn.Module):
         self._policy_mem = getattr(config, "policy_mem", "none")
         last = getattr(config, "policy_mem_layers", "last") == "last"
         self._policy_keys = self._mem_keys[-1:] if last else self._mem_keys
-        sizes = getattr(self._cell, "mem_sizes", {})
-        self.policy_extra = 0 if self._policy_mem == "none" else 2 * sum(sizes.get(c, self._deter) for c in self._policy_keys)
+        index = getattr(self._cell, "state_index", None)  # drops the b of integrator channels, always 0
+        size = self._deter if index is None else len(index)
+        if index is None and hasattr(self._cell, "mem_sizes"):
+            size = next(iter(self._cell.mem_sizes.values()))
+        self.policy_extra = 0 if self._policy_mem == "none" else 2 * size * len(self._policy_keys)
         # if cell == "gru":
         #     self._cell = GRUCell(self._hidden, self._deter)
         #     self._cell.apply(tools.weight_init)
@@ -226,8 +229,11 @@ class RSSM(nn.Module):
         if self._policy_mem == "none":
             return feat
         z = []
+        index = getattr(self._cell, "state_index", None)
         for c in self._policy_keys:
             m = state["mem_" + c].float()
+            if index is not None:
+                m = m[..., index.to(m.device)]
             z.append((m - m.mean(-1, keepdim=True)) / (m.std(-1, keepdim=True) + 1e-3))
         z = torch.cat(z, -1)
         frames = [torch.cat([(z > t).float(), (-z > t).float()], -1) for t in (torch.arange(self.T) + 0.5) * 2 / self.T]
@@ -1227,6 +1233,9 @@ class PDRNN(nn.Module):
                 self.theta.append(nn.Parameter(theta.flatten()))
                 self.C2.append(nn.Parameter(torch.randn(size, self._channels) / math.sqrt(self._channels)))
             self.register_buffer("res_mask", (torch.arange(self._channels) < self._n_res).float().repeat(size))
+            # entries of the stored state that can be nonzero: all a, and b of the resonant channels
+            self.state_index = torch.cat([torch.arange(size * self._channels),
+                                          size * self._channels + torch.nonzero(self.res_mask)[:, 0]])
 
     def soma(self, u):
         if self._soma == "step":
