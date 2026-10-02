@@ -1147,8 +1147,16 @@ class PDRNN(nn.Module):
     a factor 2) or 1 - λ (input_norm 'euler', the gain of the MCNode Euler update). x_t is the
     rate of the T input spikes; later layers read the spikes of the previous one. There is no
     feedback from the spikes into the dendrites, so d is linear in the inputs and a parallel scan
-    could train it (not used here). The output spikes are repeated T times so that the rest of
-    the spiking world model is unchanged. Use with persist_state (configs block pdcell)."""
+    could train it (not used here). Use with persist_state (configs block pdcell).
+
+    The soma turns u_t into the T spike frames that the rest of the spiking world model reads:
+      soma 'step'  one frame s_t, repeated T times (512 binary values per environment step)
+      soma 'if'    integrate-and-fire over the T SNN steps of the environment step: the membrane
+                   starts at rest, integrates the constant current u_t - and is reset by
+                   subtraction of θ after each spike, so the spike count encodes u_t (rate code,
+                   T + 1 levels). The first frame is the 'step' frame. The soma holds no state
+                   across environment steps: the memory is in the dendrites.
+    Later layers read the rate of the previous layer's frames."""
 
     def __init__(self, config, input_size, size, act=None, norm="PopNorm", device="cuda"):
         super().__init__()
@@ -1177,6 +1185,18 @@ class PDRNN(nn.Module):
             in_dim = size
         self.act_fun = node.QGateGrad(alpha=2.0, requires_grad=False)
         self._learn_tau = p["learn_tau"]
+        self._soma = p.get("soma", "step")
+
+    def soma(self, u):
+        if self._soma == "step":
+            return [self.act_fun(u - self.threshold)] * self.T
+        v, frames = torch.zeros_like(u), []
+        for _ in range(self.T):
+            v = v + u
+            s = self.act_fun(v - self.threshold)
+            v = v - s.detach() * self.threshold
+            frames.append(s)
+        return frames
 
     def forward(self, inputs, state):
         x = sum(inputs) / self.T
@@ -1192,8 +1212,8 @@ class PDRNN(nn.Module):
             d = lam * d + gain * self.in_norm[i](self.B[i](x))
             self.neuron.mems[key] = d
             u = (d.view(-1, self._size, self._channels) * self.C[i]).sum(-1) + self.D[i](x)
-            x = self.act_fun(self.soma_norm[i](u) - self.threshold)
-        outputs = [x] * self.T
+            outputs = self.soma(self.soma_norm[i](u))
+            x = sum(outputs) / self.T
         return outputs, [torch.stack(outputs, dim=0)]
 
 

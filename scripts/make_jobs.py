@@ -452,6 +452,26 @@ def round8():
     return jobs
 
 
+def round14():
+    """2026-10-02: validation of the integrate-and-fire soma (configs block somaif, EXPERIMENTS.md §17)
+    before any rerun. Memory Maze showed the dendrites of our model storing about as much object
+    information as DreamerV3's state, but the single spike frame per environment step passing
+    almost none of it on. Checks, with the protocols of the existing results:
+      1. memlen-L-recall probes L8-L64 (table 4): memory must not get worse;
+      2. Memory Maze to 1M updates, keeping the 80k and 200k world models: frozen probes on the
+         spikes vs the full state, against the old soma at 80k / 200k."""
+    cells = {"PD2Lif_tau1000": ["ours", "somaif"]}
+    jobs = []
+    for L, extra in ((8, "--batch_length 32"), (16, ""), (32, ""), (64, "--batch_length 80")):
+        jobs += recall_jobs(f"bsuite_memlen-{L}-recall", cells, seeds=(0,), extra=extra)
+    data = ROOT / "data" / "memory_maze_9x9_official"
+    name = "mmaze_official/memory_maze_9x9/PD2Lif_tau1000/s0"
+    cmd = (f"{{python}} probe_mm.py --configs mmprobe ours somaif --data {data} --seed 0 "
+           f"--mm_updates {MM_UPDATES} --mm_eval_every 10000 --keep 80000 200000 --logdir {RUNS / name}")
+    jobs.append(dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=20))
+    return jobs
+
+
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
     # Memory Maze pipeline check (round 10), Memory Maze on the official data once downloaded, round 8
@@ -464,7 +484,7 @@ def main():
     r8 = round8()
     mm_full = [j for j in r8 if j["name"].startswith("mmaze_official/")]
     r8 = [j for j in r8 if j not in mm_full and "/popgym_" not in j["name"]]  # POPGym: round 13
-    jobs = (round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
+    jobs = (round14() + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
             + r8 + round11())
     for job in jobs:  # DreamerV3 (ANN) needs about 4 GB (measured 2026-09-30), the spiking models 14-20 GB
         if "/ann_" in job["name"] and job["mem_gb"] > 6:

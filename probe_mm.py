@@ -32,6 +32,7 @@ import concurrent.futures
 import io
 import json
 import pathlib
+import shutil
 import sys
 import threading
 import time
@@ -229,6 +230,8 @@ def main():
     parser.add_argument("--mm_eval_every", type=int, default=10000)
     parser.add_argument("--mm_eval_eps", type=int, default=200)
     parser.add_argument("--probe_lr", type=float, default=3e-4)
+    parser.add_argument("--keep", type=int, nargs="*", default=[],
+                        help="also keep the checkpoint of these updates as model_<N>k.pt (probe_mm_frozen.py)")
     args, rest = parser.parse_known_args()
     config, _ = probe_wm.parse_config(rest + ["--train_episodes", "1"])
     tools.set_seed_everywhere(config.seed)
@@ -298,6 +301,8 @@ def main():
                         "opts": {"wm": wm._model_opt._opt.state_dict(), "scaler": wm._model_opt._scaler.state_dict(),
                                  **{k: o.state_dict() for k, o in opts.items()}},
                         "update": update}, logdir / "model.pt")
+            if update in args.keep:
+                shutil.copy(logdir / "model.pt", logdir / f"model_{update // 1000}k.pt")
             print(json.dumps(log), flush=True)
             metrics.write(json.dumps(log) + "\n")
             metrics.flush()
