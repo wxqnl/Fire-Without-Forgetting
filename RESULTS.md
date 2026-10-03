@@ -3,7 +3,7 @@
 Single seed (s0). A value with (NN%) is from a run still in progress; · = queued or no evaluation yet;
 — = not part of the plan.
 
-Queue at 2026-10-03 10:36:13: 168/190 done, 22 running, 0 pending.
+Queue at 2026-10-03 11:07:37: 168/190 done, 22 running, 0 pending.
 
 ## Table 2. Memory tasks, RL: evaluation return (mean of the last 3 evaluations)
 
@@ -20,10 +20,10 @@ RepeatPreviousMedium: Spiking-WM, A+B+G, ours and DreamerV3.
 | LIF | 1.00 | -0.25 | -0.08 | -0.08 | — | — | — | 0.69 | — |
 | GRSN | 0.98 | 0.94 | -0.08 | 0.08 | — | — | — | 0.33 | — |
 | Spiking-WM + A+B+G | 1.00 | 1.00 | 0.79 | -0.04 | -0.04 | 0.08 | -0.04 | -0.29 | -0.50 |
-| **Ours** | 1.00 | 0.98 | 0.98 | 0.73 | 0.98 (34%) | 0.96 (38%) | 0.50 (38%) | 0.63 (35%) | 0.03 (35%) |
+| **Ours** | 1.00 | 0.98 | 0.98 | 0.73 | 1.00 (38%) | 0.98 (40%) | 0.92 (40%) | 0.64 (38%) | 0.21 (38%) |
 | DreamerV3 (ANN) | 0.98 | 0.94 | 0.98 | -0.08 | 0.98 | 0.04 | 0.04 | 0.39 | -0.44 |
 | spiking enc. + GRU | — | 1.00 | 1.00 | — | — | — | — | — | — |
-| ours, other actor input | 0.96 | 0.98 | 1.00 | 0.90 | 1.00 (72%) | 0.67 (76%) | 0.58 (66%) | -0.34 (8%) | -0.51 (8%) |
+| ours, other actor input | 0.96 | 0.98 | 1.00 | 0.90 | 1.00 (74%) | 0.69 (78%) | 0.65 (68%) | -0.34 (8%) | -0.51 (10%) |
 | ours before §18 (integrator dendrites only) | 0.98 | 1.00 | 1.00 | 0.98 | 0.96 | 1.00 | 0.96 | 0.59 | -0.50 |
 
 ## Table 3. BSuite: env steps until the evaluation return first reaches 0.9
