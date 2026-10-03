@@ -537,7 +537,7 @@ def round16():
     jobs += recall_jobs("bsuite_memlen-32-recall", {"PDT1reshalf_tau1000": ["pdcell", "resonanthalf"]}, seeds=(0,),
                         extra="--spike_times 1")
     # the actor and critic read 7680 features (old model: 1536): measured GPU memory of the RL runs (+10%)
-    mem = {"popgym/": 26, "r2i/bsuite_memlen-51/": 28, "r2i/bsuite_memlen-71/": 32, "r2i/bsuite_memlen-101/": 50,
+    mem = {"popgym/": 26, "r2i/bsuite_memlen-51/": 28, "r2i/bsuite_memlen-71/": 32, "r2i/bsuite_memlen-101/": 47,
            "dmc500/": 30, "rl2/bsuite_memlen-8/": 14, "rl2/bsuite_memlen-16/": 28, "rl2/bsuite_memlen-32/": 28,
            "rl2/bsuite_memlen-64/": 32}
     for job in jobs:
