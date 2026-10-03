@@ -539,6 +539,12 @@ def round16():
         for job in dmc_jobs(task, {"PD2Lreshalf_tau1000": R}, steps=5e5, train_ratio=512, group="dmc500"):
             job["cmd"] = job["cmd"].replace(" --logdir ", " --env_seed_per_env True --logdir ")
             out.append(job)
+    # and POPGym, so that either choice of §18.6 has its runs (R2I: hidden state there)
+    for task in ("popgym_RepeatPreviousEasy", "popgym_RepeatPreviousMedium"):
+        name = f"popgym/{task}/PD2Lreshalf_tau1000/s0"
+        cmd = (f"{{python}} dreamer.py --configs popgym {' '.join(R)} --task {task} --seed 0 --steps 2e6 "
+               f"--train_ratio 64 --envs 8 --batch_length 64 --env_seed_per_env True --eval_every 5e4 --logdir {RUNS / name}")
+        out.append(dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name)))
     for job in out:
         job["mem_gb"] = 26 if "memlen-101" in job["name"] else 18
     jobs += out
