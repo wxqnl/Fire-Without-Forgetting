@@ -1,0 +1,54 @@
+%% Packages and macros (loaded before hyperref).
+\usepackage{cuted}      % 2-column teaser (strip)
+\usepackage{currfile}
+\usepackage{caption}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{xspace}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit,backgrounds,decorations.pathmorphing,shapes.misc,shapes.geometric}
+\usepackage{pifont}
+\usepackage{bm}
+\usepackage{microtype}
+
+%% build switch: supplementary appended after the references (make full)
+\newif\ifwithsupp
+\withsuppfalse
+\IfFileExists{withsupp.flag}{\withsupptrue}{}
+
+%% references into the supplementary: resolved in `make full`, fixed letters in the paper-only build
+\newcommand{\suppref}[2]{\ifwithsupp\ref{#1}\else #2\fi}
+
+%% annotations (switch off for submission)
+\newcommand{\TODO}[1]{\textbf{\color{red}[TODO: #1]}}
+% a value from a run that is still in progress; refreshed from runs/ by paper/scripts/paper_tables.py
+\newcommand{\pend}[1]{{\color{NavyBlue}#1}}
+% \renewcommand{\TODO}[1]{}
+% \renewcommand{\pend}[1]{#1}
+
+%% names
+\newcommand{\method}{FwF\xspace}
+\newcommand{\swm}{Spiking-WM\xspace}
+\newcommand{\swmnr}{Spiking-WM-NR\xspace}
+\newcommand{\dv}{DreamerV3\xspace}
+\newcommand{\pdn}{PDN\xspace}
+
+%% math
+\newcommand{\vect}[1]{\bm{#1}}
+\newcommand{\dd}{\vect{d}}
+\newcommand{\xx}{\vect{x}}
+\newcommand{\ssp}{\vect{s}}
+\newcommand{\uu}{\vect{u}}
+\newcommand{\Hv}{\mathrm{H}}
+\newcommand{\LN}{\mathrm{LN}}
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\newcommand{\nr}{{\color{black!45}\scriptsize n/a}}  % not run / not applicable
+
+%% compact tables
+\newcommand{\tabfont}{\footnotesize}
+\setlength{\tabcolsep}{4pt}

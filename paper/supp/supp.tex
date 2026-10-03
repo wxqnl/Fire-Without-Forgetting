@@ -1,0 +1,150 @@
+% Supplementary material; compiled after the references with `make full` (see Makefile).
+\clearpage
+\setcounter{page}{1}
+\setcounter{section}{0}
+\renewcommand{\thesection}{\Alph{section}}
+\maketitlesupplementary
+
+\section{Implementation details}
+\label{supp:impl}
+
+\paragraph{Shared world model.}
+All models use the spiking world model of \swm~\cite{sun2025spikingwm}, which follows the DreamerV3 implementation at size S: a 512-dimensional deterministic state, 32 categorical latents with 32 classes, 512 hidden units, and MLP encoders and decoders for vector observations (a CNN for Memory Maze images).
+Every layer outside the recurrent core is a linear map, a normalization (LayerNorm statistics) and LIF neurons ($\tau=2$, threshold 0.5) simulated for $T=5$ steps per environment step; spike rates averaged over the $T$ steps feed the categorical and value distributions.
+The Heaviside step uses the surrogate derivative of \swm (\texttt{QGateGrad}, width 2).
+Training follows DreamerV3: world-model learning rate $10^{-4}$, actor and critic $3\cdot10^{-5}$, imagination horizon 15, discount 0.997, $\lambda$-return 0.95, percentile return normalization, KL balancing (dynamics 0.5, representation 0.1, free nats 1).
+The ANN reference (\dv) replaces all LIF neurons by SiLU, uses one simulation step and a GRU core with LayerNorm.
+
+\paragraph{Recurrent cores.}
+\swm: multi-compartment neurons, $\tau=\tau_{\mathrm{bas}}=\tau_{\mathrm{api}}=2$, both resets.
+\swmnr: the same neurons with state kept across environment steps, no dendritic reset and dendritic input scaled by $\sqrt{\tau_d/2}$, $\tau_d=128$.
+Recurrent LIF: one layer of 512 LIF neurons ($\tau=2$) whose input is the current input spikes and the previous environment step's spikes at the same simulation step, cleared at every environment step.
+GRSN~\cite{qin2025grsn}: gated current $c_t=F\odot c_{t-1}+(1-F)\odot I$ and membrane $u_t=\beta\odot\hat u_{t-1}+(1-\beta)\odot c_t$ with soft reset, one update per environment step, state carried across steps; we add a LayerNorm to the input-gate pre-activation, without which the neurons never reach threshold in this world model.
+\method: two PDN layers, 512 neurons with 4 channels (2 integrator, 2 resonant), retention times log-uniform in $[1,1000]$ and phases uniform in $[0,2\pi)$ at initialization, both learned.
+
+\paragraph{Benchmarks.}
+\Cref{tab:supp_bench} lists the settings. Within a benchmark they are identical for all models.
+
+\begin{table}[h]
+  \centering\tabfont
+  \setlength{\tabcolsep}{3pt}
+  \caption{Benchmark settings (all models).}
+  \label{tab:supp_bench}
+  \begin{tabular}{@{}lccccc@{}}
+  \toprule
+  & env.\ steps & envs & train ratio & batch & reward head \\
+  \midrule
+  BSuite $L$=8 / 16 / 32 / 64 & 0.15 / 0.2 / 0.3 / 0.5M & 4 & 64 & 16$\times$32--80 & by action \\
+  BSuite $L$=51 / 71 / 101 & 1M & 4 & 64 & 16$\times$64 & by action \\
+  POPGym RepeatPrevious & 2M & 8 & 64 & 16$\times$64 & DreamerV3 \\
+  DMC (proprio.) & 0.5M & 4 & 512 & 16$\times$64 & DreamerV3 \\
+  Memory Maze probing & 1M updates & -- & -- & 32$\times$48 & -- \\
+  \bottomrule
+  \end{tabular}
+\end{table}
+
+BSuite $L\le64$ uses a training window that covers the episode (32, 64, 64, 80 steps).
+For $L\ge51$ we follow R2I: 1M steps and a different seed per parallel environment; the $L\le64$ runs share one seed across the four parallel environments, identically for all models.
+POPGym uses the configuration of R2I's code: DreamerV3's default reward head, unscaled rewards, eight environments, train ratio 64.
+
+\paragraph{Parameters.}
+On POPGym the world models have 7.2M (\swm, \swmnr), 6.4M (LIF), 6.5M (GRSN), 7.5M (\dv) and 8.6M (\method) parameters, of which the recurrent core has 1.3M, 0.5M, 0.5M, 1.6M and 2.6M; the actor-critic has 3.4M for all models when it reads $(z_t,h_t)$.
+Capacity does not explain the results: the GRU core of \dv is larger than the cores of the spiking baselines and fails at 64 steps, and variants of \method with the same size but dendrites cleared at every step, or a single retention time of 16 steps, stay at chance (\cref{tab:ablation}).
+
+\section{Reward that depends on cue and action}
+\label{supp:reward}
+
+On BSuite memory length the terminal reward is $+1$ if the action equals the cue and $-1$ otherwise, an exclusive-or of a remembered value and the current action.
+Neither the cue nor the action alone correlates with the reward, so a scalar reward head that reads $(h_t, z_t, a_t)$ receives no first-order learning signal.
+In our probes, a fully trained ANN world model on memory length 4 encoded the cue in $h_t$ (linear decoding accuracy 0.96--1.00) and the last action (0.94--0.97), yet its reward AUC stayed at 0.49--0.52 after 4k updates, while a plain GRU trained on the raw observations of memory length 8 reached an AUC of 1.0 within 200 updates.
+The obstacle is the reward head, not memory.
+We therefore let the reward head output one value per action and select the taken action's value (trained with a symlog MSE loss), which makes the reward a linear function of the remembered cue.
+All models use this head on BSuite, which makes the task easier for all of them; \dv, for example, solves 51 steps with it.
+POPGym, DMC and Memory Maze use DreamerV3's default heads.
+
+\section{World-model probes}
+\label{supp:probe}
+
+\paragraph{memlen-$L$-recall.}
+Episodes of BSuite memory length are collected with a uniform random policy (200k steps for training, 512 held-out episodes for evaluation, the same data for every model).
+The terminal reward is replaced by the cue ($\pm1$), independent of the action, so that a world model with memory can predict it linearly.
+Only the world model is trained, for 12k updates with batches of 16 sequences that cover the episode, with a symlog MSE reward head.
+Every 500 updates we filter the held-out episodes from their start and compute the AUC of the predicted reward at the recall step for positive against negative cues.
+
+\paragraph{RepeatPrevious.}
+Random-action episodes of POPGym RepeatPrevious Easy ($k=4$) and Medium ($k=32$).
+The reward indicates whether the action names the suit of the card shown $k$ steps earlier; we use unit rewards ($\pm1$) because the environment's per-step reward of $\pm1/(n-k)$ is too small for a regression head to learn within the probe budget for any model.
+World models are trained for 10k updates with batches of 16$\times$64 and an action-indexed reward head; the AUC is computed over all steps of held-out episodes.
+
+\section{Reset-induced amnesia: details}
+\label{supp:amnesia}
+
+\paragraph{Threshold.}
+If the spike reset limited memory through the firing frequency, lowering the threshold, which increases firing, should shorten memory.
+At memory length 16 the opposite holds for every condition: updates to AUC 0.9 for thresholds 0.25 / 0.5 / 1.0 are 8.5k / 8--8.5k / -- (A), 2.5k / 4.5k / -- (A+B), 2k / 5k / 5.5k (A+G) and 0.5k / 0.5k / 1k (A+B+G).
+A long-retention dendrite stores the cue at about 1\% of the threshold, and a lower threshold lets this faint trace reach the spikes; the gain G removes the dependence on the threshold almost completely.
+The limit is the write gain, not the firing frequency.
+
+\paragraph{Retention curves.}
+With resets, the cue can be decoded linearly from the spikes of \swm for 2--3 steps after it is shown, for $\tau_d\in\{2,16,128\}$.
+With A and $\tau_d=128$, the membrane potentials still encode it after 8 steps (accuracy 0.96--1.00) while the spikes return to chance after 3--4 steps.
+\TODO{Add the retention-curve figure (runs/plots/retention\_*).}
+
+\section{Policy input}
+\label{supp:policy}
+
+\begin{table*}[t]
+  \centering\tabfont
+  \caption{\textbf{Actor input of \method on every task.} The world model is the same; only the features of the actor and critic differ. The main tables use $(z_t,h_t)$ on BSuite and DMC and add the dendritic spikes on POPGym and Memory Maze, as R2I does with its hidden state. \pend{Blue}: in progress.}
+  \label{tab:policy}
+  \input{tables/policy}
+\end{table*}
+
+\Cref{tab:policy} reports both actor inputs on all tasks.
+Adding the dendritic spikes (6144 binary inputs, \cref{sec:wm}) leaves the short BSuite lengths unchanged but slows the policy at 64 steps (192k vs.\ 102k steps), although the world model's reward prediction on evaluation episodes already has an AUC of 1.0 at 160k steps: the memory is formed, and the larger input slows the policy.
+R2I makes the same observation for its hidden state, which helps on tasks that use memory at many steps and is not given to the policy on BSuite and DMC~\cite{samsami2024r2i}.
+\TODO{Discuss POPGym and DMC once the runs finish.}
+
+\section{Diagnosing the world model in RL}
+\label{supp:diag}
+
+\begin{table}[h]
+  \centering\tabfont
+  \caption{Reward AUC of the world model on evaluation episodes at the end of RL on RepeatPrevious, and the policy's accuracy (chance 0.25). \method here is the earlier version with integrator channels only.}
+  \label{tab:supp_diag}
+  \begin{tabular}{@{}llcc@{}}
+  \toprule
+  task & model & policy accuracy & reward AUC \\
+  \midrule
+  Easy ($k$=4) & \method, integrators only & 0.78 & 0.94 \\
+   & Recurrent LIF & 0.84 & 0.97 \\
+   & GRSN & 0.62 & 0.90 \\
+   & \dv & 0.69 & 0.98 \\
+  \midrule
+  Medium ($k$=32) & \method, integrators only & 0.25 & 0.55 \\
+   & \dv & 0.27 & 0.65 \\
+  \bottomrule
+  \end{tabular}
+\end{table}
+
+\Cref{tab:supp_diag} shows that on Medium the world models themselves fail to predict the reward, so the policy cannot do better than chance.
+This diagnosis motivated the resonant channels; the probe of \cref{sec:probe} confirms that they solve it.
+
+\section{Memory Maze}
+\label{supp:mm}
+
+We use the official Memory Maze 9$\times$9 offline dataset (29k training and 1k evaluation episodes of 1000 steps, 64$\times$64 images) and its probing protocol~\cite{pasukonis2023memorymaze}.
+The world model is trained without reward for 1M updates with truncated backpropagation through time (batches of 32$\times$48, the state carried between consecutive segments).
+On the frozen world model we then train the probes of the official code: separate MLPs (4 layers of 1024 units, LayerNorm, ELU; Adam $3\cdot10^{-4}$) predict the positions of the target objects relative to the agent (MSE) from the state, and the $9\times9$ wall layout (accuracy) from the state and the agent's pose, for 200k updates.
+A second set of probes reads only the current image embedding; the difference measures what the state carries from the past.
+We report the mean over the second half (last 500 steps) of the 1k evaluation episodes; our constant predictors (objects 24.0, walls 80.8\%) match those of the paper (23.9, 80.8\%).
+All models use the size of DreamerV3-S, smaller than the RSSM of the reference results (2048-dimensional state).
+\TODO{Table: state vs.\ no-memory probe and the memory gain for all models at 1M updates; for \method also spikes only vs.\ spikes + dendritic spikes.}
+
+\section{Energy accounting}
+\label{supp:energy}
+
+We count the operations of the world-model filter per environment step, \ie, the encoder and the posterior update that an agent runs at every step, averaged over evaluation episodes of the BSuite $L=32$ RL models.
+A synaptic operation on a spike input is an accumulate (AC, 0.9\,pJ), any operation on a graded input a multiply-accumulate (MAC, 4.6\,pJ)~\cite{horowitz2014energy}.
+For the PDN, the synaptic maps $B\xx_t$ and $D\xx_t$ read spike rates and count as ACs per spike; the dendritic update counts 3 MACs per integrator channel (decay, write, readout) and 6 per resonant channel. For all models, a normalization counts 2 MACs per element and a neuron update counts per element (LIF 1 per simulation step, MCN 4 per simulation step, GRSN and GRU 4 per environment step).
+Memory access is not counted for any model.

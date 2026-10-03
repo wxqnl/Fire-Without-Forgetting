@@ -1,0 +1,72 @@
+% Fig. 2: multi-compartment neuron with resets (a) vs persistent dendritic neuron (b). TikZ, two env steps each.
+\definecolor{integ}{HTML}{0072B2}
+\definecolor{reson}{HTML}{E69F00}
+\definecolor{resetred}{HTML}{C0392B}
+\definecolor{spk}{HTML}{333333}
+\tikzset{
+  frame/.style={draw=black!35, dashed, rounded corners=3pt, minimum width=3.5cm, minimum height=3.2cm},
+  soma/.style={circle, draw=black!80, fill=black!6, minimum size=0.62cm, inner sep=0pt, font=\scriptsize},
+  dend/.style={ellipse, draw=black!80, fill=black!6, minimum width=0.95cm, minimum height=0.45cm, inner sep=0pt, font=\tiny},
+  lab/.style={font=\scriptsize},
+  small/.style={font=\tiny},
+  arr/.style={-{Stealth[length=1.6mm]}, thin},
+  zz/.style={-{Stealth[length=1.5mm]}, thick, resetred, decorate, decoration={zigzag, amplitude=0.6pt, segment length=2.2pt, post length=1.5mm}},
+}
+\newcommand{\spiketrain}[3]{% T=5 frames, a different spike pattern per frame
+  \foreach \i/\h in {0/1,1/0,2/1,3/1,4/0}{\draw[spk, line width=0.6pt] ($(#1,#2)+(0.11*\i,0)$) -- ++(0,{0.05+0.2*\h});}
+  \node[small, anchor=west] at ($(#1,#2)+(0.55,0.12)$) {#3};}
+\newcommand{\onespike}[3]{% one frame repeated T times
+  \foreach \i in {0,...,4}{\draw[spk, line width=0.6pt] ($(#1,#2)+(0.11*\i,0)$) -- ++(0,0.25);}
+  \node[small, anchor=west] at ($(#1,#2)+(0.55,0.12)$) {#3};}
+\begin{tikzpicture}[x=1cm, y=1cm]
+% ------------------------------------------------------------------ (a) MCN
+\begin{scope}
+  \node[lab, anchor=west] at (-1.8, 2.05) {\textbf{(a)} multi-compartment neuron (\swm)};
+  \foreach \k/\x/\name in {0/0/{t-1}, 1/4.3/{t}}{
+    \node[frame] (fa\k) at (\x, 0.3) {};
+    \node[small, text=black!55, anchor=north west] at ($(fa\k.north west)+(0.05,-0.03)$) {env.\ step $\name$};
+    \node[soma] (sa\k) at (\x, 0.72) {soma};
+    \node[dend] (ba\k) at (\x-0.75, -0.4) {basal};
+    \node[dend] (aa\k) at (\x+0.75, -0.4) {apical};
+    \draw[thick] (ba\k) -- (sa\k); \draw[thick] (aa\k) -- (sa\k);
+    \draw[arr] (\x-0.75,-1.15) node[below, small, yshift=1pt] {$x_t$} -- (ba\k);
+    \draw[arr] (\x+0.75,-1.15) node[below, small, yshift=1pt] {$x_t$} -- (aa\k);
+    \spiketrain{\x-0.27}{1.2}{$h_{\name}$}
+    \draw[zz] (sa\k.south east) to[bend left=12] (aa\k.north west);
+    \draw[zz] (sa\k.south west) to[bend right=12] (ba\k.north east);
+  }
+  \node[small, text=resetred, align=left, anchor=west] at (0.62, 0.32) {reset on\\spike};
+  \node[small, text=resetred, align=center] at (3.25, 0.62) {all compart-\\ments $\leftarrow 0$\\at step start};
+  % spikes of t-1 fed back into the dendrites at t: the only trace of the past
+  \draw[arr, spk, thick] (0.95, 1.33) -- (2.15, 1.33) -- (2.15, -0.4) -- (ba1.west);
+  \node[small, align=center, fill=white, inner sep=1pt] at (2.15, 0.45) {only\\spikes\\cross};
+\end{scope}
+% ------------------------------------------------------------------ (b) PDN
+\begin{scope}[xshift=8.75cm]
+  \node[lab, anchor=west] at (-1.8, 2.05) {\textbf{(b)} persistent dendritic neuron (\method)};
+  \foreach \k/\x/\name in {0/0/{t-1}, 1/4.3/{t}}{
+    \node[frame] (fb\k) at (\x, 0.3) {};
+    \node[small, text=black!55, anchor=north west] at ($(fb\k.north west)+(0.05,-0.03)$) {env.\ step $\name$};
+    \node[soma] (sb\k) at (\x, 0.85) {soma};
+    \onespike{\x-0.27}{1.3}{$s_{\name}$}
+    \draw[arr, black!70] (\x-0.3, 0.0) -- (sb\k.south west);
+    \draw[arr, black!70] (\x+0.3, 0.0) -- (sb\k.south east);
+    \node[small, text=black!70, anchor=east] at (\x-0.34, 0.33) {$\sum_m C_m d_m$};
+    \draw[arr] (\x+1.15, -1.3) -- (\x+1.15, -0.95);
+  }
+  \node[small, below] at (1.15, -1.25) {$\sqrt{1-\lambda^2}\,\LN(B x_{t-1})$};
+  \node[small, below] at (5.45, -1.25) {$\sqrt{1-\lambda^2}\,\LN(B x_{t})$};
+  \node[small, text=black!60, anchor=west] at (4.3+0.36, 0.85) {no state};
+  % persistent channels across both steps
+  \foreach \y in {-0.1, -0.33}{
+    \draw[integ, line width=1.1pt, -{Stealth[length=1.8mm]}] (-1.65, \y) -- (5.95, \y);}
+  \foreach \y in {-0.6, -0.83}{
+    \draw[reson, line width=1.1pt, decorate, decoration={snake, amplitude=1.3pt, segment length=7pt, post length=2.5mm}] (-1.65, \y) -- (5.95, \y);
+    \draw[reson, line width=1.1pt, -{Stealth[length=1.8mm]}] (5.8, \y) -- (5.95, \y);}
+  \node[small, text=integ, anchor=north west, inner sep=1pt] at (-1.72, -0.97) {integrator: \emph{what}};
+  \node[small, text=reson, anchor=north west, inner sep=1pt] at (-0.42, -0.97) {resonant: \emph{when}};
+  \node[small, fill=white, inner sep=1pt, align=center] at (2.15, -0.47) {$\lambda,\,R(\theta)$\\[-1pt]never\\[-1pt]reset};
+  % output spike to other neurons
+  \draw[arr, spk, thick] (4.98, 1.42) -- (6.0, 1.42) node[above left, small, align=right, inner sep=1pt] {to other neurons};
+\end{scope}
+\end{tikzpicture}

@@ -1,0 +1,29 @@
+\section{Related Work}
+\label{sec:related}
+
+\paragraph{World models and memory.}
+Latent world models learn a recurrent state from observations and train behavior in imagination~\cite{ha2018world,hafner2019planet,hafner2020dreamer,hafner2021dreamerv2,hafner2025dreamerv3}.
+Their memory is that of the recurrent core: a GRU in the Dreamer family, attention over a context window in transformer world models~\cite{micheli2023iris,robine2023twm,zhang2023storm}, and a state-space recurrence in S4WM~\cite{deng2023s4wm} and R2I~\cite{samsami2024r2i}.
+R2I solves memory tasks that DreamerV3 cannot and established the protocols we follow for BSuite memory length~\cite{osband2020bsuite} and POPGym~\cite{morad2023popgym}.
+Memory Maze~\cite{pasukonis2023memorymaze} measures long-term memory in first-person 3D navigation with an offline probe of the world-model state, in the spirit of probing map-like representations in navigation agents~\cite{wijmans2023maps}.
+Ni \etal~\cite{ni2023transformers} separate memory length from credit-assignment length; our world-model probes do the same by removing the policy.
+All these models are dense ANNs.
+
+\paragraph{Spiking reinforcement learning.}
+Spiking actors and Q-networks~\cite{tang2020popsan,liu2023dsqn} simulate a feedforward SNN for a few steps per environment step and clear it before the next.
+\swm~\cite{sun2025spikingwm} brings multi-compartment neurons into a DreamerV3-style world model and evaluates on the DeepMind Control Suite and speech classification.
+GRSN~\cite{qin2025grsn} aligns a gated recurrent spiking neuron with environment time and carries its state across steps for model-free RL in POMDPs.
+Spiking model-based control has also been trained end to end with recurrent LIF networks~\cite{huebotter2025spiking}.
+None of these works evaluates on long-horizon memory benchmarks.
+We show that the reset conventions they inherit cap memory at a few to a few tens of steps, and we evaluate GRSN, recurrent LIF and \swm against \method in one world model.
+
+\paragraph{Spiking neurons with long memory.}
+Adaptive thresholds~\cite{bellec2018lsnn,yin2021adaptive}, two-compartment neurons~\cite{zhang2024tclif}, heterogeneous dendritic time constants~\cite{zheng2024dhsnn} and resonate-and-fire dynamics~\cite{izhikevich2001resonate,higuchi2024brf,zhang2025drf} extend the memory of spiking neurons.
+Removing the reset makes the membrane linear and parallelizable~\cite{fang2023psn}, and spiking state-space layers attach spiking outputs to linear recurrences~\cite{shen2025spikingssm,bal2025pspikessm,fabre2025silif,stan2024learning}.
+These neurons are trained and tested on offline sequence classification, where the network sees the whole sequence and is reset between samples.
+A world model instead filters an unbounded stream, step by step, and its state is also rolled forward in imagination.
+\method is designed for this setting: memory is carried across environment steps only in dendrites that no spike touches, retention times are set in environment steps, and the soma that produces spikes holds no state at all.
+
+\paragraph{Dendrites.}
+Dendrites act as computational subunits of a neuron~\cite{london2005dendritic,poirazi2003pyramidal,larkum2013cellular,beniaguev2021single}, and many neurons show subthreshold resonance with preferred frequencies~\cite{hutcheon2000resonance}.
+PDNs borrow both properties: several dendritic channels per neuron with separate retention times, and resonant channels whose oscillation marks elapsed time.
