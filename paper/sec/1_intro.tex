@@ -8,7 +8,7 @@
   Final return on BSuite memory length~\cite{osband2020bsuite}: the agent sees a cue, then $L$ uninformative steps, and is rewarded for recalling the cue (1 = always correct, 0 = chance).
   All models share one spiking world model and differ only in the recurrent core (\cref{sec:setup}).
   Left: 0.15--0.5M environment steps. Right: $L=51$--101 under the protocol of R2I~\cite{samsami2024r2i}, 1M steps.
-  Spiking baselines fail at 8--32 steps and DreamerV3 (ANN) beyond 51; \method recalls across all lengths.}
+  Spiking baselines stop at 32 steps or fewer and DreamerV3 (ANN) at 51; \method recalls across all lengths.}
   \label{fig:memory_length}
 \end{figure}
 
@@ -46,7 +46,7 @@ The soma has no state: at each step it reads the dendrites and emits one binary 
 Graded state never crosses a synapse; it stays inside the neuron, as in neuromorphic cores with multi-variable neurons~\cite{orchard2021loihi2}.
 
 We evaluate on memory benchmarks with published ANN protocols and on a non-memory control (\cref{sec:experiments}).
-\method is the only model, spiking or ANN, that solves BSuite memory length 64, and it solves 101 steps under the protocol of R2I~\cite{samsami2024r2i}, where DreamerV3 fails beyond 51.
+Of all models we train, spiking or ANN, \method is the only one that solves BSuite memory length 64, and it solves 101 steps under the protocol of R2I~\cite{samsami2024r2i}, where DreamerV3 fails beyond 51.
 Its world model is the only one that recalls the card of exactly 32 steps ago in POPGym RepeatPrevious~\cite{morad2023popgym} (AUC 0.93; all others, DreamerV3 included, stay at chance).
 It uses 2.9$\times$ less energy per step than DreamerV3.
 Our contributions are:

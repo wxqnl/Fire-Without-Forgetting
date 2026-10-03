@@ -59,7 +59,8 @@ def probe(run, thresh=0.9):
     hit = next((r["step"] for r in ev if r["eval_auc"] > thresh), None)
     last = np.mean([r["eval_auc"] for r in ev[-3:]])
     if hit is not None:
-        return f"{hit / 1e3:g}k"
+        # crossed the threshold but did not stay above it: show the final AUC as well
+        return f"{hit / 1e3:g}k" + (rf"\,{{\tiny({last:.2f})}}" if last < thresh and done(run) else "")
     cell = rf"--\,{{\tiny({last:.2f})}}"
     return cell if done(run) else rf"\pend{{{cell}}}"
 
@@ -219,7 +220,26 @@ def policy_table():
     write("policy", lines)
 
 
+def numbers():
+    """Macros for numbers quoted in the text, so that the prose follows the runs (tables/numbers.tex)."""
+    def ret(run):
+        ev = evals(run, "eval_return")
+        if not ev:
+            return r"\pend{$\cdot$}", r"\pend{$\cdot$}"
+        v = f"{np.mean([r['eval_return'] for r in ev[-3:]]):.2f}"
+        total = mt.budget(run)
+        pct = f"{100 * ev[-1]['step'] / total:.0f}\\%" if total else "?"
+        return wrap(v, run), wrap(pct, run)
+    out = []
+    for d in ("Easy", "Medium"):
+        v, pct = ret(f"popgym/popgym_RepeatPrevious{d}/{mt.key('OURS', 'popgym')}")
+        out += [rf"\newcommand{{\numFwf{d}}}{{{v}}}", rf"\newcommand{{\numFwf{d}Progress}}{{{pct}}}"]
+        out.append(rf"\newcommand{{\numRtwoI{d}}}{{{r2i_popgym('RepeatPrevious' + d)}}}")
+    write("numbers", out)
+
+
 if __name__ == "__main__":
+    numbers()
     rl_table()
     probe_table()
     ablation_table()

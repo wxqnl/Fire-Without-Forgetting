@@ -87,6 +87,6 @@ The dendritic state is carried through training sequences and through imaginatio
 \paragraph{Policy input.}
 The actor and critic read $(z_t,h_t)$.
 On tasks where the policy must use the memory at many steps, R2I gives its policy the hidden state of its recurrence as well~\cite{samsami2024r2i}.
-We follow the same per-task choice: on POPGym and Memory Maze, \method also sends the state of its second-layer dendrites to the actor and critic, as spikes.
+We follow the same per-task choice: on POPGym, \method also sends the state of its second-layer dendrites to the actor and critic, as spikes, and on Memory Maze the probes read the same features.
 Each state variable is standardized over the layer and encoded by $T$ ON and $T$ OFF thresholds at $\pm(k-\tfrac12)\tfrac{2}{T}$, $k=1,\dots,T$, giving $2T$ binary frames whose rates represent $2T+1$ levels.
 On BSuite and DMC the policy reads $(z_t,h_t)$ only, as in R2I. Supp.~\suppref{supp:policy}{E} reports both inputs on all tasks.

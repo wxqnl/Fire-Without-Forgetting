@@ -58,10 +58,11 @@ Three interventions target the mechanisms above: \textbf{A} keeps all compartmen
 
 \emph{With resets, time constants do not matter.}
 \swm fails at 8 and 16 steps for $\tau_d\in\{2,16,128\}$, and the cue can be decoded from its spikes for only 2--3 steps after it is shown.
+The one exception supports this diagnosis: at 32 steps, one of two seeds crosses an AUC of 0.9 at the last of 12k updates by holding the cue in self-sustained recurrent firing, a memory that exists only as spikes and is learned slowly and unreliably.
 
 \emph{Persistence is necessary.}
 Without A, neither B nor G helps.
-With A and $\tau_d=128$, the world model recalls 8 and 16 steps; removing the dendritic reset as well (A+B) halves the updates needed at 16 steps.
+With A and $\tau_d=128$, the world model recalls 8 and 16 steps; removing the dendritic reset as well (A+B) nearly halves the updates needed at 16 steps (4.5k instead of 8--8.5k).
 
 \emph{The write gain limits long time constants.}
 A+B fails at 32 steps although a linear probe still decodes the cue from the membrane potentials at the recall step (accuracy 0.88): the trace is there, but too faint to drive spikes.

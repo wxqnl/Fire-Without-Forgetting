@@ -5,7 +5,7 @@ Spiking world models forget because their neurons are reset: at every environmen
 With memory confined to binary spikes, the time constants that are supposed to provide memory have nothing to act on.
 \method keeps the memory in persistent dendritic channels that no spike touches, normalizes how strongly they are written, spreads their retention times over three orders of magnitude, and lets resonant channels record when an input arrived.
 A stateless soma turns this state into spikes, the only signal neurons exchange.
-With these neurons, a spiking world model remembers further than its ANN counterpart on standard memory benchmarks while firing sparsely.
+With these neurons, a spiking world model remembers further back than DreamerV3 on BSuite and recalls exact lags that DreamerV3 cannot, while firing sparsely.
 
 \paragraph{Limitations.}
 The dendritic state is graded, so deployment needs neuromorphic cores with multi-variable neurons, and our energy estimate counts arithmetic but not memory access.
