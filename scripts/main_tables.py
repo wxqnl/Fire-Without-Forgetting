@@ -22,19 +22,40 @@ import numpy as np
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 RUNS = ROOT / "runs"
 MAIN = [("base_tau2", "Spiking-WM"), ("LIF_tau2", "LIF"), ("GRSN_tau2", "GRSN"),
-        ("ABG_tau128", "Spiking-WM + A+B+G"), ("PD2L_tau1000", "**Ours**"), ("ann_tau2", "DreamerV3 (ANN)")]
-EXTRA = [("gru_tau2", "spiking enc. + GRU"), ("PD_tau1000", "ours, 1 layer")]
+        ("ABG_tau128", "Spiking-WM + A+B+G"), ("OURS", "**Ours**"), ("ann_tau2", "DreamerV3 (ANN)")]
+EXTRA = [("gru_tau2", "spiking enc. + GRU"), ("OURSALT", "ours, other actor input"),
+         ("PD2L_tau1000", "ours before §18 (integrator dendrites only)")]
+# Our model (EXPERIMENTS.md §18): one world model; the actor input follows R2I per task type (§18.6):
+# soma spikes only on BSuite and DMC, soma + dendritic spikes on POPGym and Memory Maze. The world-model
+# probes do not involve the actor. OURSALT: the other actor input, for the appendix ablation.
+OURS = {"bsuite": "PD2Lreshalf_tau1000", "dmc": "PD2Lreshalf_tau1000", "probe": "PD2Lreshalf_tau1000",
+        "popgym": "PD2Lv2_tau1000", "mmaze": "PD2Lv2_tau1000"}
+OURSALT = {"bsuite": "PD2Lv2_tau1000", "dmc": "PD2Lv2_tau1000", "popgym": "PD2Lreshalf_tau1000"}
+
+
+def key(model, family):
+    if model == "OURS":
+        return OURS[family]
+    if model == "OURSALT":
+        return OURSALT.get(family, "not_run")
+    return model
+
+
+def family(run):
+    return "popgym" if run.startswith("popgym") else "dmc" if run.startswith("dmc") else "bsuite"
+
 BSUITE = [f"bsuite_memlen-{n}" for n in (8, 16, 32, 64)]
 BSUITE_LONG = [f"bsuite_memlen-{n}" for n in (51, 71, 101)]  # round 8, R2I protocol (1M steps)
 POPGYM = ["popgym_RepeatPreviousEasy", "popgym_RepeatPreviousMedium"]  # round 13, R2I tasks and config
 MM_PAPER = [("constant (paper)", "23.9", "80.8"), ("VAE, no memory (paper)", "17.2", "84.1"),
             ("RSSM (paper)", "8.3", "89.0"), ("VAE+GRU TBTT (paper)", "7.8", "90.0"), ("RSSM TBTT (paper)", "6.2", "94.0")]
 DMC = ["dmc_walker_walk", "dmc_cheetah_run", "dmc_cartpole_swingup"]
-ABLATIONS = [("PD2L_tau1000", "ours"), ("PD2Lreset_tau1000", "dendrites cleared every env step"),
-             ("PD2L_tau16", "single τ = 16"), ("PD2L_tau128", "single τ = 128"),
-             ("PD2Leuler_tau1000", "Euler input gain 1 − λ"), ("PD2Lfix_tau1000", "τ fixed (not learned)"),
-             ("PD2Lcap_tau1000", "firing rate capped at 0.06"), ("PD_tau1000", "1 layer"),
-             ("PDT1_tau1000", "1 layer, T = 1")]
+ABLATIONS = [("PD2Lreshalf_tau1000", "ours"), ("PD2Lreshalfreset_tau1000", "dendrites cleared every env step"),
+             ("PD2Lreshalf_tau16", "single τ = 16"), ("PD2Lreshalf_tau128", "single τ = 128"),
+             ("PD2Lreshalfeuler_tau1000", "Euler input gain 1 − λ"), ("PD2Lreshalffix_tau1000", "τ fixed (not learned)"),
+             ("PD2Lreshalfcap_tau1000", "firing rate capped at 0.06"), ("PDreshalf_tau1000", "1 layer"),
+             ("PDT1reshalf_tau1000", "1 layer, T = 1"), ("PD2Lres_tau1000", "all channels resonant"),
+             ("PD2L_tau1000", "no resonant channels (before §18)")]
 
 
 def jobs():
@@ -187,12 +208,12 @@ def main():
     rl_runs = ([(f"rl2/{t}", short(t)) for t in BSUITE] + [(f"r2i/{t}", short(t)) for t in BSUITE_LONG]
                + [(f"popgym/{t}", short(t)) for t in POPGYM])
     out += table(["model"] + [lab for _, lab in rl_runs],
-                 [[label] + [rl_cell(f"{r}/{m}") for r, _ in rl_runs] for m, label in models])
+                 [[label] + [rl_cell(f"{r}/{key(m, family(r))}") for r, _ in rl_runs] for m, label in models])
     out += [""]
 
     out += ["## Table 3. BSuite: env steps until the evaluation return first reaches 0.9", ""]
     bs_runs = [(f"rl2/{t}", short(t)) for t in BSUITE] + [(f"r2i/{t}", short(t)) for t in BSUITE_LONG]
-    out += table(["model"] + [lab for _, lab in bs_runs], [[label] + [steps_to(f"{r}/{m}") for r, _ in bs_runs]
+    out += table(["model"] + [lab for _, lab in bs_runs], [[label] + [steps_to(f"{r}/{key(m, 'bsuite')}") for r, _ in bs_runs]
                                                           for m, label in models])
 
     out += ["", "## Table 4. World-model probe (memlen-L-recall, random-policy data)", "",
@@ -200,9 +221,23 @@ def main():
     probe_tasks = [f"bsuite_memlen-{n}-recall" for n in (8, 16, 32, 64)]
     body = []
     for m, label in models:
-        cells = [probe_cells(f"recall/{t}/{m}") for t in probe_tasks]
+        if m == "OURSALT":
+            continue
+        cells = [probe_cells(f"recall/{t}/{key(m, 'probe')}") for t in probe_tasks]
         body.append([label] + [c[0] for c in cells] + [c[1] for c in cells])
     out += table(["model"] + [f"L{n} updates" for n in (8, 16, 32, 64)] + [f"L{n} AUC" for n in (8, 16, 32, 64)], body)
+
+    out += ["", "## Table 4b. World-model probe, precise-lag recall (POPGym RepeatPrevious, random-action data)", "",
+            "Reward-prediction AUC for 'the previous action matched the card k steps back' (Easy k = 4, Medium",
+            "k = 32), unit rewards, window 64, 10k updates. Updates until AUC > 0.9 / final AUC (firing rate).", ""]
+    rp_tasks = ["popgym_RepeatPreviousEasy", "popgym_RepeatPreviousMedium"]
+    body = []
+    for m, label in models:
+        if m in ("OURSALT", "gru_tau2"):
+            continue
+        cells = [probe_cells(f"diag_rp/{t}/{key(m, 'probe')}") for t in rp_tasks]
+        body.append([label] + [c[0] for c in cells] + [c[1] for c in cells])
+    out += table(["model", "Easy updates", "Medium updates", "Easy AUC", "Medium AUC"], body)
 
     base = mm_baseline()
     out += ["", "## Table 5. Memory Maze 9×9 offline probing benchmark (Pasukonis et al. 2023; official data and probe)", "",
@@ -211,8 +246,9 @@ def main():
             "extended from 200k (resumed from the 200k checkpoint, Adam state restarted once).", ""]
     if base:
         out += [f"Constant predictor on our split: objects MSE {base[0]:.1f}, walls accuracy {100 * base[1]:.1f}.", ""]
-    body = [[label, *mm_cells(f"mmaze_official/memory_maze_9x9/{m}", "objects_mse"),
-             *mm_cells(f"mmaze_official/memory_maze_9x9/{m}", "walls_acc", 100)] for m, label in models]
+    body = [[label, *mm_cells(f"mmaze_official/memory_maze_9x9/{key(m, 'mmaze')}", "objects_mse"),
+             *mm_cells(f"mmaze_official/memory_maze_9x9/{key(m, 'mmaze')}", "walls_acc", 100)]
+            for m, label in models if m != "OURSALT"]
     body += [[label, "", obj, "", walls] for label, obj, walls in MM_PAPER]
     out += table(["model", "objects MSE ↓ 200k", "objects MSE ↓ 1M", "walls acc. (%) ↑ 200k", "walls acc. (%) ↑ 1M"],
                  body)
@@ -220,8 +256,8 @@ def main():
     out += ["", "## Table 6. DMC (proprioception), non-memory control: evaluation return", "",
             "500k env steps, train ratio 512, action repeat 2 (DreamerV3's protocol for DMC from proprioception),",
             "a different seed per parallel env.", ""]
-    dmc_models = [(m, label) for m, label in MAIN if m in ("base_tau2", "PD2L_tau1000", "ann_tau2")]
-    out += table(["model"] + [short(t) for t in DMC], [[label] + [rl_cell(f"dmc500/{t}/{m}", fmt="{:.0f}") for t in DMC]
+    dmc_models = [(m, label) for m, label in models if m in ("base_tau2", "OURS", "ann_tau2", "OURSALT", "PD2L_tau1000")]
+    out += table(["model"] + [short(t) for t in DMC], [[label] + [rl_cell(f"dmc500/{t}/{key(m, 'dmc')}", fmt="{:.0f}") for t in DMC]
                                                        for m, label in dmc_models])
 
     out += ["", "## Table 7. Ablations of our model (probe, memlen-L-recall)", "",
@@ -235,7 +271,7 @@ def main():
     out += ["", "## Table 8. Operations and energy per environment step (world-model filter: encoder + posterior)", "",
             "45 nm: 0.9 pJ per AC, 4.6 pJ per MAC; memory access not counted. Models of the BSuite L32 RL runs.", ""]
     out += table(["model", "AC (M)", "MAC (M)", "energy (µJ)", "recurrent firing rate"],
-                 [[label, *energy_cell(f"rl2/bsuite_memlen-32/{m}")] for m, label in models])
+                 [[label, *energy_cell(f"rl2/bsuite_memlen-32/{key(m, 'bsuite')}")] for m, label in models if m != "OURSALT"])
     text = "\n".join(out) + "\n"
     (ROOT / "RESULTS.md").write_text(text)
     print(text)
