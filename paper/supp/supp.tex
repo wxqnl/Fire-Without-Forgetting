@@ -30,6 +30,7 @@ GRSN~\cite{qin2025grsn}: gated current $c_t=F\odot c_{t-1}+(1-F)\odot I$ and mem
   \setlength{\tabcolsep}{3pt}
   \caption{Benchmark settings (all models).}
   \label{tab:supp_bench}
+  \resizebox{\columnwidth}{!}{%
   \begin{tabular}{@{}lccccc@{}}
   \toprule
   & env.\ steps & envs & train ratio & batch & reward head \\
@@ -40,7 +41,7 @@ GRSN~\cite{qin2025grsn}: gated current $c_t=F\odot c_{t-1}+(1-F)\odot I$ and mem
   DMC (proprio.) & 0.5M & 4 & 512 & 16$\times$64 & DreamerV3 \\
   Memory Maze probing & 1M updates & -- & -- & 32$\times$48 & -- \\
   \bottomrule
-  \end{tabular}
+  \end{tabular}}
 \end{table}
 
 BSuite $L\le64$ uses a training window that covers the episode (32, 64, 64, 80 steps).

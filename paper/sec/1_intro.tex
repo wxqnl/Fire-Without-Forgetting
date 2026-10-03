@@ -29,7 +29,7 @@ First, every environment step starts from cleared membrane potentials, the stand
 Second, a somatic spike resets the dendrites together with the soma, so a dendritic trace survives only until the neuron next fires.
 Memory must therefore be re-encoded into spikes at every step, gradients cross a surrogate derivative at every step, and the time constants shape only the few simulation steps inside one environment step.
 This explains the earlier observation that changing the time constants of \swm barely changes its performance~\cite{sun2025spikingwm}.
-Long time constants do not help even without the resets: the Euler update writes input with gain $1/\tau$, so a compartment that holds a cue for 128 steps stores it at about one percent of the firing threshold.
+Long time constants do not help even without the resets: the Euler update writes input with gain $1/\tau$, so a compartment with a time constant of 128 simulation steps stores a cue at about one percent of the firing threshold.
 
 We call this failure \emph{reset-induced amnesia} and test it causally (\cref{sec:amnesia}).
 In a world-model probe that isolates memory from exploration, removing the dendritic reset or restoring the write gain has no effect while the step reset remains.

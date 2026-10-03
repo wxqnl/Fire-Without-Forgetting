@@ -22,7 +22,7 @@ All models share one spiking world model, the DreamerV3-style network of \swm~\c
 \item \textbf{\swm}~\cite{sun2025spikingwm}: multi-compartment neurons with both resets, $\tau=2$;
 \item \textbf{Recurrent LIF}: LIF neurons with recurrent spike input, cleared at every environment step, the usual practice in spiking RL;
 \item \textbf{GRSN}~\cite{qin2025grsn}: gated recurrent spiking neurons, updated once per environment step with their state carried across steps;
-\item \textbf{\swmnr}: \swm with interventions A+B+G of \cref{sec:causal} and $\tau_d=128$, \ie, without both resets;
+\item \textbf{\swmnr}: \swm with interventions A+B+G of \cref{sec:causal} and $\tau_d=128$, \ie, with both resets removed;
 \item \textbf{\dv}~\cite{hafner2025dreamerv3}: the same architecture without spikes (GRU core, SiLU activations, one simulation step), an ANN reference;
 \item \textbf{\method}: two PDN layers (\cref{sec:method}).
 \end{itemize}
@@ -32,7 +32,7 @@ Within a benchmark, all models use identical hyperparameters, budgets and evalua
 \paragraph{Benchmarks.}
 We use benchmarks with published protocols and ANN results.
 \emph{BSuite memory length}~\cite{osband2020bsuite} shows a cue, then $L$ uninformative steps, and rewards the agent for recalling the cue; we run $L\in\{8,16,32,64\}$ and $L\in\{51,71,101\}$ under the protocol of R2I~\cite{samsami2024r2i}.
-\emph{POPGym RepeatPrevious}~\cite{morad2023popgym} rewards the agent at every step for naming the suit of the card shown $k$ steps earlier ($k=4$ Easy, $k=32$ Medium), the task on which R2I reported its largest gains; we use R2I's configuration.
+\emph{POPGym RepeatPrevious}~\cite{morad2023popgym} rewards the agent at every step for naming the suit of the card shown $k$ steps earlier ($k=4$ Easy, $k=32$ Medium), one of the three most memory-demanding POPGym tasks that R2I evaluates; we use R2I's configuration.
 \emph{Memory Maze 9$\times$9}~\cite{pasukonis2023memorymaze} is first-person 3D navigation with 1000-step episodes; we use its offline probing benchmark with the official dataset and probes: after 1M world-model updates with truncated backpropagation through time, probes decode the positions of the target objects (MSE) and the maze layout (accuracy) from the frozen state.
 \emph{DMC}~\cite{tassa2018dmc} from proprioception (walker walk, cheetah run, cartpole swingup; 500k steps, train ratio 512, as in DreamerV3) is a non-memory control on which \swm was evaluated.
 On BSuite the reward is a function of cue \emph{and} action, which a scalar reward head of a Dreamer world model fails to learn within our budgets; all models therefore use a reward head indexed by the action (Supp.~\suppref{supp:reward}{B}).
