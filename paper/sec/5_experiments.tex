@@ -61,12 +61,11 @@ Recurrent LIF, cleared at every step, solves 8 steps; GRSN, which keeps its stat
 
 \method solves every length.
 It is as fast as the best baseline up to 16 steps, the fastest at 32 (32k steps), and the only model that solves 64 steps (102k).
-Under R2I's protocol it solves 51, 71 and 101 steps in \pend{[--]}, \pend{[--]} and \pend{[--]} environment steps.
-\TODO{Fill in when the R2I-protocol runs finish (expected Oct.~4--5). The earlier version of \method without resonant channels solved them in 62k, 382k and 202k steps.}
+Under R2I's protocol it solves 51, 71 and 101 steps in 82k, 282k and 362k environment steps; \dv needs 902k steps for 51 and solves neither 71 nor 101.
 
 On RepeatPrevious Easy, \method reaches a return of \pend{0.61} after \pend{20\%} of the budget, while the final returns of the baselines range from $-0.29$ (\swmnr) to 0.69 (recurrent LIF).
-On Medium, all baselines remain near chance after 2M steps, \dv included, consistent with R2I~\cite{samsami2024r2i}.
-\TODO{Medium result of \method (run at 20\%).}
+On Medium, all baselines remain at chance after 2M steps, \dv included, consistent with R2I~\cite{samsami2024r2i}, whereas the return of \method has risen to \pend{0.03} after \pend{35\%} of the budget.
+\TODO{Final POPGym returns of \method (expected Oct.~5--6).}
 
 \subsection{What the world model remembers}
 \label{sec:probe}
@@ -138,7 +137,7 @@ Half of each kind keeps both strengths.
 \TODO{DMC runs of \method finish around Oct.~4--5. Criterion (fixed in advance): no degradation relative to \swm, whose benchmark this is.}
 On DMC (\cref{tab:mm}), \method reaches \pend{[--]}, \pend{[--]} and \pend{[--]} on walker walk, cheetah run and cartpole swingup, against 923, 343 and 497 for \swm and 953, 699 and 871 for \dv.
 
-Per environment step, the world-model filter of \method costs \pend{[--]}\,$\mu$J, \pend{[--]}$\times$ less than \dv (17.2\,$\mu$J), at a recurrent firing rate of \pend{0.18}.
+Per environment step, the world-model filter of \method costs 5.9\,$\mu$J, 2.9$\times$ less than \dv (17.2\,$\mu$J), at a recurrent firing rate of 0.16.
 Most of its operations are accumulates triggered by spikes; the multiply-accumulates of the dendrites are local to each neuron (3 per integrator and 6 per resonant channel and step).
 Recurrent LIF and GRSN are cheaper still (4.9 and 3.6\,$\mu$J) but do not remember beyond 8 and 16 steps.
 These estimates count arithmetic only, the convention of SNN energy reports; memory access, which a hardware-aware study shows can dominate~\cite{dampfhoffer2023energy}, is not included for any model.

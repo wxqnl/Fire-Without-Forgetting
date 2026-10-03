@@ -781,11 +781,17 @@ POPGym Easy，奖励 ±1，1 万次更新：DreamerV3 0.95（3k 学会），Spik
 
 | 项 | 依赖 | 预计 |
 |---|---|---|
-| BSuite L51 / L71 / L101，`PD2Lreshalf_tau1000` | 在跑 | 10 月 4–5 日 |
 | DMC 三个任务，`PD2Lreshalf_tau1000`；cartpole 第一次启动 OOM，等显存重启 | 在跑 / 排队 | 10 月 4–5 日 |
 | POPGym Easy / Medium，`PD2Lv2_tau1000` | 在跑（20%） | 10 月 5–6 日 |
-| 表 8 能耗：`PD2Lreshalf_tau1000` 的 L32 RL 跑完后运行 `energy.py` | L32 在跑 | 今天 |
 | Memory Maze：1M 次更新上的冻结探针（读策略的输入） | 在跑 | 10 月 10–13 日 |
 | 附录表 7（策略输入）的 POPGym、DMC 两列 | `PD2Lreshalf` POPGym 排队中 | 10 月 6–7 日 |
 | 多 seed | 用户定 | — |
 | 结果出来后补写第 5.2、5.4、5.6 节的 TODO 段落 | 以上各项 | — |
+
+### 19.3 新结果（10 月 3 日 10:40，已写入论文）
+
+- R2I 协议 BSuite，策略只读胞体脉冲（`PD2Lreshalf_tau1000`）：L51 / L71 / L101 分别在 82k / 282k / 362k 步达到 0.9。DreamerV3：L51 902k，L71、L101 未学会。旧模型（只有积分器树突）：62k / 382k / 202k。
+- BSuite L8–L64（同上）：12k / 22k / 32k / 102k。L64 学会后评估回报在 0.6–1.0 之间波动，最后 3 次平均 0.73；旧模型稳定在 1.0。
+- 能耗（L32 RL 模型）：5.88 µJ / 步（5.76M AC，0.15M MAC），DreamerV3 17.18 µJ，低 2.9 倍；循环层发放率 0.159。
+- POPGym（`PD2Lv2_tau1000`，35%）：Easy 0.63，Medium 0.03。所有基线在 Medium 上跑满 2M 步，仍是随机水平（−0.44 到 −0.50）。
+- 剩余的 3 个排队任务（DMC cartpole 和两个 POPGym，均为只读胞体脉冲）已于 03:45–06:56 启动。
