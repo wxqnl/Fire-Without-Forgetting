@@ -519,6 +519,10 @@ def round16():
             jobs.append(job)
     for L, steps in ((8, 1.5e5), (16, 2e5), (32, 3e5), (64, 5e5)):
         jobs += rl2_jobs(f"bsuite_memlen-{L}", {"PD2Lv2_tau1000": V2}, steps=steps, extra=MEMLEN_EXTRA[L])
+    # 2026-10-02 20:40: at L64 the new world model recalls the cue (terminal reward AUC 1.0 on the
+    # evaluation episodes at 160k steps) but the policy has not learned to use it (old model: 82k steps).
+    # Ablation: the same model, the actor reading the soma spikes only (no policymem).
+    jobs += rl2_jobs("bsuite_memlen-64", {"PD2Lreshalf_tau1000": ["ours", "resonanthalf"]}, steps=5e5, extra=MEMLEN_EXTRA[64])
     # table 4: the remaining lengths; table 7: the ablations on top of the new model
     R = ["ours", "resonanthalf"]
     for L in (8, 16):
