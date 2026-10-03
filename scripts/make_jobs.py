@@ -561,7 +561,7 @@ def round16():
            "rl2/bsuite_memlen-64/": 32}
     for job in jobs:
         for prefix, gb in mem.items():
-            if job["name"].startswith(prefix):
+            if job["name"].startswith(prefix) and "/PD2Lv2_" in job["name"]:
                 job["mem_gb"] = gb
     # precise-lag recall probes (round 12 protocol) for the spiking baselines (DreamerV3 and the old model: round 12)
     base = {k: MAIN[k] + ["rewardbyact"] for k in ("base_tau2", "LIF_tau2", "GRSN_tau2", "ABG_tau128")}
