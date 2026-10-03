@@ -31,6 +31,7 @@ STYLE = {
     "ABG_tau128": dict(label="Spiking-WM-NR", color="#CC79A7"),
     "ann_tau2": dict(label="DreamerV3 (ANN)", color="#000000", ls="--"),
     "OURS": dict(label="FwF (ours)", color="#D55E00", lw=1.8, zorder=5),
+    "R2I": dict(label="R2I (ANN)", color="#0072B2", ls="-."),
 }
 # FwF's run per benchmark (actor input per task type, EXPERIMENTS.md §18.6)
 OURS = {"bsuite": "PD2Lreshalf_tau1000", "probe": "PD2Lreshalf_tau1000", "popgym": "PD2Lv2_tau1000"}
@@ -120,6 +121,16 @@ def rl_curves():
                 continue
             st = dict(STYLE[model])
             ax.plot(x / 1e6, ema(y), **st)
+        if fam == "popgym":  # R2I, official code: training-episode score, mean per 50k env steps
+            sc = RUNS / f"r2i_agent/{task.split('/')[1]}/R2I/s0/scores.jsonl"
+            if sc.exists():
+                r = [json.loads(l) for l in sc.read_text().splitlines() if l.strip()]
+                s_, v_ = np.array([q["step"] for q in r]), np.array([q["episode/score"] for q in r])
+                bins = np.arange(0, s_.max() + 50_000, 50_000)
+                idx = np.digitize(s_, bins)
+                xb = [s_[idx == i].mean() for i in np.unique(idx)]
+                yb = [v_[idx == i].mean() for i in np.unique(idx)]
+                ax.plot(np.array(xb) / 1e6, ema(np.array(yb)), **STYLE["R2I"])
         ax.set_title(title, pad=2)
         ax.set_xlabel("env steps (M)", labelpad=1)
         lo = -1.0 if fam == "popgym" else -0.5
@@ -128,7 +139,7 @@ def rl_curves():
             ax.axhline(-0.5, color="0.75", lw=0.5, zorder=0)
     axes[0].set_ylabel("eval. return")
     handles = [plt.Line2D([], [], **{k: v for k, v in STYLE[m].items() if k != "zorder"}) for m in STYLE]
-    fig.legend(handles=handles, ncol=6, loc="upper center", bbox_to_anchor=(0.5, 1.0), handlelength=2.0)
+    fig.legend(handles=handles, ncol=7, loc="upper center", bbox_to_anchor=(0.5, 1.0), handlelength=2.0)
     fig.tight_layout(pad=0.2, rect=(0, 0, 1, 0.88), w_pad=0.6)
     fig.savefig(FIG / "rl_curves.pdf")
     plt.close(fig)

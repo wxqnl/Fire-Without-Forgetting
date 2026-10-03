@@ -8,6 +8,7 @@
   $^\dagger$Protocol of R2I~\cite{samsami2024r2i} (1M steps, a different seed per parallel environment).
   POPGym RepeatPrevious~\cite{morad2023popgym} with R2I's configuration: final return (mean of the last three evaluations; chance $=-0.5$, perfect $=1$).
   \nr\ = not run: LIF and GRSN fail at 32 steps, so the longer settings are run for the remaining models.
+  $^\ddagger$R2I with its official code and configuration, 2M steps: mean training-episode return over the last 200k steps (its code has no separate evaluation; for our models the two measures differ by at most 0.04).
   \pend{Blue}: run in progress.}
   \label{tab:rl}
   \input{tables/rl}
@@ -26,6 +27,7 @@ All models share one spiking world model, the DreamerV3-style network of \swm~\c
 \item \textbf{\dv}~\cite{hafner2025dreamerv3}: the same architecture without spikes (GRU core, SiLU activations, one simulation step), an ANN reference;
 \item \textbf{\method}: two PDN layers (\cref{sec:method}).
 \end{itemize}
+As the state of the art among ANN world models on memory tasks we also report \textbf{R2I}~\cite{samsami2024r2i}, a DreamerV3 agent with a state-space recurrence, run with its official code and configuration on POPGym, and with its published results on BSuite.
 Within a benchmark, all models use identical hyperparameters, budgets and evaluation; only the keys of the recurrent core differ (Supp.~\suppref{supp:impl}{A}).
 \method has 8.6M world-model parameters, \dv 7.5M and \swm 7.2M.
 
@@ -62,6 +64,7 @@ Recurrent LIF, cleared at every step, solves 8 steps; GRSN, which keeps its stat
 \method solves every length.
 It is as fast as the best baseline up to 16 steps, the fastest at 32 (32k steps), and the only model that solves 64 steps (102k).
 Under R2I's protocol it solves 51, 71 and 101 steps in 82k, 282k and 362k environment steps; \dv needs 902k steps for 51 and solves neither 71 nor 101.
+R2I reports a median return of about 0.9 at 51 and 71 memory steps and about 0.35 at 101 after 1M steps (10 seeds; Fig.~7 of~\cite{samsami2024r2i}), with DreamerV3's default reward head; our lengths count one step more, and all our models use the action-indexed reward head (\cref{sec:setup}), so the comparison is indicative.
 
 On RepeatPrevious Easy, \method reaches a return of \pend{0.61} after \pend{20\%} of the budget, while the final returns of the baselines range from $-0.29$ (\swmnr) to 0.69 (recurrent LIF).
 On Medium, all baselines remain at chance after 2M steps, \dv included, consistent with R2I~\cite{samsami2024r2i}, whereas the return of \method has risen to \pend{0.03} after \pend{35\%} of the budget.

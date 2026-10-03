@@ -795,3 +795,20 @@ POPGym Easy，奖励 ±1，1 万次更新：DreamerV3 0.95（3k 学会），Spik
 - 能耗（L32 RL 模型）：5.88 µJ / 步（5.76M AC，0.15M MAC），DreamerV3 17.18 µJ，低 2.9 倍；循环层发放率 0.159。
 - POPGym（`PD2Lv2_tau1000`，35%）：Easy 0.63，Medium 0.03。所有基线在 Medium 上跑满 2M 步，仍是随机水平（−0.44 到 −0.50）。
 - 剩余的 3 个排队任务（DMC cartpole 和两个 POPGym，均为只读胞体脉冲）已于 03:45–06:56 启动。
+
+### 19.4 R2I 对照（10 月 3 日；用户："如果明显能提升我们这篇论文的论述效果的话，那就做吧"）
+
+- 决定：跑 R2I；不加像素 DMC。理由：
+  - 表中缺 ANN 记忆 SOTA 一行，是审稿最可能追问的地方；
+  - 像素 DMC 只说明"非记忆任务不退化"，本体感觉 DMC 已经说明了，而脉冲模型从像素训练每个任务要 6–10 天。
+- 代码：R2I 官方仓库（`external/Recall2Imagine`，commit 6e317e7，不进 git），conda 环境 `r2i`。
+  - JAX 0.4.13；CUDA 12.1 和 cuDNN 8.9 的 pip 包。默认装上的 cuDNN 9 与 jaxlib 不兼容。
+- POPGym：官方 `popgym` 配置，`scripts/run_r2i.sh`，只改三项：
+  - `run.steps 2e6`：与我们的预算相同；
+  - `replay_size 2e6`：默认的 1e7 FIFO 在 2M 步内不会装满，采样不变；
+  - `jax.prealloc False`：GPU 是共享的。
+  - 运行目录 `runs/r2i_agent/popgym_RepeatPrevious{Easy,Medium}/R2I/s0`，GPU1，11:40 启动。约 2.5 分钟 5 万步，预计 2–4 小时跑完。
+  - 官方 `train_eval` 脚本在此版本中报错（batcher 需要 replay 对象），所以按 R2I 自己的 POPGym 配置用 `train` 脚本，记录训练回合的回报。我们的模型收敛后，训练回合回报与评估回报相差不超过 0.04。表中 R2I 取最后 200k 步训练回合回报的平均。
+- BSuite：官方仓库没有 BSuite 配置（README 写"Coming soon"，`configs_backup.yaml` 中有一份，但与论文的 1M 步不一致），所以不重跑，引用论文附录图 7（1M 步，10 个种子的中位数）。
+  - 从图上读：R2I 在 51、71 步约 0.9，81 步约 0.75，91 步约 0.5，101 步约 0.35。DreamerV3 约 30 步以上失败。
+  - R2I 的"memory steps"比我们的 L 少 1；它用默认奖励头，我们所有模型用按动作索引的奖励头。文中写明这两点，说明这一比较只作参考。
