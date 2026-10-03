@@ -523,6 +523,25 @@ def round16():
     # evaluation episodes at 160k steps) but the policy has not learned to use it (old model: 82k steps).
     # Ablation: the same model, the actor reading the soma spikes only (no policymem).
     jobs += rl2_jobs("bsuite_memlen-64", {"PD2Lreshalf_tau1000": ["ours", "resonanthalf"]}, steps=5e5, extra=MEMLEN_EXTRA[64])
+    # 2026-10-03 02:30: that ablation learns L64 at 102k (with the dendrites in the actor input: 192k, and
+    # not stable; L101 not learned at 284k, old model 202k). R2I feeds its policy the output state on
+    # BSuite and DMC and the hidden / full state on POPGym and Memory Maze. The actor reading the soma
+    # spikes only, on the other BSuite lengths and DMC (§18.6).
+    R = ["ours", "resonanthalf"]
+    out = []
+    for L, steps in ((8, 1.5e5), (16, 2e5), (32, 3e5)):
+        out += rl2_jobs(f"bsuite_memlen-{L}", {"PD2Lreshalf_tau1000": R}, steps=steps, extra=MEMLEN_EXTRA[L])
+    for L, window in ((51, 64), (71, 80), (101, 128)):
+        for job in rl2_jobs(f"bsuite_memlen-{L}", {"PD2Lreshalf_tau1000": R}, steps=1e6,
+                            extra=f"--batch_length {window} --env_seed_per_env True", eval_every=2e4):
+            out.append({k: v.replace("rl2/", "r2i/") if isinstance(v, str) else v for k, v in job.items()})
+    for task in ("dmc_walker_walk", "dmc_cheetah_run", "dmc_cartpole_swingup"):
+        for job in dmc_jobs(task, {"PD2Lreshalf_tau1000": R}, steps=5e5, train_ratio=512, group="dmc500"):
+            job["cmd"] = job["cmd"].replace(" --logdir ", " --env_seed_per_env True --logdir ")
+            out.append(job)
+    for job in out:
+        job["mem_gb"] = 26 if "memlen-101" in job["name"] else 18
+    jobs += out
     # table 4: the remaining lengths; table 7: the ablations on top of the new model
     R = ["ours", "resonanthalf"]
     for L in (8, 16):
