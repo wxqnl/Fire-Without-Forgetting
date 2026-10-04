@@ -948,3 +948,23 @@ Stage 3 模拟审稿（`paper/review/stage3/`）的结论是 Major Revision。�
 - DMC 本文：walker 911、cheetah 535、cartpole 746（约 89% 进度）。Spiking-WM 已跑完：923、343、497。
 - POPGym 本文：Easy 0.69（83%）、Medium 0.48（88%）。
 - 两项 TODO 等跑完再填。
+
+### 19.11 actor-critic 与基线同样大小，以及像素 DMC（10 月 4 日；用户："尤其是第 5 个，为啥我们的会大这么多？…那我们能不能也这么大？或者把他们搞得差不多量级"）
+
+**为什么大**：所有模型的 actor 和 critic 都是 2 层、512 宽的 MLP，共 3 个网络：actor、critic、慢 critic（EMA 副本）。
+- 基线的输入是 $(z_t, h_t)$，即 1024 + 512 = 1536 维，3 个网络合计 3.42M。所有基线一样大（POPGym 3,415,566，DreamerV3 少 12 个）。
+- FwF 还要读 6144 个树突脉冲（512 个神经元 × 6 个状态变量 × ON/OFF），第一层每个网络多出 6144 × 512 ≈ 3.15M，3 个网络合计多 9.4M，所以是 12.85M。
+
+**用户决定**："缩到和基线一样的 3.4M"（`make_jobs.round19()`）。
+- `acmatch`：`ac_units: 142`。POPGym 上 3,407,390 个参数，DMC 3,408,534，BSuite 3,407,104。基线分别为 3,415,566 / 3,419,670 / 3,414,540，略小于基线。
+- `aclowrank`：备选。宽度保持 512，树突脉冲到第一层的权重分解成 $WP$，$P$ 为 6144 → 64，共 4.69M。代码是 `networks.LowRankInput`，配置项 `ac_rank`，默认 0，已有运行不受影响。
+- 验证任务：POPGym Medium（2M 步）、DMC walker（500k）、BSuite L64（500k）。
+- 判定规则事先定好：默认用宽度 142，除非它明显不如秩 64 的版本。选定的版本随后重跑 FwF 的全部强化学习基准：BSuite 7 个长度、POPGym 2 个、DMC 3 个、像素 DMC 3 个。
+- 世界模型探针和 Memory Maze 不涉及 actor，不受影响。
+
+**像素 DMC**（用户："补像素 DMC"，推翻原来的 2A）
+- 用 DreamerV3 的 `dmc_vision` 配置：1M 帧，action repeat 2，train ratio 512，每个并行环境用不同的种子。这也是 Spiking-WM 原文评测的设置（walker 938、cheetah 577、cartpole 791）。
+- Spiking-WM 和 DreamerV3 先跑；FwF 等 actor 大小定下来再跑。
+- 已知问题：此前在 MPS 下 MuJoCo 渲染会崩溃（`runs/_dmc_render_abort`）。要先找到能用的渲染后端。
+
+**多种子**：用户 "先不补，这不是最关键的"。

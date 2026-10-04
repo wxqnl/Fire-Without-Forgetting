@@ -4,7 +4,7 @@ import os
 import pathlib
 import sys
 
-os.environ["MUJOCO_GL"] = "egl"
+os.environ.setdefault("MUJOCO_GL", "egl")  # pixel DMC jobs set MUJOCO_GL=osmesa (EGL hangs here, EXPERIMENTS.md §19.11)
 
 import numpy as np
 import ruamel.yaml as yaml

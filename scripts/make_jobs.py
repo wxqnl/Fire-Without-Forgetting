@@ -491,6 +491,7 @@ def round15():
     return jobs
 
 
+PIX_MEM = {"base_tau2": 30, "ann_tau2": 8}  # GPU memory (GB) of the DMC-from-pixels runs, set after the smoke test
 V2 = ["ours", "resonanthalf", "policymem"]  # our model after §18 (resonant dendrites, actor reads the dendrites)
 
 
@@ -611,6 +612,47 @@ def round18():
     return jobs
 
 
+def round19():
+    """2026-10-04, user decisions after the Stage 4 status report (EXPERIMENTS.md §19.11):
+    1. FwF's actor-critic at the baselines' size (user: "能不能也这么大"; chosen: shrink ours to 3.4M).
+       Two candidates, validated on the three tasks where the actor input matters most: POPGym
+       RepeatPrevious Medium, DMC walker and BSuite memlen-64. Decision rule fixed in advance: the
+       width-142 version (3.41M, the same size as the baselines) unless it is clearly worse than the
+       rank-64 version (4.7M); the chosen one then reruns every RL benchmark of FwF.
+    2. DMC from pixels (user: "补像素 DMC"), the setting Spiking-WM was evaluated in: DreamerV3's
+       dmc_vision configuration, 1M env frames, train ratio 512. Spiking-WM and DreamerV3 now; FwF once
+       item 1 is decided."""
+    jobs = []
+    cand = {"PD2Lv2m_tau1000": V2 + ["acmatch"], "PD2Lv2r64_tau1000": V2 + ["aclowrank"]}
+    for cell, cfgs in cand.items():
+        name = f"popgym/popgym_RepeatPreviousMedium/{cell}/s0"
+        cmd = (f"{{python}} dreamer.py --configs popgym {' '.join(cfgs)} --task popgym_RepeatPreviousMedium --seed 0 "
+               f"--steps 2e6 --train_ratio 64 --envs 8 --batch_length 64 --env_seed_per_env True --eval_every 5e4 "
+               f"--logdir {RUNS / name}")
+        jobs.append(dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=26))
+    for job in dmc_jobs("dmc_walker_walk", cand, steps=5e5, train_ratio=512, group="dmc500"):
+        job["cmd"] = job["cmd"].replace(" --logdir ", " --env_seed_per_env True --logdir ")
+        job["mem_gb"] = 30
+        jobs.append(job)
+    for job in rl2_jobs("bsuite_memlen-64", cand, steps=5e5, extra=MEMLEN_EXTRA[64]):
+        job["mem_gb"] = 32
+        jobs.append(job)
+    return jobs
+
+
+def round20():
+    """DMC from pixels (round19 item 2). MuJoCo renders with OSMesa on the CPU: EGL hangs on this
+    machine and rendering aborted under the MPS GPU setup before (runs/_dmc_render_abort)."""
+    jobs = []
+    for task in ("dmc_walker_walk", "dmc_cheetah_run", "dmc_cartpole_swingup"):
+        for cell in ("base_tau2", "ann_tau2"):
+            name = f"dmcpix/{task}/{cell}/s0"
+            cmd = (f"MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa {{python}} dreamer.py --configs dmc_vision {' '.join(MAIN[cell])} --task {task} --seed 0 "
+                   f"--steps 1e6 --train_ratio 512 --eval_every 2e4 --env_seed_per_env True --logdir {RUNS / name}")
+            jobs.append(dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=PIX_MEM[cell]))
+    return jobs
+
+
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
     # Memory Maze pipeline check (round 10), Memory Maze on the official data once downloaded, round 8
@@ -626,7 +668,7 @@ def main():
     # Round 14 (integrate-and-fire soma) failed check V1 on 2026-10-02 (EXPERIMENTS.md §17.4): its
     # unfinished runs were stopped and are not queued again.
     r14 = [j for j in round14() if j["name"] == "recall/bsuite_memlen-8-recall/PD2Lif_tau1000/s0"]
-    jobs = (round18() + round17() + round16() + round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
+    jobs = (round19() + round18() + round17() + round16() + round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
             + r8 + round11())
     # the old model's 1M Memory Maze continuation was stopped on 2026-10-02 (superseded, EXPERIMENTS.md §18.4)
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2L_tau1000/s0"]

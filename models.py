@@ -253,7 +253,9 @@ class ImagBehavior(nn.Module):
             feat_size = config.dyn_stoch * config.dyn_discrete + config.dyn_deter
         else:
             feat_size = config.dyn_stoch + config.dyn_deter
-        feat_size += world_model.dynamics.policy_extra
+        extra = world_model.dynamics.policy_extra
+        rank = getattr(config, "ac_rank", 0) if extra else 0
+        feat_size += rank or extra
         ac_units = getattr(config, "ac_units", 0) or config.units
         self.actor = networks.ActionHead(
             feat_size,
@@ -303,6 +305,9 @@ class ImagBehavior(nn.Module):
                 device=config.device,
                 spike_times=config.spike_times
             )
+        if rank:
+            self.actor = networks.LowRankInput(self.actor, extra, rank)
+            self.value = networks.LowRankInput(self.value, extra, rank)
         if config.slow_value_target:
             self._slow_value = copy.deepcopy(self.value)
             self._updates = 0

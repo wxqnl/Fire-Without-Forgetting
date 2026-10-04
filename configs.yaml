@@ -54,6 +54,7 @@ defaults:
   value_layers: 2
   actor_layers: 2
   ac_units: 0  # width of the actor and critic; 0 = units
+  ac_rank: 0  # rank of the actor's and critic's weights from the dendritic spikes; 0 = full
   act: 'LIFNode'
   norm: 'PopNorm'
   encoder:
@@ -363,6 +364,13 @@ policymem:
 # the size of FwF's (12.85M parameters on POPGym; 3.42M at the default width)
 acwide:
   ac_units: 1384
+# FwF's actor-critic at the baselines' size (EXPERIMENTS.md §19.11; user decision 2026-10-04): narrowed
+# to 142 units (3.41M parameters on POPGym; baselines 3.42M) ...
+acmatch:
+  ac_units: 142
+# ... or, kept at 512 units, with rank-64 synaptic weights from the dendritic spikes (4.7M)
+aclowrank:
+  ac_rank: 64
 
 # baselines: recurrent LIF (T SNN steps per env step, membrane cleared each step unless combined
 # with persist) and GRSN (Qin et al., AAAI 2025; one update per env step, state carried)

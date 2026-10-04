@@ -909,6 +909,22 @@ class SpikeMLP(nn.Module):
                 mod.n_reset()
 
 
+class LowRankInput(nn.Module):
+    """Wraps the actor or a critic: its last `extra` input features (the dendritic ON/OFF spikes of
+    policy_mem) reach the first layer through a rank-`rank` factor, i.e. through the weights W P with
+    P: extra -> rank (configs block aclowrank, EXPERIMENTS.md §19.11)."""
+
+    def __init__(self, net, extra, rank):
+        super().__init__()
+        self.net = net
+        self.extra = extra
+        self.proj = nn.Linear(extra, rank, bias=False)
+
+    def forward(self, x, *args, **kwargs):
+        x = torch.cat([x[..., :-self.extra], self.proj(x[..., -self.extra:])], -1)
+        return self.net(x, *args, **kwargs)
+
+
 class ActionHead(nn.Module):
     def __init__(
         self,
