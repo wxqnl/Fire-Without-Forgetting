@@ -16,7 +16,7 @@
 | 1 RESEARCH | 跳过 | — | — |
 | 2 WRITE | 跳过（草稿已有） | — | — |
 | 2.5 INTEGRITY | 完成：第 1 轮 FAIL，修正后 PASS WITH NOTES；Mode 4 SUSPECTED | `stage2_5_integrity.md`、`audit/` | 待确认 |
-| 3 REVIEW | 未开始 | | |
+| 3 REVIEW | 完成（10 月 4 日）：Major Revision；评分 3/3/4/3/2（6 级）；面板由同一子 agent 依次写成，非独立 | `review/stage3/`（5 份报告、editorial_decision、revision_roadmap） | "你搞个子 agent 来继续模拟审稿" |
 | 4 REVISE | 未开始 | | |
 | 3′ RE-REVIEW | 未开始 | | |
 | 4.5 FINAL INTEGRITY | 未开始 | | |
@@ -34,4 +34,9 @@ Stage 2.5 之后、Stage 3 之前的用户改动（10 月 4 日）：
 - Mode 4 现在的情况：本文的 actor-critic 在所有任务上都读树突，因而更大（POPGym 上 12.9M，基线 3.4M）；附录 A 已披露。
 - Mode 4 用户决定（10 月 4 日，原话）："b 可以跑，但是没必要都跑呀，他就是最多算一个消融，就在消融里面做一个任务就够了呀"。
   - 处理：在 POPGym RepeatPrevious Easy 上加跑一组只读胞体、actor-critic 加宽到 12.85M 的对照，放进附录 E（EXPERIMENTS.md §19.7）。
-- 是否进入 Stage 3：尚未得到用户的"继续"。
+- 进入 Stage 3：用户原话 "你搞个子 agent 来继续模拟审稿"（10 月 4 日）。
+
+Stage 3 结果核对（主 agent，10 月 4 日）：
+- Spiking-WM 原文（arXiv 2503.00713 表 I）评测的是像素 DMC，1M 帧，约 18.8M 参数；walker walk / cheetah run / cartpole swingup 分别为 938.5 / 577.2 / 791.0。审稿所说属实；论文 §5.1 "on which Spiking-WM was evaluated" 需更正。
+- R2I 在 POPGym 上 2M 步处于随机水平：与其原文 50M 步曲线（图 9）对照，Medium 一致，Easy 低于其 3 种子均值。属于预算差异，需在文中说明（EXPERIMENTS §19.5）。
+- 等待用户在 MANDATORY 审稿决定检查点做出选择。
