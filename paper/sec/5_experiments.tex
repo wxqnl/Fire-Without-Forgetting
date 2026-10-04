@@ -95,7 +95,7 @@ At $k=4$ most models learn it, \method fastest (2k updates).
 At $k=32$, \method is the only model that learns it (AUC 0.93 after 6k updates); all others, including \dv and GRSN, remain at 0.50--0.55 (curves in Supp.~\suppref{supp:probe}{C}).
 Resonance is the reason: the same model with integrator channels only also stays at chance (0.54), and in RL its world model reached a reward AUC of only 0.55 on Medium (Supp.~\suppref{supp:diag}{F}).
 We added resonant channels after the integrator-only model failed this task, and the configuration has not changed since.
-RepeatPrevious Hard ($k=64$), which we did not use during development, tests it on a new lag: \method reaches an AUC of 0.9 after 7k updates, and all other models stay at \pend{0.50--0.53} for 20k updates.
+RepeatPrevious Hard ($k=64$), which we did not use during development, tests it on a new lag: \method reaches an AUC of 0.9 after 7k updates, and all other models stay at \pend{0.50--0.54} for 20k updates.
 
 \subsection{Memory Maze}
 \label{sec:mm}
