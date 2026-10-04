@@ -115,14 +115,14 @@ def rl_table():
 
 def probe_table():
     """Table 3: world-model probes, memlen-L-recall and RepeatPrevious (precise lag)."""
-    lines = [r"\setlength{\tabcolsep}{2.2pt}", r"\begin{tabular}{@{}l cccc cc@{}}", r"\toprule",
-             r" & \multicolumn{4}{c}{memlen-$L$-recall} & \multicolumn{2}{c}{RepeatPrevious} \\",
-             r"\cmidrule(lr){2-5}\cmidrule(l){6-7}",
-             r" & $L$=8 & 16 & 32 & 64 & $k$=4 & $k$=32 \\", r"\midrule"]
+    lines = [r"\setlength{\tabcolsep}{2.0pt}", r"\begin{tabular}{@{}l cccc ccc@{}}", r"\toprule",
+             r" & \multicolumn{4}{c}{memlen-$L$-recall} & \multicolumn{3}{c}{RepeatPrevious} \\",
+             r"\cmidrule(lr){2-5}\cmidrule(l){6-8}",
+             r" & $L$=8 & 16 & 32 & 64 & $k$=4 & 32 & 64$^\ast$ \\", r"\midrule"]
     for m, label in MODELS:
         run_p = lambda t: f"recall/bsuite_memlen-{t}-recall/{mt.key(m, 'probe')}"
         cells = [probe(run_p(L)) for L in (8, 16, 32, 64)]
-        cells += [probe(f"diag_rp/popgym_RepeatPrevious{d}/{mt.key(m, 'probe')}") for d in ("Easy", "Medium")]
+        cells += [probe(f"diag_rp/popgym_RepeatPrevious{d}/{mt.key(m, 'probe')}") for d in ("Easy", "Medium", "Hard")]
         if m == "OURS":
             lines.append(r"\midrule")
         lines.append(label + " & " + " & ".join(cells) + r" \\")

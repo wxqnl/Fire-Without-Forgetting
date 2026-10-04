@@ -2,7 +2,7 @@
 \label{sec:conclusion}
 
 Spiking world models forget because their neurons are reset at every environment step and at every spike, which leaves their time constants nothing to act on.
-\method keeps memory in persistent, normalized integrator and resonant dendrites that no spike touches, and communicates through the spikes of a stateless soma.
+\method keeps memory in persistent, normalized integrator and resonant dendrites that no spike resets, and communicates through the spikes of a stateless soma.
 A spiking world model built from these neurons remembers further back than DreamerV3 on BSuite and recalls exact lags that DreamerV3 cannot, at a recurrent firing rate of 0.15 and 3.9$\times$ less arithmetic energy per step.
 
 \paragraph{Limitations.}

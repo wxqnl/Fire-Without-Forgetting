@@ -81,7 +81,7 @@ At 2M steps, the comparison is one of sample efficiency.
 
 \begin{table}[t]
   \centering\tabfont
-  \caption{\textbf{World-model probes} (random-policy data, no policy). Updates until the reward AUC exceeds 0.9; -- = not within 12k (memlen) or 10k (RepeatPrevious) updates; in parentheses the final AUC (0.5 = no memory) when it ends below 0.9.}
+  \caption{\textbf{World-model probes} (random-policy data, no policy). Updates until the reward AUC exceeds 0.9; -- = not within 12k (memlen) or 10k (RepeatPrevious) updates; in parentheses the final AUC (0.5 = no memory) when it ends below 0.9. $^\ast$Held out (not used during development): 20k updates, training window 128.}
   \label{tab:probe}
   \input{tables/probe}
 \end{table}
@@ -94,7 +94,8 @@ RepeatPrevious asks for a different memory: not one value held for long, but the
 At $k=4$ most models learn it, \method fastest (2k updates).
 At $k=32$, \method is the only model that learns it (AUC 0.93 after 6k updates); all others, including \dv and GRSN, remain at 0.50--0.55 (curves in Supp.~\suppref{supp:probe}{C}).
 Resonance is the reason: the same model with integrator channels only also stays at chance (0.54), and in RL its world model reached a reward AUC of only 0.55 on Medium (Supp.~\suppref{supp:diag}{F}).
-We added resonant channels after the integrator-only model failed this task, and the configuration has not changed since; RepeatPrevious Hard ($k=64$), which we did not use during development, tests it on a new lag. \TODO{Hard probe results of all models (20k updates, window 128).}
+We added resonant channels after the integrator-only model failed this task, and the configuration has not changed since.
+RepeatPrevious Hard ($k=64$), which we did not use during development, tests it on a new lag: \method reaches an AUC of 0.9 after 7k updates, and all other models stay at \pend{0.50--0.53} for 20k updates.
 
 \subsection{Memory Maze}
 \label{sec:mm}
@@ -130,7 +131,8 @@ Memory Maze tests whether a world model builds a map of a 3D maze from first-per
 \emph{Channel types}: without resonant channels the model fails RepeatPrevious Medium; with only resonant channels it still solves it but needs almost twice as many updates at 64 steps (6.5k vs.\ 3.5k, and its AUC does not stay above 0.9), where a value must be held unchanged.
 Half of each kind keeps both strengths.
 \emph{Sparsity}: capping the firing rate at 0.06 (from 0.18) keeps 32-step recall (2k updates) but loses 64-step recall within the budget.
-\emph{Stateless soma and no spike feedback}: \TODO{results of the soma with a membrane that its spike resets, and of dendrites that also receive the layer's spikes (64 steps, $k=32$).}
+\emph{Stateless soma}: a soma that keeps a membrane potential across steps and is reset by its spike learns $k=32$ as fast as \method (6k updates) but fails at 64 steps (AUC 0.50).
+\emph{Spike feedback}: dendrites that also receive the layer's spikes learn both tasks slightly more slowly (4k and 7k updates instead of 3.5k and 6k).
 
 \subsection{Non-memory control and energy}
 \label{sec:energy}

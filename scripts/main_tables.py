@@ -55,7 +55,9 @@ ABLATIONS = [("PD2Lreshalf_tau1000", "ours"), ("PD2Lreshalfreset_tau1000", "dend
              ("PD2Lreshalfeuler_tau1000", "Euler input gain 1 − λ"), ("PD2Lreshalffix_tau1000", "τ fixed (not learned)"),
              ("PD2Lreshalfcap_tau1000", "firing rate capped at 0.06"), ("PDreshalf_tau1000", "1 layer"),
              ("PDT1reshalf_tau1000", "1 layer, T = 1"), ("PD2Lres_tau1000", "all channels resonant"),
-             ("PD2L_tau1000", "no resonant channels (before §18)")]
+             ("PD2L_tau1000", "no resonant channels (before §18)"),
+             ("PD2Lreshalfsomalif_tau1000", "soma with membrane (τ = 2) and spike reset"),
+             ("PD2Lreshalffeedback_tau1000", "spike feedback into the dendrites")]
 
 
 def jobs():
@@ -229,15 +231,16 @@ def main():
 
     out += ["", "## Table 4b. World-model probe, precise-lag recall (POPGym RepeatPrevious, random-action data)", "",
             "Reward-prediction AUC for 'the previous action matched the card k steps back' (Easy k = 4, Medium",
-            "k = 32), unit rewards, window 64, 10k updates. Updates until AUC > 0.9 / final AUC (firing rate).", ""]
-    rp_tasks = ["popgym_RepeatPreviousEasy", "popgym_RepeatPreviousMedium"]
+            "k = 32), unit rewards, window 64, 10k updates. Hard (k = 64, held out: not used during development):",
+            "window 128, 20k updates. Updates until AUC > 0.9 / final AUC (firing rate).", ""]
+    rp_tasks = ["popgym_RepeatPreviousEasy", "popgym_RepeatPreviousMedium", "popgym_RepeatPreviousHard"]
     body = []
     for m, label in models:
         if m in ("OURSALT", "gru_tau2"):
             continue
         cells = [probe_cells(f"diag_rp/{t}/{key(m, 'probe')}") for t in rp_tasks]
         body.append([label] + [c[0] for c in cells] + [c[1] for c in cells])
-    out += table(["model", "Easy updates", "Medium updates", "Easy AUC", "Medium AUC"], body)
+    out += table(["model", "Easy updates", "Medium updates", "Hard updates", "Easy AUC", "Medium AUC", "Hard AUC"], body)
 
     base = mm_baseline()
     out += ["", "## Table 5. Memory Maze 9×9 offline probing benchmark (Pasukonis et al. 2023; official data and probe)", "",
@@ -260,13 +263,14 @@ def main():
     out += table(["model"] + [short(t) for t in DMC], [[label] + [rl_cell(f"dmc500/{t}/{key(m, 'dmc')}", fmt="{:.0f}") for t in DMC]
                                                        for m, label in dmc_models])
 
-    out += ["", "## Table 7. Ablations of our model (probe, memlen-L-recall)", "",
+    out += ["", "## Table 7. Ablations of our model (probe, memlen-L-recall and RepeatPrevious Medium)", "",
             "Updates until reward AUC > 0.9 / final AUC (firing rate).", ""]
     body = []
     for m, label in ABLATIONS:
-        l32, l64 = (probe_cells(f"recall/bsuite_memlen-{n}-recall/{m}") for n in (32, 64))
-        body.append([label, *l32, *l64])
-    out += table(["variant", "L32 updates", "L32 AUC (rate)", "L64 updates", "L64 AUC (rate)"], body)
+        l32, l64, rp = (probe_cells(r) for r in (f"recall/bsuite_memlen-32-recall/{m}", f"recall/bsuite_memlen-64-recall/{m}",
+                                                f"diag_rp/popgym_RepeatPreviousMedium/{m}"))
+        body.append([label, *l32, *l64, *rp])
+    out += table(["variant", "L32 updates", "L32 AUC (rate)", "L64 updates", "L64 AUC (rate)", "Medium updates", "Medium AUC (rate)"], body)
 
     out += ["", "## Table 8. Operations and energy per environment step (world-model filter: encoder + posterior; agent: filter + actor)", "",
             "45 nm: 0.9 pJ per AC, 4.6 pJ per MAC; memory access not counted. Models of the BSuite L32 RL runs.",

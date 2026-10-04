@@ -64,7 +64,7 @@ The normalization of the LRU~\cite{orvieto2023lru} thus keeps channels with rete
 
 \paragraph{What the PDN adds.}
 We adopt the input normalization and the initialization of the LRU~\cite{orvieto2023lru}.
-The PDN adds what a spiking world model needs: binary spikes as the only signal between its neurons, no reset of and no spike feedback into the memory, a stateless soma, and separate integrator and resonant channels; \cref{sec:ablation} removes each of them.
+The PDN adds what a spiking world model needs: binary spikes as the only signal between its neurons, memory that no spike resets, a stateless soma, and separate integrator and resonant channels; \cref{sec:ablation} removes the last three and adds spike feedback, which does not help.
 
 \paragraph{A spectrum of retention times.}
 The memory length a task needs is not known in advance.
