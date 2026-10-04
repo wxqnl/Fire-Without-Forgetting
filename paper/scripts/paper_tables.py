@@ -204,7 +204,7 @@ def mm_dmc_energy_table():
 
 def policy_table():
     """Supp.: the two actor inputs of FwF on every task (soma spikes vs soma + dendritic spikes)."""
-    variants = [("PD2Lreshalf_tau1000", r"$(z_t, h_t)$"), ("PD2Lv2_tau1000", r"$(z_t, h_t)$ + dendritic spikes")]
+    variants = [("PD2Lv2_tau1000", r"$(z_t, h_t)$ + dendritic spikes (\method)"), ("PD2Lreshalf_tau1000", r"$(z_t, h_t)$ only")]
     cols = [("rl2", L) for L in (8, 16, 32, 64)] + [("r2i", L) for L in (51, 71, 101)]
     dmc = ["walker_walk", "cheetah_run", "cartpole_swingup"]
     lines = [r"\begin{tabular}{@{}l ccccccc cc ccc@{}}", r"\toprule",

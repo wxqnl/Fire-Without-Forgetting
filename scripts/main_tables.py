@@ -25,12 +25,12 @@ MAIN = [("base_tau2", "Spiking-WM"), ("LIF_tau2", "LIF"), ("GRSN_tau2", "GRSN"),
         ("ABG_tau128", "Spiking-WM + A+B+G"), ("OURS", "**Ours**"), ("ann_tau2", "DreamerV3 (ANN)")]
 EXTRA = [("gru_tau2", "spiking enc. + GRU"), ("OURSALT", "ours, other actor input"),
          ("PD2L_tau1000", "ours before §18 (integrator dendrites only)")]
-# Our model (EXPERIMENTS.md §18): one world model; the actor input follows R2I per task type (§18.6):
-# soma spikes only on BSuite and DMC, soma + dendritic spikes on POPGym and Memory Maze. The world-model
-# probes do not involve the actor. OURSALT: the other actor input, for the appendix ablation.
-OURS = {"bsuite": "PD2Lreshalf_tau1000", "dmc": "PD2Lreshalf_tau1000", "probe": "PD2Lreshalf_tau1000",
+# Our model (EXPERIMENTS.md §18, §19.6): one configuration on every task; the actor and critic read the
+# soma spikes and the second-layer dendrites as ON/OFF spikes (policymem). The world-model probes do
+# not involve the actor (their runs are named PD2Lreshalf). OURSALT: soma spikes only, appendix ablation.
+OURS = {"bsuite": "PD2Lv2_tau1000", "dmc": "PD2Lv2_tau1000", "probe": "PD2Lreshalf_tau1000",
         "popgym": "PD2Lv2_tau1000", "mmaze": "PD2Lv2_tau1000"}
-OURSALT = {"bsuite": "PD2Lv2_tau1000", "dmc": "PD2Lv2_tau1000", "popgym": "PD2Lreshalf_tau1000"}
+OURSALT = {"bsuite": "PD2Lreshalf_tau1000", "dmc": "PD2Lreshalf_tau1000", "popgym": "PD2Lreshalf_tau1000"}
 
 
 def key(model, family):

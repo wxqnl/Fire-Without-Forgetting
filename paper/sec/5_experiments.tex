@@ -28,7 +28,7 @@ All models share one spiking world model, the DreamerV3-style network of \swm~\c
 \item \textbf{\method}: two PDN layers (\cref{sec:method}).
 \end{itemize}
 As the state of the art among ANN world models on memory tasks we also report \textbf{R2I}~\cite{samsami2024r2i}, a DreamerV3 agent with a state-space recurrence, run with its official code and configuration on POPGym, and with its published results on BSuite.
-Within a benchmark, all models use identical hyperparameters, budgets and evaluation and differ only in the recurrent core and, for \method on POPGym, in the policy input (\cref{sec:wm}; Supp.~\suppref{supp:impl}{A}).
+Within a benchmark, all models use identical hyperparameters, budgets and evaluation and differ only in the recurrent core, whose state the actor and critic read (\cref{sec:wm}; Supp.~\suppref{supp:impl}{A}).
 On POPGym, \method has 8.6M world-model parameters, \dv 7.5M and \swm 7.2M.
 
 \paragraph{Benchmarks.}
@@ -62,8 +62,8 @@ Recurrent LIF, cleared at every step, solves 8 steps; GRSN, which keeps its stat
 \dv solves up to 32 steps in the short budgets and 51 steps in 902k of 1M steps under R2I's protocol, and fails at 64, 71 and 101.
 
 \method solves every length.
-It is as fast as the best baseline up to 16 steps, the fastest at 32 (32k steps), and the only model that solves 64 steps (102k); after that its return stays at or above 0.5 (final 0.73), whereas no other model exceeds 0.5 at any evaluation.
-Under R2I's protocol it solves 51, 71 and 101 steps in 82k, 282k and 362k environment steps; \dv needs 902k steps for 51 and solves neither 71 nor 101.
+It is as fast as the best baseline up to 16 steps, the fastest at 32 (32k steps), and the only model that solves 64 steps (192k); after that its return is at least 0.5 in 94\% of the evaluations (mean 0.87), whereas no other model exceeds 0.5 at any evaluation.
+Under R2I's protocol it solves 51, 71 and 101 steps in 82k, 162k and 404k environment steps, with a mean return of 0.93, 0.86 and 0.75 over the evaluations that follow; \dv needs 902k steps for 51 and solves neither 71 nor 101.
 R2I reports a median return of about 0.9 at 51 and 71 memory steps and about 0.35 at 101 after 1M steps (10 seeds; Fig.~7 of~\cite{samsami2024r2i}), with DreamerV3's default reward head; our lengths count one step more, and all our models use the action-indexed reward head (\cref{sec:setup}), so the comparison is indicative.
 
 On RepeatPrevious Easy, \method reaches a return of \numFwfEasy\ after \numFwfEasyProgress\ of the budget, while the final returns of the baselines range from $-0.29$ (\swmnr) to 0.69 (recurrent LIF).
@@ -140,7 +140,7 @@ Half of each kind keeps both strengths.
 \TODO{DMC runs of \method finish around Oct.~4--5. Criterion (fixed in advance): no degradation relative to \swm, whose benchmark this is.}
 On DMC (\cref{tab:mm}), \method reaches \pend{[--]}, \pend{[--]} and \pend{[--]} on walker walk, cheetah run and cartpole swingup, against 923, 343 and 497 for \swm and 953, 699 and 871 for \dv.
 
-Per environment step, the world-model filter of \method costs 5.9\,$\mu$J, 2.9$\times$ less than \dv (17.2\,$\mu$J), at a recurrent firing rate of 0.16.
+Per environment step, the world-model filter of \method costs 5.4\,$\mu$J, 3.2$\times$ less than \dv (17.2\,$\mu$J), at a recurrent firing rate of 0.15.
 Most of its operations are accumulates triggered by spikes; the multiply-accumulates of the dendrites are local to each neuron (3 per integrator and 6 per resonant channel and step).
 Recurrent LIF and GRSN are cheaper still (4.9 and 3.6\,$\mu$J) but do not remember beyond 8 and 16 steps.
 These estimates count arithmetic only, the convention of SNN energy reports; memory access, which a hardware-aware study shows can dominate~\cite{dampfhoffer2023energy}, is not included for any model.

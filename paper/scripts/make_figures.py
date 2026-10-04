@@ -33,8 +33,8 @@ STYLE = {
     "OURS": dict(label="FwF (ours)", color="#D55E00", lw=1.8, zorder=5),
     "R2I": dict(label="R2I (ANN)", color="#0072B2", ls="-."),
 }
-# FwF's run per benchmark (actor input per task type, EXPERIMENTS.md §18.6)
-OURS = {"bsuite": "PD2Lreshalf_tau1000", "probe": "PD2Lreshalf_tau1000", "popgym": "PD2Lv2_tau1000"}
+# FwF's runs: one configuration everywhere (EXPERIMENTS.md §19.6); the probe runs have no actor
+OURS = {"bsuite": "PD2Lv2_tau1000", "probe": "PD2Lreshalf_tau1000", "popgym": "PD2Lv2_tau1000"}
 
 
 def rows(path):

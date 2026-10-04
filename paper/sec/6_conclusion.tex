@@ -9,5 +9,4 @@ With these neurons, a spiking world model remembers further back than DreamerV3 
 
 \paragraph{Limitations.}
 The dendritic state is graded, so deployment needs neuromorphic cores with multi-variable neurons, and our energy estimate counts arithmetic but not memory access.
-The policy reads the dendritic state only on tasks that need memory at many steps, a per-task choice that we take from R2I.
 We train the world model step by step with backpropagation through time; the linear dendrites admit parallel training, which we leave to future work, together with visual control from pixels and longer memory horizons.

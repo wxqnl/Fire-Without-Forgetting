@@ -85,8 +85,7 @@ Everything else is unchanged and spiking: the input layer that reads $(z_{t-1},a
 The dendritic state is carried through training sequences and through imagination rollouts, and is cleared only at episode starts.
 
 \paragraph{Policy input.}
-The actor and critic read $(z_t,h_t)$.
-On tasks where the policy must use the memory at many steps, R2I gives its policy the hidden state of its recurrence as well~\cite{samsami2024r2i}.
-We follow the same per-task choice: on POPGym, \method also sends the state of its second-layer dendrites to the actor and critic, as spikes, and on Memory Maze the probes read the same features.
-Each state variable is standardized over the layer and encoded by $T$ ON and $T$ OFF thresholds at $\pm(k-\tfrac12)\tfrac{2}{T}$, $k=1,\dots,T$, giving $2T$ binary frames whose rates represent $2T+1$ levels.
-On BSuite and DMC the policy reads $(z_t,h_t)$ only, as in R2I. Supp.~\suppref{supp:policy}{E} reports both inputs on all tasks.
+The actor and critic read $z_t$, $h_t$ and the state of the second-layer dendrites, on every task; the Memory Maze probes read the same features.
+The soma sends one bit per neuron and step, whereas the dendrites hold the memory in graded form.
+To pass them on as spikes, each state variable is standardized over the layer and encoded by $T$ ON and $T$ OFF thresholds at $\pm(k-\tfrac12)\tfrac{2}{T}$, $k=1,\dots,T$, giving $2T$ binary frames whose rates represent $2T+1$ levels.
+Supp.~\suppref{supp:policy}{E} compares a policy that reads $(z_t,h_t)$ only.
