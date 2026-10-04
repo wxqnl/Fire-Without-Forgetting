@@ -106,7 +106,7 @@ With A and $\tau_d=128$, the membrane potentials still encode it after 8 steps (
 The two learn BSuite up to 51 steps equally fast.
 Without the dendritic spikes the policy learns 64 steps sooner (102k vs.\ 192k steps), although the world model of \method already predicts the reward of the evaluation episodes with an AUC of 1.0 at 160k steps; a single cue fits in the one bit per neuron that the soma sends.
 On POPGym and on DMC walker walk the policy that reads $(z_t,h_t)$ only falls far behind.
-With the dendritic spikes the actor-critic has 12.9M parameters instead of 3.4M; the last row widens the actor and critic that read $(z_t,h_t)$ only to the same 12.9M, on RepeatPrevious Easy.
+With the dendritic spikes the actor-critic has 12.9M parameters instead of 3.4M; the last row widens the actor and critic that read $(z_t,h_t)$ only to the same 12.9M, on RepeatPrevious Medium.
 \TODO{Result of the widened actor-critic (2M steps, around Oct.~6).}
 \TODO{Final POPGym and DMC numbers once the runs finish (Oct.~4--5).}
 

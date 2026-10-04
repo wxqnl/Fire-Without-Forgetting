@@ -578,13 +578,37 @@ def round16():
 
 def round17():
     """2026-10-04: capacity control for the actor-critic (EXPERIMENTS.md §19.7). FwF's actor and critic
-    read the dendritic spikes and have 12.85M parameters on POPGym, the soma-only ones 3.42M. One task
-    (RepeatPrevious Easy, where the two inputs differ most): soma spikes only, widened to 12.85M."""
-    name = "popgym/popgym_RepeatPreviousEasy/PD2Lreshalfacwide_tau1000/s0"
-    cmd = (f"{{python}} dreamer.py --configs popgym ours resonanthalf acwide --task popgym_RepeatPreviousEasy --seed 0 "
+    read the dendritic spikes and have 12.85M parameters on POPGym, the soma-only ones 3.42M. One task:
+    soma spikes only, widened to 12.85M. First on RepeatPrevious Easy; moved to Medium on 2026-10-04
+    (Stage 3 review: Medium is the task only FwF learns; user decision "1a")."""
+    name = "popgym/popgym_RepeatPreviousMedium/PD2Lreshalfacwide_tau1000/s0"
+    cmd = (f"{{python}} dreamer.py --configs popgym ours resonanthalf acwide --task popgym_RepeatPreviousMedium --seed 0 "
            f"--steps 2e6 --train_ratio 64 --envs 8 --batch_length 64 --env_seed_per_env True --eval_every 5e4 "
            f"--logdir {RUNS / name}")
     return [dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=26)]
+
+
+def round18():
+    """2026-10-04, after the Stage 3 review (user decision "3做", EXPERIMENTS.md §19.8): world-model probes only.
+    1. Held-out memory task: POPGym RepeatPrevious Hard (the card of exactly 64 steps ago), not used while
+       the model was developed. Round 12 protocol with the window doubled with the lag (128) and 20k
+       updates, the same for every model.
+    2. Design ablations of FwF on memlen-64-recall and RepeatPrevious Medium (protocols of table 5):
+       a soma with a membrane that is reset by its spike (pdsomalif), dendrites that also receive the
+       layer's own spikes (pdfeedback)."""
+    R = ["ours", "resonanthalf"]
+    hard = {k: MAIN[k] + ["rewardbyact"] for k in ("base_tau2", "LIF_tau2", "GRSN_tau2", "ABG_tau128", "ann_tau2")}
+    hard["PD2Lreshalf_tau1000"] = R + ["rewardbyact"]
+    jobs = list(recall_jobs("popgym_RepeatPreviousHard", hard, seeds=(0,), updates=20000,
+                            extra="--batch_length 128", group="diag_rp", eval_every=1000))
+    abl = {"PD2Lreshalfsomalif_tau1000": R + ["pdsomalif"], "PD2Lreshalffeedback_tau1000": R + ["pdfeedback"]}
+    jobs += recall_jobs("bsuite_memlen-64-recall", abl, seeds=(0,), extra=MEMLEN_EXTRA[64])
+    jobs += recall_jobs("popgym_RepeatPreviousMedium", {k: v + ["rewardbyact"] for k, v in abl.items()}, seeds=(0,),
+                        updates=10000, extra="--batch_length 64", group="diag_rp", eval_every=1000)
+    for job in jobs:
+        if "RepeatPreviousHard" in job["name"]:
+            job["mem_gb"] = 5
+    return jobs
 
 
 def main():
@@ -602,7 +626,7 @@ def main():
     # Round 14 (integrate-and-fire soma) failed check V1 on 2026-10-02 (EXPERIMENTS.md §17.4): its
     # unfinished runs were stopped and are not queued again.
     r14 = [j for j in round14() if j["name"] == "recall/bsuite_memlen-8-recall/PD2Lif_tau1000/s0"]
-    jobs = (round17() + round16() + round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
+    jobs = (round18() + round17() + round16() + round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
             + r8 + round11())
     # the old model's 1M Memory Maze continuation was stopped on 2026-10-02 (superseded, EXPERIMENTS.md §18.4)
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2L_tau1000/s0"]

@@ -17,7 +17,7 @@
 | 2 WRITE | 跳过（草稿已有） | — | — |
 | 2.5 INTEGRITY | 完成：第 1 轮 FAIL，修正后 PASS WITH NOTES；Mode 4 SUSPECTED | `stage2_5_integrity.md`、`audit/` | 待确认 |
 | 3 REVIEW | 完成（10 月 4 日）：Major Revision；评分 3/3/4/3/2（6 级）；面板由同一子 agent 依次写成，非独立 | `review/stage3/`（5 份报告、editorial_decision、revision_roadmap） | "你搞个子 agent 来继续模拟审稿" |
-| 4 REVISE | 未开始 | | |
+| 4 REVISE | 进行中（10 月 4 日） | | "1a 2A 3做" |
 | 3′ RE-REVIEW | 未开始 | | |
 | 4.5 FINAL INTEGRITY | 未开始 | | |
 | 5 FINALIZE | 未开始（输出为 CVPR LaTeX，不转 DOCX/APA） | | |
@@ -39,4 +39,8 @@ Stage 2.5 之后、Stage 3 之前的用户改动（10 月 4 日）：
 Stage 3 结果核对（主 agent，10 月 4 日）：
 - Spiking-WM 原文（arXiv 2503.00713 表 I）评测的是像素 DMC，1M 帧，约 18.8M 参数；walker walk / cheetah run / cartpole swingup 分别为 938.5 / 577.2 / 791.0。审稿所说属实；论文 §5.1 "on which Spiking-WM was evaluated" 需更正。
 - R2I 在 POPGym 上 2M 步处于随机水平：与其原文 50M 步曲线（图 9）对照，Medium 一致，Easy 低于其 3 种子均值。属于预算差异，需在文中说明（EXPERIMENTS §19.5）。
-- 等待用户在 MANDATORY 审稿决定检查点做出选择。
+- 用户在审稿决定检查点的选择（10 月 4 日，原话）："1a 2A 3做"。
+  - 1a：网络大小对照只跑一个任务，从 RepeatPrevious Easy 换到 Medium；
+  - 2A：DMC 只改文字（写明本体感觉输入，列出 Spiking-WM 原文的像素 DMC 数字作参考），不补跑像素 DMC；
+  - 3 做：补 RepeatPrevious Hard 留出任务的世界模型探针（所有模型），以及两个设计消融探针（有状态并会重置的胞体；树突接收本层脉冲）。
+- 进入 Stage 4 REVISE。

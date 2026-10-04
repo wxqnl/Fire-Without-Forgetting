@@ -330,6 +330,12 @@ pdreset:
   persist_state: False
 pdfixtau:
   PDRNN: {learn_tau: False}
+# design ablations (EXPERIMENTS.md §19.8): a soma whose membrane leaks over environment steps (τ = 2)
+# and is reset by its spike; dendrites that also receive the layer's own spikes of the previous step
+pdsomalif:
+  PDRNN: {soma: 'lif', soma_tau: 2.0}
+pdfeedback:
+  PDRNN: {spike_feedback: True}
 pd2layer:
   PDRNN: {layers: 2}
 

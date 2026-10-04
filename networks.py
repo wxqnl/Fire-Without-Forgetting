@@ -1193,7 +1193,13 @@ class PDRNN(nn.Module):
     (the complex recurrence d_t = λ e^{iθ} d_{t-1} + g(λ) LN(B x_t) in real form). An integrator
     channel (θ = 0) holds a value; a resonant one also encodes how long ago its input arrived, which
     is what recalling the input of exactly k steps ago needs. θ ~ U[0, max_phase] (the LRU's
-    initialisation) and is learned with τ."""
+    initialisation) and is learned with τ.
+
+    Design ablations (EXPERIMENTS.md §19.8), both off in the model:
+      soma 'lif'          the soma keeps a membrane across environment steps, v_t = β v_{t-1} + PopNorm(u_t)
+                          with β = exp(-1/soma_tau), hard reset to 0 by its spike (one frame, repeated T times)
+      spike_feedback      the dendrites also receive the layer's own spikes of the previous step,
+                          LN(B x_t + R s_{t-1}), so the recurrence also passes through the threshold"""
 
     def __init__(self, config, input_size, size, act=None, norm="PopNorm", device="cuda"):
         super().__init__()
@@ -1236,6 +1242,19 @@ class PDRNN(nn.Module):
             # entries of the stored state that can be nonzero: all a, and b of the resonant channels
             self.state_index = torch.cat([torch.arange(size * self._channels),
                                           size * self._channels + torch.nonzero(self.res_mask)[:, 0]])
+        # states of the design ablations; listed first so that the last key stays the last layer's
+        # dendrites (what policy_mem reads)
+        self._feedback = p.get("spike_feedback", False)
+        extra = {}
+        if self._soma == "lif":
+            self.soma_decay = math.exp(-1.0 / p.get("soma_tau", 2.0))
+            extra.update({f"v{i}": size for i in range(self._layers)})
+        if self._feedback:
+            self.R = nn.ModuleList([nn.Linear(size, size * self._channels, bias=False) for _ in range(self._layers)])
+            extra.update({f"s{i}": size for i in range(self._layers)})
+        if extra:
+            self.neuron = PDState(list(extra) + keys)
+            self.mem_sizes = {**extra, **self.mem_sizes}
 
     def soma(self, u):
         if self._soma == "step":
@@ -1262,7 +1281,10 @@ class PDRNN(nn.Module):
             log_tau = self.log_tau[i] if self._learn_tau else self.log_tau[i].detach()
             lam = torch.exp(-torch.exp(-log_tau))
             gain = torch.sqrt(1 - lam**2) if self._input_norm == "lru" else 1 - lam
-            inp = gain * self.in_norm[i](self.B[i](x))
+            pre = self.B[i](x)
+            if self._feedback and self.neuron.mems[f"s{i}"] is not None:
+                pre = pre + self.R[i](self.neuron.mems[f"s{i}"])
+            inp = gain * self.in_norm[i](pre)
             if self._n_res:
                 theta = self.theta[i] if self._learn_tau else self.theta[i].detach()
                 theta = theta * self.res_mask  # integrator channels stay at θ = 0
@@ -1276,8 +1298,17 @@ class PDRNN(nn.Module):
                 d = lam * d + inp
                 u = (d.view(-1, self._size, self._channels) * self.C[i]).sum(-1) + self.D[i](x)
             self.neuron.mems[key] = d
-            outputs = self.soma(self.soma_norm[i](u))
+            if self._soma == "lif":
+                v = self.neuron.mems[f"v{i}"]
+                v = self.soma_norm[i](u) + (0 if v is None else self.soma_decay * v)
+                spike = self.act_fun(v - self.threshold)
+                self.neuron.mems[f"v{i}"] = v * (1 - spike.detach())
+                outputs = [spike] * self.T
+            else:
+                outputs = self.soma(self.soma_norm[i](u))
             x = sum(outputs) / self.T
+            if self._feedback:
+                self.neuron.mems[f"s{i}"] = x
         return outputs, [torch.stack(outputs, dim=0)]
 
 

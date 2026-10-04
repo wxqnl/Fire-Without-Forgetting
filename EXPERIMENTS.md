@@ -875,3 +875,19 @@ POPGym Easy，奖励 ±1，1 万次更新：DreamerV3 0.95（3k 学会），Spik
   - 新增配置 `acwide`（`ac_units: 1384`）；`models.ImagBehavior` 用 `ac_units` 建 actor 和 critic；
   - `make_jobs.round17()` 加了这一个任务（队列 190 → 191，其他任务未变），10 月 4 日 01:57 在 gpu7 启动，预计 10 月 6 日前后跑完。
 - 论文：附录 E 的表加了一行（其余格为 n/a），附录 A 的参数段指向附录 E；结果出来后补文字。
+- 10 月 4 日 02:40 改到 RepeatPrevious Medium（Stage 3 审稿指出 Medium 才是只有本文模型能学会的任务；用户决定 "1a"）。Easy 那组（1.2%）已停止，移到 `runs/_superseded/acwide_easy/`。
+
+### 19.8 审稿后补的世界模型探针（10 月 4 日；用户："1a 2A 3做"）
+
+Stage 3 模拟审稿（`paper/review/stage3/`）的结论是 Major Revision。用户决定：
+- 1a：网络大小对照改到 Medium（§19.7）；
+- 2A：DMC 只改文字；
+- 3 做：补以下探针（`make_jobs.round18()`，队列 191 → 201，02:40 全部启动）。
+
+1. **留出任务 POPGym RepeatPrevious Hard**（回忆恰好 64 步前的牌）。开发模型时没有用过这个任务，用来回应"谐振通道是看了 Medium 才加的"。
+   - 6 个模型：Spiking-WM、LIF、GRSN、A+B+G、DreamerV3、本文模型。
+   - 沿用第 12 轮协议，训练窗口随间隔加倍到 128，每个模型都训练 20k 次更新。
+2. **两个设计消融**（协议同表 5：memlen-64-recall 12k 次更新、窗口 80；RepeatPrevious Medium 10k 次更新、窗口 64）：
+   - `pdsomalif`：胞体保留膜电位，跨环境步泄漏（τ = 2），发放后硬重置为 0。对应的设计是"胞体无状态"。
+   - `pdfeedback`：树突还接收本层上一步的脉冲，即 $\mathrm{LN}(Bx_t + Rs_{t-1})$，让递归也经过阈值。对应的设计是"树突不接收脉冲"。
+   - 代码在 `networks.PDRNN`（`soma: 'lif'`、`spike_feedback`），默认关闭。新状态排在键的最前面，保证 `policy_mem` 读到的仍是最后一层树突。已用 30 次更新的短跑验证能正常运行。
