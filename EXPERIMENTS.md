@@ -968,3 +968,13 @@ Stage 3 模拟审稿（`paper/review/stage3/`）的结论是 Major Revision。�
 - 已知问题：此前在 MPS 下 MuJoCo 渲染会崩溃（`runs/_dmc_render_abort`）。要先找到能用的渲染后端。
 
 **多种子**：用户 "先不补，这不是最关键的"。
+- 渲染（10 月 4 日 14:40 解决）：
+  - 本机 EGL 会卡住，GLFW 没有显示器；OSMesa 能用，CPU 渲染，每个进程约 5 个核。
+  - `dreamer.py` 原来强制设 `MUJOCO_GL=egl`，改成 `setdefault`，像素任务的命令前加 `MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa`（`make_jobs.round20()`）。
+  - 在队列的 MPS 环境下实测，预填充和训练都正常。
+- 冒烟测试（walker）：
+  - DreamerV3：显存 4.3 GB，约 18k 帧/小时，1M 帧约 2.3 天；
+  - Spiking-WM：显存 20 GB，速度更慢，预计 5–7 天。
+  - 队列显存预留：24 GB / 6 GB。
+- 10 月 4 日 14:36 起，6 个像素任务（Spiking-WM 和 DreamerV3 × 3 个任务）进入队列，walker 两个已经启动。队列共 213 个任务。
+- actor-critic 两个候选版本的冒烟测试（POPGym Medium 约 1 万步）都能正常训练。6 个验证任务 14:18 起陆续启动。

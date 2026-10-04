@@ -491,7 +491,7 @@ def round15():
     return jobs
 
 
-PIX_MEM = {"base_tau2": 30, "ann_tau2": 8}  # GPU memory (GB) of the DMC-from-pixels runs, set after the smoke test
+PIX_MEM = {"base_tau2": 24, "ann_tau2": 6}  # GPU memory (GB) of the DMC-from-pixels runs (smoke test 2026-10-04: 20 and 4.3)
 V2 = ["ours", "resonanthalf", "policymem"]  # our model after §18 (resonant dendrites, actor reads the dendrites)
 
 
@@ -668,7 +668,7 @@ def main():
     # Round 14 (integrate-and-fire soma) failed check V1 on 2026-10-02 (EXPERIMENTS.md §17.4): its
     # unfinished runs were stopped and are not queued again.
     r14 = [j for j in round14() if j["name"] == "recall/bsuite_memlen-8-recall/PD2Lif_tau1000/s0"]
-    jobs = (round19() + round18() + round17() + round16() + round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
+    jobs = (round19() + round20() + round18() + round17() + round16() + round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
             + r8 + round11())
     # the old model's 1M Memory Maze continuation was stopped on 2026-10-02 (superseded, EXPERIMENTS.md §18.4)
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2L_tau1000/s0"]
