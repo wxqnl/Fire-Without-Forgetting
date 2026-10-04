@@ -577,7 +577,7 @@ def round16():
     return jobs
 
 
-def round17():
+def round17():  # stopped 2026-10-04 15:10 (user: "同意停掉"): superseded by round 19, FwF at the baselines' size
     """2026-10-04: capacity control for the actor-critic (EXPERIMENTS.md §19.7). FwF's actor and critic
     read the dendritic spikes and have 12.85M parameters on POPGym, the soma-only ones 3.42M. One task:
     soma spikes only, widened to 12.85M. First on RepeatPrevious Easy; moved to Medium on 2026-10-04
@@ -644,12 +644,50 @@ def round20():
     """DMC from pixels (round19 item 2). MuJoCo renders with OSMesa on the CPU: EGL hangs on this
     machine and rendering aborted under the MPS GPU setup before (runs/_dmc_render_abort)."""
     jobs = []
-    for task in ("dmc_walker_walk", "dmc_cheetah_run", "dmc_cartpole_swingup"):
+    # 2026-10-04 15:10, user: "这个像素的，我觉得选一个任务不就行了…我们只是想可视化或者说往 cv 稍微靠一下而已":
+    # walker walk only (the most reported DMC task, first in Spiking-WM's table); cheetah and cartpole stopped.
+    for task in ("dmc_walker_walk",):
         for cell in ("base_tau2", "ann_tau2"):
             name = f"dmcpix/{task}/{cell}/s0"
             cmd = (f"MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa {{python}} dreamer.py --configs dmc_vision {' '.join(MAIN[cell])} --task {task} --seed 0 "
                    f"--steps 1e6 --train_ratio 512 --eval_every 2e4 --env_seed_per_env True --logdir {RUNS / name}")
             jobs.append(dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=PIX_MEM[cell]))
+    return jobs
+
+
+def round21():
+    """2026-10-04 15:10, user: "赶紧把需要重跑的跑完". FwF with the actor-critic at the baselines' size
+    (acmatch, 142 units, 3.41M) on its other RL benchmarks, started without waiting for the round 19
+    validation (if acmatch turns out clearly worse than aclowrank, these are rerun with aclowrank).
+    Protocols and GPU memory as the PD2Lv2 rows of round 16. Plus DMC walker from pixels (round 20)."""
+    M = V2 + ["acmatch"]
+    cell = {"PD2Lv2m_tau1000": M}
+    jobs = []
+    for L, steps in ((8, 1.5e5), (16, 2e5), (32, 3e5)):
+        jobs += rl2_jobs(f"bsuite_memlen-{L}", cell, steps=steps, extra=MEMLEN_EXTRA[L])
+    for L, window in ((51, 64), (71, 80), (101, 128)):
+        for job in rl2_jobs(f"bsuite_memlen-{L}", cell, steps=1e6,
+                            extra=f"--batch_length {window} --env_seed_per_env True", eval_every=2e4):
+            jobs.append({k: v.replace("rl2/", "r2i/") if isinstance(v, str) else v for k, v in job.items()})
+    name = "popgym/popgym_RepeatPreviousEasy/PD2Lv2m_tau1000/s0"
+    cmd = (f"{{python}} dreamer.py --configs popgym {' '.join(M)} --task popgym_RepeatPreviousEasy --seed 0 --steps 2e6 "
+           f"--train_ratio 64 --envs 8 --batch_length 64 --env_seed_per_env True --eval_every 5e4 --logdir {RUNS / name}")
+    jobs.append(dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=26))
+    for task in ("dmc_cheetah_run", "dmc_cartpole_swingup"):
+        for job in dmc_jobs(task, cell, steps=5e5, train_ratio=512, group="dmc500"):
+            job["cmd"] = job["cmd"].replace(" --logdir ", " --env_seed_per_env True --logdir ")
+            jobs.append(job)
+    mem = {"r2i/bsuite_memlen-51/": 28, "r2i/bsuite_memlen-71/": 32, "r2i/bsuite_memlen-101/": 47, "dmc500/": 30,
+           "rl2/bsuite_memlen-8/": 14, "rl2/bsuite_memlen-16/": 28, "rl2/bsuite_memlen-32/": 28}
+    for job in jobs:
+        for prefix, gb in mem.items():
+            if job["name"].startswith(prefix):
+                job["mem_gb"] = gb
+    name = "dmcpix/dmc_walker_walk/PD2Lv2m_tau1000/s0"
+    cmd = (f"MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa {{python}} dreamer.py --configs dmc_vision {' '.join(M)} "
+           f"--task dmc_walker_walk --seed 0 --steps 1e6 --train_ratio 512 --eval_every 2e4 --env_seed_per_env True "
+           f"--logdir {RUNS / name}")
+    jobs.insert(0, dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=30))
     return jobs
 
 
@@ -668,7 +706,7 @@ def main():
     # Round 14 (integrate-and-fire soma) failed check V1 on 2026-10-02 (EXPERIMENTS.md §17.4): its
     # unfinished runs were stopped and are not queued again.
     r14 = [j for j in round14() if j["name"] == "recall/bsuite_memlen-8-recall/PD2Lif_tau1000/s0"]
-    jobs = (round19() + round20() + round18() + round17() + round16() + round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
+    jobs = (round19() + round21() + round20() + round18() + round16() + round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
             + r8 + round11())
     # the old model's 1M Memory Maze continuation was stopped on 2026-10-02 (superseded, EXPERIMENTS.md §18.4)
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2L_tau1000/s0"]

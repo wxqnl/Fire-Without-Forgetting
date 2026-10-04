@@ -978,3 +978,16 @@ Stage 3 模拟审稿（`paper/review/stage3/`）的结论是 Major Revision。�
   - 队列显存预留：24 GB / 6 GB。
 - 10 月 4 日 14:36 起，6 个像素任务（Spiking-WM 和 DreamerV3 × 3 个任务）进入队列，walker 两个已经启动。队列共 213 个任务。
 - actor-critic 两个候选版本的冒烟测试（POPGym Medium 约 1 万步）都能正常训练。6 个验证任务 14:18 起陆续启动。
+
+### 19.12 停掉宽 actor 对照，像素 DMC 只留 walker，FwF 重跑提前开始（10 月 4 日 15:00）
+
+- 停掉 `PD2Lreshalfacwide`（只读胞体、actor 加宽到 12.9M，约 25%）。用户原话："同意停掉"。
+  - 理由：FwF 缩到 3.41M 后，和只读胞体的版本（3.42M）一样大，两者的对比本身就是大小相同的对照。
+  - 运行目录移到 `runs/_superseded/acwide_medium/`，`round17()` 不再入队。
+- 像素 DMC 只跑 walker。用户原话："这个像素的，我觉得选一个任务不就行了…他也不是核心 benchmark，我们只是想可视化或者说往 cv 稍微靠一下而已"。
+  - 选 walker 的理由：DMC 里报告最多的任务，也是 Spiking-WM 表中的第一个；在看到任何像素结果之前选定。
+  - cheetah、cartpole 的 4 个运行（启动约 15 分钟）已停，移到 `runs/_superseded/dmcpix_extra/`。
+- FwF 的其余强化学习任务不等验证结果，直接用 `acmatch`（宽度 142）开跑（`make_jobs.round21()`）。用户原话："赶紧把需要重跑的跑完"。
+  - 内容：BSuite 8/16/32 步，51/71/101 步；POPGym Easy；DMC cheetah、cartpole；像素 DMC walker。
+  - 如果验证显示 `acmatch` 明显不如 `aclowrank`，这些任务改用 `aclowrank` 重跑。
+- Hard 探针的 Spiking-WM 也跑完了（0.50）。表 3 的 Hard 一列已是最终值，正文去掉 \pend。
