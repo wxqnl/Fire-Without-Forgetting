@@ -4,12 +4,11 @@
 \begin{table*}[t]
   \centering\tabfont
   \caption{\textbf{Memory in reinforcement learning.}
-  BSuite memory length~\cite{osband2020bsuite}: environment steps until the evaluation return first reaches 0.9 (-- = not within the budget).
-  $^\dagger$Protocol of R2I~\cite{samsami2024r2i} (1M steps, a different seed per parallel environment).
-  POPGym RepeatPrevious~\cite{morad2023popgym} with the environment settings of R2I's code: final return (mean of the last three evaluations; chance $=-0.5$, perfect $=1$).
-  \nr\ = not run: LIF and GRSN fail at 32 steps, so the longer settings are run for the remaining models.
-  $^\ddagger$R2I with its official code and configuration, 2M steps: mean training-episode return over the last 200k steps (its code has no separate evaluation; for our models the two measures differ by at most 0.04).
-  \pend{Blue}: run in progress.}
+  BSuite memory length~\cite{osband2020bsuite}: environment steps until the evaluation return first reaches 0.9 (-- = not within the budget); $^\dagger$lengths, budget and windows of R2I~\cite{samsami2024r2i} (1M steps, one seed per environment; action-indexed reward head).
+  POPGym RepeatPrevious~\cite{morad2023popgym}, environment settings of R2I's code: final return, mean of the last three evaluations (chance $=-0.5$).
+  \nr: not run, as LIF and GRSN fail at 32 steps.
+  $^\ddagger$R2I, official code and configuration, 2M steps: mean training-episode return over the last 200k steps (for our models the two measures differ by at most 0.04).
+  \pend{Blue}: in progress.}
   \label{tab:rl}
   \input{tables/rl}
 \end{table*}
@@ -18,25 +17,25 @@
 \label{sec:setup}
 
 \paragraph{Models.}
-All models share one spiking world model, the DreamerV3-style network of \swm~\cite{sun2025spikingwm} at the size of DreamerV3-S (512 units, $T=5$), and differ only in the recurrent core:
-\begin{itemize}
-\item \textbf{\swm}~\cite{sun2025spikingwm}: multi-compartment neurons with both resets, $\tau=2$;
-\item \textbf{Recurrent LIF}: LIF neurons with recurrent spike input, cleared at every environment step, the usual practice in spiking RL;
-\item \textbf{GRSN}~\cite{qin2025grsn}: gated recurrent spiking neurons, updated once per environment step with their state carried across steps;
-\item \textbf{\swmnr}: \swm with interventions A+B+G of \cref{sec:causal} and $\tau_d=128$, \ie, with both resets removed;
-\item \textbf{\dv}~\cite{hafner2025dreamerv3}: the same architecture without spikes (GRU core, SiLU activations, one simulation step), an ANN reference;
-\item \textbf{\method}: two PDN layers (\cref{sec:method}).
-\end{itemize}
+All models share one spiking world model, the DreamerV3-style network of \swm~\cite{sun2025spikingwm} at the size of DreamerV3-S (512 units, $T=5$), and differ in the recurrent core:
+\textbf{\swm} (multi-compartment neurons with both resets, $\tau=2$);
+\textbf{recurrent LIF} neurons, cleared at every environment step as usual in spiking RL;
+\textbf{GRSN}~\cite{qin2025grsn}, gated recurrent spiking neurons updated once per environment step with their state carried;
+\textbf{\swmnr}, \swm with A+B+G (\cref{sec:causal}) and $\tau_d=128$, \ie without both resets;
+\textbf{\dv}~\cite{hafner2025dreamerv3}, the same architecture without spikes (GRU core, SiLU, one simulation step);
+and \textbf{\method} with two PDN layers.
 As the state of the art among ANN world models on memory tasks we also report \textbf{R2I}~\cite{samsami2024r2i}, a DreamerV3 agent with a state-space recurrence, run with its official code and configuration on POPGym, and with its published results on BSuite.
-Within a benchmark, all models use identical hyperparameters, budgets and evaluation and differ only in the recurrent core, whose state the actor and critic read (\cref{sec:wm}; Supp.~\suppref{supp:impl}{A}).
+Within a benchmark, all models use identical hyperparameters, budgets and evaluation.
+The actor and critic of every model read $(z_t,h_t)$, where $h_t$ is the spike output of the core (for \dv its GRU state); those of \method also read its dendritic state as spikes (\cref{sec:wm}), which makes its actor-critic 12.9M parameters instead of 3.4M on POPGym (Supp.~\suppref{supp:impl}{A}).
 On POPGym, \method has 8.6M world-model parameters, \dv 7.5M and \swm 7.2M.
 
 \paragraph{Benchmarks.}
 We use benchmarks with published protocols and ANN results.
-\emph{BSuite memory length}~\cite{osband2020bsuite} shows a cue, then $L$ uninformative steps, and rewards the agent for recalling the cue; we run $L\in\{8,16,32,64\}$ and $L\in\{51,71,101\}$ under the protocol of R2I~\cite{samsami2024r2i}.
+\emph{BSuite memory length}~\cite{osband2020bsuite} shows a cue, then $L$ uninformative steps, and rewards the agent for recalling the cue; we run $L\in\{8,16,32,64\}$, and $L\in\{51,71,101\}$ with the lengths, budget (1M steps) and training windows of R2I~\cite{samsami2024r2i}.
 \emph{POPGym RepeatPrevious}~\cite{morad2023popgym} rewards the agent at every step for naming the suit of the card shown $k$ steps earlier ($k=4$ Easy, $k=32$ Medium), one of the three most memory-demanding POPGym tasks that R2I evaluates; we use the environment settings of R2I's code (eight parallel environments, train ratio 64, unscaled rewards) for 2M steps.
 \emph{Memory Maze 9$\times$9}~\cite{pasukonis2023memorymaze} is first-person 3D navigation with 1000-step episodes; we use its offline probing benchmark with the official dataset and probes: after 1M world-model updates with truncated backpropagation through time, probes decode the positions of the target objects (MSE) and the maze layout (accuracy) from the frozen state.
-\emph{DMC}~\cite{tassa2018dmc} from proprioception (walker walk, cheetah run, cartpole swingup; 500k steps, train ratio 512, as in DreamerV3) is a non-memory control on which \swm was evaluated.
+\emph{DMC}~\cite{tassa2018dmc} from proprioception (walker walk, cheetah run, cartpole swingup; 500k steps, train ratio 512, as in DreamerV3) is our non-memory control.
+\swm was evaluated on DMC from pixels, where its 19M-parameter model reaches 938, 577 and 791 on these tasks after 1M frames~\cite{sun2025spikingwm}; here it runs inside the shared DreamerV3-S-sized world model.
 On BSuite the reward is a function of cue \emph{and} action, which a scalar reward head of a Dreamer world model fails to learn within our budgets; all models therefore use a reward head indexed by the action (Supp.~\suppref{supp:reward}{B}).
 This head also helps \dv, which solves 51 steps here, whereas R2I reported it failing beyond about 30.
 
@@ -44,7 +43,9 @@ This head also helps \dv, which solves 51 steps here, whereas R2I reported it fa
 To measure memory without exploration and credit assignment, we also train world models alone on random-policy data and measure the AUC of their reward prediction where reward depends on the past (\cref{sec:causal}): \emph{memlen-$L$-recall}, where the terminal reward is the cue $L$ steps back, and \emph{RepeatPrevious}, where the reward indicates whether the action names the card $k$ steps back.
 We report updates until the AUC exceeds 0.9 within 12k (memlen) or 10k (RepeatPrevious) updates.
 
-\TODO{Number of seeds: one so far (multiple seeds deferred, decision of Oct.~3); state the final count here.}
+\paragraph{Runs and evaluation.}
+Every RL and probe result is one training run (\cref{tab:interventions}: two seeds per cell).
+Evaluations average 32 episodes on BSuite (every 10k steps, 20k with R2I's lengths) and 16 on POPGym (every 50k), with the mode of the policy; Supp.~\suppref{supp:impl}{A} reports how the return holds after it first reaches 0.9.
 
 \subsection{Memory in reinforcement learning}
 \label{sec:rl}
@@ -52,22 +53,27 @@ We report updates until the AUC exceeds 0.9 within 12k (memlen) or 10k (RepeatPr
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{fig/rl_curves}
-  \caption{\textbf{Learning curves} on BSuite memory length under the protocol of R2I (left three) and POPGym RepeatPrevious (right two; chance $=-0.5$). Exponential moving average of the evaluation return (R2I: training-episode return, see \cref{tab:rl}). \pend{\method's runs are in progress.}}
+  \caption{\textbf{Learning curves} on BSuite memory length with the lengths and budget of R2I (left three) and POPGym RepeatPrevious (right two; chance $=-0.5$). Exponential moving average of the evaluation return (R2I: training-episode return, see \cref{tab:rl}). \pend{\method's runs are in progress.}}
   \label{fig:rl_curves}
 \end{figure*}
 
 \Cref{tab:rl}, \cref{fig:memory_length} and \cref{fig:rl_curves} show that every spiking baseline stops at a memory length set by its resets.
 \swm never recalls a cue, not even 8 steps back.
 Recurrent LIF, cleared at every step, solves 8 steps; GRSN, which keeps its state but resets its membrane at every spike, solves 16; \swmnr, without both resets, solves 32.
-\dv solves up to 32 steps in the short budgets and 51 steps in 902k of 1M steps under R2I's protocol, and fails at 64, 71 and 101.
+\dv solves up to 32 steps in the short budgets and 51 steps in 902k of 1M steps with R2I's lengths, and fails at 64, 71 and 101.
 
-\method solves every length.
-It is as fast as the best baseline up to 16 steps, the fastest at 32 (32k steps), and the only model that solves 64 steps (192k); after that its return is at least 0.5 in 94\% of the evaluations (mean 0.87), whereas no other model exceeds 0.5 at any evaluation.
-Under R2I's protocol it solves 51, 71 and 101 steps in 82k, 162k and 404k environment steps, with a mean return of 0.93, 0.86 and 0.75 over the evaluations that follow; \dv needs 902k steps for 51 and solves neither 71 nor 101.
+\method reaches a return of 0.9 at every length.
+It is as fast as the best baseline up to 16 steps, the fastest at 32 (32k steps), and the only model that reaches 0.9 at 64 steps (192k of 500k steps); after that its return is at least 0.5 in 94\% of the evaluations (mean 0.87), whereas no other model exceeds 0.5 at any evaluation.
+This does not depend on the RL budget: in the world-model probes, \dv fails at 64 steps as well (\cref{sec:probe}).
+With R2I's lengths it reaches 0.9 at 51, 71 and 101 steps after 82k, 162k and 404k environment steps, with a mean return of 0.93, 0.86 and 0.75 over the evaluations that follow and final returns of 0.92, 0.46 and 0.40, since single evaluations fluctuate (\cref{fig:rl_curves}); \dv needs 902k steps for 51 and reaches 0.9 at neither 71 nor 101.
 R2I reports a median return of about 0.9 at 51 and 71 memory steps and about 0.35 at 101 after 1M steps (10 seeds; Fig.~7 of~\cite{samsami2024r2i}), with DreamerV3's default reward head; our lengths count one step more, and all our models use the action-indexed reward head (\cref{sec:setup}), so the comparison is indicative.
+These BSuite results do not depend on the dendritic readout: with an actor and critic that read $(z_t,h_t)$ only, \method reaches 0.9 at every length, at 64 steps even sooner (102k), whereas on POPGym and DMC walker walk the readout is needed (Supp.~\suppref{supp:policy}{E}).
 
 On RepeatPrevious Easy, \method reaches a return of \numFwfEasy\ after \numFwfEasyProgress\ of the budget, while the final returns of the baselines range from $-0.29$ (\swmnr) to 0.69 (recurrent LIF).
-On Medium, all baselines remain at chance after 2M steps, \dv included, consistent with R2I~\cite{samsami2024r2i}, whereas the return of \method has risen to \numFwfMedium\ after \numFwfMediumProgress\ of the budget.
+On Medium, all baselines remain at chance after 2M steps, \dv included, whereas the return of \method has risen to \numFwfMedium\ after \numFwfMediumProgress\ of the budget.
+R2I, run with its official code, stays at chance on both tasks within 2M steps.
+Its published curves span 50M steps: on Medium they leave chance only after about 3M steps, and on Easy they rise after about 1M steps and average 0--0.3 at 2M with a large spread across seeds, while DreamerV3 learns Easy but not Medium (Fig.~9 of~\cite{samsami2024r2i}), as in our runs.
+At 2M steps, the comparison is one of sample efficiency.
 \TODO{Final POPGym returns of \method (expected Oct.~5--6).}
 
 \subsection{What the world model remembers}
@@ -75,19 +81,10 @@ On Medium, all baselines remain at chance after 2M steps, \dv included, consiste
 
 \begin{table}[t]
   \centering\tabfont
-  \caption{\textbf{World-model probes} (random-policy data, no policy learning). Updates until the AUC of the reward prediction exceeds 0.9; -- = not within 12k (memlen) or 10k (RepeatPrevious) updates, with the final AUC in parentheses (0.5 = no memory); a final AUC after an update count marks a run that crossed 0.9 but ended below it.}
+  \caption{\textbf{World-model probes} (random-policy data, no policy). Updates until the reward AUC exceeds 0.9; -- = not within 12k (memlen) or 10k (RepeatPrevious) updates; in parentheses the final AUC (0.5 = no memory) when it ends below 0.9.}
   \label{tab:probe}
   \input{tables/probe}
 \end{table}
-
-\begin{figure*}[t]
-  \centering
-  \includegraphics[width=\textwidth]{fig/probe_panels}
-  \caption{\textbf{Persistence, retention time, write gain and resonance} (world-model probes, AUC of the reward prediction; 0.5 = no memory).
-  (a) Variants of \method recalling a cue 64 steps back: clearing the dendrites at every step, retention times shorter than the memory, or the Euler write gain all leave the world model without memory.
-  (b) Recalling the card of exactly 32 steps ago: only \method with resonant channels learns it.}
-  \label{fig:probe}
-\end{figure*}
 
 The probes separate memory from policy learning (\cref{tab:probe}).
 On memlen-$L$-recall, \method learns every length at least as fast as any other model and is the only one that recalls 64 steps (3.5k updates); \dv and \swmnr stop at 32, GRSN at 16, LIF at 8.
@@ -95,24 +92,24 @@ The same ordering as in RL shows that the limits of the baselines are limits of 
 
 RepeatPrevious asks for a different memory: not one value held for long, but the input of an exact lag among a stream of similar inputs.
 At $k=4$ most models learn it, \method fastest (2k updates).
-At $k=32$, \method is the only model that learns it (AUC 0.93 after 6k updates); all others, including \dv and GRSN, remain at 0.50--0.55 (\cref{fig:probe}b).
-Resonance is the reason: the same model with integrator channels only also stays at chance (0.54).
-In RL, the world model of the earlier integrator-only \method reached a reward AUC of only 0.55 on Medium evaluation episodes, so its policy had nothing to act on (Supp.~\suppref{supp:diag}{F}).
+At $k=32$, \method is the only model that learns it (AUC 0.93 after 6k updates); all others, including \dv and GRSN, remain at 0.50--0.55 (curves in Supp.~\suppref{supp:probe}{C}).
+Resonance is the reason: the same model with integrator channels only also stays at chance (0.54), and in RL its world model reached a reward AUC of only 0.55 on Medium (Supp.~\suppref{supp:diag}{F}).
+We added resonant channels after the integrator-only model failed this task, and the configuration has not changed since; RepeatPrevious Hard ($k=64$), which we did not use during development, tests it on a new lag. \TODO{Hard probe results of all models (20k updates, window 128).}
 
 \subsection{Memory Maze}
 \label{sec:mm}
 
 \begin{table}[t]
   \centering\tabfont
-  \setlength{\tabcolsep}{2.6pt}
-  \caption{\textbf{Memory Maze, DMC and energy.} Memory Maze 9$\times$9 offline probing~\cite{pasukonis2023memorymaze}: probes on the frozen state after 1M updates, second half of the evaluation episodes (constant predictor: 23.9 MSE, 80.8\% walls). DMC from proprioception: return after 500k steps. Energy of the world-model filter per environment step (45\,nm, 0.9\,pJ per accumulate, 4.6\,pJ per multiply-accumulate~\cite{horowitz2014energy}) and firing rate of the recurrent state, BSuite $L=32$ models. Bottom: reference results from~\cite{pasukonis2023memorymaze} (larger RSSM).}
+  \setlength{\tabcolsep}{3pt}
+  \caption{\textbf{Memory Maze and DMC.} Memory Maze 9$\times$9 offline probing~\cite{pasukonis2023memorymaze}: probes on the frozen state after 1M updates, second half of the evaluation episodes (constant predictor: 23.9 MSE, 80.8\% walls). DMC from proprioception: return after 500k steps. Bottom: reference results from~\cite{pasukonis2023memorymaze} (larger RSSM).}
   \label{tab:mm}
   \input{tables/mm_dmc_energy}
 \end{table}
 
 \TODO{Memory Maze runs reach 1M updates around Oct.~10--13; the values shown are the latest in-training probes. Final values: frozen probes (200k probe updates) on the policy features.}
 Memory Maze tests whether a world model builds a map of a 3D maze from first-person views over 1000 steps.
-\Cref{tab:mm} reports the probes on the state that the policy reads.
+\Cref{tab:mm} reports the probes on the state that the policy reads: $(z_t,h_t)$ for all models, and in addition the dendritic spikes for \method.
 \TODO{Text after the results: compare \method with the spiking baselines and \dv; the memory gain is the difference to a probe on the current image embedding alone (no memory).}
 
 \subsection{Ablations}
@@ -120,27 +117,28 @@ Memory Maze tests whether a world model builds a map of a 3D maze from first-per
 
 \begin{table}[t]
   \centering\tabfont
-  \caption{\textbf{Ablations} on the world-model probes (updates until AUC $>0.9$; -- (AUC) = not within 12k/10k updates). Each row changes one design choice of \method; a final AUC after an update count marks a run that crossed 0.9 but ended below it.}
+  \caption{\textbf{Ablations} on the world-model probes (as in \cref{tab:probe}). Each row changes one design choice of \method.}
   \label{tab:ablation}
   \input{tables/ablation}
 \end{table}
 
-\Cref{tab:ablation} and \cref{fig:probe}a remove one design choice at a time.
+\Cref{tab:ablation} removes one design choice at a time (curves in Supp.~\suppref{supp:probe}{C}).
 \emph{Persistence}: clearing the dendrites at every environment step erases the memory of \method (AUC 0.50 at 64 steps), the direct test of reset-induced amnesia inside our own model.
-\emph{Retention time}: a single retention time of 16 steps fails at 64 steps, while 128 steps succeeds; the log-uniform spectrum succeeds without being set for the task, and learning it changes little against keeping its initialization (3.5k vs.\ 4k updates).
+\emph{Retention time}: a single retention time of 16 steps fails at 64 steps and one of 128 succeeds; the log-uniform spectrum succeeds without being set for the task, learned or kept at its initialization (3.5k vs.\ 4k updates).
 \emph{Write gain}: with the Euler gain $1-\lambda$ the long-retention channels are too faint, and the model fails at 64 steps.
 \emph{Depth}: one PDN layer fails at 64 steps; the spikes of the first layer give the second a nonlinear input.
 \emph{Channel types}: without resonant channels the model fails RepeatPrevious Medium; with only resonant channels it still solves it but needs almost twice as many updates at 64 steps (6.5k vs.\ 3.5k, and its AUC does not stay above 0.9), where a value must be held unchanged.
 Half of each kind keeps both strengths.
 \emph{Sparsity}: capping the firing rate at 0.06 (from 0.18) keeps 32-step recall (2k updates) but loses 64-step recall within the budget.
+\emph{Stateless soma and no spike feedback}: \TODO{results of the soma with a membrane that its spike resets, and of dendrites that also receive the layer's spikes (64 steps, $k=32$).}
 
 \subsection{Non-memory control and energy}
 \label{sec:energy}
 
-\TODO{DMC runs of \method finish around Oct.~4--5. Criterion (fixed in advance): no degradation relative to \swm, whose benchmark this is.}
-On DMC (\cref{tab:mm}), \method reaches \pend{[--]}, \pend{[--]} and \pend{[--]} on walker walk, cheetah run and cartpole swingup, against 923, 343 and 497 for \swm and 953, 699 and 871 for \dv.
+\TODO{Final DMC returns of \method (Oct.~4).}
+On DMC (\cref{tab:mm}), \method reaches \pend{[--]}, \pend{[--]} and \pend{[--]} on walker walk, cheetah run and cartpole swingup, against 923, 343 and 497 for \swm and 953, 699 and 871 for \dv in the same setting.
 
-Per environment step, the world-model filter of \method costs 5.4\,$\mu$J, 3.2$\times$ less than \dv (17.2\,$\mu$J), at a recurrent firing rate of 0.15.
-Most of its operations are accumulates triggered by spikes; the multiply-accumulates of the dendrites are local to each neuron (3 per integrator and 6 per resonant channel and step).
-Recurrent LIF and GRSN are cheaper still (4.9 and 3.6\,$\mu$J) but do not remember beyond 8 and 16 steps.
-These estimates count arithmetic only, the convention of SNN energy reports; memory access, which a hardware-aware study shows can dominate~\cite{dampfhoffer2023energy}, is not included for any model.
+Per environment step (Supp.~\suppref{supp:energy}{H}), the agent of \method, world-model filter and actor, costs 5.7\,$\mu$J, 3.9$\times$ less than \dv (22.0\,$\mu$J); the filter alone costs 3.3 against 17.2\,$\mu$J, at a recurrent firing rate of 0.15.
+Most of its operations are accumulates triggered by spikes, including those of the 6144 dendritic spike inputs of the actor (2.3\,$\mu$J of the 5.7); the multiply-accumulates of the dendrites are local to each neuron (3 per integrator and 6 per resonant channel and step).
+The spiking baselines cost 2.4--3.9\,$\mu$J but do not remember beyond 8--32 steps.
+These estimates count 32-bit arithmetic only~\cite{horowitz2014energy}, the convention of SNN energy reports; memory access, which a hardware-aware study shows can dominate~\cite{dampfhoffer2023energy}, is not included for any model.

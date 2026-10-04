@@ -21,7 +21,7 @@ where $I^{c}[k] = W_c\,[\,x_t[k];\,h_{t-1}[k]\,]$ combines the current input spi
 Two resets act on this neuron:
 \begin{enumerate}
 \item \textbf{Step reset.} All compartments are set to zero at the start of every environment step.
-\item \textbf{Spike reset.} When the soma fires, the soma and both dendrites are set to zero.
+\item \textbf{Spike reset.} When the soma fires, the soma and both dendrites are set to zero.\footnote{The equations of~\cite{sun2025spikingwm} show the somatic reset; the dendritic reset is part of its official implementation (\texttt{MCNode.calc\_spike}), which all our \swm runs use.}
 \end{enumerate}
 
 \paragraph{Consequences.}
@@ -36,17 +36,16 @@ The spike reset additionally truncates a dendritic trace at the next spike: with
 which vanishes as soon as the neuron has fired once, so the effective memory is the shorter of $\tau_c$ and the inter-spike interval.
 
 \paragraph{Write gain.}
-Removing both resets is not enough to make long time constants useful.
-The Euler update in \cref{eq:mcn} writes input with gain $1/\tau_c$: an input held for $n$ simulation steps raises the compartment by $1-\alpha^{n}\approx n/\tau_c$, and for white input the stationary spread of $v^{c}$ shrinks as $1/\sqrt{2\tau_c}$.
-A long time constant thus retains a cue but stores it faintly.
-In the probe of \cref{sec:causal} with both resets removed, a cue moved the basal potential of a $\tau_c=128$ dendrite by 0.004--0.009, about 1\% of the threshold $\vartheta=0.5$, compared with 0.19 at $\tau_c=2$, where it decays within two steps.
+Removing both resets does not make long time constants useful by itself.
+The Euler update in \cref{eq:mcn} writes input with gain $1/\tau_c$, so for white input the stationary spread of $v^{c}$ shrinks as $1/\sqrt{2\tau_c}$: a long time constant retains a cue but stores it faintly.
+With both resets removed (\cref{sec:causal}), a cue moved the basal potential of a $\tau_c=128$ dendrite by 0.004--0.009, about 1\% of the threshold $\vartheta=0.5$, against 0.19 at $\tau_c=2$.
 
 \subsection{Causal test}
 \label{sec:causal}
 
 \begin{table}[t]
   \centering\tabfont
-  \caption{\textbf{Interventions on \swm} (world-model probe, memlen-$L$-recall). Updates until the reward AUC exceeds 0.9, two seeds; -- = not within 12k updates; blank = not run. A: state kept across environment steps; B: no dendritic reset on a somatic spike; G: dendritic input scaled by $\sqrt{\tau_d/2}$. The GRU core is a continuous-state reference inside the same spiking world model.}
+  \caption{\textbf{Interventions on \swm} (world-model probe, memlen-$L$-recall). Updates until the reward AUC exceeds 0.9, two seeds; -- = not within 12k updates; blank = not run. A: state kept across environment steps; B: no dendritic reset on a somatic spike; G: dendritic input scaled by $\sqrt{\tau_d/2}$. GRU: continuous-state reference core.}
   \label{tab:interventions}
   \input{tables/interventions}
 \end{table}

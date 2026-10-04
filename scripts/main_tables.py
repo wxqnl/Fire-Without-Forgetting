@@ -181,10 +181,10 @@ def mm_baseline():
 def energy_cell(run):
     path = RUNS / run / "s0" / "energy.json"
     if not path.exists():
-        return ["·"] * 4
+        return ["·"] * 5
     e = json.loads(path.read_text())
     return [f"{e['ac_per_step'] / 1e6:.2f}", f"{e['mac_per_step'] / 1e6:.2f}", f"{e['energy_nj_per_step'] / 1e3:.2f}",
-            f"{e['deter_rate']:.3f}"]
+            f"{e.get('agent_energy_nj_per_step', float('nan')) / 1e3:.2f}", f"{e['deter_rate']:.3f}"]
 
 
 def main():
@@ -268,9 +268,10 @@ def main():
         body.append([label, *l32, *l64])
     out += table(["variant", "L32 updates", "L32 AUC (rate)", "L64 updates", "L64 AUC (rate)"], body)
 
-    out += ["", "## Table 8. Operations and energy per environment step (world-model filter: encoder + posterior)", "",
-            "45 nm: 0.9 pJ per AC, 4.6 pJ per MAC; memory access not counted. Models of the BSuite L32 RL runs.", ""]
-    out += table(["model", "AC (M)", "MAC (M)", "energy (µJ)", "recurrent firing rate"],
+    out += ["", "## Table 8. Operations and energy per environment step (world-model filter: encoder + posterior; agent: filter + actor)", "",
+            "45 nm: 0.9 pJ per AC, 4.6 pJ per MAC; memory access not counted. Models of the BSuite L32 RL runs.",
+            "Spike counts corrected on 2026-10-04 (a binary spike frame was counted T times before).", ""]
+    out += table(["model", "filter AC (M)", "filter MAC (M)", "filter energy (µJ)", "agent energy (µJ)", "recurrent firing rate"],
                  [[label, *energy_cell(f"rl2/bsuite_memlen-32/{key(m, 'bsuite')}")] for m, label in models if m != "OURSALT"])
     text = "\n".join(out) + "\n"
     (ROOT / "RESULTS.md").write_text(text)

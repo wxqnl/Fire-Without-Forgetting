@@ -5,8 +5,8 @@
   \centering
   \input{fig/neurons}
   \caption{\textbf{Where memory lives.}
-  (a) In a multi-compartment neuron of \swm, all compartments are cleared at every environment step and the dendrites are also reset by every somatic spike, so the only trace of step $t-1$ that reaches step $t$ is the binary spike output fed back as input.
-  (b) In a persistent dendritic neuron (PDN), linear dendritic channels carry the memory across environment steps. They are never reset and receive no spikes back. Integrator channels (blue) hold a value; resonant channels (orange) rotate by a phase $\theta$ per step, so their state also encodes elapsed time. A stateless soma reads the channels and emits one binary spike $s_t$, the only output of the neuron.}
+  (a) \swm: all compartments are cleared at every environment step and the dendrites at every somatic spike, so only the binary spikes fed back as input carry step $t-1$ to step $t$.
+  (b) PDN: linear dendritic channels, never reset and without spike feedback, carry the memory across steps. Integrator channels (blue) hold a value; resonant channels (orange) rotate by a phase $\theta$ per step and so also encode elapsed time. A stateless soma reads them and emits the neuron's only output, a binary spike $s_t$.}
   \label{fig:neurons}
 \end{figure*}
 
@@ -43,7 +43,7 @@ s_t = \Hv\big(\mathrm{N}(u_t) - \vartheta\big),
 \label{eq:soma}
 \end{equation}
 where $C_m, C'_m$ are per-neuron weights, $D$ is a synaptic matrix, $\mathrm{N}$ is the normalization used throughout the world model and $\vartheta=0.5$.
-The spike $s_t$ is repeated over the $T$ simulation steps and is the only signal the neuron sends to other neurons.
+The spike $s_t$ is repeated over the $T$ simulation steps and is the only signal the neuron sends to other neurons of the world model.
 
 \paragraph{Parameters.}
 We use $N=512$ and $M=4$, half of the channels of every neuron resonant.
@@ -60,7 +60,11 @@ The spike, which does cross one, is recomputed from the dendrites at every step 
 
 \paragraph{Normalized write.}
 For unit-variance white input, \cref{eq:integrator} gives $\mathrm{Var}(d_t)=(1-\lambda^2)\sum_{k\ge0}\lambda^{2k}=1$ for every $\tau$, whereas the Euler gain $1-\lambda$ of \cref{eq:mcn} gives $(1-\lambda)/(1+\lambda)\approx 1/(2\tau)$.
-The normalization of the LRU~\cite{orvieto2023lru} thus keeps channels with retention times from 1 to 1000 steps on the same scale. Intervention G applied the same scaling up to a constant: $\sqrt{\tau/2}\cdot\tfrac{1}{\tau}=\tfrac12\sqrt{2/\tau}\approx\tfrac12\sqrt{1-\lambda^2}$.
+The normalization of the LRU~\cite{orvieto2023lru} thus keeps channels with retention times from 1 to 1000 steps on the same scale; intervention G is the same scaling up to a factor of 2.
+
+\paragraph{What the PDN adds.}
+We adopt the input normalization and the initialization of the LRU~\cite{orvieto2023lru}.
+The PDN adds what a spiking world model needs: binary spikes as the only signal between its neurons, no reset of and no spike feedback into the memory, a stateless soma, and separate integrator and resonant channels; \cref{sec:ablation} removes each of them.
 
 \paragraph{A spectrum of retention times.}
 The memory length a task needs is not known in advance.
@@ -69,12 +73,12 @@ Log-uniform retention times cover lengths from one to a thousand steps in every 
 \paragraph{Resonance tells time.}
 An input that arrived $k$ steps ago contributes $\lambda^{k}(\cos k\theta,\ \sin k\theta)\,w_{t-k}$ to a resonant channel: its phase identifies the lag.
 In integrator channels, inputs of different ages are superposed with smoothly decaying weights $\lambda^{j}$, so isolating the input of exactly $k$ steps ago from those of $k\pm1$ steps ago requires subtracting channels with nearby retention times, an ill-conditioned readout.
-We keep integrators and resonators side by side: the former hold \emph{what} was seen, the latter also record \emph{when}.
+Integrators hold \emph{what} was seen, resonators also record \emph{when}.
 
 \paragraph{Spikes communicate.}
 All signals between neurons are spikes, so the synaptic operations $B\xx_t$ and $D\xx_t$ are accumulates.
-The dendritic recurrence, the readout $\sum_m C_m d_m$ and the normalizations are local to a neuron: $O(NM)$ multiply-accumulates per step, against $O(N^2)$ for a dense recurrent matrix.
-Graded values never cross a synapse; they remain inside the neuron, as state variables of neuromorphic cores that support multi-variable neuron models~\cite{orchard2021loihi2}.
+The dendritic recurrence and the readout $\sum_m C_m d_m$ are local to a neuron, and the normalizations need only the mean and variance of a layer, as in every spiking world model we compare: $O(NM)$ multiply-accumulates per step, against $O(N^2)$ for a dense recurrent matrix.
+Inside the world model, graded values never cross a synapse; they remain inside the neuron, as state variables of neuromorphic cores that support multi-variable neuron models~\cite{orchard2021loihi2}.
 Since the dendrites are linear in their input, the layer could also be trained with a parallel scan~\cite{smith2023s5}; we train it step by step, like every other model in this paper.
 
 \subsection{Spiking world model}
@@ -88,4 +92,5 @@ The dendritic state is carried through training sequences and through imaginatio
 The actor and critic read $z_t$, $h_t$ and the state of the second-layer dendrites, on every task; the Memory Maze probes read the same features.
 The soma sends one bit per neuron and step, whereas the dendrites hold the memory in graded form.
 To pass them on as spikes, each state variable is standardized over the layer and encoded by $T$ ON and $T$ OFF thresholds at $\pm(k-\tfrac12)\tfrac{2}{T}$, $k=1,\dots,T$, giving $2T$ binary frames whose rates represent $2T+1$ levels.
+With six state variables per neuron, the actor and critic receive 6144 additional binary inputs per simulation step, the only path by which the dendritic state leaves a neuron.
 Supp.~\suppref{supp:policy}{E} compares a policy that reads $(z_t,h_t)$ only.

@@ -137,7 +137,9 @@ ABLATIONS = [("PD2Lreshalf_tau1000", r"\method"),
              ("PD2Lreshalfeuler_tau1000", r"Euler write gain $1-\lambda$"),
              ("PDreshalf_tau1000", "one PDN layer"),
              ("PD2L_tau1000", "no resonant channels"), ("PD2Lres_tau1000", "all channels resonant"),
-             ("PD2Lreshalfcap_tau1000", "firing rate capped at 0.06")]
+             ("PD2Lreshalfcap_tau1000", "firing rate capped at 0.06"),
+             ("PD2Lreshalfsomalif_tau1000", "soma with membrane and reset"),
+             ("PD2Lreshalffeedback_tau1000", "spike feedback into dendrites")]
 
 
 def ablation_table():
@@ -175,31 +177,42 @@ def mm_cell(run, key, scale=1.0, fmt="{:.1f}"):
 
 
 def mm_dmc_energy_table():
-    """Table 4: Memory Maze probe, DMC return and energy per step, one row per model."""
+    """Table 4: Memory Maze probe and DMC return, one row per model (energy: supp. table, energy_table)."""
     dmc = ["walker_walk", "cheetah_run", "cartpole_swingup"]
-    lines = [r"\begin{tabular}{@{}l cc ccc cc@{}}", r"\toprule",
-             r" & \multicolumn{2}{c}{Memory Maze 9$\times$9} & \multicolumn{3}{c}{DMC return $\uparrow$} & \multicolumn{2}{c}{per env.\ step} \\",
-             r"\cmidrule(lr){2-3}\cmidrule(lr){4-6}\cmidrule(l){7-8}",
-             r" & obj.\ MSE $\downarrow$ & walls \% $\uparrow$ & walk & run & swingup & $\mu$J $\downarrow$ & rate \\", r"\midrule"]
+    lines = [r"\begin{tabular}{@{}l cc ccc@{}}", r"\toprule",
+             r" & \multicolumn{2}{c}{Memory Maze 9$\times$9} & \multicolumn{3}{c}{DMC return $\uparrow$} \\",
+             r"\cmidrule(lr){2-3}\cmidrule(l){4-6}",
+             r" & obj.\ MSE $\downarrow$ & walls \% $\uparrow$ & walk & run & swing \\", r"\midrule"]
     for m, label in MODELS:
         mm = f"mmaze_official/memory_maze_9x9/{mt.key(m, 'mmaze')}"
         o = mm_cell(mm, "objects_mse")[0]
         w = mm_cell(mm, "walls_acc", 100)[0]
         d = [final_return(f"dmc500/dmc_{t}/{mt.key(m, 'dmc')}", fmt="{:.0f}") for t in dmc]
-        e_path = mt.RUNS / f"rl2/bsuite_memlen-32/{mt.key(m, 'bsuite')}/s0/energy.json"
-        if e_path.exists():
-            e = json.loads(e_path.read_text())
-            en = [f"{e['energy_nj_per_step'] / 1e3:.2f}", "--" if m == "ann_tau2" else f"{e['deter_rate']:.2f}"]
-        else:
-            en = [r"\pend{$\cdot$}", r"\pend{$\cdot$}"]
         if m == "OURS":
             lines.append(r"\midrule")
-        lines.append(label + " & " + " & ".join([o, w] + d + en) + r" \\")
+        lines.append(label + " & " + " & ".join([o, w] + d) + r" \\")
     lines.append(r"\midrule")
     for label, o, w in MM_PAPER:
-        lines.append(label + f" & {o} & {w} & " + " & ".join([r"\nr"] * 5) + r" \\")
+        lines.append(label + f" & {o} & {w} & " + " & ".join([r"\nr"] * 3) + r" \\")
     lines += [r"\bottomrule", r"\end{tabular}"]
     write("mm_dmc_energy", lines)
+
+
+def energy_table():
+    """Supp.: operations and energy per environment step of the BSuite L=32 RL agents (energy.py)."""
+    lines = [r"\begin{tabular}{@{}l ccc c c@{}}", r"\toprule",
+             r" & \multicolumn{3}{c}{world-model filter} & actor & agent \\", r"\cmidrule(lr){2-4}",
+             r"model & AC (M) & MAC (M) & $\mu$J & $\mu$J & $\mu$J \\", r"\midrule"]
+    for m, label in MODELS:
+        e_path = mt.RUNS / f"rl2/bsuite_memlen-32/{mt.key(m, 'bsuite')}/s0/energy.json"
+        if m == "R2I" or not e_path.exists():
+            continue
+        e = json.loads(e_path.read_text())
+        cells = [f"{e['ac_per_step'] / 1e6:.2f}", f"{e['mac_per_step'] / 1e6:.2f}", f"{e['energy_nj_per_step'] / 1e3:.1f}",
+                 f"{e['actor_energy_nj_per_step'] / 1e3:.1f}", f"{e['agent_energy_nj_per_step'] / 1e3:.1f}"]
+        lines.append(label + " & " + " & ".join(cells) + r" \\")
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("energy", lines)
 
 
 def policy_table():
@@ -220,6 +233,33 @@ def policy_table():
         lines.append(label + " & " + " & ".join(cells) + r" \\")
     lines += [r"\bottomrule", r"\end{tabular}"]
     write("policy", lines)
+
+
+def stability_table():
+    """Supp.: BSuite RL, per model and length: env. steps to a return of 0.9, then the mean return and the
+    fraction of evaluations with return >= 0.5 from that evaluation on (single runs; Stage 3 review, RM-4)."""
+    cols = [("rl2", L) for L in (8, 16, 32, 64)] + [("r2i", L) for L in (51, 71, 101)]
+    lines = [r"\begin{tabular}{@{}l ccccccc@{}}", r"\toprule",
+             r"model & $L$=8 & 16 & 32 & 64 & 51$^\dagger$ & 71$^\dagger$ & 101$^\dagger$ \\", r"\midrule"]
+    for m, label in MODELS:
+        if m == "R2I":
+            continue
+        cells = []
+        for g, L in cols:
+            run = f"{g}/bsuite_memlen-{L}/{mt.key(m, 'bsuite')}"
+            ev = [(r["step"], r["eval_return"]) for r in evals(run, "eval_return")]
+            if not ev:
+                cells.append(r"\nr")
+                continue
+            hit = next((i for i, (_, v) in enumerate(ev) if v >= 0.9), None)
+            if hit is None:
+                cells.append("--")
+                continue
+            after = [v for _, v in ev[hit:]]
+            cells.append(wrap(f"{np.mean(after):.2f}\\,{{\\tiny({100 * np.mean([v >= 0.5 for v in after]):.0f}\\%)}}", run))
+        lines.append(label + " & " + " & ".join(cells) + r" \\")
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("stability", lines)
 
 
 def numbers():
@@ -246,5 +286,7 @@ if __name__ == "__main__":
     probe_table()
     ablation_table()
     mm_dmc_energy_table()
+    stability_table()
+    energy_table()
     policy_table()
     print("tables written to", OUT)

@@ -12,7 +12,8 @@ agent, over held-out episodes and counts with forward hooks:
        channel, GRSN 4, GRU 4)
 
 Energy with the 45 nm figures common in SNN papers (Horowitz 2014): 0.9 pJ per AC, 4.6 pJ per
-MAC. Memory access is not counted; the hardware-aware accounting of research plan §4.4 is a
+MAC. For RL runs the actor is counted as well (actor_*, agent_energy_nj_per_step).
+Memory access is not counted; the hardware-aware accounting of research plan §4.4 is a
 later step.
 
 usage: python energy.py --configs bsuite ours --task bsuite_memlen-32-recall --logdir <run dir>
@@ -54,7 +55,14 @@ class Counter:
 
     def linear(self, mod, inp, out):
         x = inp[0]
-        n = spike_count(x, self.T if x.dtype.is_floating_point else 1)
+        if not x.dtype.is_floating_point:
+            n = spike_count(x, 1)
+        elif getattr(mod, "_rate_input", False):  # reads the rate of the T input frames (PDRNN, GRSN synapses)
+            n = spike_count(x, self.T)
+        elif bool(((x == 0) | (x == 1)).all()):  # one frame of binary spikes (fixed 2026-10-04: was counted T times)
+            n = float(x.sum())
+        else:  # a rate over the T frames, or real-valued (None: multiply-accumulates)
+            n = spike_count(x, self.T)
         if n is not None:
             self.ac += n * mod.out_features
         else:
@@ -77,9 +85,9 @@ class Counter:
         return hook
 
 
-def attach(wm, counter):
+def attach(wm, counter, parts=None):
     handles = []
-    for part in (wm.encoder, wm.dynamics):
+    for part in parts or (wm.encoder, wm.dynamics):
         for mod in part.modules():
             if isinstance(mod, nn.Linear):
                 handles.append(mod.register_forward_hook(counter.linear))
@@ -92,9 +100,13 @@ def attach(wm, counter):
             elif isinstance(mod, node.ANNAct):
                 handles.append(mod.register_forward_hook(counter.elementwise(1)))
             elif isinstance(mod, networks.PDRNN):
+                for lin in list(mod.B) + list(mod.D) + list(getattr(mod, "R", [])):
+                    lin._rate_input = True
                 # 3 per integrator channel; a resonant channel rotates (a, b) and is read by C and C': 6
                 handles.append(mod.register_forward_hook(counter.elementwise(3 * (mod._channels + mod._n_res) * mod._layers)))
             elif isinstance(mod, (networks.GRSNCell, networks.GRUCtrl)):
+                if isinstance(mod, networks.GRSNCell):
+                    mod.forget._rate_input = mod.inp._rate_input = True
                 handles.append(mod.register_forward_hook(counter.elementwise(4)))
             elif isinstance(mod, networks.LIFRNN):
                 handles.append(mod.register_forward_hook(counter.elementwise(counter.T)))  # T updates per call
@@ -125,8 +137,8 @@ def main():
         wm.load_state_dict(torch.load(logdir / "wm.pt", map_location=config.device))
     else:
         state = torch.load(logdir / "latest_model.pt", map_location=config.device)
-        state = {k[len("_wm."):]: v for k, v in state.items() if k.startswith("_wm.")}
-        wm.load_state_dict({k.replace("_orig_mod.", "", 1): v for k, v in state.items()})  # torch.compile prefix
+        wm.load_state_dict({k[len("_wm."):].replace("_orig_mod.", "", 1): v  # torch.compile prefix
+                            for k, v in state.items() if k.startswith("_wm.")})
     wm.eval()
     counter = Counter(config.spike_times)
     attach(wm, counter)
@@ -142,6 +154,20 @@ def main():
         "deter_rate": float(post["deter"].float().mean()),
         "steps": steps,
     }
+    if not (logdir / "wm.pt").exists():
+        # RL run: also the actor, which runs at every step on the agent (Stage 3 review, RM-9).
+        # It reads get_policy_feat: (z_t, h_t), plus the dendritic ON/OFF spikes with policy_mem.
+        beh = models.ImagBehavior(config, wm).to(config.device)
+        prefix = next(p for p in ("_task_behavior._orig_mod.actor.", "_task_behavior.actor.") if any(k.startswith(p) for k in state))
+        beh.actor.load_state_dict({k[len(prefix):]: v for k, v in state.items() if k.startswith(prefix)})
+        beh.eval()
+        actor_counter = Counter(config.spike_times)
+        attach(wm, actor_counter, parts=(beh.actor,))
+        beh.actor(wm.dynamics.get_policy_feat(post))
+        out["actor_ac_per_step"] = actor_counter.ac / steps
+        out["actor_mac_per_step"] = actor_counter.mac / steps
+        out["actor_energy_nj_per_step"] = (E_AC * actor_counter.ac + E_MAC * actor_counter.mac) / steps * 1e9
+        out["agent_energy_nj_per_step"] = out["energy_nj_per_step"] + out["actor_energy_nj_per_step"]
     print(json.dumps(out))
     (logdir / "energy.json").write_text(json.dumps(out, indent=1))
 

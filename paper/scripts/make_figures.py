@@ -74,7 +74,7 @@ def final(path, key="eval_return", n=3):
 def memory_length():
     """Fig. 1: final evaluation return against the BSuite memory length; left: L8-L64 (0.15-0.5M env
     steps), right: L51-L101 under the protocol of R2I (1M env steps)."""
-    fig, ax = plt.subplots(figsize=(3.3, 2.05))
+    fig, ax = plt.subplots(figsize=(3.3, 1.8))
     groups = [[(8, "rl2"), (16, "rl2"), (32, "rl2"), (64, "rl2")], [(51, "r2i"), (71, "r2i"), (101, "r2i")]]
     pos = {8: 0, 16: 1, 32: 2, 64: 3, 51: 4.6, 71: 5.6, 101: 6.6}
     for model in ["base_tau2", "LIF_tau2", "GRSN_tau2", "ABG_tau128", "ann_tau2", "OURS"]:
