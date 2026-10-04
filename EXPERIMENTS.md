@@ -991,3 +991,16 @@ Stage 3 模拟审稿（`paper/review/stage3/`）的结论是 Major Revision。�
   - 内容：BSuite 8/16/32 步，51/71/101 步；POPGym Easy；DMC cheetah、cartpole；像素 DMC walker。
   - 如果验证显示 `acmatch` 明显不如 `aclowrank`，这些任务改用 `aclowrank` 重跑。
 - Hard 探针的 Spiking-WM 也跑完了（0.50）。表 3 的 Hard 一列已是最终值，正文去掉 \pend。
+
+### 19.13 12.9M 版本跑完；3.41M 版本的早期结果（10 月 4 日 19:00）
+
+- 12.9M 的 FwF（`PD2Lv2`）已经跑完：
+  - DMC：walker 897、cheetah 495、cartpole 840（Spiking-WM 923 / 343 / 497，DreamerV3 953 / 699 / 871）；
+  - POPGym Medium：0.50；Easy 还在跑，90% 时 0.71。
+  - 主配置换成 3.41M 版本之后，这组结果放进附录，作为"策略网络更大"的消融。
+- 3.41M 版本（`PD2Lv2m`）的早期结果：
+  - BSuite 8 / 16 / 32 步：回报都稳定在 1.0。
+  - BSuite 64 步：约 103k 步时达到 1.0，比 12.9M 版本的 192k 早。
+  - POPGym Medium：两个版本到约 200k 步都还在随机水平（12.9M 版本也是很晚才离开随机水平）。DMC walker 刚开始。
+- 像素 walker：DreamerV3 在 120k 帧已到 866；Spiking-WM 36k 帧时 248；FwF 刚启动。
+- 实测显存（MiB）：3.41M 版本 21k–29k，秩 64 版本 28k–34k，像素 FwF 29k，与预留值相近。还有 5 个任务在等显存。
