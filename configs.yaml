@@ -53,6 +53,7 @@ defaults:
   cont_layers: 2
   value_layers: 2
   actor_layers: 2
+  ac_units: 0  # width of the actor and critic; 0 = units
   act: 'LIFNode'
   norm: 'PopNorm'
   encoder:
@@ -352,6 +353,10 @@ resonanthalf:
 # the actor and critic (and the Memory Maze probes) also read the dendrites as spikes (§18.2)
 policymem:
   policy_mem: 'onoff'
+# capacity control (EXPERIMENTS.md §19.7): the actor and critic read (z_t, h_t) only but are widened to
+# the size of FwF's (12.85M parameters on POPGym; 3.42M at the default width)
+acwide:
+  ac_units: 1384
 
 # baselines: recurrent LIF (T SNN steps per env step, membrane cleared each step unless combined
 # with persist) and GRSN (Qin et al., AAAI 2025; one update per env step, state carried)

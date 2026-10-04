@@ -254,11 +254,12 @@ class ImagBehavior(nn.Module):
         else:
             feat_size = config.dyn_stoch + config.dyn_deter
         feat_size += world_model.dynamics.policy_extra
+        ac_units = getattr(config, "ac_units", 0) or config.units
         self.actor = networks.ActionHead(
             feat_size,
             config.num_actions,
             config.actor_layers,
-            config.units,
+            ac_units,
             config.act,
             eval("config."+config.act),
             config.norm,
@@ -277,7 +278,7 @@ class ImagBehavior(nn.Module):
                 feat_size,
                 (255,),
                 config.value_layers,
-                config.units,
+                ac_units,
                 config.act,
                 eval("config."+config.act),
                 config.norm,
@@ -292,7 +293,7 @@ class ImagBehavior(nn.Module):
                 feat_size,
                 [],
                 config.value_layers,
-                config.units,
+                ac_units,
                 config.act,
                 eval("config."+config.act),
                 config.norm,

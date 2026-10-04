@@ -576,6 +576,17 @@ def round16():
     return jobs
 
 
+def round17():
+    """2026-10-04: capacity control for the actor-critic (EXPERIMENTS.md §19.7). FwF's actor and critic
+    read the dendritic spikes and have 12.85M parameters on POPGym, the soma-only ones 3.42M. One task
+    (RepeatPrevious Easy, where the two inputs differ most): soma spikes only, widened to 12.85M."""
+    name = "popgym/popgym_RepeatPreviousEasy/PD2Lreshalfacwide_tau1000/s0"
+    cmd = (f"{{python}} dreamer.py --configs popgym ours resonanthalf acwide --task popgym_RepeatPreviousEasy --seed 0 "
+           f"--steps 2e6 --train_ratio 64 --envs 8 --batch_length 64 --env_seed_per_env True --eval_every 5e4 "
+           f"--logdir {RUNS / name}")
+    return [dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=26)]
+
+
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
     # Memory Maze pipeline check (round 10), Memory Maze on the official data once downloaded, round 8
@@ -591,7 +602,7 @@ def main():
     # Round 14 (integrate-and-fire soma) failed check V1 on 2026-10-02 (EXPERIMENTS.md §17.4): its
     # unfinished runs were stopped and are not queued again.
     r14 = [j for j in round14() if j["name"] == "recall/bsuite_memlen-8-recall/PD2Lif_tau1000/s0"]
-    jobs = (round16() + round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
+    jobs = (round17() + round16() + round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
             + r8 + round11())
     # the old model's 1M Memory Maze continuation was stopped on 2026-10-02 (superseded, EXPERIMENTS.md §18.4)
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2L_tau1000/s0"]

@@ -50,7 +50,7 @@ POPGym uses the environment settings of R2I's code: DreamerV3's default reward h
 R2I itself runs with the official POPGym configuration of its code (batches of $4\times1024$ steps), changed only in the budget (2M steps, as for all models) and the replay capacity (2M steps, so that no step of the run is evicted).
 
 \paragraph{Parameters.}
-On POPGym the world models have 7.2M (\swm, \swmnr), 6.4M (LIF), 6.5M (GRSN), 7.5M (\dv) and 8.6M (\method) parameters, of which the recurrent core has 1.3M, 0.5M, 0.5M, 1.6M and 2.6M; the actor-critic has 3.4M for the baselines and 12.9M for \method, which also reads the 6144 dendritic spikes.
+On POPGym the world models have 7.2M (\swm, \swmnr), 6.4M (LIF), 6.5M (GRSN), 7.5M (\dv) and 8.6M (\method) parameters, of which the recurrent core has 1.3M, 0.5M, 0.5M, 1.6M and 2.6M; the actor-critic has 3.4M for the baselines and 12.9M for \method, which also reads the 6144 dendritic spikes (Supp.~\suppref{supp:policy}{E} controls for this size).
 Capacity does not explain the results: the GRU core of \dv is larger than the cores of the spiking baselines and fails at 64 steps, and variants of \method with the same size but dendrites cleared at every step, or a single retention time of 16 steps, stay at chance (\cref{tab:ablation}).
 
 \section{Reward that depends on cue and action}
@@ -106,6 +106,8 @@ With A and $\tau_d=128$, the membrane potentials still encode it after 8 steps (
 The two learn BSuite up to 51 steps equally fast.
 Without the dendritic spikes the policy learns 64 steps sooner (102k vs.\ 192k steps), although the world model of \method already predicts the reward of the evaluation episodes with an AUC of 1.0 at 160k steps; a single cue fits in the one bit per neuron that the soma sends.
 On POPGym and on DMC walker walk the policy that reads $(z_t,h_t)$ only falls far behind.
+With the dendritic spikes the actor-critic has 12.9M parameters instead of 3.4M; the last row widens the actor and critic that read $(z_t,h_t)$ only to the same 12.9M, on RepeatPrevious Easy.
+\TODO{Result of the widened actor-critic (2M steps, around Oct.~6).}
 \TODO{Final POPGym and DMC numbers once the runs finish (Oct.~4--5).}
 
 \section{Diagnosing the world model in RL}
