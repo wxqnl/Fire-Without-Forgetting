@@ -1011,3 +1011,12 @@ Stage 3 模拟审稿（`paper/review/stage3/`）的结论是 Major Revision。�
 - 51 步 194k 时回报 1.0（还在跑）；POPGym Medium 415k 时开始离开随机水平（-0.21）。
 - 像素 walker：DreamerV3 240k 帧约 900–935；Spiking-WM 68k 帧 406；FwF 48k 帧 187。
 - 12.9M 版本的 POPGym Easy 跑完：0.72。
+- 10 月 5 日 05:00：
+  - 已跑完：
+    - BSuite 64 步：3.41M 版本 102k 步达到 0.9，最终 0.85；秩 64 版本 132k，最终 0.96。
+    - 只读胞体（3.42M）的 DMC：747 / 528 / 720；POPGym Medium 0.02。
+  - 验证中途对比：
+    - POPGym Medium：3.41M 版本 652k 步时 0.38，比 12.9M 版本（0.09）和秩 64 版本（600k 时 0.43）都离开随机水平得早。
+    - DMC walker：3.41M 版本落后，165k 步 258；12.9M 版本 779，秩 64 版本 444，只读胞体 394。
+    - walker 才进行到约 35%，按事先定的规则，跑完再判定。
+  - 其他：POPGym Easy 382k 步 0.61；51 / 71 步都已达到 1.0；像素 walker：DreamerV3 约 950，Spiking-WM 518（112k 帧），FwF 386（96k 帧）。
