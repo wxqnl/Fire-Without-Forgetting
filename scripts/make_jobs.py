@@ -691,6 +691,41 @@ def round21():
     return jobs
 
 
+def round22():
+    """2026-10-05 09:40, insurance for the round 19 decision. On DMC walker the width-142 actor-critic (acmatch)
+    trails the rank-64 one (aclowrank) at 45% (337 vs 544 at 220k steps); if acmatch ends clearly worse, FwF
+    switches to aclowrank on every benchmark. User: "可以可以，按照你的推荐来". The aclowrank runs of the other
+    RL benchmarks (L64, POPGym Medium and DMC walker are in round 19), longest first; if acmatch stays, they
+    are an appendix ablation. GPU memory: measured aclowrank runs (28-34 GB) + 15%."""
+    M = V2 + ["aclowrank"]
+    cell = {"PD2Lv2r64_tau1000": M}
+    name = "dmcpix/dmc_walker_walk/PD2Lv2r64_tau1000/s0"
+    cmd = (f"MUJOCO_GL=osmesa PYOPENGL_PLATFORM=osmesa {{python}} dreamer.py --configs dmc_vision {' '.join(M)} "
+           f"--task dmc_walker_walk --seed 0 --steps 1e6 --train_ratio 512 --eval_every 2e4 --env_seed_per_env True "
+           f"--logdir {RUNS / name}")
+    jobs = [dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=34)]
+    name = "popgym/popgym_RepeatPreviousEasy/PD2Lv2r64_tau1000/s0"
+    cmd = (f"{{python}} dreamer.py --configs popgym {' '.join(M)} --task popgym_RepeatPreviousEasy --seed 0 --steps 2e6 "
+           f"--train_ratio 64 --envs 8 --batch_length 64 --env_seed_per_env True --eval_every 5e4 --logdir {RUNS / name}")
+    jobs.append(dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=32))
+    for task in ("dmc_cheetah_run", "dmc_cartpole_swingup"):
+        for job in dmc_jobs(task, cell, steps=5e5, train_ratio=512, group="dmc500"):
+            job["cmd"] = job["cmd"].replace(" --logdir ", " --env_seed_per_env True --logdir ")
+            job["mem_gb"] = 34
+            jobs.append(job)
+    for L, window, gb in ((101, 128, 54), (71, 80, 37), (51, 64, 32)):
+        for job in rl2_jobs(f"bsuite_memlen-{L}", cell, steps=1e6,
+                            extra=f"--batch_length {window} --env_seed_per_env True", eval_every=2e4):
+            job = {k: v.replace("rl2/", "r2i/") if isinstance(v, str) else v for k, v in job.items()}
+            job["mem_gb"] = gb
+            jobs.append(job)
+    for L, steps, gb in ((8, 1.5e5, 16), (16, 2e5, 32), (32, 3e5, 32)):
+        for job in rl2_jobs(f"bsuite_memlen-{L}", cell, steps=steps, extra=MEMLEN_EXTRA[L]):
+            job["mem_gb"] = gb
+            jobs.append(job)
+    return jobs
+
+
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
     # Memory Maze pipeline check (round 10), Memory Maze on the official data once downloaded, round 8
@@ -706,7 +741,7 @@ def main():
     # Round 14 (integrate-and-fire soma) failed check V1 on 2026-10-02 (EXPERIMENTS.md §17.4): its
     # unfinished runs were stopped and are not queued again.
     r14 = [j for j in round14() if j["name"] == "recall/bsuite_memlen-8-recall/PD2Lif_tau1000/s0"]
-    jobs = (round19() + round21() + round20() + round18() + round16() + round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
+    jobs = (round19() + round21() + round22() + round20() + round18() + round16() + round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
             + r8 + round11())
     # the old model's 1M Memory Maze continuation was stopped on 2026-10-02 (superseded, EXPERIMENTS.md §18.4)
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2L_tau1000/s0"]
