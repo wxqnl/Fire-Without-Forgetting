@@ -746,6 +746,20 @@ def round23():
     return jobs
 
 
+def round24():
+    """2026-10-06, user: "可以补，把卡八卡都用起来，加加速". DMC from proprioception for the other spiking
+    baselines (recurrent LIF, GRSN, Spiking-WM + A+B+G), with the protocol of the dmc500 group (500k steps, train
+    ratio 512, a seed per env), so that the non-memory control compares FwF with every spiking model
+    (EXPERIMENTS.md §19.18). GPU memory as for Spiking-WM."""
+    cells = {k: MAIN[k] for k in ("LIF_tau2", "GRSN_tau2", "ABG_tau128")}
+    jobs = []
+    for task in ("dmc_walker_walk", "dmc_cheetah_run", "dmc_cartpole_swingup"):
+        for job in dmc_jobs(task, cells, steps=5e5, train_ratio=512, group="dmc500"):
+            job["cmd"] = job["cmd"].replace(" --logdir ", " --env_seed_per_env True --logdir ")
+            jobs.append(job)
+    return jobs
+
+
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
     # Memory Maze pipeline check (round 10), Memory Maze on the official data once downloaded, round 8
@@ -761,7 +775,13 @@ def main():
     # Round 14 (integrate-and-fire soma) failed check V1 on 2026-10-02 (EXPERIMENTS.md §17.4): its
     # unfinished runs were stopped and are not queued again.
     r14 = [j for j in round14() if j["name"] == "recall/bsuite_memlen-8-recall/PD2Lif_tau1000/s0"]
-    jobs = (round19() + round21() + round22() + round23() + round20() + round18() + round16() + round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
+    # 2026-10-06 (EXPERIMENTS.md §19.18): the short BSuite runs of aclowrank first (energy count at L=32), the
+    # 54-GB L=101 run after the DMC baselines, so that it does not hold a GPU half empty while it waits for room.
+    r22 = round22()
+    short = [j for j in r22 if "/bsuite_memlen-16/" in j["name"] or "/bsuite_memlen-32/" in j["name"]]
+    l101 = [j for j in r22 if "/bsuite_memlen-101/" in j["name"]]
+    r22 = short + [j for j in r22 if j not in short and j not in l101]
+    jobs = (round19() + round21() + r22 + round23() + round24() + l101 + round20() + round18() + round16() + round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
             + r8 + round11())
     # the old model's 1M Memory Maze continuation was stopped on 2026-10-02 (superseded, EXPERIMENTS.md §18.4)
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2L_tau1000/s0"]

@@ -261,7 +261,8 @@ def main():
     out += ["", "## Table 6. DMC (proprioception), non-memory control: evaluation return", "",
             "500k env steps, train ratio 512, action repeat 2 (DreamerV3's protocol for DMC from proprioception),",
             "a different seed per parallel env.", ""]
-    dmc_models = [(m, label) for m, label in models if m in ("base_tau2", "OURS", "ann_tau2", "OURSALT", "PD2L_tau1000")]
+    dmc_models = [(m, label) for m, label in models if m in ("base_tau2", "LIF_tau2", "GRSN_tau2", "ABG_tau128", "OURS", "ann_tau2",
+                                                             "OURSALT", "PD2L_tau1000")]  # all spiking baselines since §19.18
     out += table(["model"] + [short(t) for t in DMC], [[label] + [rl_cell(f"dmc500/{t}/{key(m, 'dmc')}", fmt="{:.0f}") for t in DMC]
                                                        for m, label in dmc_models])
 
