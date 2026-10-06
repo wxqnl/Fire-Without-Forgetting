@@ -688,7 +688,11 @@ def round21():
            f"--task dmc_walker_walk --seed 0 --steps 1e6 --train_ratio 512 --eval_every 2e4 --env_seed_per_env True "
            f"--logdir {RUNS / name}")
     jobs.insert(0, dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=30))
-    return jobs
+    # 2026-10-06, user: "同意，按你的推荐来吧": FwF switches to aclowrank (EXPERIMENTS.md §19.16). acmatch stays
+    # as the equal-size appendix row (BSuite, POPGym Medium, DMC walker); its other runs were stopped.
+    stopped = {"dmc500/dmc_cheetah_run/PD2Lv2m_tau1000/s0", "dmc500/dmc_cartpole_swingup/PD2Lv2m_tau1000/s0",
+               "popgym/popgym_RepeatPreviousEasy/PD2Lv2m_tau1000/s0", "dmcpix/dmc_walker_walk/PD2Lv2m_tau1000/s0"}
+    return [j for j in jobs if j["name"] not in stopped]
 
 
 def round22():
@@ -696,7 +700,8 @@ def round22():
     trails the rank-64 one (aclowrank) at 45% (337 vs 544 at 220k steps); if acmatch ends clearly worse, FwF
     switches to aclowrank on every benchmark. User: "可以可以，按照你的推荐来". The aclowrank runs of the other
     RL benchmarks (L64, POPGym Medium and DMC walker are in round 19), longest first; if acmatch stays, they
-    are an appendix ablation. GPU memory: measured aclowrank runs (28-34 GB) + 15%."""
+    are an appendix ablation. GPU memory: measured aclowrank runs (28-34 GB) + 15%.
+    2026-10-06: acmatch ended clearly worse on walker, aclowrank is FwF's configuration (EXPERIMENTS.md §19.16)."""
     M = V2 + ["aclowrank"]
     cell = {"PD2Lv2r64_tau1000": M}
     name = "dmcpix/dmc_walker_walk/PD2Lv2r64_tau1000/s0"

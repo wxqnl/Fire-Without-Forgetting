@@ -26,7 +26,7 @@ All models share one spiking world model, the DreamerV3-style network of \swm~\c
 and \textbf{\method} with two PDN layers.
 As the state of the art among ANN world models on memory tasks we also report \textbf{R2I}~\cite{samsami2024r2i}, a DreamerV3 agent with a state-space recurrence, run with its official code and configuration on POPGym, and with its published results on BSuite.
 Within a benchmark, all models use identical hyperparameters, budgets and evaluation.
-The actor and critic of every model read $(z_t,h_t)$, where $h_t$ is the spike output of the core (for \dv its GRU state); those of \method also read its dendritic state as spikes (\cref{sec:wm}), which makes its actor-critic 12.9M parameters instead of 3.4M on POPGym (Supp.~\suppref{supp:impl}{A}).
+The actor and critic of every model read $(z_t,h_t)$, where $h_t$ is the spike output of the core (for \dv its GRU state); those of \method also read its dendritic state as spikes (\cref{sec:wm}), which gives its actor-critic 4.7M parameters instead of 3.4M (Supp.~\suppref{supp:impl}{A}); at exactly 3.4M it still learns every BSuite length and RepeatPrevious Medium (Supp.~\suppref{supp:policy}{E}).
 On POPGym, \method has 8.6M world-model parameters, \dv 7.5M and \swm 7.2M.
 
 \paragraph{Benchmarks.}
@@ -63,9 +63,9 @@ Recurrent LIF, cleared at every step, solves 8 steps; GRSN, which keeps its stat
 \dv solves up to 32 steps in the short budgets and 51 steps in 902k of 1M steps with R2I's lengths, and fails at 64, 71 and 101.
 
 \method reaches a return of 0.9 at every length.
-It is as fast as the best baseline up to 16 steps, the fastest at 32 (32k steps), and the only model that reaches 0.9 at 64 steps (192k of 500k steps); after that its return is at least 0.5 in 94\% of the evaluations (mean 0.87), whereas no other model exceeds 0.5 at any evaluation.
+It is as fast as the best baseline up to 16 steps, the fastest at 32 (\numFwfToThirtyTwo\ steps), and the only model that reaches 0.9 at 64 steps (\numFwfToSixtyFour\ of 500k steps); after that its return is at least 0.5 in \numFwfAfterFracSixtyFour\% of the evaluations (mean \numFwfAfterSixtyFour), whereas no other model exceeds 0.5 at any evaluation.
 This does not depend on the RL budget: in the world-model probes, \dv fails at 64 steps as well (\cref{sec:probe}).
-With R2I's lengths it reaches 0.9 at 51, 71 and 101 steps after 82k, 162k and 404k environment steps, with a mean return of 0.93, 0.86 and 0.75 over the evaluations that follow and final returns of 0.92, 0.46 and 0.40, since single evaluations fluctuate (\cref{fig:rl_curves}); \dv needs 902k steps for 51 and reaches 0.9 at neither 71 nor 101.
+With R2I's lengths it reaches 0.9 at 51, 71 and 101 steps after \numFwfToFiftyOne, \numFwfToSeventyOne\ and \numFwfToHundredOne\ environment steps, with a mean return of \numFwfAfterFiftyOne, \numFwfAfterSeventyOne\ and \numFwfAfterHundredOne\ over the evaluations that follow and final returns of \numFwfFinalFiftyOne, \numFwfFinalSeventyOne\ and \numFwfFinalHundredOne\ (\cref{fig:rl_curves}); \dv needs 902k steps for 51 and reaches 0.9 at neither 71 nor 101.
 R2I reports a median return of about 0.9 at 51 and 71 memory steps and about 0.35 at 101 after 1M steps (10 seeds; Fig.~7 of~\cite{samsami2024r2i}), with DreamerV3's default reward head; our lengths count one step more, and all our models use the action-indexed reward head (\cref{sec:setup}), so the comparison is indicative.
 These BSuite results do not depend on the dendritic readout: with an actor and critic that read $(z_t,h_t)$ only, \method reaches 0.9 at every length, at 64 steps even sooner (102k), whereas on POPGym and DMC walker walk the readout is needed (Supp.~\suppref{supp:policy}{E}).
 
@@ -74,7 +74,7 @@ On Medium, all baselines remain at chance after 2M steps, \dv included, whereas 
 R2I, run with its official code, stays at chance on both tasks within 2M steps.
 Its published curves span 50M steps: on Medium they leave chance only after about 3M steps, and on Easy they rise after about 1M steps and average 0--0.3 at 2M with a large spread across seeds, while DreamerV3 learns Easy but not Medium (Fig.~9 of~\cite{samsami2024r2i}), as in our runs.
 At 2M steps, the comparison is one of sample efficiency.
-\TODO{Final POPGym returns of \method (expected Oct.~5--6).}
+\TODO{Rank-64 actor (switched Oct.~6): recheck the BSuite comparisons above once $L$=16--101 finish (Oct.~7--8); final POPGym returns (Medium Oct.~6, Easy Oct.~8).}
 
 \subsection{What the world model remembers}
 \label{sec:probe}
@@ -137,10 +137,10 @@ Half of each kind keeps both strengths.
 \subsection{Non-memory control and energy}
 \label{sec:energy}
 
-\TODO{Final DMC returns of \method (Oct.~4).}
-On DMC (\cref{tab:mm}), \method reaches \pend{[--]}, \pend{[--]} and \pend{[--]} on walker walk, cheetah run and cartpole swingup, against 923, 343 and 497 for \swm and 953, 699 and 871 for \dv in the same setting.
+\TODO{Final DMC returns of \method (Oct.~7) and pixel walker walk (Oct.~9--10).}
+On DMC (\cref{tab:mm}), \method reaches \numFwfDmcWalk, \numFwfDmcRun\ and \numFwfDmcSwing\ on walker walk, cheetah run and cartpole swingup, against 923, 343 and 497 for \swm and 953, 699 and 871 for \dv in the same setting.
 
-Per environment step (Supp.~\suppref{supp:energy}{H}), the agent of \method, world-model filter and actor, costs 5.7\,$\mu$J, 3.9$\times$ less than \dv (22.0\,$\mu$J); the filter alone costs 3.3 against 17.2\,$\mu$J, at a recurrent firing rate of 0.15.
-Most of its operations are accumulates triggered by spikes, including those of the 6144 dendritic spike inputs of the actor (2.3\,$\mu$J of the 5.7); the multiply-accumulates of the dendrites are local to each neuron (3 per integrator and 6 per resonant channel and step).
-The spiking baselines cost 2.4--3.9\,$\mu$J but do not remember beyond 8--32 steps.
+Per environment step (Supp.~\suppref{supp:energy}{H}), the agent of \method, world-model filter and actor, costs \numEnergyAgent\,$\mu$J, \numEnergyRatio$\times$ less than \dv (\numEnergyAgentDv\,$\mu$J); the filter alone costs \numEnergyFilter\ against \numEnergyFilterDv\,$\mu$J, at a recurrent firing rate of \numEnergyRate.
+Most of its operations are accumulates triggered by spikes, including those of the 6144 dendritic spike inputs of the actor (\numEnergyActor\,$\mu$J for the whole actor); the multiply-accumulates of the dendrites are local to each neuron (3 per integrator and 6 per resonant channel and step).
+The spiking baselines cost \numEnergySpiking\,$\mu$J but do not remember beyond 8--32 steps.
 These estimates count 32-bit arithmetic only~\cite{horowitz2014energy}, the convention of SNN energy reports; memory access, which a hardware-aware study shows can dominate~\cite{dampfhoffer2023energy}, is not included for any model.

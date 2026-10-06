@@ -55,6 +55,14 @@ class Counter:
 
     def linear(self, mod, inp, out):
         x = inp[0]
+        tail = getattr(mod, "_real_tail", 0)
+        if tail:  # spikes followed by `tail` real-valued inputs (first layer behind networks.LowRankInput)
+            head = x[..., :-tail]
+            n = float(head.sum()) if bool(((head == 0) | (head == 1)).all()) else spike_count(head, self.T)
+            assert n is not None, "the inputs before the low-rank projection must be spikes"
+            self.ac += n * mod.out_features
+            self.mac += x[..., 0].numel() * tail * mod.out_features
+            return
         if not x.dtype.is_floating_point:
             n = spike_count(x, 1)
         elif getattr(mod, "_rate_input", False):  # reads the rate of the T input frames (PDRNN, GRSN synapses)
@@ -89,6 +97,11 @@ def attach(wm, counter, parts=None):
     handles = []
     for part in parts or (wm.encoder, wm.dynamics):
         for mod in part.modules():
+            if isinstance(mod, networks.LowRankInput):
+                # the projection P reads the dendritic spikes (AC); the first layer reads the spikes of (z, h)
+                # (AC) and the rank-r output of P, which is real-valued (MAC)
+                first = next(m for m in mod.net.modules() if isinstance(m, nn.Linear))
+                first._real_tail = mod.proj.out_features
             if isinstance(mod, nn.Linear):
                 handles.append(mod.register_forward_hook(counter.linear))
             elif isinstance(mod, (normalization.PopNorm, nn.LayerNorm)):

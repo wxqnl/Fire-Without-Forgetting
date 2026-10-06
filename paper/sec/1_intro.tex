@@ -44,7 +44,7 @@ A stateless soma reads the dendrites and emits one binary spike per step, the on
 We evaluate on memory benchmarks with published ANN protocols and on a non-memory control (\cref{sec:experiments}).
 Of all models we train, spiking or ANN, \method is the only one that reaches a return of 0.9 on BSuite memory length 64 within 500k steps, and with the lengths and budget of R2I~\cite{samsami2024r2i} it also does so at 71 and 101 steps, where DreamerV3 stays near chance.
 Its world model is the only one that recalls the card of exactly 32 steps ago in POPGym RepeatPrevious~\cite{morad2023popgym} (AUC 0.93; all others, DreamerV3 included, stay at chance).
-The agent uses 3.9$\times$ less arithmetic energy per step than DreamerV3.
+The agent uses \numEnergyRatio$\times$ less arithmetic energy per step than DreamerV3.
 Our contributions are:
 \begin{itemize}
 \item We identify reset-induced amnesia in spiking world models (step reset, dendritic reset, a write gain tied to the time constant) and establish it with causal interventions.

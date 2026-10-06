@@ -92,5 +92,5 @@ The dendritic state is carried through training sequences and through imaginatio
 The actor and critic read $z_t$, $h_t$ and the state of the second-layer dendrites, on every task; the Memory Maze probes read the same features.
 The soma sends one bit per neuron and step, whereas the dendrites hold the memory in graded form.
 To pass them on as spikes, each state variable is standardized over the layer and encoded by $T$ ON and $T$ OFF thresholds at $\pm(k-\tfrac12)\tfrac{2}{T}$, $k=1,\dots,T$, giving $2T$ binary frames whose rates represent $2T+1$ levels.
-With six state variables per neuron, the actor and critic receive 6144 additional binary inputs per simulation step, the only path by which the dendritic state leaves a neuron.
+With six state variables per neuron, the actor and critic receive 6144 additional binary inputs per simulation step, the only path by which the dendritic state leaves a neuron; their first layer reads these inputs through a rank-64 factor.
 Supp.~\suppref{supp:policy}{E} compares a policy that reads $(z_t,h_t)$ only.

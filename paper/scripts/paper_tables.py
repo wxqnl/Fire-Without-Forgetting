@@ -216,21 +216,31 @@ def energy_table():
 
 
 def policy_table():
-    """Supp.: the actor inputs of FwF (soma + dendritic spikes, soma spikes only, and soma spikes only with the
-    actor-critic widened to FwF's size, RepeatPrevious Medium only)."""
-    variants = [("PD2Lv2_tau1000", r"$(z_t, h_t)$ + dendritic spikes (\method)"), ("PD2Lreshalf_tau1000", r"$(z_t, h_t)$ only"),
-                ("PD2Lreshalfacwide_tau1000", r"$(z_t, h_t)$ only, actor-critic widened to 12.9M")]
+    """Supp.: the actor inputs of FwF. The dendritic spikes reach the actor and critic through rank-64 weights
+    (FwF, 4.7M), through full weights with the actor-critic narrowed to the baselines' 3.4M (142 units; its runs of
+    RepeatPrevious Easy, cheetah and cartpole were stopped when FwF switched to rank 64, EXPERIMENTS.md §19.16),
+    or through full weights (12.9M); last row: soma spikes only, 3.4M."""
+    variants = [("PD2Lv2r64_tau1000", r"+ dendritic spikes, rank 64 (\method)", "4.7M"),
+                ("PD2Lv2m_tau1000", r"+ dendritic spikes, 142 units", "3.4M"),
+                ("PD2Lv2_tau1000", r"+ dendritic spikes", "12.9M"),
+                ("PD2Lreshalf_tau1000", r"only", "3.4M")]
+    stopped = {"popgym/popgym_RepeatPreviousEasy/PD2Lv2m_tau1000", "dmc500/dmc_cheetah_run/PD2Lv2m_tau1000",
+               "dmc500/dmc_cartpole_swingup/PD2Lv2m_tau1000"}
     cols = [("rl2", L) for L in (8, 16, 32, 64)] + [("r2i", L) for L in (51, 71, 101)]
     dmc = ["walker_walk", "cheetah_run", "cartpole_swingup"]
-    lines = [r"\begin{tabular}{@{}l ccccccc cc ccc@{}}", r"\toprule",
-             r" & \multicolumn{7}{c}{BSuite: env.\ steps to 0.9 $\downarrow$} & \multicolumn{2}{c}{RepeatPrev.} & \multicolumn{3}{c}{DMC} \\",
-             r"\cmidrule(lr){2-8}\cmidrule(lr){9-10}\cmidrule(l){11-13}",
-             r"actor input & 8 & 16 & 32 & 64 & 51 & 71 & 101 & Easy & Med. & walk & run & swing \\", r"\midrule"]
-    for run, label in variants:
+    lines = [r"\begin{tabular}{@{}l c ccccccc cc ccc@{}}", r"\toprule",
+             r" & & \multicolumn{7}{c}{BSuite: env.\ steps to 0.9 $\downarrow$} & \multicolumn{2}{c}{RepeatPrev.} & \multicolumn{3}{c}{DMC} \\",
+             r"\cmidrule(lr){3-9}\cmidrule(lr){10-11}\cmidrule(l){12-14}",
+             r"actor input: $(z_t, h_t)$ & params & 8 & 16 & 32 & 64 & 51 & 71 & 101 & Easy & Med. & walk & run & swing \\",
+             r"\midrule"]
+    for run, label, size in variants:
         cells = [steps_to(f"{g}/bsuite_memlen-{L}/{run}") for g, L in cols]
         cells += [final_return(f"popgym/popgym_RepeatPrevious{d}/{run}") for d in ("Easy", "Medium")]
         cells += [final_return(f"dmc500/dmc_{t}/{run}", fmt="{:.0f}") for t in dmc]
-        lines.append(label + " & " + " & ".join(cells) + r" \\")
+        runs = [f"{g}/bsuite_memlen-{L}/{run}" for g, L in cols] + [f"popgym/popgym_RepeatPrevious{d}/{run}" for d in ("Easy", "Medium")]
+        runs += [f"dmc500/dmc_{t}/{run}" for t in dmc]
+        cells = [r"\nr" if r in stopped else c for r, c in zip(runs, cells)]
+        lines.append(label + " & " + size + " & " + " & ".join(cells) + r" \\")
     lines += [r"\bottomrule", r"\end{tabular}"]
     write("policy", lines)
 
@@ -277,6 +287,38 @@ def numbers():
         v, pct = ret(f"popgym/popgym_RepeatPrevious{d}/{mt.key('OURS', 'popgym')}")
         out += [rf"\newcommand{{\numFwf{d}}}{{{v}}}", rf"\newcommand{{\numFwf{d}Progress}}{{{pct}}}"]
         out.append(rf"\newcommand{{\numRtwoI{d}}}{{{r2i_popgym('RepeatPrevious' + d)}}}")
+    # BSuite (EXPERIMENTS.md §19.16): steps to 0.9, mean return and % of evaluations >= 0.5 from then on, final return
+    names = {8: "Eight", 16: "Sixteen", 32: "ThirtyTwo", 64: "SixtyFour", 51: "FiftyOne", 71: "SeventyOne", 101: "HundredOne"}
+    for g, L in [("rl2", L) for L in (8, 16, 32, 64)] + [("r2i", L) for L in (51, 71, 101)]:
+        run = f"{g}/bsuite_memlen-{L}/{mt.key('OURS', 'bsuite')}"
+        ev = [r["eval_return"] for r in evals(run, "eval_return")]
+        hit = next((i for i, v in enumerate(ev) if v >= 0.9), None)
+        after = ev[hit:] if hit is not None else []
+        pend = r"\pend{$\cdot$}"
+        out += [rf"\newcommand{{\numFwfTo{names[L]}}}{{{steps_to(run)}}}",
+                rf"\newcommand{{\numFwfAfter{names[L]}}}{{{wrap(f'{np.mean(after):.2f}', run) if after else pend}}}",
+                rf"\newcommand{{\numFwfAfterFrac{names[L]}}}{{{wrap(f'{100 * np.mean([v >= 0.5 for v in after]):.0f}', run) if after else pend}}}",
+                rf"\newcommand{{\numFwfFinal{names[L]}}}{{{final_return(run)}}}"]
+    for t, name in (("walker_walk", "Walk"), ("cheetah_run", "Run"), ("cartpole_swingup", "Swing")):
+        out.append(rf"\newcommand{{\numFwfDmc{name}}}{{{final_return(f'dmc500/dmc_{t}/' + mt.key('OURS', 'dmc'), fmt='{:.0f}')}}}")
+    # energy per environment step of the BSuite L=32 agents (energy.py; pending until the energy count of our run exists)
+    def energy(m):
+        path = mt.RUNS / f"rl2/bsuite_memlen-32/{mt.key(m, 'bsuite')}/s0/energy.json"
+        return json.loads(path.read_text()) if path.exists() else None
+    ours, dv = energy("OURS"), energy("ann_tau2")
+    spiking = [e for e in map(energy, ("base_tau2", "LIF_tau2", "GRSN_tau2", "ABG_tau128")) if e]
+    uj = lambda e, k: f"{e[k] / 1e3:.1f}"
+    vals = {"Agent": uj(ours, "agent_energy_nj_per_step") if ours else None,
+            "Filter": uj(ours, "energy_nj_per_step") if ours else None,
+            "Actor": uj(ours, "actor_energy_nj_per_step") if ours else None,
+            "Ratio": f"{dv['agent_energy_nj_per_step'] / ours['agent_energy_nj_per_step']:.1f}" if ours and dv else None,
+            "Rate": f"{ours['deter_rate']:.2f}" if ours else None,
+            "AgentDv": uj(dv, "agent_energy_nj_per_step") if dv else None,
+            "FilterDv": uj(dv, "energy_nj_per_step") if dv else None,
+            "Spiking": "--".join(f"{x / 1e3:.1f}" for x in (min(e["agent_energy_nj_per_step"] for e in spiking),
+                                                           max(e["agent_energy_nj_per_step"] for e in spiking)))}
+    pend = r"\pend{$\cdot$}"
+    out += [rf"\newcommand{{\numEnergy{k}}}{{{v or pend}}}" for k, v in vals.items()]
     write("numbers", out)
 
 

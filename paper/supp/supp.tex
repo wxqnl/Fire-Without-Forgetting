@@ -50,7 +50,7 @@ POPGym uses the environment settings of R2I's code: DreamerV3's default reward h
 R2I itself runs with the official POPGym configuration of its code (batches of $4\times1024$ steps), changed only in the budget (2M steps, as for all models) and the replay capacity (2M steps, so that no step of the run is evicted).
 
 \paragraph{Parameters.}
-On POPGym the world models have 7.2M (\swm, \swmnr), 6.4M (LIF), 6.5M (GRSN), 7.5M (\dv) and 8.6M (\method) parameters, of which the recurrent core has 1.3M, 0.5M, 0.5M, 1.6M and 2.6M; the actor-critic has 3.4M for the baselines and 12.9M for \method, which also reads the 6144 dendritic spikes (Supp.~\suppref{supp:policy}{E} controls for this size).
+On POPGym the world models have 7.2M (\swm, \swmnr), 6.4M (LIF), 6.5M (GRSN), 7.5M (\dv) and 8.6M (\method) parameters, of which the recurrent core has 1.3M, 0.5M, 0.5M, 1.6M and 2.6M; the actor-critic has 3.4M for the baselines and 4.7M for \method, which also reads the 6144 dendritic spikes through a rank-64 factor (Supp.~\suppref{supp:policy}{E} controls for this size).
 Capacity does not explain the results: the GRU core of \dv is larger than the cores of the spiking baselines and fails at 64 steps, and variants of \method with the same size but dendrites cleared at every step, or a single retention time of 16 steps, stay at chance (\cref{tab:ablation}).
 
 
@@ -123,18 +123,18 @@ With A and $\tau_d=128$, the membrane potentials still encode it after 8 steps (
 
 \begin{table*}[t]
   \centering\tabfont
-  \caption{\textbf{Actor input of \method.} The world model is the same; only the features of the actor and critic differ. First row: \method as in all other tables. \pend{Blue}: in progress.}
+  \caption{\textbf{Actor input of \method.} The world model is the same; only the features of the actor and critic differ. First row: \method as in all other tables. \pend{Blue}: in progress; \nr: not run.}
   \label{tab:policy}
   \input{tables/policy}
 \end{table*}
 
-\Cref{tab:policy} compares \method with an actor and critic that read $(z_t,h_t)$ only.
-The two learn BSuite up to 51 steps equally fast.
-Without the dendritic spikes the policy learns 64 steps sooner (102k vs.\ 192k steps), although the world model of \method already predicts the reward of the evaluation episodes with an AUC of 1.0 at 160k steps; a single cue fits in the one bit per neuron that the soma sends.
-On POPGym and on DMC walker walk the policy that reads $(z_t,h_t)$ only falls far behind.
-With the dendritic spikes the actor-critic has 12.9M parameters instead of 3.4M; the last row widens the actor and critic that read $(z_t,h_t)$ only to the same 12.9M, on RepeatPrevious Medium.
-\TODO{Result of the widened actor-critic (2M steps, around Oct.~6).}
-\TODO{Final POPGym and DMC numbers once the runs finish (Oct.~4--5).}
+\Cref{tab:policy} compares how the actor and critic of \method read the dendritic spikes.
+\method passes them to the first layer through a rank-64 factor and keeps 512 units, which gives the actor-critic 4.7M parameters.
+The second row uses full weights and narrows the actor-critic to the 3.4M of the baselines (142 units), the third uses full weights at 512 units (12.9M), and the last reads $(z_t,h_t)$ only (3.4M).
+At the size of the baselines the dendritic spikes still give every BSuite length and RepeatPrevious Medium, where the policy that reads $(z_t,h_t)$ only stays at chance: the gain comes from the readout, not from the parameters.
+The narrow actor-critic learns walker walk more slowly, so \method keeps the width and compresses the dendritic input instead.
+Without the dendritic spikes the policy learns 64 steps slightly sooner, since a single cue fits in the one bit per neuron that the soma sends; on POPGym and DMC walker walk it falls far behind.
+\TODO{Final POPGym and DMC numbers of the rank-64 actor-critic (Oct.~7--8).}
 
 \section{Diagnosing the world model in RL}
 \label{supp:diag}
@@ -179,9 +179,9 @@ We count the operations of the world-model filter per environment step, \ie, the
 A synaptic operation on a spike input is an accumulate (AC, 0.9\,pJ), any operation on a graded input a multiply-accumulate (MAC, 4.6\,pJ)~\cite{horowitz2014energy}.
 For the PDN, the synaptic maps $B\xx_t$ and $D\xx_t$ read spike rates and count as ACs per spike; the dendritic update counts 3 MACs per integrator channel (decay, write, readout) and 6 per resonant channel. For all models, a normalization counts 2 MACs per element and a neuron update counts per element (LIF 1 per simulation step, MCN 4 per simulation step, GRSN and GRU 4 per environment step).
 Memory access is not counted for any model.
-For the RL agents we also count the actor, which runs at every step: it reads $(z_t,h_t)$, and for \method also the 6144 dendritic spike inputs (\cref{sec:wm}).
+For the RL agents we also count the actor, which runs at every step: it reads $(z_t,h_t)$, and for \method also the 6144 dendritic spike inputs, through the rank-64 factor (\cref{sec:wm}); the factor reads spikes (ACs), and the first layer reads its 64 graded outputs (MACs).
 A binary spike frame counts once per simulation step; a spike that the PDN or GRSN soma repeats over the $T$ simulation steps counts $T$ times.
-\Cref{tab:energy} lists the counts; the recurrent firing rate of \method is 0.15.
+\Cref{tab:energy} lists the counts; the recurrent firing rate of \method is \numEnergyRate.
 
 \begin{table}[t]
   \centering\tabfont

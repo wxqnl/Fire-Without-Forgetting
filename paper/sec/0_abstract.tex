@@ -9,5 +9,5 @@ Each neuron keeps linear dendritic channels that are never reset and never recei
 Half of the channels resonate, so that their phase records how long ago an input arrived.
 A stateless soma reads the channels and emits a binary spike, the only signal that neurons of the world model exchange.
 On BSuite memory length, \method is the only model we train, spiking or not, that reaches a return of 0.9 at 64 steps within 500k environment steps; with the lengths and budget of R2I it also does so at 71 and 101 steps, where DreamerV3 stays near chance.
-Its world model is the only one that recalls the input of exactly 32 steps ago on POPGym RepeatPrevious, and the agent uses 3.9$\times$ less arithmetic energy per step than DreamerV3.
+Its world model is the only one that recalls the input of exactly 32 steps ago on POPGym RepeatPrevious, and the agent uses \numEnergyRatio$\times$ less arithmetic energy per step than DreamerV3.
 \end{abstract}

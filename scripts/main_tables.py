@@ -28,8 +28,10 @@ EXTRA = [("gru_tau2", "spiking enc. + GRU"), ("OURSALT", "ours, other actor inpu
 # Our model (EXPERIMENTS.md §18, §19.6): one configuration on every task; the actor and critic read the
 # soma spikes and the second-layer dendrites as ON/OFF spikes (policymem). The world-model probes do
 # not involve the actor (their runs are named PD2Lreshalf). OURSALT: soma spikes only, appendix ablation.
-OURS = {"bsuite": "PD2Lv2_tau1000", "dmc": "PD2Lv2_tau1000", "probe": "PD2Lreshalf_tau1000",
-        "popgym": "PD2Lv2_tau1000", "mmaze": "PD2Lv2_tau1000"}
+# Since 2026-10-06 (EXPERIMENTS.md §19.16) the dendritic spikes reach the actor and critic through rank-64
+# weights (aclowrank, 4.7M; PD2Lv2r64). Memory Maze trains the world model only, so its run keeps the name PD2Lv2.
+OURS = {"bsuite": "PD2Lv2r64_tau1000", "dmc": "PD2Lv2r64_tau1000", "probe": "PD2Lreshalf_tau1000",
+        "popgym": "PD2Lv2r64_tau1000", "mmaze": "PD2Lv2_tau1000"}
 OURSALT = {"bsuite": "PD2Lreshalf_tau1000", "dmc": "PD2Lreshalf_tau1000", "popgym": "PD2Lreshalf_tau1000"}
 
 
