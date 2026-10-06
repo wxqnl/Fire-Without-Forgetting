@@ -259,11 +259,11 @@ def stability_table():
             run = f"{g}/bsuite_memlen-{L}/{mt.key(m, 'bsuite')}"
             ev = [(r["step"], r["eval_return"]) for r in evals(run, "eval_return")]
             if not ev:
-                cells.append(r"\nr")
+                cells.append(r"\pend{$\cdot$}" if mt.planned(run) else r"\nr")
                 continue
             hit = next((i for i, (_, v) in enumerate(ev) if v >= 0.9), None)
             if hit is None:
-                cells.append("--")
+                cells.append("--" if done(run) else r"\pend{$\cdot$}")
                 continue
             after = [v for _, v in ev[hit:]]
             cells.append(wrap(f"{np.mean(after):.2f}\\,{{\\tiny({100 * np.mean([v >= 0.5 for v in after]):.0f}\\%)}}", run))
