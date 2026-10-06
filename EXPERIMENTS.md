@@ -1115,3 +1115,21 @@ Stage 3 模拟审稿（`paper/review/stage3/`）的结论是 Major Revision。�
   - 正文仍是 8 页，`main_full` 没有溢出。
 - 待跑完：4.7M 的 BSuite 16 / 32 / 51 / 71 / 101 步、POPGym Easy、DMC cheetah 和 cartpole、像素 walker。
   - 跑完后核对 §5.2 中比较性的表述（"16 步前与最好的基线一样快、32 步最快"），并按 32 步运行重算能耗。
+
+### 19.17 补跑 LIF 和 GRSN 的 POPGym Medium；DMC 上与 Spiking-WM 的对比（10 月 6 日；用户："按照你的意见来吧"）
+
+- 起因：主表的 Medium 列中 LIF 和 GRSN 是 n/a。当初删掉它们，是因为它们当时在 Easy 上也停在随机水平；但 2M 步后两者都学会了 Easy（0.69、0.33），这个理由已不成立。
+- 做法：`make_jobs.round23()`，协议同第 13 轮，每个 14.5 GB，排在 4.7M 任务之后。
+- 用户对故事的要求（原话）："在我们主推的记忆上我们明显有优势，然后用在通用 world model benchmark 上时也能有一定提升（）相比其他的 spike 方法"。
+- DMC（本体感觉输入）上，FwF 各版本与 Spiking-WM 在相同步数下的对比：
+
+  | 500k 步 | walker | cheetah | cartpole | 平均 |
+  |---|---|---|---|---|
+  | Spiking-WM | 925 | 336 | 484 | 582 |
+  | FwF 12.9M | 878 | 501 | 801 | 727 |
+  | FwF 只读胞体 3.4M | 764 | 501 | 721 | 662 |
+  | FwF 4.7M（进行中） | 400k 时 843 | 85k 时 148（SWM 68） | 45k 时 164（SWM 125） | — |
+
+  - 所有 FwF 版本在 cheetah 和 cartpole 上都明显好于 Spiking-WM，只读胞体的版本也是，所以这个优势来自世界模型本身。walker 上略低于 Spiking-WM。
+  - 像素 walker：200k 帧时 3.41M 为 589，Spiking-WM 为 505；4.7M 版本还在早期。
+- DMC 上的其他脉冲基线（LIF、GRSN、Spiking-WM + A+B+G）没有跑，要说"好于其他脉冲方法"，目前只能对比 Spiking-WM。是否补跑（3 个模型 × 3 个任务）待用户决定。

@@ -731,6 +731,21 @@ def round22():
     return jobs
 
 
+def round23():
+    """2026-10-06, user: "按照你的意见来吧". POPGym RepeatPrevious Medium for recurrent LIF and GRSN, with the
+    protocol of round 13. They had been left out because at the time they were also at chance on Easy; both
+    learned Easy by 2M steps (0.69, 0.33), so the Medium column of the main table needs them (EXPERIMENTS.md §19.17)."""
+    jobs = []
+    for cell in ("LIF_tau2", "GRSN_tau2"):
+        name = f"popgym/popgym_RepeatPreviousMedium/{cell}/s0"
+        logdir = RUNS / name
+        cmd = (f"{{python}} dreamer.py --configs popgym {' '.join(MAIN[cell])} --task popgym_RepeatPreviousMedium --seed 0 "
+               f"--steps 2e6 --train_ratio 64 --envs 8 --batch_length 64 --env_seed_per_env True "
+               f"--eval_every 5e4 --logdir {logdir}")
+        jobs.append(dict(name=name, cmd=" ".join(cmd.split()), logdir=str(logdir), mem_gb=14.5))
+    return jobs
+
+
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
     # Memory Maze pipeline check (round 10), Memory Maze on the official data once downloaded, round 8
@@ -746,7 +761,7 @@ def main():
     # Round 14 (integrate-and-fire soma) failed check V1 on 2026-10-02 (EXPERIMENTS.md §17.4): its
     # unfinished runs were stopped and are not queued again.
     r14 = [j for j in round14() if j["name"] == "recall/bsuite_memlen-8-recall/PD2Lif_tau1000/s0"]
-    jobs = (round19() + round21() + round22() + round20() + round18() + round16() + round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
+    jobs = (round19() + round21() + round22() + round23() + round20() + round18() + round16() + round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
             + r8 + round11())
     # the old model's 1M Memory Maze continuation was stopped on 2026-10-02 (superseded, EXPERIMENTS.md §18.4)
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2L_tau1000/s0"]
