@@ -799,7 +799,7 @@ def main():
     short = [j for j in r22 if "/bsuite_memlen-16/" in j["name"] or "/bsuite_memlen-32/" in j["name"]]
     l101 = [j for j in r22 if "/bsuite_memlen-101/" in j["name"]]
     r22 = short + [j for j in r22 if j not in short and j not in l101]
-    jobs = (round19() + round21() + r22 + round23() + round24() + l101 + round25() + round20() + round18() + round16() + round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
+    jobs = (round19() + round21() + r22 + round23() + round24() + round25() + l101 + round20() + round18() + round16() + round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
             + r8 + round11())
     # the old model's 1M Memory Maze continuation was stopped on 2026-10-02 (superseded, EXPERIMENTS.md §18.4)
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2L_tau1000/s0"]
