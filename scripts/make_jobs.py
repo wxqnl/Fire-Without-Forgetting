@@ -760,6 +760,23 @@ def round24():
     return jobs
 
 
+def round25():
+    """2026-10-07, user: "可以，先诊断像素 walker，有结论再找我". Pixel walker world models trained offline on the
+    same data, DreamerV3's replay buffer of its pixel walker run (diag_wm_offline.py; EXPERIMENTS.md §19.22): in
+    RL each world model trains on the data of its own policy. Also FwF with the thermometer soma (T graded
+    frames per step instead of one), the candidate fix if the binary soma limits velocity coding."""
+    data = RUNS / "dmcpix/dmc_walker_walk/ann_tau2/s0/train_eps"
+    cells = {"base_tau2": ([], 16), "LIF_tau2": (["lifcell"], 16), "ann_tau2": (["grucell", "annwm"], 8),
+             "PD2Lv2_tau1000": (["ours", "resonanthalf"], 20), "PD2Lv2thermo_tau1000": (["ours", "resonanthalf", "somathermo"], 20)}
+    jobs = []
+    for cell, (cfgs, gb) in cells.items():
+        name = f"diag_pix/dmc_walker_walk/{cell}/s0"
+        cmd = (f"{{python}} diag_wm_offline.py --configs dmc_vision {' '.join(cfgs)} --data {data} --updates 30000 "
+               f"--eval_every 3000 --logdir {RUNS / name}")
+        jobs.append(dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=gb))
+    return jobs
+
+
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
     # Memory Maze pipeline check (round 10), Memory Maze on the official data once downloaded, round 8
@@ -781,7 +798,7 @@ def main():
     short = [j for j in r22 if "/bsuite_memlen-16/" in j["name"] or "/bsuite_memlen-32/" in j["name"]]
     l101 = [j for j in r22 if "/bsuite_memlen-101/" in j["name"]]
     r22 = short + [j for j in r22 if j not in short and j not in l101]
-    jobs = (round19() + round21() + r22 + round23() + round24() + l101 + round20() + round18() + round16() + round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
+    jobs = (round19() + round21() + r22 + round23() + round24() + l101 + round25() + round20() + round18() + round16() + round15() + r14 + round3() + round4() + r5 + round7() + round9() + round10() + round12() + mm_full + round13()
             + r8 + round11())
     # the old model's 1M Memory Maze continuation was stopped on 2026-10-02 (superseded, EXPERIMENTS.md §18.4)
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2L_tau1000/s0"]
