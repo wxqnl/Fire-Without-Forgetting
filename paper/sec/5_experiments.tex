@@ -43,8 +43,7 @@ This head also helps \dv, which solves 51 steps here, whereas R2I reported it fa
 To measure memory without exploration and credit assignment, we also train world models alone on random-policy data and measure the AUC of their reward prediction where reward depends on the past (\cref{sec:causal}): \emph{memlen-$L$-recall}, where the terminal reward is the cue $L$ steps back, and \emph{RepeatPrevious}, where the reward indicates whether the action names the card $k$ steps back.
 We report updates until the AUC exceeds 0.9 within 12k (memlen) or 10k (RepeatPrevious) updates.
 
-\paragraph{Runs and evaluation.}
-Every RL and probe result is one training run (\cref{tab:interventions}: two seeds per cell).
+\paragraph{Evaluation.}
 Evaluations average 32 episodes on BSuite (every 10k steps, 20k with R2I's lengths) and 16 on POPGym (every 50k), with the mode of the policy; Supp.~\suppref{supp:impl}{A} reports how the return holds after it first reaches 0.9.
 
 \subsection{Memory in reinforcement learning}

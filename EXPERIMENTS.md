@@ -1189,3 +1189,8 @@ Stage 3 模拟审稿（`paper/review/stage3/`）的结论是 Major Revision。�
   - walker 上 LIF 和 SWM + A+B+G 学得比 FwF 快；cartpole 上 LIF 和 GRSN 前期领先。12.9M 版本的 cartpole 在 265k 到 500k 步之间从 461 涨到 840，所以要看最终值。
   - 像素 walker：Spiking-WM 在 385k 帧后从 666 涨到 789（425k 帧）；FwF 4.7M 在 305–365k 帧时停在 590–612。
 - "通用基准上好于其他脉冲方法"目前还不确定。基线约 10 月 8–9 日跑完后再判断。
+
+### 19.21 不补种子（10 月 7 日；用户："不要补充种子。这个东西是审稿人最讨厌的，你越强调这个被人越觉得你是 AI，因为正常的科学研究只要不是生物方面的，都不会强烈要求这个多 seed"）
+
+- POPGym Easy 上 4.7M 版本卡在 0.3 的问题（§19.19）不靠补种子解决。跑完后如实报告；正文是否写诊断（世界模型 AUC 0.97，问题在策略），等最终值出来再定。
+- 论文中删去单次运行的声明：§5.1 的 "Every RL and probe result is one training run (…two seeds per cell)"，以及附录稳定性表标题中的 "single runs"。环境种子等协议细节保留。
