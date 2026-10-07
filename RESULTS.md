@@ -3,7 +3,7 @@
 Single seed (s0). A value with (NN%) is from a run still in progress; · = queued or no evaluation yet;
 — = not part of the plan.
 
-Queue at 2026-10-07 00:43:48: 211/235 done, 23 running, 1 pending.
+Queue at 2026-10-07 15:15:20: 216/240 done, 24 running, 0 pending.
 
 ## Table 2. Memory tasks, RL: evaluation return (mean of the last 3 evaluations)
 
@@ -17,10 +17,10 @@ RepeatPreviousMedium: Spiking-WM, A+B+G, ours and DreamerV3.
 | model | L8 | L16 | L32 | L64 | L51 | L71 | L101 | RepeatPreviousEasy | RepeatPreviousMedium |
 |---|---|---|---|---|---|---|---|---|---|
 | Spiking-WM | 0.08 | -0.25 | -0.08 | -0.33 | -0.04 | 0.19 | -0.04 | 0.43 | -0.50 |
-| LIF | 1.00 | -0.25 | -0.08 | -0.08 | — | — | — | 0.69 | -0.49 (43%) |
-| GRSN | 0.98 | 0.94 | -0.08 | 0.08 | — | — | — | 0.33 | -0.51 (50%) |
+| LIF | 1.00 | -0.25 | -0.08 | -0.08 | — | — | — | 0.69 | -0.51 (73%) |
+| GRSN | 0.98 | 0.94 | -0.08 | 0.08 | — | — | — | 0.33 | -0.50 (83%) |
 | Spiking-WM + A+B+G | 1.00 | 1.00 | 0.79 | -0.04 | -0.04 | 0.08 | -0.04 | -0.29 | -0.50 |
-| **Ours** | 1.00 | 0.98 | 0.98 | 0.96 | 0.90 (66%) | 0.85 (94%) | · | 0.53 (60%) | 0.57 |
+| **Ours** | 1.00 | 0.98 | 0.98 | 0.96 | 0.90 | 0.96 | 1.00 (32%) | 0.68 (88%) | 0.57 |
 | DreamerV3 (ANN) | 0.98 | 0.94 | 0.98 | -0.08 | 0.98 | 0.04 | 0.04 | 0.39 | -0.44 |
 | spiking enc. + GRU | — | 1.00 | 1.00 | — | — | — | — | — | — |
 | ours, other actor input | 1.00 | 0.98 | 0.98 | 0.73 | 0.94 | 0.88 | 0.52 | 0.16 | 0.02 |
@@ -34,7 +34,7 @@ RepeatPreviousMedium: Spiking-WM, A+B+G, ours and DreamerV3.
 | LIF | 62k | > 202k | > 302k | > 502k | — | — | — |
 | GRSN | 32k | 112k | > 302k | > 502k | — | — | — |
 | Spiking-WM + A+B+G | 12k | 22k | 52k | > 507k | > 1002k | > 1002k | > 1002k |
-| **Ours** | 12k | 22k | 42k | 132k | 102k | 222k | · |
+| **Ours** | 12k | 22k | 42k | 132k | 102k | 222k | 262k |
 | DreamerV3 (ANN) | 12k | 32k | 62k | > 502k | 902k | > 1002k | > 1002k |
 | spiking enc. + GRU | — | 32k | 102k | — | — | — | — |
 | ours, other actor input | 12k | 22k | 32k | 102k | 82k | 282k | 362k |
@@ -81,11 +81,11 @@ Constant predictor on our split: objects MSE 24.0, walls accuracy 80.8.
 
 | model | objects MSE ↓ 200k | objects MSE ↓ 1M | walls acc. (%) ↑ 200k | walls acc. (%) ↑ 1M |
 |---|---|---|---|---|
-| Spiking-WM | 12.1 / 12.0 | 11.9 / 12.0 (570k) | 82.0 / 81.8 | 83.1 / 82.8 (570k) |
-| LIF | 12.0 / 12.0 | 11.8 / 12.0 (650k) | 82.0 / 81.9 | 83.6 / 83.2 (650k) |
-| GRSN | 11.7 / 12.1 | 11.6 / 12.1 (680k) | 82.0 / 81.8 | 83.1 / 83.1 (680k) |
-| Spiking-WM + A+B+G | 11.3 / 12.1 | 11.2 / 12.0 (560k) | 82.2 / 81.8 | 83.4 / 82.9 (560k) |
-| **Ours** | 9.8 / 12.1 | 9.2 / 12.4 (370k) | 82.3 / 82.0 | 82.9 / 82.3 (370k) |
+| Spiking-WM | 12.1 / 12.0 | 11.8 / 12.0 (620k) | 82.0 / 81.8 | 83.2 / 82.9 (620k) |
+| LIF | 12.0 / 12.0 | 11.7 / 11.9 (700k) | 82.0 / 81.9 | 83.6 / 83.3 (700k) |
+| GRSN | 11.7 / 12.1 | 11.6 / 12.0 (740k) | 82.0 / 81.8 | 83.3 / 83.2 (740k) |
+| Spiking-WM + A+B+G | 11.3 / 12.1 | 11.4 / 12.0 (610k) | 82.2 / 81.8 | 83.4 / 83.0 (610k) |
+| **Ours** | 9.8 / 12.1 | 9.1 / 12.2 (420k) | 82.3 / 82.0 | 83.0 / 82.7 (420k) |
 | DreamerV3 (ANN) | 10.6 / 11.9 | 9.8 / 11.8 | 82.7 / 81.8 | 85.3 / 83.5 |
 | spiking enc. + GRU | — | — | — | — |
 | ours before §18 (integrator dendrites only) | 11.9 / 12.1 | 11.9 / 12.1 (230k) | 82.0 / 81.9 | 82.5 / 82.4 (230k) |
@@ -103,10 +103,10 @@ a different seed per parallel env.
 | model | walker_walk | cheetah_run | cartpole_swingup |
 |---|---|---|---|
 | Spiking-WM | 923 | 343 | 497 |
-| LIF | 906 (49%) | 263 (33%) | 390 (29%) |
-| GRSN | 594 (53%) | 146 (37%) | 447 (29%) |
-| Spiking-WM + A+B+G | 659 (37%) | 180 (29%) | 203 (17%) |
-| **Ours** | 908 | 382 (61%) | 481 (53%) |
+| LIF | 893 (81%) | 478 (69%) | 739 (61%) |
+| GRSN | 820 (93%) | 349 (77%) | 628 (69%) |
+| Spiking-WM + A+B+G | 884 (65%) | 389 (57%) | 559 (41%) |
+| **Ours** | 908 | 470 (93%) | 755 (85%) |
 | DreamerV3 (ANN) | 953 | 699 | 871 |
 | ours, other actor input | 747 | 528 | 720 |
 | ours before §18 (integrator dendrites only) | 851 | 433 | 732 |
