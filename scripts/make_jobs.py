@@ -764,10 +764,11 @@ def round25():
     """2026-10-07, user: "可以，先诊断像素 walker，有结论再找我". Pixel walker world models trained offline on the
     same data, DreamerV3's replay buffer of its pixel walker run (diag_wm_offline.py; EXPERIMENTS.md §19.22): in
     RL each world model trains on the data of its own policy. Also FwF with the thermometer soma (T graded
-    frames per step instead of one), the candidate fix if the binary soma limits velocity coding."""
+    frames per step instead of one), the candidate fix if the binary soma limits velocity coding. GPU memory
+    measured: Spiking-WM and LIF 13 GB, DreamerV3 3 GB."""
     data = RUNS / "dmcpix/dmc_walker_walk/ann_tau2/s0/train_eps"
     cells = {"base_tau2": ([], 16), "LIF_tau2": (["lifcell"], 16), "ann_tau2": (["grucell", "annwm"], 8),
-             "PD2Lv2_tau1000": (["ours", "resonanthalf"], 20), "PD2Lv2thermo_tau1000": (["ours", "resonanthalf", "somathermo"], 20)}
+             "PD2Lv2_tau1000": (["ours", "resonanthalf"], 18), "PD2Lv2thermo_tau1000": (["ours", "resonanthalf", "somathermo"], 18)}
     jobs = []
     for cell, (cfgs, gb) in cells.items():
         name = f"diag_pix/dmc_walker_walk/{cell}/s0"
