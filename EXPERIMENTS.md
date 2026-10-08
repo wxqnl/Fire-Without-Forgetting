@@ -1391,4 +1391,4 @@ Stage 3 模拟审稿（`paper/review/stage3/`）的结论是 Major Revision。�
   - recon、朝向与 LIF 持平，一步预测、速度略差，4 步预测差。除 4 步预测与 Spiking-WM 持平外，其余各项都优于 Spiking-WM。
   - 4 通道版本 18k 时 recon 28.5、一步预测 45.5、速度 0.52、朝向 0.81（LIF 29.4、47.1、0.56、0.81）。
 - L101 r64（gpu7）04:09 跑完：最后 200k 步 eval 在 0.0 和 0.94 之间来回跳，1M 时为 0.50。我们在 gpu7 上已没有任务，04:20 停掉了它的 MPS 守护进程。
-- 03:00–03:36 的监视器一直没报事件：Bash 环境里的 `grep` 是 ugrep 包装函数，在管道里不按行刷新。监视命令已改用 `command grep --line-buffered`。
+- 02:44–04:13 的诊断监视器一直没报事件：Bash 环境里的 `grep` 是 ugrep 包装函数，在管道里不按行刷新。监视命令已改用 `command grep --line-buffered`。
