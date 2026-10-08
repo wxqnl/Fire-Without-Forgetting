@@ -847,6 +847,25 @@ def round28():
     return jobs
 
 
+def round29(jobs):
+    """2026-10-08 03:00, user: "你觉得我们最终采用哪个配置和版本最好" (EXPERIMENTS.md §19.27). Thermo + feedback with two
+    dendritic channels keeps the memory probes (L64 5.5k updates) and the world-model size (16.75M), and its pixel
+    world model beats Spiking-WM and is level with LIF. The RL check of round 26 with this variant: the 4.7M runs of
+    BSuite L32 and L64, pixel walker (to 500k frames) and proprioceptive walker, nothing else changed."""
+    picks = ("rl2/bsuite_memlen-32/", "dmcpix/dmc_walker_walk/", "rl2/bsuite_memlen-64/", "dmc500/dmc_walker_walk/")
+    out = []
+    for prefix in picks:
+        job = next(j for j in jobs if j["name"] == f"{prefix}PD2Lv2r64_tau1000/s0")
+        job = {k: (v.replace("PD2Lv2r64_tau1000", "PD2Lv2r64thermofbch2_tau1000") if isinstance(v, str) else v)
+               for k, v in job.items()}
+        job["cmd"] = job["cmd"].replace(" aclowrank ", " aclowrank somathermo pdfeedback pdch2 ")
+        if prefix.startswith("dmcpix/"):
+            job["cmd"] = job["cmd"].replace(" --steps 1e6 ", " --steps 5e5 ")
+        assert "pdch2" in job["cmd"]
+        out.append(job)
+    return out
+
+
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
     # Memory Maze pipeline check (round 10), Memory Maze on the official data once downloaded, round 8
