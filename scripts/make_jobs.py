@@ -866,6 +866,34 @@ def round29(jobs):
     return out
 
 
+def round30(jobs):
+    """2026-10-08 05:40, user: "可以，按你说的两步走" (EXPERIMENTS.md §19.28). The L32 check of round 29 reached 1.0 at
+    32.5k steps (binary soma 42.5k), so the memory side of the paper is rerun now with the final model, in parallel
+    with the DMC checks of round 29: BSuite L8, L16 (L32, L64: round 29), L51, L71, L101, POPGym RepeatPrevious Easy
+    and Medium, the world-model probes (L64 recall and Medium: round 28) and Memory Maze."""
+    flags = "somathermo pdfeedback pdch2"
+    renames = {"PD2Lv2r64_tau1000": ("PD2Lv2r64thermofbch2_tau1000", " aclowrank ", f" aclowrank {flags} "),
+               "PD2Lreshalf_tau1000": ("PD2Lreshalfthermofbch2_tau1000", " resonanthalf ", f" resonanthalf {flags} "),
+               "PD2Lv2_tau1000": ("PD2Lv2thermofbch2_tau1000", " policymem ", f" policymem {flags} ")}
+    # the small probes first (they must not wait behind a large job), then the longest runs
+    picks = [(f"recall/bsuite_memlen-{n}-recall/", "PD2Lreshalf_tau1000") for n in (8, 16, 32)]
+    picks += [(f"diag_rp/popgym_RepeatPrevious{d}/", "PD2Lreshalf_tau1000") for d in ("Easy", "Hard")]
+    picks += [("mmaze_official/memory_maze_9x9/", "PD2Lv2_tau1000"), ("r2i/bsuite_memlen-101/", "PD2Lv2r64_tau1000"),
+              ("popgym/popgym_RepeatPreviousEasy/", "PD2Lv2r64_tau1000"),
+              ("popgym/popgym_RepeatPreviousMedium/", "PD2Lv2r64_tau1000"), ("r2i/bsuite_memlen-71/", "PD2Lv2r64_tau1000"),
+              ("r2i/bsuite_memlen-51/", "PD2Lv2r64_tau1000"), ("rl2/bsuite_memlen-16/", "PD2Lv2r64_tau1000"),
+              ("rl2/bsuite_memlen-8/", "PD2Lv2r64_tau1000")]
+    out = []
+    for prefix, cell in picks:
+        new, old_flag, new_flag = renames[cell]
+        job = next(j for j in jobs if j["name"] == f"{prefix}{cell}/s0")
+        job = {k: (v.replace(cell, new) if isinstance(v, str) else v) for k, v in job.items()}
+        assert old_flag in job["cmd"]
+        job["cmd"] = job["cmd"].replace(old_flag, new_flag, 1)
+        out.append(job)
+    return out
+
+
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
     # Memory Maze pipeline check (round 10), Memory Maze on the official data once downloaded, round 8
@@ -891,7 +919,7 @@ def main():
             + r8 + round11())
     # the old model's 1M Memory Maze continuation was stopped on 2026-10-02 (superseded, EXPERIMENTS.md §18.4)
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2L_tau1000/s0"]
-    jobs = round29(jobs) + round28() + round27() + round26(jobs) + jobs
+    jobs = round29(jobs) + round30(jobs) + round28() + round27() + round26(jobs) + jobs
     for job in jobs:  # DreamerV3 (ANN) needs about 4 GB (measured 2026-09-30), the spiking models 14-20 GB
         if "/ann_" in job["name"] and job["mem_gb"] > 6:
             job["mem_gb"] = 7 if job["name"].startswith("mmaze") else 6
