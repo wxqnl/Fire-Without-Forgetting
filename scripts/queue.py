@@ -128,7 +128,8 @@ class Handle:
         if exit_file.exists() and exit_file.read_text().strip():
             return int(exit_file.read_text().strip())
         code = self.proc.returncode if self.proc is not None else infer_exit(self.job)
-        exit_file.write_text(str(code))
+        if exit_file.parent.exists():  # a stopped job's logdir may have been moved away (2026-10-08)
+            exit_file.write_text(str(code))
         return code
 
 
