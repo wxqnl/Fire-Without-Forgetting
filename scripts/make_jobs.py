@@ -794,7 +794,9 @@ def round26(jobs):
             job["cmd"] = job["cmd"].replace(" --steps 1e6 ", " --steps 5e5 ")
         assert "somathermo" in job["cmd"]
         out.append(job)
-    return out
+    # 2026-10-08 00:45 (EXPERIMENTS.md §19.26): thermo alone fails the L64 recall probe (AUC 0.50 at 9k updates; binary
+    # soma 3.5k), so only its L32 run (already running) is kept; the RL check moves to thermo + feedback (round 28)
+    return out[:1]
 
 
 def round27():
@@ -818,6 +820,30 @@ def round27():
         cmd = (f"{{python}} probe_wm.py --configs popgym ours resonanthalf {cfgs} rewardbyact --task popgym_RepeatPreviousMedium "
                f"--seed 0 --updates 10000 --eval_every 1000 --reward_head symlog_mse --batch_length 64 --logdir {RUNS / name}")
         jobs.append(dict(name=name, cmd=cmd, logdir=str(RUNS / name), mem_gb=2.5))
+    return jobs
+
+
+def round28():
+    """2026-10-08 00:45, user: "所以现在有结论了吗" (EXPERIMENTS.md §19.26). Thermo + spike feedback keeps the memory probes
+    (L64 5k, Medium 7k updates) and brings the pixel world model to LIF's level, but R adds 2.1M parameters to the world
+    model (18.9M; ours now 16.8M, LIF 14.6M, Spiking-WM 15.4M). With two dendritic channels per neuron (pdch2) B and R
+    together have the parameters of B alone: the same world-model size as now. Cheap checks of that variant first."""
+    data = RUNS / "dmcpix/dmc_walker_walk/ann_tau2/s0/train_eps"
+    cfg = "somathermo pdfeedback pdch2"
+    cell = "PD2Lv2thermofbch2_tau1000"
+    name = f"diag_pix/dmc_walker_walk/{cell}/s0"
+    cmd = (f"{{python}} diag_wm_offline.py --configs dmc_vision ours resonanthalf {cfg} --data {data} "
+           f"--updates 30000 --eval_every 3000 --logdir {RUNS / name}")
+    jobs = [dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=18)]
+    cell = "PD2Lreshalfthermofbch2_tau1000"
+    name = f"recall/bsuite_memlen-64-recall/{cell}/s0"
+    cmd = (f"{{python}} probe_wm.py --configs bsuite ours resonanthalf {cfg} --task bsuite_memlen-64-recall --seed 0 "
+           f"--updates 12000 --eval_every 500 --reward_head symlog_mse --batch_length 80 --logdir {RUNS / name}")
+    jobs.append(dict(name=name, cmd=cmd, logdir=str(RUNS / name), mem_gb=2.5))
+    name = f"diag_rp/popgym_RepeatPreviousMedium/{cell}/s0"
+    cmd = (f"{{python}} probe_wm.py --configs popgym ours resonanthalf {cfg} rewardbyact --task popgym_RepeatPreviousMedium "
+           f"--seed 0 --updates 10000 --eval_every 1000 --reward_head symlog_mse --batch_length 64 --logdir {RUNS / name}")
+    jobs.append(dict(name=name, cmd=cmd, logdir=str(RUNS / name), mem_gb=2.5))
     return jobs
 
 
@@ -846,7 +872,7 @@ def main():
             + r8 + round11())
     # the old model's 1M Memory Maze continuation was stopped on 2026-10-02 (superseded, EXPERIMENTS.md §18.4)
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2L_tau1000/s0"]
-    jobs = round27() + round26(jobs) + jobs
+    jobs = round28() + round27() + round26(jobs) + jobs
     for job in jobs:  # DreamerV3 (ANN) needs about 4 GB (measured 2026-09-30), the spiking models 14-20 GB
         if "/ann_" in job["name"] and job["mem_gb"] > 6:
             job["mem_gb"] = 7 if job["name"].startswith("mmaze") else 6

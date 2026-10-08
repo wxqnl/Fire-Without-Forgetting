@@ -337,6 +337,10 @@ pdsomalif:
   PDRNN: {soma: 'lif', soma_tau: 2.0}
 pdfeedback:
   PDRNN: {spike_feedback: True}
+# two dendritic channels per neuron instead of four (one integrator, one resonant with resonanthalf): with
+# pdfeedback the synapses B and R together have the parameters of B alone with four channels (EXPERIMENTS.md §19.26)
+pdch2:
+  PDRNN: {channels: 2}
 pd2layer:
   PDRNN: {layers: 2}
 
