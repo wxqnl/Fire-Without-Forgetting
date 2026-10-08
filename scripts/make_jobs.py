@@ -797,6 +797,30 @@ def round26(jobs):
     return out
 
 
+def round27():
+    """2026-10-07 21:10, user: "现在的 Thermo 做到了当前任务里面的 spike sota 吗？如果还弱于别的 spike 的，其实还是有点
+    问题的" (EXPERIMENTS.md §19.24). Offline on the same pixel walker data (round 25), thermo still trails LIF on
+    every metric; LIF has a nonlinear recurrence (spikes fed back), our dendrites do not. Spike feedback into the
+    dendrites (pdfeedback) cost almost nothing in memory in round 18 (L64 4k vs 3.5k updates, Medium 7k vs 6k).
+    Cheap checks first: the pixel world model with thermo + feedback, and the memory probes of round 18 (Table 5
+    protocol) for thermo and thermo + feedback."""
+    data = RUNS / "dmcpix/dmc_walker_walk/ann_tau2/s0/train_eps"
+    name = "diag_pix/dmc_walker_walk/PD2Lv2thermofb_tau1000/s0"
+    cmd = (f"{{python}} diag_wm_offline.py --configs dmc_vision ours resonanthalf somathermo pdfeedback --data {data} "
+           f"--updates 30000 --eval_every 3000 --logdir {RUNS / name}")
+    jobs = [dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=18)]
+    for cell, cfgs in (("PD2Lreshalfthermo_tau1000", "somathermo"), ("PD2Lreshalfthermofb_tau1000", "somathermo pdfeedback")):
+        name = f"recall/bsuite_memlen-64-recall/{cell}/s0"
+        cmd = (f"{{python}} probe_wm.py --configs bsuite ours resonanthalf {cfgs} --task bsuite_memlen-64-recall --seed 0 "
+               f"--updates 12000 --eval_every 500 --reward_head symlog_mse --batch_length 80 --logdir {RUNS / name}")
+        jobs.append(dict(name=name, cmd=cmd, logdir=str(RUNS / name), mem_gb=2.5))
+        name = f"diag_rp/popgym_RepeatPreviousMedium/{cell}/s0"
+        cmd = (f"{{python}} probe_wm.py --configs popgym ours resonanthalf {cfgs} rewardbyact --task popgym_RepeatPreviousMedium "
+               f"--seed 0 --updates 10000 --eval_every 1000 --reward_head symlog_mse --batch_length 64 --logdir {RUNS / name}")
+        jobs.append(dict(name=name, cmd=cmd, logdir=str(RUNS / name), mem_gb=2.5))
+    return jobs
+
+
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
     # Memory Maze pipeline check (round 10), Memory Maze on the official data once downloaded, round 8
@@ -822,7 +846,7 @@ def main():
             + r8 + round11())
     # the old model's 1M Memory Maze continuation was stopped on 2026-10-02 (superseded, EXPERIMENTS.md §18.4)
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2L_tau1000/s0"]
-    jobs = round26(jobs) + jobs
+    jobs = round27() + round26(jobs) + jobs
     for job in jobs:  # DreamerV3 (ANN) needs about 4 GB (measured 2026-09-30), the spiking models 14-20 GB
         if "/ann_" in job["name"] and job["mem_gb"] > 6:
             job["mem_gb"] = 7 if job["name"].startswith("mmaze") else 6
