@@ -227,8 +227,10 @@ def main():
 
         reserved = None  # GPU held back for the first job that does not fit
         for job in pending:
-            used = {g: 0.0 for g in gpus + idle_gpus}
-            count = {g: 0 for g in gpus + idle_gpus}
+            # adopted jobs may run on GPUs no longer in --gpus: counted, but nothing new is started there
+            on = set(gpus + idle_gpus) | {h.gpu for h in running.values()}
+            used = {g: 0.0 for g in on}
+            count = {g: 0 for g in on}
             for h in running.values():
                 used[h.gpu] += h.mem
                 count[h.gpu] += 1

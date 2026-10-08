@@ -778,6 +778,25 @@ def round25():
     return jobs
 
 
+def round26(jobs):
+    """2026-10-07 15:30, user: "好的…我们得确认他已经改进到基本可以了" (EXPERIMENTS.md §19.23). RL check of the
+    thermometer soma (somathermo) before any rerun: the 4.7M FwF runs of BSuite L32 and L64 (memory must not
+    get worse), pixel walker (to 500k frames: compared at matched frames with the binary soma and Spiking-WM)
+    and proprioceptive walker, each with the soma switched and nothing else changed. GPUs 0-3 only (user)."""
+    picks = ("rl2/bsuite_memlen-32/", "dmcpix/dmc_walker_walk/", "rl2/bsuite_memlen-64/", "dmc500/dmc_walker_walk/")
+    out = []
+    for prefix in picks:
+        job = next(j for j in jobs if j["name"] == f"{prefix}PD2Lv2r64_tau1000/s0")
+        job = {k: (v.replace("PD2Lv2r64_tau1000", "PD2Lv2r64thermo_tau1000") if isinstance(v, str) else v)
+               for k, v in job.items()}
+        job["cmd"] = job["cmd"].replace(" aclowrank ", " aclowrank somathermo ")
+        if prefix.startswith("dmcpix/"):
+            job["cmd"] = job["cmd"].replace(" --steps 1e6 ", " --steps 5e5 ")
+        assert "somathermo" in job["cmd"]
+        out.append(job)
+    return out
+
+
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
     # Memory Maze pipeline check (round 10), Memory Maze on the official data once downloaded, round 8
@@ -803,6 +822,7 @@ def main():
             + r8 + round11())
     # the old model's 1M Memory Maze continuation was stopped on 2026-10-02 (superseded, EXPERIMENTS.md §18.4)
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2L_tau1000/s0"]
+    jobs = round26(jobs) + jobs
     for job in jobs:  # DreamerV3 (ANN) needs about 4 GB (measured 2026-09-30), the spiking models 14-20 GB
         if "/ann_" in job["name"] and job["mem_gb"] > 6:
             job["mem_gb"] = 7 if job["name"].startswith("mmaze") else 6
