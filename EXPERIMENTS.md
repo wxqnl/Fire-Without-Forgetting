@@ -1380,5 +1380,7 @@ Stage 3 模拟审稿（`paper/review/stage3/`）的结论是 Major Revision。�
 - 选定 thermo + 反馈 + 2 通道作为最终模型（`ours resonanthalf policymem aclowrank somathermo pdfeedback pdch2`，RL 名 `PD2Lv2r64thermofbch2_tau1000`）：
   - 与现模型同规模；4 通道版本多 2.1M 参数，是所有脉冲模型中最大的。
   - 代价：记忆探针比 4 通道版本慢约 0.5–1k 次更新，像素略弱。
-- 第 29 轮（`round29`）：用这个版本重做第 26 轮的 RL 验证（L32、L64、像素 walker 到 500k、本体感知 walker）。Medium 过 0.9 后加入队列。
+- 第 29 轮（`round29`）：用这个版本重做第 26 轮的 RL 验证（L32、L64、像素 walker 到 500k、本体感知 walker）。
+  - Medium 探针 8k 次更新过 0.9（0.916），比 4 通道版本和 step + 反馈晚 1k；L64 6k 时 1.000。
+  - 03:20 加入队列（只用 0–3 卡），原任务列表备份为 `runs/jobs.round28.final.jsonl`。
 - 第 26 轮的像素 thermo 任务 23:42 在 gpu2 上重新启动过（§19.26 撤任务时漏掉了）。该版本已否决，03:00 停止（28k 步），日志目录移到 `runs/aborted/`。
