@@ -1302,3 +1302,29 @@ Stage 3 模拟审稿（`paper/review/stage3/`）的结论是 Major Revision。�
 - 下一步：
   - 若 thermo + 反馈在离线诊断里追上 LIF，并且探针上记忆不变差，第 26 轮还没启动的 RL 验证（像素、L64、本体感知 walker）改用它。
   - 若没追上，第 26 轮照常用 thermo，同时继续诊断与 LIF 的差距。
+
+### 19.25 论文改名为 Spike-Driven Dreamer，主图，草稿；L101 运行后期坍塌（10 月 7 日 23:55；用户："我想把 draft 发给别人看一眼了…主图现在还缺少一个，你用 svg 画吧…要不叫 spike driven dreamer？或者 spike driven world model"）
+
+- 改名：
+  - 方法名改为 Spike-Driven Dreamer（简称 SD-Dreamer），对应宏 `\methodfull` 和 `\method`。
+  - 题目改为 "Spike-Driven Dreamer: Persistent Dendrites Give Spiking World Models Long-Term Memory"，§4 标题同步修改，图例也改为 SD-Dreamer。
+  - 没有选 "Spike-Driven World Model"：基线 Spiking-WM 的全称就是 "Spiking World Model"，两者太像。
+  - 查重：网页搜索没有找到同名工作。
+- 主图：
+  - 新的图 2（`paper/fig/overview_svg.py` → `overview.svg`/`overview.pdf`，用 rsvg-convert 转换），替换原来的 TikZ 神经元图。
+  - (a) 一个环境步内的完整智能体：编码器、两层 PDN、隐变量、各个头、actor-critic，以及 actor-critic 读取的树突 ON/OFF 脉冲。
+  - (b) 记忆存在哪里：Spiking-WM 与 PDN 的对比。
+- 为了把正文压回 8 页：
+  - 图注缩短；
+  - 删去 §4 的 "What the PDN adds" 段落（LRU 的归属仍在 "Normalized write" 和 "Parameters" 中）；
+  - 删去关于 parallel scan 的一句。
+  - 结果：正文 8 页，参考文献从第 9 页开始，`main_full` 没有溢出。附录表 `tab:supp_diag` 的表头缩短。
+- 草稿：
+  - 摘要前加 `\draftnote`，说明蓝色数字来自还在跑的任务、红色 TODO 是待补部分；投稿前在 `preamble.tex` 中关掉。
+  - TODO 文字改为面向读者的说法。
+  - 图 1 中还在跑的任务用空心点表示。
+- BSuite L101（4.7M，`r2i`）后期坍塌：
+  - 262k 步达到 0.9。640k–760k 步的训练回报为 0.86–0.95。
+  - 从约 760k 步开始掉到 0.27、0.05、0.12；eval 在 782k 时 −0.19，802k 时 0.06。
+  - reward loss 仍为 0.002–0.003，value loss 从 1.04 升到 1.23，KL 从 0.53 升到 0.63。
+  - 与 POPGym Easy 那次一样，像是策略一侧的坍塌（§19.19）。等跑完（约 1M 步）再看。

@@ -23,14 +23,14 @@ plt.rcParams.update({
     "axes.spines.top": False, "axes.spines.right": False, "pdf.fonttype": 42, "legend.frameon": False,
 })
 
-# Okabe-Ito colours; FwF in vermillion and drawn on top
+# Okabe-Ito colours; ours in vermillion and drawn on top
 STYLE = {
     "base_tau2": dict(label="Spiking-WM", color="#E69F00"),
     "LIF_tau2": dict(label="LIF", color="#56B4E9"),
     "GRSN_tau2": dict(label="GRSN", color="#009E73"),
     "ABG_tau128": dict(label="Spiking-WM-NR", color="#CC79A7"),
     "ann_tau2": dict(label="DreamerV3 (ANN)", color="#000000", ls="--"),
-    "OURS": dict(label="FwF (ours)", color="#D55E00", lw=1.8, zorder=5),
+    "OURS": dict(label="SD-Dreamer (ours)", color="#D55E00", lw=1.8, zorder=5),
     "R2I": dict(label="R2I (ANN)", color="#0072B2", ls="-."),
 }
 # FwF's runs: one configuration everywhere (EXPERIMENTS.md §19.6); the probe runs have no actor
@@ -71,6 +71,11 @@ def final(path, key="eval_return", n=3):
     return float(np.mean(y[-n:])) if len(y) else None
 
 
+def finished(path):
+    exit_file = RUNS / path / "s0" / ".exit"
+    return exit_file.exists() and exit_file.read_text().strip() == "0"
+
+
 def memory_length():
     """Fig. 1: final evaluation return against the BSuite memory length; left: L8-L64 (0.15-0.5M env
     steps), right: L51-L101 under the protocol of R2I (1M env steps)."""
@@ -81,13 +86,17 @@ def memory_length():
         st = dict(STYLE[model])
         label = st.pop("label")
         for g, group in enumerate(groups):
-            xs, ys = [], []
+            xs, ys, live = [], [], []
             for L, sub in group:
-                v = final(f"{sub}/bsuite_memlen-{L}/{run(model, 'bsuite')}")
+                path = f"{sub}/bsuite_memlen-{L}/{run(model, 'bsuite')}"
+                v = final(path)
                 if v is not None:
-                    xs.append(pos[L]), ys.append(v)
+                    xs.append(pos[L]), ys.append(v), live.append(not finished(path))
             if xs:
                 ax.plot(xs, ys, label=label if g == 0 else None, marker="o", ms=2.8, **st)
+                for x, y, l in zip(xs, ys, live):  # runs still in progress: open marker
+                    if l:
+                        ax.plot([x], [y], marker="o", ms=4.2, mfc="white", mec=st["color"], mew=1.0, ls="none", zorder=6)
     ax.axvline(3.8, color="0.6", lw=0.6, ls=":")
     ax.text(1.5, 1.13, "0.15-0.5M env steps", ha="center", fontsize=6.5, color="0.35")
     ax.text(5.6, 1.13, "R2I protocol, 1M steps", ha="center", fontsize=6.5, color="0.35")
@@ -154,7 +163,7 @@ def probe_panels():
              ("PD2Lreshalf_tau16", r"single $\tau=16$", "#56B4E9", "-."),
              ("PD2Lreshalf_tau128", r"single $\tau=128$", "#0072B2", "--"),
              ("PD2Lreshalfeuler_tau1000", r"Euler write gain $1-\lambda$", "#009E73", (0, (3, 1, 1, 1))),
-             ("PD2Lreshalf_tau1000", r"FwF ($\tau\in[1,1000]$, gain $\sqrt{1-\lambda^2}$)", "#D55E00", "-")]
+             ("PD2Lreshalf_tau1000", r"SD-Dreamer ($\tau\in[1,1000]$, gain $\sqrt{1-\lambda^2}$)", "#D55E00", "-")]
     for name, label, color, ls in sweep:
         x, y = curve(f"recall/bsuite_memlen-64-recall/{name}", "eval_auc")
         if len(x):
@@ -166,9 +175,9 @@ def probe_panels():
     ax.legend(loc="center right", bbox_to_anchor=(1.0, 0.6), handlelength=2.2)
     ax = axes[1]
     lag = [("base_tau2", None), ("LIF_tau2", None), ("GRSN_tau2", None), ("ABG_tau128", None), ("ann_tau2", None),
-           ("PD2L_tau1000", dict(label="FwF, integrator dendrites only", color="#D55E00", ls=":", lw=1.4)),
-           ("PD2Lres_tau1000", dict(label="FwF, all channels resonant", color="#D55E00", ls="--", lw=1.2)),
-           ("PD2Lreshalf_tau1000", dict(STYLE["OURS"], label="FwF (half resonant)"))]
+           ("PD2L_tau1000", dict(label="SD-Dreamer, integrator dendrites only", color="#D55E00", ls=":", lw=1.4)),
+           ("PD2Lres_tau1000", dict(label="SD-Dreamer, all channels resonant", color="#D55E00", ls="--", lw=1.2)),
+           ("PD2Lreshalf_tau1000", dict(STYLE["OURS"], label="SD-Dreamer (half resonant)"))]
     for name, st in lag:
         st = dict(STYLE[name]) if st is None else st
         x, y = curve(f"diag_rp/popgym_RepeatPreviousMedium/{name}", "eval_auc")

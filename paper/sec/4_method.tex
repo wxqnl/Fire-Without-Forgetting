@@ -1,17 +1,17 @@
-\section{Fire Without Forgetting}
+\section{Spike-Driven Dreamer}
 \label{sec:method}
 
 \begin{figure*}[t]
   \centering
-  \input{fig/neurons}
-  \caption{\textbf{Where memory lives.}
-  (a) \swm: all compartments are cleared at every environment step and the dendrites at every somatic spike, so only the binary spikes fed back as input carry step $t-1$ to step $t$.
-  (b) PDN: linear dendritic channels, never reset and without spike feedback, carry the memory across steps. Integrator channels (blue) hold a value; resonant channels (orange) rotate by a phase $\theta$ per step and so also encode elapsed time. A stateless soma reads them and emits the neuron's only output, a binary spike $s_t$.}
-  \label{fig:neurons}
+  \includegraphics[width=\textwidth]{fig/overview}
+  \caption{\textbf{\methodfull.}
+  (a) Two layers of persistent dendritic neurons (PDNs) form the recurrent core of a spiking Dreamer. Their dendritic channels (integrator: blue, resonant: orange) carry the memory across environment steps and are never reset; neurons exchange only binary spikes, and the actor-critic also reads the second-layer dendrites as ON/OFF spikes.
+  (b) In \swm, all compartments are cleared at every step and the dendrites at every somatic spike, so only spikes reach the next step. In a PDN, the dendritic channels persist and a stateless soma reads them.}
+  \label{fig:overview}
 \end{figure*}
 
 \Cref{sec:amnesia} gives a design rule: memory must live in a state that spikes never reset, written with a gain that does not vanish for long time constants, and its recurrence should not pass through a threshold.
-We build \method from neurons that follow this rule, keeping the rest of the spiking world model unchanged.
+We build \method from neurons that follow this rule, keeping the rest of the spiking world model unchanged (\cref{fig:overview}).
 
 \subsection{Persistent dendritic neuron}
 \label{sec:pdn}
@@ -62,10 +62,6 @@ The spike, which does cross one, is recomputed from the dendrites at every step 
 For unit-variance white input, \cref{eq:integrator} gives $\mathrm{Var}(d_t)=(1-\lambda^2)\sum_{k\ge0}\lambda^{2k}=1$ for every $\tau$, whereas the Euler gain $1-\lambda$ of \cref{eq:mcn} gives $(1-\lambda)/(1+\lambda)\approx 1/(2\tau)$.
 The normalization of the LRU~\cite{orvieto2023lru} thus keeps channels with retention times from 1 to 1000 steps on the same scale; intervention G is the same scaling up to a factor of 2.
 
-\paragraph{What the PDN adds.}
-We adopt the input normalization and the initialization of the LRU~\cite{orvieto2023lru}.
-The PDN adds what a spiking world model needs: binary spikes as the only signal between its neurons, memory that no spike resets, a stateless soma, and separate integrator and resonant channels; \cref{sec:ablation} removes the last three and adds spike feedback, which does not help.
-
 \paragraph{A spectrum of retention times.}
 The memory length a task needs is not known in advance.
 Log-uniform retention times cover lengths from one to a thousand steps in every neuron, so no time constant is tuned per task.
@@ -79,7 +75,6 @@ Integrators hold \emph{what} was seen, resonators also record \emph{when}.
 All signals between neurons are spikes, so the synaptic operations $B\xx_t$ and $D\xx_t$ are accumulates.
 The dendritic recurrence and the readout $\sum_m C_m d_m$ are local to a neuron, and the normalizations need only the mean and variance of a layer, as in every spiking world model we compare: $O(NM)$ multiply-accumulates per step, against $O(N^2)$ for a dense recurrent matrix.
 Inside the world model, graded values never cross a synapse; they remain inside the neuron, as state variables of neuromorphic cores that support multi-variable neuron models~\cite{orchard2021loihi2}.
-Since the dendrites are linear in their input, the layer could also be trained with a parallel scan~\cite{smith2023s5}; we train it step by step, like every other model in this paper.
 
 \subsection{Spiking world model}
 \label{sec:wm}

@@ -73,7 +73,7 @@ On Medium, all baselines remain at chance after 2M steps, \dv included, whereas 
 R2I, run with its official code, stays at chance on both tasks within 2M steps.
 Its published curves span 50M steps: on Medium they leave chance only after about 3M steps, and on Easy they rise after about 1M steps and average 0--0.3 at 2M with a large spread across seeds, while DreamerV3 learns Easy but not Medium (Fig.~9 of~\cite{samsami2024r2i}), as in our runs.
 At 2M steps, the comparison is one of sample efficiency.
-\TODO{Rank-64 actor (switched Oct.~6): recheck the BSuite comparisons above once $L$=16--101 finish (Oct.~7--8); final POPGym returns (Medium Oct.~6, Easy Oct.~8).}
+\TODO{Final BSuite and POPGym numbers (runs in progress).}
 
 \subsection{What the world model remembers}
 \label{sec:probe}
@@ -107,10 +107,10 @@ RepeatPrevious Hard ($k=64$), which we did not use during development, tests it 
   \input{tables/mm_dmc_energy}
 \end{table}
 
-\TODO{Memory Maze runs reach 1M updates around Oct.~10--13; the values shown are the latest in-training probes. Final values: frozen probes (200k probe updates) on the policy features.}
+\TODO{Memory Maze: final probes after 1M updates (in progress); the values shown are the latest in-training probes.}
 Memory Maze tests whether a world model builds a map of a 3D maze from first-person views over 1000 steps.
 \Cref{tab:mm} reports the probes on the state that the policy reads: $(z_t,h_t)$ for all models, and in addition the dendritic spikes for \method.
-\TODO{Text after the results: compare \method with the spiking baselines and \dv; the memory gain is the difference to a probe on the current image embedding alone (no memory).}
+\TODO{Discussion of the Memory Maze results against the spiking baselines and \dv.}
 
 \subsection{Ablations}
 \label{sec:ablation}
@@ -136,7 +136,7 @@ Half of each kind keeps both strengths.
 \subsection{Non-memory control and energy}
 \label{sec:energy}
 
-\TODO{Final DMC returns of \method (Oct.~7) and pixel walker walk (Oct.~9--10).}
+\TODO{Final DMC returns, including walker walk from pixels.}
 On DMC (\cref{tab:mm}), \method reaches \numFwfDmcWalk, \numFwfDmcRun\ and \numFwfDmcSwing\ on walker walk, cheetah run and cartpole swingup, against 923, 343 and 497 for \swm and 953, 699 and 871 for \dv in the same setting.
 
 Per environment step (Supp.~\suppref{supp:energy}{H}), the agent of \method, world-model filter and actor, costs \numEnergyAgent\,$\mu$J, \numEnergyRatio$\times$ less than \dv (\numEnergyAgentDv\,$\mu$J); the filter alone costs \numEnergyFilter\ against \numEnergyFilterDv\,$\mu$J, at a recurrent firing rate of \numEnergyRate.

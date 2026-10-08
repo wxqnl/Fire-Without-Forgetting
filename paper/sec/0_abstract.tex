@@ -1,10 +1,11 @@
 \begin{abstract}
+\draftnote
 Embodied agents see only part of their world and must remember what has left their view.
 World models give an agent this memory through a recurrent latent state, and spiking neural networks (SNNs) promise to run them with sparse binary events on low-power hardware.
 We find that spiking world models forget within a few steps, although their neurons have long time constants.
 Membrane potentials are cleared at every environment step and dendrites are reset by every somatic spike, so memory has to be re-encoded into binary spikes at each step and the time constants have no effect.
 Causal interventions confirm this \emph{reset-induced amnesia}: a spiking world model fails to recall a cue 8 steps back whatever its time constants, whereas with both resets removed and its write gain normalized it recalls cues 32 steps back.
-We propose \method, a spiking world model in which dendrites store and spikes communicate.
+We propose the \methodfull (\method), a spiking world model in which dendrites store and spikes communicate.
 Each neuron keeps linear dendritic channels that are never reset and never receive spikes back, with retention times initialized from 1 to 1000 environment steps and a write gain normalized across them.
 Half of the channels resonate, so that their phase records how long ago an input arrived.
 A stateless soma reads the channels and emits a binary spike, the only signal that neurons of the world model exchange.

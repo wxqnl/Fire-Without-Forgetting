@@ -116,7 +116,7 @@ The limit is the write gain, not the firing frequency.
 \paragraph{Retention curves.}
 With resets, the cue can be decoded linearly from the spikes of \swm for 2--3 steps after it is shown, for $\tau_d\in\{2,16,128\}$.
 With A and $\tau_d=128$, the membrane potentials still encode it after 8 steps (accuracy 0.96--1.00) while the spikes return to chance after 3--4 steps.
-\TODO{Add the retention-curve figure (runs/plots/retention\_*).}
+\TODO{Figure: retention curves.}
 
 \section{Policy input}
 \label{supp:policy}
@@ -134,7 +134,7 @@ The second row uses full weights and narrows the actor-critic to the 3.4M of the
 At the size of the baselines the dendritic spikes still give every BSuite length and RepeatPrevious Medium, where the policy that reads $(z_t,h_t)$ only stays at chance: the gain comes from the readout, not from the parameters.
 The narrow actor-critic learns walker walk more slowly, so \method keeps the width and compresses the dendritic input instead.
 Without the dendritic spikes the policy learns 64 steps slightly sooner, since a single cue fits in the one bit per neuron that the soma sends; on POPGym and DMC walker walk it falls far behind.
-\TODO{Final POPGym and DMC numbers of the rank-64 actor-critic (Oct.~7--8).}
+\TODO{Final POPGym and DMC numbers (runs in progress).}
 
 \section{Diagnosing the world model in RL}
 \label{supp:diag}
@@ -145,14 +145,14 @@ Without the dendritic spikes the policy learns 64 steps slightly sooner, since a
   \label{tab:supp_diag}
   \begin{tabular}{@{}llcc@{}}
   \toprule
-  task & model & policy accuracy & reward AUC \\
+  task & model & policy acc. & reward AUC \\
   \midrule
-  Easy ($k$=4) & \method, integrators only & 0.78 & 0.94 \\
+  Easy ($k$=4) & \method, integr.\ only & 0.78 & 0.94 \\
    & Recurrent LIF & 0.84 & 0.97 \\
    & GRSN & 0.62 & 0.90 \\
    & \dv & 0.69 & 0.98 \\
   \midrule
-  Medium ($k$=32) & \method, integrators only & 0.25 & 0.55 \\
+  Medium ($k$=32) & \method, integr.\ only & 0.25 & 0.55 \\
    & \dv & 0.27 & 0.65 \\
   \bottomrule
   \end{tabular}
@@ -170,7 +170,7 @@ On the frozen world model we then train the probes of the official code: separat
 A second set of probes reads only the current image embedding; the difference measures what the state carries from the past.
 We report the mean over the second half (last 500 steps) of the 1k evaluation episodes; our constant predictors (objects 24.0, walls 80.8\%) match those of the paper (23.9, 80.8\%).
 All models use the size of DreamerV3-S, smaller than the RSSM of the reference results (2048-dimensional state).
-\TODO{Table: state vs.\ no-memory probe and the memory gain for all models at 1M updates; for \method also spikes only vs.\ spikes + dendritic spikes.}
+\TODO{Table: memory gain over a no-memory probe for all models after 1M updates.}
 
 \section{Energy accounting}
 \label{supp:energy}

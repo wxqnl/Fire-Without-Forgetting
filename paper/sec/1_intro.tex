@@ -8,7 +8,7 @@
   Final return on BSuite memory length~\cite{osband2020bsuite}: the agent sees a cue, then $L$ uninformative steps, and is rewarded for recalling the cue (1 = always correct, 0 = chance).
   All models share one spiking world model and differ in the recurrent core (\cref{sec:setup}).
   Left: 0.15--0.5M environment steps. Right: $L=51$--101 with the lengths and budget of R2I~\cite{samsami2024r2i} (1M steps).
-  Spiking baselines reach a return of 0.9 up to 32 steps and DreamerV3 (ANN) up to 51; \method is the only model that reaches it beyond 51 steps (\cref{tab:rl}).}
+  Spiking baselines reach a return of 0.9 up to 32 steps and DreamerV3 (ANN) up to 51; \method is the only model that reaches it beyond 51 steps (\cref{tab:rl}). \pend{Open markers: runs in progress.}}
   \label{fig:memory_length}
 \end{figure}
 
@@ -36,7 +36,7 @@ With persistent state the world model recalls cues 16 steps back, and adding the
 Conversely, clearing the dendrites of our own model at every step erases its memory.
 
 These results give a design rule: memory should live in a state that no spike ever resets, and spikes should only carry information out of it.
-We build \method from \emph{persistent dendritic neurons} (PDNs) that follow this rule (\cref{sec:method}).
+We build the \methodfull (\method) from \emph{persistent dendritic neurons} (PDNs) that follow this rule (\cref{sec:method}).
 A PDN keeps linear dendritic channels across environment steps that are never reset, receive no spikes back from the soma, and are written with a gain normalized across time constants from 1 to 1000 environment steps.
 Integrator channels hold \emph{what} was seen; resonant channels, damped oscillators in the tradition of resonate-and-fire neurons~\cite{izhikevich2001resonate}, also encode \emph{when}.
 A stateless soma reads the dendrites and emits one binary spike per step, the only signal that other neurons of the world model receive; the graded state stays inside the neuron, as in neuromorphic cores with multi-variable neurons~\cite{orchard2021loihi2}.
