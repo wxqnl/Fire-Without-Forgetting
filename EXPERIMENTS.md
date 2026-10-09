@@ -1494,4 +1494,4 @@ Stage 3 模拟审稿（`paper/review/stage3/`）的结论是 Major Revision。�
    - 主表的 BSuite L8–L64 改用 rl3，rl2 作废。
 4. POPGym Easy/Medium 的 actor-critic 对照，2 个任务。
 
-- 01:17：48 个已启动（42 个探针、4 个 rl3、2 个 POPGym），30 个等显存。
+- 01:17：46 个已启动（42 个探针、4 个 rl3），30 个等显存（26 个 rl3、2 个像素诊断、2 个 POPGym 对照）。
