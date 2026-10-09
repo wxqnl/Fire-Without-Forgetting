@@ -1469,3 +1469,29 @@ Stage 3 模拟审稿（`paper/review/stage3/`）的结论是 Major Revision。�
   - 附录消融（表 7）和 actor-critic 大小对照；
   - 胞体 / 反馈 / 通道数消融；
   - 能耗实测。
+
+### 19.30 第 31 轮：消融、对照与 BSuite 重跑（10 月 9 日 01:15；用户："可以，按你的建议来吧"）
+
+`make_jobs.round31()`，共 76 个任务，原任务列表备份为 `runs/jobs.round30b.jsonl`：
+
+1. 表 7 在最终模型上重做，每个变体只改一处，共 14 个变体 × 3 个探针（L32 回忆、L64 回忆、Medium）= 42 个。
+   - 变体名前缀为 `SDD`。最终模型自身一行用 `PD2Lreshalfthermofbch2`（第 28、30 轮）。
+   - 各变体改动的地方：
+     - 每步清空树突（reset）；
+     - 单一 τ = 16 或 128；
+     - Euler 输入增益；
+     - τ 固定不学习；
+     - 发放率上限（cap）；
+     - 1 层，以及 1 层且 T = 1；
+     - 全共振通道（res）、无共振通道（nores）；
+     - LIF 胞体（somalif）、二值胞体（step）；
+     - 去掉反馈（nofb）；
+     - 4 个通道（ch4）。
+2. 像素 walker 离线诊断（第 25 轮协议）补两个逐项拆分：去掉 thermo（`PD2Lv2stepfbch2`）、去掉反馈（`PD2Lv2thermoch2`）。
+3. BSuite L8–L64 全部重跑，每个并行环境用不同种子，组名 `rl3/`，共 30 个任务（§14.2 的缺陷）。
+   - 模型：最终模型、actor-critic 对照、Spiking-WM、LIF、GRSN、A+B+G、DreamerV3，以及 spiking enc. + GRU（只有 L16/L32，与 rl2 相同）。
+   - actor-critic 对照是 `PD2Lreshalfthermofbch2`：只读胞体脉冲，3.41M，与基线相同。
+   - 主表的 BSuite L8–L64 改用 rl3，rl2 作废。
+4. POPGym Easy/Medium 的 actor-critic 对照，2 个任务。
+
+- 01:17：48 个已启动（42 个探针、4 个 rl3、2 个 POPGym），30 个等显存。

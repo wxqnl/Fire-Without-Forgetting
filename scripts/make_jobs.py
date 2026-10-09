@@ -894,6 +894,71 @@ def round30(jobs):
     return out
 
 
+def round31(jobs):
+    """2026-10-09 01:30, user: "可以，按你的建议来吧" (EXPERIMENTS.md §19.30), after the review of §19.29.
+    1. Table 7 on the final model: each ablation changes one part of it, on the L32 and L64 recall probes and the
+       RepeatPrevious Medium probe (protocols of Table 4); the soma, the spike feedback and the channel count
+       included. Its own row: PD2Lreshalfthermofbch2 (rounds 28, 30).
+    2. Pixel walker world-model diagnostics (round 25 protocol) without thermo and without feedback.
+    3. BSuite L8-L64 again for every model with a different seed per parallel environment (rl2 shared one seed,
+       §14.2), as rl3; with them our model with the baselines' actor-critic (soma spikes only, 3.41M).
+    4. The same actor-critic control on POPGym Easy and Medium."""
+    out = []
+    final = ["ours", "resonanthalf", "somathermo", "pdfeedback", "pdch2"]
+    abl = {"SDDreset_tau1000": final + ["pdreset"], "SDD_tau16": final + ["pdtau16"], "SDD_tau128": final + ["pdtau128"],
+           "SDDeuler_tau1000": final + ["pdeuler"], "SDDfix_tau1000": final + ["pdfixtau"],
+           "SDDcap_tau1000": final + ["ratecap"], "SDD1L_tau1000": ["pdcell"] + final[1:],
+           "SDDres_tau1000": ["ours", "resonant"] + final[2:], "SDDnores_tau1000": ["ours"] + final[2:],
+           "SDDsomalif_tau1000": ["ours", "resonanthalf", "pdsomalif", "pdfeedback", "pdch2"],
+           "SDDstep_tau1000": ["ours", "resonanthalf", "pdfeedback", "pdch2"],
+           "SDDnofb_tau1000": ["ours", "resonanthalf", "somathermo", "pdch2"],
+           "SDDch4_tau1000": ["ours", "resonanthalf", "somathermo", "pdfeedback"]}
+    t1 = {"SDD1LT1_tau1000": ["pdcell"] + final[1:]}
+    for L in (32, 64):
+        out += recall_jobs(f"bsuite_memlen-{L}-recall", abl, seeds=(0,), extra=MEMLEN_EXTRA[L])
+        out += recall_jobs(f"bsuite_memlen-{L}-recall", t1, seeds=(0,), extra=MEMLEN_EXTRA[L] + " --spike_times 1")
+    rp = {k: v + ["rewardbyact"] for k, v in abl.items()}
+    out += recall_jobs("popgym_RepeatPreviousMedium", rp, seeds=(0,), updates=10000, extra="--batch_length 64",
+                       group="diag_rp", eval_every=1000)
+    out += recall_jobs("popgym_RepeatPreviousMedium", {k: v + ["rewardbyact"] for k, v in t1.items()}, seeds=(0,),
+                       updates=10000, extra="--batch_length 64 --spike_times 1", group="diag_rp", eval_every=1000)
+    data = RUNS / "dmcpix/dmc_walker_walk/ann_tau2/s0/train_eps"
+    for cell, cfg in (("PD2Lv2stepfbch2_tau1000", "pdfeedback pdch2"), ("PD2Lv2thermoch2_tau1000", "somathermo pdch2")):
+        name = f"diag_pix/dmc_walker_walk/{cell}/s0"
+        cmd = (f"{{python}} diag_wm_offline.py --configs dmc_vision ours resonanthalf {cfg} --data {data} "
+               f"--updates 30000 --eval_every 3000 --logdir {RUNS / name}")
+        out.append(dict(name=name, cmd=cmd, logdir=str(RUNS / name), mem_gb=18))
+    flags = "somathermo pdfeedback pdch2"
+    by_name = {j["name"]: j for j in jobs}
+    rl3 = []
+    for L in (64, 32, 16, 8):  # longest first
+        for cell in ("PD2Lv2r64thermofbch2_tau1000", "PD2Lreshalfthermofbch2_tau1000", "base_tau2", "LIF_tau2",
+                     "GRSN_tau2", "ABG_tau128", "ann_tau2", "gru_tau2"):
+            src = {"PD2Lv2r64thermofbch2_tau1000": "PD2Lv2r64_tau1000",
+                   "PD2Lreshalfthermofbch2_tau1000": "PD2Lreshalf_tau1000"}.get(cell, cell)
+            job = by_name.get(f"rl2/bsuite_memlen-{L}/{src}/s0")
+            if job is None:
+                continue
+            job = {k: (v.replace("/rl2/", "/rl3/").replace("rl2/", "rl3/", 1).replace(src, cell)
+                       if isinstance(v, str) else v) for k, v in job.items()}
+            if src != cell:
+                anchor = " aclowrank " if "aclowrank" in job["cmd"] else " resonanthalf "
+                job["cmd"] = job["cmd"].replace(anchor, f"{anchor}{flags} ", 1)
+                job["mem_gb"] = max(job["mem_gb"], 24)
+            assert "--env_seed_per_env" not in job["cmd"]
+            job["cmd"] = job["cmd"].replace(" --logdir ", " --env_seed_per_env True --logdir ")
+            rl3.append(job)
+    out += rl3
+    for task in ("popgym_RepeatPreviousEasy", "popgym_RepeatPreviousMedium"):
+        job = by_name[f"popgym/{task}/PD2Lreshalf_tau1000/s0"]
+        job = {k: (v.replace("PD2Lreshalf_tau1000", "PD2Lreshalfthermofbch2_tau1000") if isinstance(v, str) else v)
+               for k, v in job.items()}
+        job["cmd"] = job["cmd"].replace(" resonanthalf ", f" resonanthalf {flags} ", 1)
+        job["mem_gb"] = 26
+        out.append(job)
+    return out
+
+
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
     # Memory Maze pipeline check (round 10), Memory Maze on the official data once downloaded, round 8
@@ -919,7 +984,7 @@ def main():
             + r8 + round11())
     # the old model's 1M Memory Maze continuation was stopped on 2026-10-02 (superseded, EXPERIMENTS.md §18.4)
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2L_tau1000/s0"]
-    jobs = round29(jobs) + round30(jobs) + round28() + round27() + round26(jobs) + jobs
+    jobs = round29(jobs) + round30(jobs) + round31(jobs) + round28() + round27() + round26(jobs) + jobs
     # 2026-10-09 (EXPERIMENTS.md §19.29), user: "可以停": the binary-soma Memory Maze run is superseded by the final
     # model's (round 30, which copies its job); stopped at 540k updates
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2Lv2_tau1000/s0"]
