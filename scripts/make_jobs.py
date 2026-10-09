@@ -920,6 +920,9 @@ def main():
     # the old model's 1M Memory Maze continuation was stopped on 2026-10-02 (superseded, EXPERIMENTS.md §18.4)
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2L_tau1000/s0"]
     jobs = round29(jobs) + round30(jobs) + round28() + round27() + round26(jobs) + jobs
+    # 2026-10-09 (EXPERIMENTS.md §19.29), user: "可以停": the binary-soma Memory Maze run is superseded by the final
+    # model's (round 30, which copies its job); stopped at 540k updates
+    jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2Lv2_tau1000/s0"]
     for job in jobs:  # DreamerV3 (ANN) needs about 4 GB (measured 2026-09-30), the spiking models 14-20 GB
         if "/ann_" in job["name"] and job["mem_gb"] > 6:
             job["mem_gb"] = 7 if job["name"].startswith("mmaze") else 6

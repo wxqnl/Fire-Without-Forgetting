@@ -1450,3 +1450,22 @@ Stage 3 模拟审稿（`paper/review/stage3/`）的结论是 Major Revision。�
     - 解决前 eval 序列与其他版本几乎一样（同样的环境种子，策略接近随机）。
     - 现模型 262k 解决，大 actor-critic 版本 PD2Lv2 363k 解决，目前仍在这个范围内。
   - Memory Maze：40k 次更新，物体 MSE 11.6。
+
+### 19.29 停掉旧模型的 Memory Maze；正式论文标准的核查（10 月 9 日 01:00；用户："我需要你在确认一下，我们现在做的实验、配置是可以作为正式学术论文的结果写成 Paper 的"）
+
+- 用户同意（"可以停"）后，00:56 停掉 `mmaze_official/memory_maze_9x9/PD2Lv2_tau1000`（step 胞体，540k 次更新），由第 30 轮最终模型的运行取代。
+  - `make_jobs.main()` 在第 30 轮复制完任务之后才过滤掉它。第一次放在前面，生成失败，队列按失败重试规则在 gpu7 上重启了它，22 秒后再次停掉。
+  - 检查点（`model.pt`，10 月 8 日 23:22）和日志完好。
+- 配置复核（`scripts/review_configs.py` 的逻辑，只看主表模型 + 最终模型，scratchpad `review_final.py`）：
+  - 每个 benchmark 内，所有模型共享全部协议键：步数、train ratio、并行环境、batch、学习率、折扣、想象步长、回放、评估局数、种子设置。
+  - 模型之间只在模型本身的键上不同：`dyn_cell`、`PDRNN`、`MCNode`、`persist_state`、`act`、编解码器激活、`ac_rank`。
+  - 唯一的协议差异：像素 walker 的验证运行是 500k 帧，基线是 1M，正式结果要另跑 1M。
+- 参数量（最终模型 vs Spiking-WM / DreamerV3）：
+  - 向量任务：world model 8.42M vs 7.10M / 7.36M，actor-critic 4.10M vs 3.41M。
+  - 像素：world model 16.75M vs 15.43M / 15.69M。
+- 已知的协议缺陷：BSuite L8–L64（rl2）所有模型都是 `env_seed_per_env=False`（§14.2），第 29/30 轮的新运行也一样。
+- 主表还需要在最终模型上补的：
+  - 像素 walker 1M；
+  - 附录消融（表 7）和 actor-critic 大小对照；
+  - 胞体 / 反馈 / 通道数消融；
+  - 能耗实测。
