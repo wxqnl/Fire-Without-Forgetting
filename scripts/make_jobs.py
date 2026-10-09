@@ -969,8 +969,12 @@ def round32():
              "SDDstep_tau1000": ["ours", "resonanthalf", "pdfeedback", "pdch2"],
              "PD2Lreshalf_tau1000": ["ours", "resonanthalf"]}
     out = list(recall_jobs("bsuite_memlen-101-recall", cells, seeds=(0,), extra="--batch_length 128"))
+    # 05:10: the final model passes the recall probe (AUC 1.0 at 3000 updates). In RL the reward at the last step is
+    # +1/-1 by whether the action matches the cue (rewardbyact head, as in the RL run): the same probe on that task
+    xor = {k: cells[k] + ["rewardbyact"] for k in ("PD2Lreshalfthermofbch2_tau1000", "PD2Lreshalf_tau1000")}
+    out += recall_jobs("bsuite_memlen-101", xor, seeds=(0,), extra="--batch_length 128", group="xor")
     for job in out:
-        job["mem_gb"] = 4
+        job["mem_gb"] = 6  # peak 5.7 GB measured; the first try at 4 GB went out of memory on a full GPU
     return out
 
 
