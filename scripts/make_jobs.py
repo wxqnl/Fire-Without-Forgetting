@@ -978,6 +978,28 @@ def round32():
     return out
 
 
+def round33(jobs):
+    """2026-10-09 09:21 (EXPERIMENTS.md §19.33), step 2 of the plan of 2026-10-08 (user: "可以，按你说的两步走") for the
+    proprioceptive side: the final model's walker run passed its check at 300k frames (mean over 100k-300k 828, LIF 731).
+    The final model on cheetah run and cartpole swingup, and the actor-critic control (soma spikes only, as the
+    baselines) on all three tasks. Longest jobs, first in the queue. The pixel side waits for its own check."""
+    flags = "somathermo pdfeedback pdch2"
+    by_name = {j["name"]: j for j in jobs}
+    out = []
+    for task in ("dmc_cheetah_run", "dmc_cartpole_swingup", "dmc_walker_walk"):
+        for src, cell, anchor in (("PD2Lv2r64_tau1000", "PD2Lv2r64thermofbch2_tau1000", " aclowrank "),
+                                  ("PD2Lreshalf_tau1000", "PD2Lreshalfthermofbch2_tau1000", " resonanthalf ")):
+            if task == "dmc_walker_walk" and cell.startswith("PD2Lv2r64"):
+                continue  # round 29
+            job = by_name[f"dmc500/{task}/{src}/s0"]
+            job = {k: (v.replace(src, cell) if isinstance(v, str) else v) for k, v in job.items()}
+            job["cmd"] = job["cmd"].replace(anchor, f"{anchor}{flags} ", 1)
+            assert job["cmd"].count("pdch2") == 1
+            job["mem_gb"] = max(job["mem_gb"], 22)
+            out.append(job)
+    return out
+
+
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
     # Memory Maze pipeline check (round 10), Memory Maze on the official data once downloaded, round 8
@@ -1003,7 +1025,7 @@ def main():
             + r8 + round11())
     # the old model's 1M Memory Maze continuation was stopped on 2026-10-02 (superseded, EXPERIMENTS.md §18.4)
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2L_tau1000/s0"]
-    jobs = round32() + round29(jobs) + round30(jobs) + round31(jobs) + round28() + round27() + round26(jobs) + jobs
+    jobs = round33(jobs) + round32() + round29(jobs) + round30(jobs) + round31(jobs) + round28() + round27() + round26(jobs) + jobs
     # 2026-10-09 (EXPERIMENTS.md §19.29), user: "可以停": the binary-soma Memory Maze run is superseded by the final
     # model's (round 30, which copies its job); stopped at 540k updates
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2Lv2_tau1000/s0"]
