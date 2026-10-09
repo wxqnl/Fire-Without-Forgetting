@@ -959,6 +959,21 @@ def round31(jobs):
     return out
 
 
+def round32():
+    """2026-10-09 02:40, user: "可以" (EXPERIMENTS.md §19.32). The final model never learns R2I L101 in RL (716k steps):
+    its reward head stays at the predict-zero loss, while the old r64 learned it at 302k. Recall probe at L=101,
+    window 128 as in the RL run: can the final world model carry the cue 101 steps, and if not, is it the spike
+    feedback or the thermometer soma. The old r64's world model is PD2Lreshalf."""
+    cells = {"PD2Lreshalfthermofbch2_tau1000": ["ours", "resonanthalf", "somathermo", "pdfeedback", "pdch2"],
+             "SDDnofb_tau1000": ["ours", "resonanthalf", "somathermo", "pdch2"],
+             "SDDstep_tau1000": ["ours", "resonanthalf", "pdfeedback", "pdch2"],
+             "PD2Lreshalf_tau1000": ["ours", "resonanthalf"]}
+    out = list(recall_jobs("bsuite_memlen-101-recall", cells, seeds=(0,), extra="--batch_length 128"))
+    for job in out:
+        job["mem_gb"] = 4
+    return out
+
+
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
     # Memory Maze pipeline check (round 10), Memory Maze on the official data once downloaded, round 8
@@ -984,7 +999,7 @@ def main():
             + r8 + round11())
     # the old model's 1M Memory Maze continuation was stopped on 2026-10-02 (superseded, EXPERIMENTS.md §18.4)
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2L_tau1000/s0"]
-    jobs = round29(jobs) + round30(jobs) + round31(jobs) + round28() + round27() + round26(jobs) + jobs
+    jobs = round32() + round29(jobs) + round30(jobs) + round31(jobs) + round28() + round27() + round26(jobs) + jobs
     # 2026-10-09 (EXPERIMENTS.md §19.29), user: "可以停": the binary-soma Memory Maze run is superseded by the final
     # model's (round 30, which copies its job); stopped at 540k updates
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2Lv2_tau1000/s0"]
