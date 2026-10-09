@@ -1,6 +1,7 @@
 """Minimal GPU job queue for the Phase 0 grid.
 
-Jobs file: one JSON object per line: {"name", "cmd", "logdir", "mem_gb"}. File order is
+Jobs file: one JSON object per line: {"name", "cmd", "logdir", "mem_gb"}, optionally "gpus": the only GPUs the
+job may start on (long runs placed on the GPUs kept to the end, 2026-10-09). File order is
 priority. The file is re-read every poll, so jobs can be added while the queue runs
 (write it atomically, see make_jobs.py).
 
@@ -236,7 +237,8 @@ def main():
                 used[h.gpu] += h.mem
                 count[h.gpu] += 1
             choice = None
-            for g in sorted(gpus + usable, key=lambda g: used[g]):
+            pin = job.get("gpus")
+            for g in sorted([g for g in gpus + usable if pin is None or g in pin], key=lambda g: used[g]):
                 if g == reserved:
                     continue
                 if count[g] >= args.max_per_gpu or used[g] + job["mem_gb"] > args.budget_gb:
@@ -247,7 +249,8 @@ def main():
                 break
             if choice is None:
                 if reserved is None:
-                    reserved = max(gpus, key=lambda g: args.budget_gb - used[g])
+                    keep = [g for g in gpus if pin is None or g in pin] or gpus
+                    reserved = max(keep, key=lambda g: args.budget_gb - used[g])
                 continue
             if not args.no_mps and choice not in mps_started:
                 ensure_mps(root, choice)

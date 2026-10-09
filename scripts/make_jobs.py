@@ -1000,6 +1000,19 @@ def round33(jobs):
     return out
 
 
+def round34(jobs):
+    """2026-10-09 17:20 (EXPERIMENTS.md §19.34), step 2 for pixels: the final model's pixel walker check reached 300k
+    frames level with Spiking-WM and the old r64 (mean over 250k-305k: 576, 580, 597), and DMC only needs parity. The
+    1M-frame run of the protocol, fresh: the check (5e5) keeps no optimizer state, so continuing it would reset Adam
+    halfway. Pinned to gpu6, which runs the final model's Memory Maze to the end."""
+    job = next(j for j in jobs if j["name"] == "dmcpix/dmc_walker_walk/PD2Lv2r64thermofbch2_tau1000/s0")
+    job = {k: (v.replace("dmcpix/", "dmcpix1m/") if isinstance(v, str) else v) for k, v in job.items()}
+    job["cmd"] = job["cmd"].replace(" --steps 5e5 ", " --steps 1e6 ")
+    assert "--steps 1e6" in job["cmd"] and "/runs/dmcpix1m/" in job["cmd"]
+    job["gpus"] = [6]
+    return [job]
+
+
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
     # Memory Maze pipeline check (round 10), Memory Maze on the official data once downloaded, round 8
@@ -1026,6 +1039,7 @@ def main():
     # the old model's 1M Memory Maze continuation was stopped on 2026-10-02 (superseded, EXPERIMENTS.md §18.4)
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2L_tau1000/s0"]
     jobs = round33(jobs) + round32() + round29(jobs) + round30(jobs) + round31(jobs) + round28() + round27() + round26(jobs) + jobs
+    jobs = round34(jobs) + jobs  # copies a job of round 29
     # 2026-10-09 (EXPERIMENTS.md §19.29), user: "可以停": the binary-soma Memory Maze run is superseded by the final
     # model's (round 30, which copies its job); stopped at 540k updates
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2Lv2_tau1000/s0"]
