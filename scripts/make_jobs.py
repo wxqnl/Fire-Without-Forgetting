@@ -1034,6 +1034,23 @@ def round35(jobs):
     return [rerun(jobs, n) for n in names]
 
 
+def round36(jobs):
+    """2026-10-10 10:50 (EXPERIMENTS.md §19.38), user: "可以，你把这个问题解决之后，重跑这几个下降的就好了". After learning
+    R2I L71/L101 the final model drops back to chance again and again while its world model keeps the cue (§19.37):
+    does the actor reading the dendrites (policymem) or the spike feedback cause it? Group diag_r2i: the soma-only
+    actor-critic (the control of round 31) at L71 and L101, and the final model without spike feedback at L71."""
+    out = []
+    for L, cell, drop, mem in ((71, "PD2Lreshalfthermofbch2_tau1000", " policymem aclowrank ", 30),
+                               (71, "PD2Lv2r64thermoch2_tau1000", " pdfeedback ", 37),
+                               (101, "PD2Lreshalfthermofbch2_tau1000", " policymem aclowrank ", 42)):
+        src = next(j for j in jobs if j["name"] == f"r2i/bsuite_memlen-{L}/PD2Lv2r64thermofbch2_tau1000/s0")
+        name = f"diag_r2i/bsuite_memlen-{L}/{cell}/s0"
+        cmd = src["cmd"].replace(drop, " ").replace(f"/runs/{src['name']}", f"/runs/{name}")
+        assert drop.split()[0] not in cmd and cmd.endswith(f"/runs/{name}")
+        out.append(dict(name=name, cmd=cmd, logdir=str(RUNS / name), mem_gb=mem))
+    return out
+
+
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
     # Memory Maze pipeline check (round 10), Memory Maze on the official data once downloaded, round 8
@@ -1061,7 +1078,10 @@ def main():
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2L_tau1000/s0"]
     jobs = round33(jobs) + round32() + round29(jobs) + round30(jobs) + round31(jobs) + round28() + round27() + round26(jobs) + jobs
     # round 34 stays first: its pinned job holds the reservation of gpu6
-    jobs = round34(jobs) + round35(jobs) + jobs  # copy jobs of rounds 29 and 22/8
+    jobs = round34(jobs) + round36(jobs) + round35(jobs) + jobs  # copy jobs of rounds 29, 30 and 22/8
+    # the POPGym Medium control of round 31 is a diagnostic of round 36 too: right after it
+    med = "popgym/popgym_RepeatPreviousMedium/PD2Lreshalfthermofbch2_tau1000/s0"
+    jobs = jobs[:4] + [j for j in jobs if j["name"] == med] + [j for j in jobs[4:] if j["name"] != med]
     # 2026-10-09 (EXPERIMENTS.md §19.29), user: "可以停": the binary-soma Memory Maze run is superseded by the final
     # model's (round 30, which copies its job); stopped at 540k updates
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2Lv2_tau1000/s0"]
