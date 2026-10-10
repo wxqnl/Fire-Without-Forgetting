@@ -1013,6 +1013,27 @@ def round34(jobs):
     return [job]
 
 
+def rerun(jobs, name, seed=1):
+    """A second run of the job `name` (".../s0") with another seed, as `.../s{seed}`."""
+    job = next(j for j in jobs if j["name"] == name)
+    job = {k: (v.replace("/s0", f"/s{seed}") if isinstance(v, str) else v) for k, v in job.items()}
+    job["cmd"] = job["cmd"].replace(" --seed 0 ", f" --seed {seed} ")
+    assert f" --seed {seed} " in job["cmd"] and job["logdir"].endswith(f"/s{seed}")
+    return job
+
+
+def round35(jobs):
+    """2026-10-09 21:00 (EXPERIMENTS.md §19.36), user: "选 B，但是其他 base 模型我们也在跑一次 ... 就跑他们最短的
+    没学会的那个点，如果还是学不会，那就后面的都不跑了，如果能学会，再重跑". Every model of the R2I BSuite runs gets
+    one more run (seed 1) at its shortest length not learned (no evaluation >= 0.9 in 1M steps, the criterion of
+    table 3); a model that learns it there goes on to the next length. Ours fails first at L101, Spiking-WM and
+    A+B+G at L51, DreamerV3 at L71 (learned L51 at 902.5k). The 54-GB run of ours last, so that the small ones
+    start right away."""
+    names = ["r2i/bsuite_memlen-51/base_tau2/s0", "r2i/bsuite_memlen-51/ABG_tau128/s0",
+             "r2i/bsuite_memlen-71/ann_tau2/s0", "r2i/bsuite_memlen-101/PD2Lv2r64thermofbch2_tau1000/s0"]
+    return [rerun(jobs, n) for n in names]
+
+
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
     # Memory Maze pipeline check (round 10), Memory Maze on the official data once downloaded, round 8
@@ -1039,7 +1060,8 @@ def main():
     # the old model's 1M Memory Maze continuation was stopped on 2026-10-02 (superseded, EXPERIMENTS.md §18.4)
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2L_tau1000/s0"]
     jobs = round33(jobs) + round32() + round29(jobs) + round30(jobs) + round31(jobs) + round28() + round27() + round26(jobs) + jobs
-    jobs = round34(jobs) + jobs  # copies a job of round 29
+    # round 34 stays first: its pinned job holds the reservation of gpu6
+    jobs = round34(jobs) + round35(jobs) + jobs  # copy jobs of rounds 29 and 22/8
     # 2026-10-09 (EXPERIMENTS.md §19.29), user: "可以停": the binary-soma Memory Maze run is superseded by the final
     # model's (round 30, which copies its job); stopped at 540k updates
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2Lv2_tau1000/s0"]
