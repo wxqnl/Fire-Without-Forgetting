@@ -1080,6 +1080,15 @@ def round38(jobs):
     return out
 
 
+def round39(jobs):
+    """2026-10-11 01:45 (EXPERIMENTS.md §19.41), user: "如果我们发现 B 的效果确实明显好了，而且解决了我们之前遇到的问题，
+    那为什么不重训呢？我们卡也有". The two longest runs of candidate B start now instead of after the screening, so
+    that a switch to B does not wait for them: Memory Maze (offline probe training, 10-12 days) and the pixel walker
+    1M (5-6 days). Stopped if B is not chosen."""
+    return [swap_cell(jobs, "mmaze_official/memory_maze_9x9/PD2Lv2thermofbch2_tau1000/s0", "PD2Lv2thermofb1ch2_tau1000"),
+            swap_cell(jobs, "dmcpix1m/dmc_walker_walk/PD2Lv2r64thermofbch2_tau1000/s0", "PD2Lv2r64thermofb1ch2_tau1000")]
+
+
 def swap_cell(jobs, name, cell):
     """Copy of the job `name` with pdfeedback -> pdfeedback1 under the run name `cell`."""
     src = next(j for j in jobs if j["name"] == name)
@@ -1123,7 +1132,7 @@ def main():
     jobs = jobs + round37(jobs)  # after everything already queued (the POPGym Easy control keeps its turn)
     # candidate B (round 38) ahead of the pixel baselines, behind the POPGym Easy control (both decide the model)
     easy = [j for j in jobs if j["name"] == "popgym/popgym_RepeatPreviousEasy/PD2Lreshalfthermofbch2_tau1000/s0"]
-    jobs = jobs[:1] + easy + round38(jobs) + [j for j in jobs[1:] if j not in easy]
+    jobs = jobs[:1] + easy + round38(jobs) + round39(jobs) + [j for j in jobs[1:] if j not in easy]
     # 2026-10-09 (EXPERIMENTS.md §19.29), user: "可以停": the binary-soma Memory Maze run is superseded by the final
     # model's (round 30, which copies its job); stopped at 540k updates
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2Lv2_tau1000/s0"]
