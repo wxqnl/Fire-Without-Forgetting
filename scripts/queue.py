@@ -13,7 +13,9 @@ adopts jobs whose .pid is still alive instead of launching them twice.
 
 Scheduling: memory is accounted with each job's mem_gb (plus a live nvidia-smi check
 against other users). When the highest-priority pending job does not fit anywhere, the
-GPU with the most headroom is reserved for it and smaller jobs backfill the others.
+GPU with the most headroom is reserved for it and smaller jobs backfill the others. After a launch the GPU gets no
+other job for --cooldown seconds: a new job allocates its memory only after its start-up, so the live check would
+otherwise see stale free memory and stack jobs (2026-10-11 01:52: 30 probes started in one pass, GPUs ran full).
 
 GPUs in --idle_gpus are shared with other people: a job is started there only after the GPU
 has had no process of anyone else for --idle_min minutes, and no further job once one appears
@@ -168,6 +170,7 @@ def main():
     parser.add_argument("--no_mps", action="store_true")
     parser.add_argument("--reserve_gb", type=float, default=4.0)
     parser.add_argument("--poll", type=float, default=20.0)
+    parser.add_argument("--cooldown", type=float, default=180.0, help="seconds after a launch before the GPU gets another job")
     parser.add_argument("--python", default="/home/user01/miniconda3/envs/fwf/bin/python")
     args = parser.parse_args()
     gpus = [int(g) for g in args.gpus.split(",")]
@@ -178,6 +181,7 @@ def main():
     status_file = pathlib.Path(args.jobs).with_suffix(".status")
     running = {}  # name -> Handle
     attempts = {}
+    last_launch = {}  # gpu -> time of the last launch there
     if not args.no_mps:
         for g in gpus:
             ensure_mps(root, g)
@@ -239,7 +243,7 @@ def main():
             choice = None
             pin = job.get("gpus")
             for g in sorted([g for g in gpus + usable if pin is None or g in pin], key=lambda g: used[g]):
-                if g == reserved:
+                if g == reserved or time.time() - last_launch.get(g, 0.0) < args.cooldown:
                     continue
                 if count[g] >= args.max_per_gpu or used[g] + job["mem_gb"] > args.budget_gb:
                     continue
@@ -256,6 +260,7 @@ def main():
                 ensure_mps(root, choice)
                 mps_started.add(choice)
             running[job["name"]] = launch(job, choice, args, root)
+            last_launch[choice] = time.time()
             attempts[job["name"]] = attempts.get(job["name"], 0) + 1
             log(f"launched {job['name']} on gpu{choice}")
             time.sleep(2)

@@ -1208,6 +1208,11 @@ def main():
     for job in jobs:  # DreamerV3 (ANN) needs about 4 GB (measured 2026-09-30), the spiking models 14-20 GB
         if "/ann_" in job["name"] and job["mem_gb"] > 6:
             job["mem_gb"] = 7 if job["name"].startswith("mmaze") else 6
+    # 2026-10-11 (EXPERIMENTS.md §19.45): the world-model probes take 5-7.5 GB, not the 2.5-6 GB declared; with 30 of
+    # them started at once the GPUs ran full and three failed out of memory
+    for job in jobs:
+        if job["name"].split("/")[0] in ("recall", "diag_rp", "xor"):
+            job["mem_gb"] = {2.5: 8, 5: 12, 6: 14}.get(job["mem_gb"], job["mem_gb"])
     RUNS.mkdir(exist_ok=True)
     out = RUNS / "jobs.jsonl"
     tmp = out.with_suffix(".tmp")
