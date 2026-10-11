@@ -1051,6 +1051,20 @@ def round36(jobs):
     return out
 
 
+def round37(jobs):
+    """2026-10-10 22:40 (EXPERIMENTS.md §19.40), user: "我们还是希望最后的结果能做到 spike 里面的 sota", then "可以，像素
+    基线也补上吧". Pixel walker 1M for the spiking baselines that only have proprio DMC runs (LIF, GRSN, A+B+G),
+    copied from the Spiking-WM pixel job with each baseline's cell configs as in dmc500."""
+    src = next(j for j in jobs if j["name"] == "dmcpix/dmc_walker_walk/base_tau2/s0")
+    out = []
+    for cell, cfg in (("LIF_tau2", "lifcell"), ("GRSN_tau2", "grsn"), ("ABG_tau128", "persist nodendreset taud128 dendgain")):
+        name = f"dmcpix/dmc_walker_walk/{cell}/s0"
+        cmd = src["cmd"].replace("--configs dmc_vision ", f"--configs dmc_vision {cfg} ").replace(f"/runs/{src['name']}", f"/runs/{name}")
+        assert f"dmc_vision {cfg} --task" in cmd and "--steps 1e6" in cmd and cmd.endswith(f"/runs/{name}")
+        out.append(dict(name=name, cmd=cmd, logdir=str(RUNS / name), mem_gb=src["mem_gb"]))
+    return out
+
+
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
     # Memory Maze pipeline check (round 10), Memory Maze on the official data once downloaded, round 8
@@ -1082,6 +1096,7 @@ def main():
     # the POPGym Medium control of round 31 is a diagnostic of round 36 too: right after it
     med = "popgym/popgym_RepeatPreviousMedium/PD2Lreshalfthermofbch2_tau1000/s0"
     jobs = jobs[:4] + [j for j in jobs if j["name"] == med] + [j for j in jobs[4:] if j["name"] != med]
+    jobs = jobs + round37(jobs)  # after everything already queued (the POPGym Easy control keeps its turn)
     # 2026-10-09 (EXPERIMENTS.md §19.29), user: "可以停": the binary-soma Memory Maze run is superseded by the final
     # model's (round 30, which copies its job); stopped at 540k updates
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2Lv2_tau1000/s0"]
