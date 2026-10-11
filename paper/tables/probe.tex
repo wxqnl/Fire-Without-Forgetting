@@ -2,7 +2,7 @@
 \setlength{\tabcolsep}{2.4pt}
 \begin{tabular}{@{}l cccc ccc@{}}
 \toprule
- & \multicolumn{4}{c}{memlen-$L$-recall} & \multicolumn{3}{c}{RepeatPrevious} \\
+ & \multicolumn{4}{c}{cue recall} & \multicolumn{3}{c}{RepeatPrevious} \\
 \cmidrule(lr){2-5}\cmidrule(l){6-8}
  & $L$=8 & 16 & 32 & 64 & $k$=4 & 32 & 64$^\ast$ \\
 \midrule
@@ -10,7 +10,7 @@
 Recurrent LIF & 1.00 & 0.52 & 0.50 & 0.50 & 0.99 & 0.50 & 0.50 \\
 GRSN~\cite{qin2025grsn} & 1.00 & 1.00 & 0.51 & 0.51 & 0.89 & 0.51 & 0.50 \\
 DH-SNN~\cite{zheng2024dhsnn} & 1.00 & 1.00 & 1.00 & 0.52 & 0.63 & 0.50 & \pend{0.50} \\
-TC-LIF~\cite{zhang2024tclif} & 1.00 & 1.00 & 1.00 & 1.00 & 0.86 & 0.50 & \pend{0.54} \\
+TC-LIF~\cite{zhang2024tclif} & 1.00 & 1.00 & 1.00 & 1.00 & 0.86 & 0.50 & 0.57 \\
 \dv (ANN)~\cite{hafner2025dreamerv3} & 1.00 & 1.00 & 1.00 & 0.50 & 0.95 & 0.50 & 0.50 \\
 \midrule
 \textbf{\method (ours)} & 1.00 & 1.00 & 1.00 & 1.00 & 0.98 & 0.92 & 0.94 \\

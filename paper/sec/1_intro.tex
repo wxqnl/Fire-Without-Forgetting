@@ -7,8 +7,9 @@
   \caption{\textbf{Spiking world models forget.}
   Final return on BSuite memory length~\cite{osband2020bsuite}: the agent sees a cue, then $L$ uninformative steps, and is rewarded for recalling the cue (1 = always correct, 0 = chance).
   All models share one spiking world model and differ in the recurrent core (\cref{sec:setup}).
-  Left: 0.15--0.5M environment steps. Right: $L=51$--101 with the lengths and budget of R2I~\cite{samsami2024r2i} (1M steps).
-  Spiking baselines reach a return of 0.9 up to 32 steps and DreamerV3 (ANN) up to 51; \method is the only model that reaches it beyond 51 steps (\cref{tab:rl}). \pend{Open markers: runs in progress.}}
+  Left: budgets of 150k to 500k environment steps. Right: $L$ = 51, 71 and 101 with the lengths and budget of R2I~\cite{samsami2024r2i} (1M steps).
+  \swm fails at every length, recurrent LIF neurons stop at 8 steps and GRSN at 16; TC-LIF, whose state is carried across steps and never cleared, reaches 64.
+  \method reaches a return of 0.9 at every length up to 101 steps, and \dv up to 51 (\cref{tab:rl}). \pend{Open markers: runs in progress.}}
   \label{fig:memory_length}
 \end{figure}
 
@@ -20,34 +21,36 @@ Recent world models remember for hundreds of steps~\cite{samsami2024r2i,deng2023
 Embodied agents also run on batteries.
 Spiking neural networks (SNNs) communicate with binary events, replace multiply-accumulates by accumulates, and run on neuromorphic processors at a fraction of the energy of dense networks~\cite{roy2019towards,davies2018loihi,orchard2021loihi2}.
 Spiking neurons are dynamical systems with membrane and dendritic time constants, and these dynamics are widely credited with a capacity for temporal memory~\cite{bellec2018lsnn,zhang2024tclif,zheng2024dhsnn}.
-Spiking-WM~\cite{sun2025spikingwm} builds a spiking world model on multi-compartment neurons whose dendrites are meant to integrate information over long timescales.
+\swm~\cite{sun2025spikingwm} builds a spiking world model on multicompartment neurons whose dendrites integrate information over long timescales.
 
-We find that spiking world models do not use this capacity: they forget within a few steps (\cref{fig:memory_length}).
-On BSuite memory length, \swm does not recall a cue 8 steps back; recurrent LIF neurons stop at 8 steps and gated recurrent spiking neurons~\cite{qin2025grsn} at 16.
+We find that spiking world models forget within a few steps (\cref{fig:memory_length}).
+On BSuite memory length, \swm does not recall a cue 8 steps back; recurrent LIF neurons stop at 8 steps and gated recurrent spiking neurons (GRSN)~\cite{qin2025grsn} at 16.
 The cause is reset.
 First, every environment step starts from cleared membrane potentials, the standard practice in spiking RL~\cite{tang2020popsan,liu2023dsqn,sun2025spikingwm}; only the binary spike output reaches the next step.
-Second, a somatic spike resets the dendrites together with the soma, so a dendritic trace survives only until the neuron next fires.
-Memory must therefore be re-encoded into spikes at every step, gradients cross a surrogate derivative at every step, and the time constants shape only the few simulation steps inside one environment step.
+Second, a somatic spike resets the dendrites together with the soma, so a dendritic trace survives only until the neuron fires again.
+Memory must therefore be encoded into spikes again at every step, gradients cross a surrogate derivative at every step, and the time constants act only on the few simulation steps inside one environment step.
 Long time constants do not help even without the resets: the Euler update writes input with gain $1/\tau$, so a compartment with a time constant of 128 simulation steps stores a cue at about one percent of the firing threshold.
 
-We call this failure \emph{reset-induced amnesia} and test it causally (\cref{sec:amnesia}).
-In a world-model probe that isolates memory from exploration, removing the dendritic reset or restoring the write gain has no effect while the step reset remains.
-With persistent state the world model recalls cues 16 steps back, and adding the write gain extends this to 32 steps, learned faster than with a GRU core.
-Conversely, clearing the dendrites of our own model at every step erases its memory.
+We call this failure \emph{reset amnesia} and test it causally (\cref{sec:amnesia}).
+In a world model probe that isolates memory from exploration, removing the dendritic reset or restoring the write gain has no effect while the step reset remains.
+With persistent state the world model recalls cues 16 steps back, and the normalized write gain extends this to 32 steps, learned faster than with a GRU core.
+Clearing the dendrites of our own model at every step erases its memory.
+The spiking neurons we compare confirm the diagnosis: TC-LIF~\cite{zhang2024tclif}, whose two compartments carry their state across steps and are never cleared, recalls 64 steps.
 
-These results give a design rule: memory should live in a state that no spike ever resets, and spikes should only carry information out of it.
+These results give a design rule: memory should live in a state that no spike resets, written with a gain that holds for long time constants, and spikes should carry information out of it.
 We build the \methodfull (\method) from \emph{persistent dendritic neurons} (PDNs) that follow this rule (\cref{sec:method}).
-A PDN keeps linear dendritic channels across environment steps that are never reset, receive no spikes back from the soma, and are written with a gain normalized across time constants from 1 to 1000 environment steps.
+A PDN keeps linear dendritic channels across environment steps; spikes write into them through synapses but never clear them, and the write gain is normalized across retention times from 1 to 1000 environment steps.
 Integrator channels hold \emph{what} was seen; resonant channels, damped oscillators in the tradition of resonate-and-fire neurons~\cite{izhikevich2001resonate}, also encode \emph{when}.
-A stateless soma reads the dendrites and emits one binary spike per step, the only signal that other neurons of the world model receive; the graded state stays inside the neuron, as in neuromorphic cores with multi-variable neurons~\cite{orchard2021loihi2}.
+A stateless soma reads the channels and sends a spike count over the simulation steps of each environment step, the only signal that other neurons of the world model receive; the graded state stays inside the neuron, as in neuromorphic cores whose neurons hold several state variables~\cite{orchard2021loihi2}.
 
-We evaluate on memory benchmarks with published ANN protocols and on a non-memory control (\cref{sec:experiments}).
-Of all models we train, spiking or ANN, \method is the only one that reaches a return of 0.9 on BSuite memory length 64 within 500k steps, and with the lengths and budget of R2I~\cite{samsami2024r2i} it also does so at 71 and 101 steps, where DreamerV3 stays near chance.
-Its world model is the only one that recalls the card of exactly 32 steps ago in POPGym RepeatPrevious~\cite{morad2023popgym} (AUC 0.93; all others, DreamerV3 included, stay at chance).
-The agent uses \numEnergyRatio$\times$ less arithmetic energy per step than DreamerV3.
+We evaluate on memory benchmarks with published protocols and ANN results, and on DMC as a control task without a memory demand (\cref{sec:experiments}).
+On BSuite memory length, \method reaches a return of 0.9 at every length, up to 101 steps with the lengths and budget of R2I~\cite{samsami2024r2i}, where \dv stops at 51.
+On POPGym RepeatPrevious Medium~\cite{morad2023popgym}, which rewards naming the card of exactly 32 steps ago, it is the only model whose return rises above chance within 2M steps; every other model, \dv and R2I included, stays at chance.
+World model probes show that this is a memory of exact time: only \method recalls lags of 32 and 64 steps (AUC 0.92 and 0.94; all others at most 0.57), and only with its resonant channels.
+The agent uses \numEnergyRatio$\times$ less arithmetic energy per step than \dv.
 Our contributions are:
 \begin{itemize}
-\item We identify reset-induced amnesia in spiking world models (step reset, dendritic reset, a write gain tied to the time constant) and establish it with causal interventions.
-\item We propose the persistent dendritic neuron, in which persistent, normalized integrator and resonant dendrites store memory and a stateless soma communicates by spikes, and build the spiking world model \method from it.
-\item We give the first evaluation of spiking world models on standard memory benchmarks (BSuite memory length up to 101 steps, POPGym RepeatPrevious, Memory Maze), with DMC as a non-memory control and per-step energy accounting.
+\item We identify reset amnesia in spiking world models (step reset, spike reset, and a write gain tied to the time constant) and establish it with causal interventions.
+\item We propose the persistent dendritic neuron, in which persistent, normalized integrator and resonant dendrites store memory and a stateless soma communicates by spike counts, and build the spiking world model \method from it.
+\item We give the first evaluation of spiking world models on standard memory benchmarks (BSuite memory length up to 101 steps, POPGym RepeatPrevious, Memory Maze), against five spiking recurrent cores and \dv, with DMC as a control and the energy of each step.
 \end{itemize}

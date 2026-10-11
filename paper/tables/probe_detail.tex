@@ -2,7 +2,7 @@
 \setlength{\tabcolsep}{2.4pt}
 \begin{tabular}{@{}l cccc ccc@{}}
 \toprule
- & \multicolumn{4}{c}{memlen-$L$-recall} & \multicolumn{3}{c}{RepeatPrevious} \\
+ & \multicolumn{4}{c}{cue recall} & \multicolumn{3}{c}{RepeatPrevious} \\
 \cmidrule(lr){2-5}\cmidrule(l){6-8}
  & $L$=8 & 16 & 32 & 64 & $k$=4 & 32 & 64$^\ast$ \\
 \midrule
@@ -10,7 +10,7 @@
 Recurrent LIF & 6k & --\,{\tiny(0.52)} & --\,{\tiny(0.50)} & --\,{\tiny(0.50)} & 4k & --\,{\tiny(0.50)} & --\,{\tiny(0.50)} \\
 GRSN~\cite{qin2025grsn} & 1.5k & 4k & --\,{\tiny(0.51)} & --\,{\tiny(0.51)} & --\,{\tiny(0.89)} & --\,{\tiny(0.51)} & --\,{\tiny(0.50)} \\
 DH-SNN~\cite{zheng2024dhsnn} & 1.5k & 2k & 4.5k & --\,{\tiny(0.52)} & --\,{\tiny(0.63)} & --\,{\tiny(0.50)} & \pend{--\,{\tiny(0.50)}} \\
-TC-LIF~\cite{zhang2024tclif} & 0.5k & 0.5k & 1k & 3.5k & --\,{\tiny(0.86)} & --\,{\tiny(0.50)} & \pend{--\,{\tiny(0.54)}} \\
+TC-LIF~\cite{zhang2024tclif} & 0.5k & 0.5k & 1k & 3.5k & --\,{\tiny(0.86)} & --\,{\tiny(0.50)} & --\,{\tiny(0.57)} \\
 \swmnr & 0.5k & 0.5k & 2k & --\,{\tiny(0.51)} & --\,{\tiny(0.81)} & --\,{\tiny(0.54)} & --\,{\tiny(0.54)} \\
 \dv (ANN)~\cite{hafner2025dreamerv3} & 0.5k & 1k & 6k & --\,{\tiny(0.50)} & 3k & --\,{\tiny(0.50)} & --\,{\tiny(0.50)} \\
 \textbf{\method (ours)} & 0.5k & 0.5k & 1k & 5.5k & 3k & 8k & 8k \\

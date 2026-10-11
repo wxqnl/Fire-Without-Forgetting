@@ -1,14 +1,17 @@
 \begin{abstract}
 \draftnote
-Embodied agents see only part of their world and must remember what has left their view.
-World models give an agent this memory through a recurrent latent state, and spiking neural networks (SNNs) promise to run them with sparse binary events on low-power hardware.
-We find that spiking world models forget within a few steps, although their neurons have long time constants.
-Membrane potentials are cleared at every environment step and dendrites are reset by every somatic spike, so memory has to be re-encoded into binary spikes at each step and the time constants have no effect.
-Causal interventions confirm this \emph{reset-induced amnesia}: a spiking world model fails to recall a cue 8 steps back whatever its time constants, whereas with both resets removed and its write gain normalized it recalls cues 32 steps back.
-We propose the \methodfull (\method), a spiking world model in which dendrites store and spikes communicate.
-Each neuron keeps linear dendritic channels that are never reset and never receive spikes back, with retention times initialized from 1 to 1000 environment steps and a write gain normalized across them.
-Half of the channels resonate, so that their phase records how long ago an input arrived.
-A stateless soma reads the channels and emits a binary spike, the only signal that neurons of the world model exchange.
-On BSuite memory length, \method is the only model we train, spiking or not, that reaches a return of 0.9 at 64 steps within 500k environment steps; with the lengths and budget of R2I it also does so at 71 and 101 steps, where DreamerV3 stays near chance.
-Its world model is the only one that recalls the input of exactly 32 steps ago on POPGym RepeatPrevious, and the agent uses \numEnergyRatio$\times$ less arithmetic energy per step than DreamerV3.
+% "only model ... within 2M steps" and "exact lags of 64 steps": check against DH-SNN and TC-LIF on POPGym when their runs finish.
+Spiking neural networks (SNNs) compute with sparse binary spikes and run on neuromorphic hardware at a fraction of the energy of dense networks, which makes them a natural choice for embodied agents.
+Such agents see only part of their world, and a world model gives them memory by compressing past observations into a recurrent state.
+We find that spiking world models forget within a few steps, even when their neurons have long time constants.
+The cause is reset: membrane potentials are cleared at every environment step and dendrites at every somatic spike, so all memory has to pass through binary spikes at every step.
+Causal interventions on a spiking world model confirm this \emph{reset amnesia} and show that long time constants also need a normalized write gain.
+Building on these findings, we propose the \methodfull (\method), a spiking world model in which dendrites store memory and spikes communicate it.
+Its persistent dendritic neurons keep integrator and resonant dendritic channels that spikes never reset, with retention times from 1 to 1000 environment steps.
+The integrators hold what the agent has seen, and the resonators also record when.
+A stateless soma reads the channels and sends a spike count, the only signal that passes between neurons.
+On BSuite memory length, \method recalls a cue 101 steps back within the budget of R2I, while DreamerV3 fails beyond 51 steps.
+On POPGym RepeatPrevious, it is the only model, spiking or not, that learns to name the card shown exactly 32 steps earlier within 2M environment steps, and its world model also recalls exact lags of 64 steps on a task held out from development.
+The agent uses \numEnergyRatio$\times$ less arithmetic energy per step than DreamerV3.
+These results show that spiking world models remember over long horizons once their memory lives in dendritic state that spikes do not reset.
 \end{abstract}

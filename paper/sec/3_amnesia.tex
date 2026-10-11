@@ -1,15 +1,15 @@
-\section{Reset-Induced Amnesia}
+\section{Reset Amnesia}
 \label{sec:amnesia}
 
 \subsection{Spiking world models}
 \label{sec:swm}
 
-We follow the recurrent state-space model of DreamerV3~\cite{hafner2025dreamerv3}.
+We follow the recurrent state space model of DreamerV3~\cite{hafner2025dreamerv3}.
 At environment step $t$ a recurrent core updates a deterministic state $h_t$ from $h_{t-1}$, the previous stochastic latent $z_{t-1}$ and action $a_{t-1}$; the posterior infers $z_t$ from $h_t$ and the observation embedding, the prior predicts it from $h_t$ alone, and decoder, reward and continuation heads read $(h_t, z_t)$.
 In a spiking world model~\cite{sun2025spikingwm} every layer is spiking and is simulated for $T$ steps per environment step ($T=5$), and $h_t\in\{0,1\}^{T\times N}$ is the spike output of the core.
 
-\swm uses multi-compartment neurons (MCNs).
-In simulation step $k$ of environment step $t$, a basal and an apical dendrite integrate synaptic input with Euler-discretized leaks, and the soma integrates the basal potential gated by the apical one:
+\swm uses multicompartment neurons (MCNs).
+In simulation step $k$ of environment step $t$, a basal and an apical dendrite integrate synaptic input with leaks discretized by the Euler method, and the soma integrates the basal potential gated by the apical one:
 \begin{equation}
 \begin{aligned}
 v^{c}[k] &= v^{c}[k-1] + \tfrac{1}{\tau_c}\big(I^{c}[k] - v^{c}[k-1]\big), \quad c\in\{\mathrm{bas},\mathrm{api}\},\\
@@ -25,7 +25,7 @@ Two resets act on this neuron:
 \end{enumerate}
 
 \paragraph{Consequences.}
-With the step reset, the core computes $h_t = \Phi(x_t, h_{t-1})$ from a zero state: it is a binary recurrent network, and everything it knows about the past must be re-encoded into the $T\times N$ bits of $h_{t-1}$ at every step.
+With the step reset, the core computes $h_t = \Phi(x_t, h_{t-1})$ from a zero state: it is a binary recurrent network, and everything it knows about the past must be encoded again into the $T\times N$ bits of $h_{t-1}$ at every step.
 The gradient from a reward $L$ steps after a cue crosses $L$ surrogate derivatives.
 The time constants $\tau_c$ act only within the $T$ simulation steps of one environment step, which explains why changing them barely changes the performance of \swm~\cite{sun2025spikingwm}.
 The spike reset additionally truncates a dendritic trace at the next spike: with $\alpha=1-1/\tau_c$,
@@ -33,42 +33,42 @@ The spike reset additionally truncates a dendritic trace at the next spike: with
 \frac{\partial v^{c}[k]}{\partial I^{c}[k-j]} = \frac{1}{\tau_c}\,\alpha^{j}\prod_{i=1}^{j}\big(1-s[k-i]\big),
 \label{eq:spike_reset}
 \end{equation}
-which vanishes as soon as the neuron has fired once, so the effective memory is the shorter of $\tau_c$ and the inter-spike interval.
+which vanishes as soon as the neuron has fired once, so the effective memory is the shorter of $\tau_c$ and the interval between spikes.
 
 \paragraph{Write gain.}
 Removing both resets does not make long time constants useful by itself.
 The Euler update in \cref{eq:mcn} writes input with gain $1/\tau_c$, so for white input the stationary spread of $v^{c}$ shrinks as $1/\sqrt{2\tau_c}$: a long time constant retains a cue but stores it faintly.
-With both resets removed (\cref{sec:causal}), a cue moved the basal potential of a $\tau_c=128$ dendrite by 0.004--0.009, about 1\% of the threshold $\vartheta=0.5$, against 0.19 at $\tau_c=2$.
+With both resets removed (\cref{sec:causal}), a cue moved the basal potential of a $\tau_c=128$ dendrite by 0.004 to 0.009, about 1\% of the threshold $\vartheta=0.5$, against 0.19 at $\tau_c=2$.
 
 \subsection{Causal test}
 \label{sec:causal}
 
 \begin{table}[t]
   \centering\tabfont
-  \caption{\textbf{Interventions on \swm} (world-model probe, memlen-$L$-recall). Updates until the reward AUC exceeds 0.9, two seeds; -- = not within 12k updates; blank = not run. A: state kept across environment steps; B: no dendritic reset on a somatic spike; G: dendritic input scaled by $\sqrt{\tau_d/2}$. GRU: continuous-state reference core.}
+  \caption{\textbf{Interventions on \swm} (world model probe, cue recall over $L$ steps). Updates until the reward AUC exceeds 0.9, two seeds; -- = not within 12k updates; blank = not run. A: state kept across environment steps; B: no dendritic reset on a somatic spike; G: dendritic input scaled by $\sqrt{\tau_d/2}$. GRU: reference core with continuous state.}
   \label{tab:interventions}
   \input{tables/interventions}
 \end{table}
 
-We test these mechanisms with interventions on \swm in a world-model probe that isolates memory from exploration and credit assignment.
-The data are BSuite memory-length episodes~\cite{osband2020bsuite} collected by a random policy, with the terminal reward set to the cue ($\pm1$, \emph{memlen-$L$-recall}); only the world model is trained, and we measure the AUC of its reward prediction at the recall step on held-out episodes, from 0.5 without memory to 1 with perfect recall (details in Supp.~\suppref{supp:probe}{C}).
+We test these mechanisms with interventions on \swm in a world model probe that isolates memory from exploration and credit assignment.
+The data are BSuite memory length episodes~\cite{osband2020bsuite} collected by a random policy, with the terminal reward set to the cue ($\pm1$, \emph{cue recall}); only the world model is trained, and we measure the AUC of its reward prediction at the recall step on evaluation episodes, from 0.5 without memory to 1 with perfect recall (details in Supp.~\suppref{supp:probe}{C}).
 Three interventions target the mechanisms above: \textbf{A} keeps all compartments across environment steps and clears them only at episode starts; \textbf{B} keeps the dendrites when the soma fires; \textbf{G} multiplies the dendritic input by $\sqrt{\tau_d/2}$, which equalizes the stationary spread across dendritic time constants $\tau_d$.
 \Cref{tab:interventions} gives four findings.
 
 \emph{With resets, time constants do not matter.}
-\swm fails at 8 and 16 steps for $\tau_d\in\{2,16,128\}$, and the cue can be decoded from its spikes for only 2--3 steps after it is shown.
+\swm fails at 8 and 16 steps for $\tau_d\in\{2,16,128\}$, and the cue can be decoded from its spikes for only 2 to 3 steps after it is shown.
 The one exception supports this diagnosis: at 32 steps, one of two seeds crosses an AUC of 0.9 at the last of 12k updates by holding the cue in self-sustained recurrent firing, a memory that exists only as spikes and is learned slowly and unreliably.
 
 \emph{Persistence is necessary.}
 Without A, neither B nor G helps.
-With A and $\tau_d=128$, the world model recalls 8 and 16 steps; removing the dendritic reset as well (A+B) nearly halves the updates needed at 16 steps (4.5k instead of 8--8.5k).
+With A and $\tau_d=128$, the world model recalls 8 and 16 steps; removing the dendritic reset as well (A+B) nearly halves the updates needed at 16 steps (4.5k instead of 8k to 8.5k).
 
 \emph{The write gain limits long time constants.}
 A+B fails at 32 steps although a linear probe still decodes the cue from the membrane potentials at the recall step (accuracy 0.88): the trace is there, but too faint to drive spikes.
-Restoring the gain (A+B+G) recalls 8 and 16 steps within 500 updates and 32 steps within 2000--3000, faster than the GRU core.
+Restoring the gain (A+B+G) recalls 8 and 16 steps within 500 updates and 32 steps within 2000 to 3000, faster than the GRU core.
 The gain does not work by raising the firing rate: capped at a firing rate of 0.06, A+B+G still learns 32 steps in 2000 updates.
 
-\emph{Removing resets is not sufficient for longer memory.}
-A+B+G fails at 64 steps even with $\tau_d=512$, and in reinforcement learning it stops at 32 steps (\swmnr in \cref{fig:memory_length}).
+\emph{Longer memory needs more than removing resets.}
+A+B+G fails at 64 steps even with $\tau_d=512$, and in reinforcement learning it stops at 32 steps (\swmnr in Supp.~\suppref{supp:impl}{A}).
 Its time constants are counted in simulation steps, and its soma still resets.
-\Cref{sec:method} removes both; in our model, a resetting soma alone loses 64-step recall (\cref{sec:ablation}).
+\Cref{sec:method} removes both; in our model, a soma with a membrane and a reset loses the recall of 64 steps (\cref{sec:ablation}).

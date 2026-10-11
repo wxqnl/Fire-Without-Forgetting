@@ -28,7 +28,7 @@ STYLE = {
     "base_tau2": dict(label="Spiking-WM", color="#E69F00"),
     "LIF_tau2": dict(label="LIF", color="#56B4E9"),
     "GRSN_tau2": dict(label="GRSN", color="#009E73"),
-    "ABG_tau128": dict(label="Spiking-WM-NR", color="#CC79A7"),
+    "ABG_tau128": dict(label="Spiking-WM A+B+G", color="#CC79A7"),
     "ann_tau2": dict(label="DreamerV3 (ANN)", color="#000000", ls="--"),
     "OURS": dict(label="SD-Dreamer (ours)", color="#D55E00", lw=1.8, zorder=5),
     "R2I": dict(label="R2I (ANN)", color="#0072B2", ls="-."),
@@ -168,7 +168,7 @@ def probe_panels():
         x, y = curve(f"recall/bsuite_memlen-64-recall/{name}", "eval_auc")
         if len(x):
             ax.plot(x / 1e3, y, label=label, color=color, ls=ls, lw=1.8 if name.endswith("half_tau1000") else 1.2)
-    ax.set_title("(a) cue 64 steps back (memlen-64-recall)", pad=2)
+    ax.set_title("(a) cue recall, 64 steps back", pad=2)
     ax.set_xlabel("world-model updates (k)")
     ax.set_ylabel("reward AUC")
     ax.set_ylim(0.4, 1.02)

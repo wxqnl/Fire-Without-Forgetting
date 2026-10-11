@@ -1862,3 +1862,13 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
 - 主图（`paper/fig/overview_svg.py`）重画：每个神经元两条通道、各神经元旁边画脉冲计数、反馈 R、(b) 中 PDN 的反馈箭头写入通道但不清零；最小字号从 13–15 提到 17–19 单位（约 5pt），去掉重叠。rsvg-convert 不在 fwf 环境里，用 `seamdet` 环境的：`python fig/overview_svg.py /home/user01/miniconda3/envs/seamdet/bin/rsvg-convert`。
 - 正文现在超出 8 页约 1/3 页（新增两行基线、方法多一段、结果段落仍是旧文字），结果部分重写时一起压回 8 页。
 - 10:19：只读胞体的对照在 R2I L101 跑完（diag_r2i，1M 步）：162.5k 首次达到 0.9，学会后有 5 次评估跌破 0.5，最后 3 次平均 0.65。附录 actor 输入表的 L101 格由它填（`policy_table`）。队列 360/394 完成，只剩 TC-LIF 的 R2I L51 在排队。
+
+### 19.50 论文文字润色：去防御性写法，摘要重写（10 月 11 日 11:10；用户："帮我润色和改一下 Paper 的内容和文字吧，别那么防御性。还有就是 abstract 写的好一点，你可以看看 spiking WM 怎么写的，而且最好不要用破折号和-造词"）
+
+- 新事实先核对：TC-LIF 在 rl3 L64 112.5k 步首次达到 0.9（我们 82.5k），之后一直 0.94–1.0；DH-SNN L16 162.5k 学会，L32、L64 未学会（还在跑）。所以"唯一在 64 步达到 0.9 的模型"不再成立，全文改掉。仍成立且是主线的：R2I 预算下学会 101 步（DreamerV3 止于 51）；POPGym Medium 只有我们离开随机水平（0.32，其余含 R2I、DreamerV3 都在 −0.44 到 −0.51；DH-SNN、TC-LIF 在 200k/2M 时仍随机）；探针里只有我们回忆恰好 32 和 64 步前的输入（0.92 / 0.94，其余 ≤ 0.57）。
+- TC-LIF 的实现（`networks.TCLIFCell`）：两个隔室跨步保留、无泄漏，脉冲只减去固定量（软复位）不清零。正文把它写成支持诊断的证据（状态跨步保留、不被脉冲清零的神经元记得更久）。
+- 摘要按 Spiking-WM（arXiv 2503.00713）的结构重写：背景（SNN 省能、适合具身智能体）→ 世界模型提供记忆 → 发现（脉冲世界模型很快遗忘）→ 原因（复位）→ 因果验证 → 方法（树突存、脉冲传）→ 结果 → 结论。
+- 术语：reset-induced amnesia 改为 reset amnesia；memlen-$L$-recall 改为 cue recall（表头同步改了 `paper_tables.py`）；Spiking-WM-NR 改为 Spiking-WM A+B+G（`preamble.tex` 的 `\swmnr`，`make_figures.py` 图例）；multi-compartment → multicompartment；其余自造连字符复合词（action-indexed、world-model、log-uniform、rank-64、held-out 等）都改成普通短语；范围的 `--` 在正文里改成 "to"。全文无破折号。保留的连字符都是通用术语或名字（model-based、first-person、two-compartment、resonate-and-fire、actor-critic、DH-SNN、TC-LIF、SD-Dreamer）。
+- 去防御：删掉"the comparison is indicative""do not remember beyond 8–32 steps""the configuration has not changed since"（最终模型后来加了脉冲计数和反馈，这句已不成立，改成"Hard 没有用于任何设计选择"）等；R2I 的已发表结果写成事实对比；能耗口径只在 §5.6 说一次。
+- 结果段（§5.2–5.6）按最终模型和当前表格重写；附录 actor 输入段重写（读树突对 POPGym 必要，cheetah/cartpole 上不读树突的对照更高，照实写）。未完成的结果留 TODO：DH-SNN 32/64、R2I L51 的 DH-SNN/TC-LIF/LIF、DH-SNN/TC-LIF 的 POPGym、Memory Maze 终值、DMC 终值和像素 walker、能耗。
+- 正文仍超出 8 页约 1/4 页（第 9 页左栏约 29 行，其中 TODO 约 8 行）；Spiking-WM 的像素 DMC 数字和"DreamerV3 用这个奖励头学会 51 步"两句移到附录。

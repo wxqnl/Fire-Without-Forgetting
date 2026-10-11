@@ -23,7 +23,7 @@ MODELS = [("base_tau2", r"\swm~\cite{sun2025spikingwm}"), ("LIF_tau2", "Recurren
           ("GRSN_tau2", r"GRSN~\cite{qin2025grsn}"), ("DHSNN", r"DH-SNN~\cite{zheng2024dhsnn}"),
           ("TCLIF", r"TC-LIF~\cite{zhang2024tclif}"),
           ("ann_tau2", r"\dv (ANN)~\cite{hafner2025dreamerv3}"), ("OURS", r"\textbf{\method (ours)}")]
-# A+B+G (Spiking-WM-NR) is an ablation of Spiking-WM (Sec. 3) since 2026-10-11 (EXPERIMENTS.md §19.44): it appears
+# A+B+G (Spiking-WM A+B+G) is an ablation of Spiking-WM (Sec. 3) since 2026-10-11 (EXPERIMENTS.md §19.44): it appears
 # only in the supplementary detail tables
 SUPP_MODELS = MODELS[:5] + [("ABG_tau128", r"\swmnr")] + MODELS[5:]
 BSUITE = [("rl3", L) for L in (8, 16, 32, 64)] + [("r2i", L) for L in (51, 71, 101)]
@@ -175,12 +175,12 @@ def probe_runs(m):
             + [f"diag_rp/popgym_RepeatPrevious{d}/{p}" for d in ("Easy", "Medium", "Hard")])
 
 
-PROBE_HEAD = [r" & \multicolumn{4}{c}{memlen-$L$-recall} & \multicolumn{3}{c}{RepeatPrevious} \\",
+PROBE_HEAD = [r" & \multicolumn{4}{c}{cue recall} & \multicolumn{3}{c}{RepeatPrevious} \\",
               r"\cmidrule(lr){2-5}\cmidrule(l){6-8}", r" & $L$=8 & 16 & 32 & 64 & $k$=4 & 32 & 64$^\ast$ \\", r"\midrule"]
 
 
 def probe_table():
-    """Table 2: world-model probes, memlen-L-recall and RepeatPrevious (precise lag): final reward AUC."""
+    """Table 2: world model probes, cue recall and RepeatPrevious (precise lag): final reward AUC."""
     lines = [r"\setlength{\tabcolsep}{2.4pt}", r"\begin{tabular}{@{}l cccc ccc@{}}", r"\toprule"] + PROBE_HEAD
     for m, label in MODELS:
         if m == "OURS":
@@ -207,7 +207,7 @@ ABL_RUNS = ("recall/bsuite_memlen-32-recall", "recall/bsuite_memlen-64-recall", 
 def ablation_table():
     """Table 4: ablations of the final model on the world-model probes (final reward AUC) and firing rate."""
     lines = [r"\begin{tabular}{@{}l cc c c@{}}", r"\toprule",
-             r" & \multicolumn{2}{c}{memlen-$L$-recall} & RepeatPrev. & firing \\",
+             r" & \multicolumn{2}{c}{cue recall} & RepeatPrev. & firing \\",
              r"\cmidrule(lr){2-3}", r"variant & $L$=32 & 64 & $k$=32 & rate \\", r"\midrule"]
     for name, label in ABLATIONS:
         r = rate(f"recall/bsuite_memlen-64-recall/{name}")
