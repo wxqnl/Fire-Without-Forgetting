@@ -1169,7 +1169,8 @@ def round43(jobs):
 def priority(job):
     """Queue class of a job (§19.46): 1 candidate B on the paper's tables (RL, Memory Maze, pixel, table 2 probes),
     2 the new baselines on the core tables, 3 the pixel baselines, 5 the rest, 8 table 4 ablations, 9 the
-    supplementary items of B and the R2I L51 runs of LIF, GRSN, DH-SNN and TC-LIF (run if time is left)."""
+    supplementary items of B and the R2I L51 runs of LIF, GRSN, DH-SNN and TC-LIF (run if time is left). Since B was
+    dropped (§19.47) the classes 1 and 8 are empty."""
     group, cell = job["name"].split("/")[0], job["name"].split("/")[-2]
     task = job["name"].split("/")[1]
     if cell.startswith("SDD") and "fb1" in cell:
@@ -1243,6 +1244,10 @@ def main():
     for job in jobs:  # DreamerV3 (ANN) needs about 4 GB (measured 2026-09-30), the spiking models 14-20 GB
         if "/ann_" in job["name"] and job["mem_gb"] > 6:
             job["mem_gb"] = 7 if job["name"].startswith("mmaze") else 6
+    # 2026-10-11 06:40 (EXPERIMENTS.md §19.47): candidate B failed criterion (a) of §19.46 (R2I L71 not learned by
+    # 250k: 0.06 at 262.5k, final model 182.5k), so the final model stays; B's jobs (rounds 38-40) are dropped and its
+    # stopped runs moved to runs/_superseded/candidateB
+    jobs = [j for j in jobs if "fb1" not in j["name"].split("/")[-2]]
     # 2026-10-11 02:30 (EXPERIMENTS.md §19.46), user: "3 表四可以稍微往后排？ 4 ... 因为当前时间原因可以这么干 ... 5 补充材料
     # ... 可以先放后面": queue order by class, stable within a class; the pinned job stays first
     jobs = [jobs[0]] + sorted(jobs[1:], key=priority)

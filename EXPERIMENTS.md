@@ -1833,3 +1833,11 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
   - (b) DMC 0–105k 评估平均不比原最终模型差：walker ≥ 280（原 311 的 0.9 倍），cheetah ≥ 54，cartpole ≥ 232（原 258 的 0.9 倍）。
   - 都满足就定用 B，马上停掉原最终模型和旧世界模型上还在跑的任务（Memory Maze、像素 1M、DMC cheetah/cartpole、POPGym 对照、R2I 诊断），空出卡给其余任务。不满足就退回原最终模型，停掉 B。
   - 学会后回落和 POPGym Medium 要更久才看得出，这两项定下之后继续看，不再等。
+
+### 19.47 B 没过判据 (a)，退回原最终模型（10 月 11 日 06:27）
+
+- 判据 (a) 不满足：B 的 R2I L71 到 262.5k 步仍没学会（评估 162.5k 0.19、182.5k −0.12、202.5k −0.19、222.5k 0.06、242.5k 0.00、262.5k 0.06）；最终模型 182.5k 学会。162.5k 之前两者每次评估完全相同（学会前策略近乎固定，评估环境种子相同）。按 §19.46 事先定的规则，不等 (b)，退回原最终模型 `PD2Lv2r64thermofbch2_tau1000`（探针 `PD2Lreshalfthermofbch2_tau1000`，Memory Maze `PD2Lv2thermofbch2_tau1000`）。
+- 停掉时 B 的其余数据（只作记录）：DMC 45k 评估 walker 144 / cheetah 128 / cartpole 270（最终模型同一步 252 / 23 / 256）；POPGym Medium 到 211k 仍 −0.5；探针 L8 0.5k、L16 0.5k、L64 3k（最终模型 5.5k）、Medium 6k（最终模型 8k）。
+- 操作：`make_jobs.main()` 去掉第 38–40 轮 B 的全部任务（备份 `runs/jobs.round44.jsonl`，剩 394 个）；B 在跑的 16 个任务（RL 6 个、探针 7 个、表 4 消融 3 个）停掉，39 个 B 的日志目录移到 `runs/_superseded/candidateB/`。原最终模型的表 4 消融和补充项早已跑完，剩下只有 Memory Maze（25%）、像素 walker 1M（26%）、DMC cheetah（86%）和 cartpole（75%）；POPGym 对照和 R2I 诊断照常跑完。
+- 新基线探针结果（表 2）：TC-LIF 回忆 L8/L16/L32/L64 = 0.5k/0.5k/1k/3.5k，RepeatPrevious Easy ✗ (0.86)、Medium ✗ (0.50)；DH-SNN 1.5k/2k/4.5k/✗ (0.52)，Easy ✗ (0.63)、Medium ✗ (0.50)；两者的 Hard 还在跑。回忆 L64 是表 2 唯一一格被基线（TC-LIF 3.5k）超过的。
+- DMC 本体：最终模型 cheetah（约 430k 步，近几次 380–440）和 cartpole（约 380k 步，400–560）明显低于 LIF（500k 最后 3 次 532 / 811）；只读胞体的 actor-critic 对照（未缩小，不满足同规模）在两项上更高（541 / 749–831），walker 更低（836 对 929）。
