@@ -1861,3 +1861,4 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
 - 附录新增像素世界模型诊断表（`paper_tables.pix_diag_table()` → `tables/pix_diag.tex`，`diag_pix` 的 30k 次更新结果）：一步预测图像损失 LIF 44.1、Spiking-WM 46.2、最终模型 44.3、只有脉冲计数无反馈 46.0、每步一个脉冲加反馈 55.3、每步一个脉冲（M = 4，无反馈）54.9。
 - 主图（`paper/fig/overview_svg.py`）重画：每个神经元两条通道、各神经元旁边画脉冲计数、反馈 R、(b) 中 PDN 的反馈箭头写入通道但不清零；最小字号从 13–15 提到 17–19 单位（约 5pt），去掉重叠。rsvg-convert 不在 fwf 环境里，用 `seamdet` 环境的：`python fig/overview_svg.py /home/user01/miniconda3/envs/seamdet/bin/rsvg-convert`。
 - 正文现在超出 8 页约 1/3 页（新增两行基线、方法多一段、结果段落仍是旧文字），结果部分重写时一起压回 8 页。
+- 10:19：只读胞体的对照在 R2I L101 跑完（diag_r2i，1M 步）：162.5k 首次达到 0.9，学会后有 5 次评估跌破 0.5，最后 3 次平均 0.65。附录 actor 输入表的 L101 格由它填（`policy_table`）。队列 360/394 完成，只剩 TC-LIF 的 R2I L51 在排队。
