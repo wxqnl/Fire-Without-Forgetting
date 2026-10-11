@@ -5,9 +5,9 @@
   \centering\tabfont
   \caption{\textbf{Memory in reinforcement learning.}
   BSuite memory length~\cite{osband2020bsuite}: success as in R2I~\cite{samsami2024r2i}, \ie whether the evaluation return reaches 0.9 within the budget (\cmark) or not (\xmark); steps and returns in Supp.~\suppref{supp:impl}{A}. $^\dagger$Lengths, budget and training windows of R2I (1M steps; reward head with one output per action).
-  POPGym RepeatPrevious~\cite{morad2023popgym} with the environment settings of R2I's code: final return, mean of the last three evaluations (chance $=-0.5$).
+  POPGym RepeatPrevious~\cite{morad2023popgym} with the environment settings of R2I's code: max-mean episodic return, the metric of POPGym (chance $=-0.5$).
   \nr: not run, as the model fails at a shorter length.
-  $^\ddagger$R2I with its official code and configuration for 2M steps: mean return of the training episodes over the last 200k steps (for our models the two measures differ by at most 0.04).
+  $^\ddagger$R2I with its official code and configuration for 2M steps, measured on its training episodes (for our models the two measures differ by at most 0.07).
   \pend{Blue}: in progress.}
   \label{tab:rl}
   \input{tables/rl}
@@ -66,7 +66,7 @@ TC-LIF carries both compartments across steps, and its spikes subtract a fixed a
 Up to 64 steps it is as fast as the fastest baseline or faster (64 steps after \numFwfToSixtyFour\ environment steps, TC-LIF after 112k), and with R2I's lengths it learns 51, 71 and 101 steps after \numFwfToFiftyOne, \numFwfToSeventyOne\ and \numFwfToHundredOne\ steps (returns in Supp.~\suppref{supp:impl}{A}).
 R2I reports a median return of about 0.9 at 51 and 71 memory steps and about 0.35 at 101 after 1M steps (10 seeds; Fig.~7 of~\cite{samsami2024r2i}), with DreamerV3's default reward head and lengths that count one step less.
 
-On RepeatPrevious Easy, \method reaches \numFwfEasy, close to the best baseline, recurrent LIF (0.69).
+On RepeatPrevious Easy, \method reaches \numFwfEasy, close to the best baseline, recurrent LIF (0.74).
 On Medium, which asks for the card of exactly 32 steps ago, every baseline, \dv included, stays at chance after 2M steps, while \method reaches \numFwfMedium.
 R2I, run with its official code, stays at chance on both tasks within 2M steps.
 In its published curves over 50M steps, R2I leaves chance on Medium after about 3M steps and DreamerV3 learns Easy but not Medium (Fig.~9 of~\cite{samsami2024r2i}), as in our runs; \method learns Medium within a budget in which R2I has not yet left chance.
@@ -134,7 +134,7 @@ The spike count, the feedback and the number of channels leave the memory nearly
 \label{sec:energy}
 
 On DMC from proprioception (\cref{tab:mm}), \method matches the best spiking model on walker walk (\numFwfDmcWalk; \swm 923) and trails recurrent LIF on cheetah run and cartpole swingup (\numFwfDmcRun\ and \numFwfDmcSwing\ against 532 and 811).
-With an actor that reads $(z_t,h_t)$ only, the same world model reaches \pend{516} and \pend{790} on these two tasks (Supp.~\suppref{supp:policy}{E}), so the gap lies in the policy input.
+With an actor that reads $(z_t,h_t)$ only, the same world model reaches \pend{499} and \pend{787} on these two tasks (Supp.~\suppref{supp:policy}{E}), so the gap lies in the policy input.
 \TODO{Final DMC returns, including walker walk from pixels (runs in progress).}
 
 Per environment step (Supp.~\suppref{supp:energy}{H}), the agent of \method, world model filter and actor, costs \numEnergyAgent\,$\mu$J, \numEnergyRatio$\times$ less than \dv (\numEnergyAgentDv\,$\mu$J); the filter alone costs \numEnergyFilter\ against \numEnergyFilterDv\,$\mu$J, at a recurrent firing rate of \numEnergyRate.

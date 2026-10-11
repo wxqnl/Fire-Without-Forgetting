@@ -143,8 +143,8 @@ With A and $\tau_d=128$, the membrane potentials still encode it after 8 steps (
 
 \Cref{tab:policy} compares \method with an actor and critic of the baselines' size (3.4M parameters) that read $(z_t,h_t)$ only, on the same world model.
 On BSuite both learn every length they were run on, at nearly the same speed: one cue fits in the spike counts of $h_t$.
-On RepeatPrevious the policy needs the dendritic state: without it, the return reaches \pend{0.26} on Easy and \pend{$-0.30$} on Medium, against 0.66 and 0.32.
-On DMC the dendritic readout helps on walker walk (923 against \pend{849}), while cheetah run and cartpole swingup are learned better without it (\pend{516} and \pend{790} against \pend{408} and \pend{494}).
+On RepeatPrevious the policy needs the dendritic state: without it, the return reaches \pend{0.56} on Easy and \pend{0.10} on Medium, against 0.72 and 0.48.
+On DMC the dendritic readout helps on walker walk (923 against \pend{881}), while cheetah run and cartpole swingup are learned better without it (\pend{499} and \pend{787} against \pend{433} and \pend{517}).
 \TODO{Final POPGym and DMC numbers of the control (runs in progress).}
 
 \section{Diagnosing the world model in RL}
