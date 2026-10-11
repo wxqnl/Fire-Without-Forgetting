@@ -1,7 +1,10 @@
 """LaTeX tables of the paper from the run directories -> paper/tables/*.tex.
 
-Uses the run helpers of scripts/main_tables.py (same runs, same FwF mapping as RESULTS.md). A value
+Uses the run helpers of scripts/main_tables.py (same runs, same mapping of our model as RESULTS.md). A value
 from a run that is still in progress is wrapped in \\pend{...} (blue in the draft); \\nr = not run.
+Measures (2026-10-11, EXPERIMENTS.md §19.48, user: "还是和主流一致比较好"): the main tables report what the source
+benchmarks report: BSuite success within the budget as in R2I, final returns, and the final AUC of the world-model
+probes at a fixed budget; steps and updates to 0.9 are in the supplementary detail tables.
 Rerun after new results: python paper/scripts/paper_tables.py
 """
 import json
@@ -17,8 +20,14 @@ import main_tables as mt  # noqa: E402
 OUT = ROOT / "paper" / "tables"
 OUT.mkdir(exist_ok=True)
 MODELS = [("base_tau2", r"\swm~\cite{sun2025spikingwm}"), ("LIF_tau2", "Recurrent LIF"),
-          ("GRSN_tau2", r"GRSN~\cite{qin2025grsn}"), ("ABG_tau128", r"\swmnr"),
+          ("GRSN_tau2", r"GRSN~\cite{qin2025grsn}"), ("DHSNN", r"DH-SNN~\cite{zheng2024dhsnn}"),
+          ("TCLIF", r"TC-LIF~\cite{zhang2024tclif}"),
           ("ann_tau2", r"\dv (ANN)~\cite{hafner2025dreamerv3}"), ("OURS", r"\textbf{\method (ours)}")]
+# A+B+G (Spiking-WM-NR) is an ablation of Spiking-WM (Sec. 3) since 2026-10-11 (EXPERIMENTS.md §19.44): it appears
+# only in the supplementary detail tables
+SUPP_MODELS = MODELS[:5] + [("ABG_tau128", r"\swmnr")] + MODELS[5:]
+BSUITE = [("rl3", L) for L in (8, 16, 32, 64)] + [("r2i", L) for L in (51, 71, 101)]
+PEND = r"\pend{$\cdot$}"
 
 
 def done(run):
@@ -33,11 +42,25 @@ def evals(run, key):
     return [r for r in mt.rows(run) if key in r]
 
 
+def missing(run):
+    return PEND if mt.planned(run) else r"\nr"
+
+
+def success(run, thresh=0.9):
+    """BSuite success as in R2I: an evaluation return reaches 0.9 within the budget (R2I lengths: rerun rule)."""
+    ev = evals(run, "eval_return")
+    if not ev:
+        return missing(run)
+    if any(r["eval_return"] >= thresh for r in ev):
+        return r"\cmark"  # final once reached
+    return r"\xmark" if done(run) else PEND
+
+
 def steps_to(run, thresh=0.9):
     """Env steps (k) until the eval return first reaches thresh; '--' if not within the budget."""
     ev = evals(run, "eval_return")
     if not ev:
-        return r"\nr" if not mt.planned(run) else r"\pend{$\cdot$}"
+        return missing(run)
     hit = next((r["step"] for r in ev if r["eval_return"] >= thresh), None)
     if hit is not None:
         return f"{hit / 1e3:.0f}k"  # final once reached
@@ -47,15 +70,23 @@ def steps_to(run, thresh=0.9):
 def final_return(run, fmt="{:.2f}"):
     ev = evals(run, "eval_return")
     if not ev:
-        return r"\nr" if not mt.planned(run) else r"\pend{$\cdot$}"
+        return missing(run)
     return wrap(fmt.format(np.mean([r["eval_return"] for r in ev[-3:]])), run)
+
+
+def auc(run):
+    """Final reward AUC of a world-model probe: mean of the last three evaluations within the fixed budget."""
+    ev = evals(run, "eval_auc")
+    if not ev:
+        return missing(run)
+    return wrap(f"{np.mean([r['eval_auc'] for r in ev[-3:]]):.2f}", run)
 
 
 def probe(run, thresh=0.9):
     """Updates (k) until reward AUC > thresh; failures show '-- (final AUC)'."""
     ev = evals(run, "eval_auc")
     if not ev:
-        return r"\nr" if not mt.planned(run) else r"\pend{$\cdot$}"
+        return missing(run)
     hit = next((r["step"] for r in ev if r["eval_auc"] > thresh), None)
     last = np.mean([r["eval_auc"] for r in ev[-3:]])
     if hit is not None:
@@ -80,11 +111,11 @@ def r2i_popgym(task, window=200_000):
     path = mt.RUNS / f"r2i_agent/popgym_{task}/R2I/s0"
     sc = path / "scores.jsonl"
     if not sc.exists():
-        return r"\pend{$\cdot$}"
+        return PEND
     rows = [json.loads(l) for l in sc.read_text().splitlines() if l.strip()]
     rows = [r for r in rows if "episode/score" in r]
     if not rows:
-        return r"\pend{$\cdot$}"
+        return PEND
     last = rows[-1]["step"]
     v = np.mean([r["episode/score"] for r in rows if r["step"] >= last - window])
     exit_path = path / ".exit"
@@ -93,15 +124,14 @@ def r2i_popgym(task, window=200_000):
 
 
 def rl_table():
-    """Table 2: BSuite memory length (env steps to 0.9) and POPGym RepeatPrevious (final return)."""
-    cols = ([("rl2", L) for L in (8, 16, 32, 64)] + [("r2i", L) for L in (51, 71, 101)])
+    """Table 1: BSuite memory length (success within the budget) and POPGym RepeatPrevious (final return)."""
     lines = [r"\begin{tabular}{@{}l cccc ccc cc@{}}", r"\toprule",
-             r" & \multicolumn{7}{c}{BSuite memory length: env.\ steps to return 0.9 $\downarrow$} & \multicolumn{2}{c}{RepeatPrevious: return $\uparrow$} \\",
+             r" & \multicolumn{7}{c}{BSuite memory length: success} & \multicolumn{2}{c}{RepeatPrevious: return $\uparrow$} \\",
              r"\cmidrule(lr){2-8}\cmidrule(l){9-10}",
              r" & $L$=8 & 16 & 32 & 64 & 51$^\dagger$ & 71$^\dagger$ & 101$^\dagger$ & Easy & Medium \\",
              r"\midrule"]
     for m, label in MODELS:
-        cells = [steps_to(f"{g}/bsuite_memlen-{L}/{mt.key(m, 'bsuite')}") for g, L in cols]
+        cells = [success(f"{g}/bsuite_memlen-{L}/{mt.key(m, 'bsuite')}") for g, L in BSUITE]
         cells += [final_return(f"popgym/popgym_RepeatPrevious{d}/{mt.key(m, 'popgym')}") for d in ("Easy", "Medium")]
         if m == "OURS":
             lines.append(r"R2I (ANN)~\cite{samsami2024r2i} & \multicolumn{7}{c}{\footnotesize reported in~\cite{samsami2024r2i}, see text} & "
@@ -113,53 +143,92 @@ def rl_table():
     write("rl", lines)
 
 
+def rl_detail_table():
+    """Supp.: BSuite per model and length: env. steps to a return of 0.9, final return, and from the first 0.9 on
+    the mean return and the fraction of evaluations with return >= 0.5."""
+    lines = [r"\begin{tabular}{@{}l ccccccc@{}}", r"\toprule",
+             r"model & $L$=8 & 16 & 32 & 64 & 51$^\dagger$ & 71$^\dagger$ & 101$^\dagger$ \\"]
+
+    def after(run):
+        ev = [(r["step"], r["eval_return"]) for r in evals(run, "eval_return")]
+        if not ev:
+            return missing(run)
+        hit = next((i for i, (_, v) in enumerate(ev) if v >= 0.9), None)
+        if hit is None:
+            return "--" if done(run) else PEND
+        vals = [v for _, v in ev[hit:]]
+        return wrap(f"{np.mean(vals):.2f}\\,{{\\tiny({100 * np.mean([v >= 0.5 for v in vals]):.0f}\\%)}}", run)
+
+    for title, cell in ((r"environment steps until the return first reaches 0.9", steps_to),
+                        (r"final return (mean of the last three evaluations)", final_return),
+                        (r"from the first return of 0.9 on: mean return (evaluations $\ge0.5$)", after)):
+        lines += [r"\midrule", rf"\multicolumn{{8}}{{@{{}}l}}{{\emph{{{title}}}}} \\"]
+        for m, label in SUPP_MODELS:
+            lines.append(label + " & " + " & ".join(cell(f"{g}/bsuite_memlen-{L}/{mt.key(m, 'bsuite')}") for g, L in BSUITE) + r" \\")
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("rl_detail", lines)
+
+
+def probe_runs(m):
+    p = mt.key(m, "probe")
+    return ([f"recall/bsuite_memlen-{L}-recall/{p}" for L in (8, 16, 32, 64)]
+            + [f"diag_rp/popgym_RepeatPrevious{d}/{p}" for d in ("Easy", "Medium", "Hard")])
+
+
+PROBE_HEAD = [r" & \multicolumn{4}{c}{memlen-$L$-recall} & \multicolumn{3}{c}{RepeatPrevious} \\",
+              r"\cmidrule(lr){2-5}\cmidrule(l){6-8}", r" & $L$=8 & 16 & 32 & 64 & $k$=4 & 32 & 64$^\ast$ \\", r"\midrule"]
+
+
 def probe_table():
-    """Table 3: world-model probes, memlen-L-recall and RepeatPrevious (precise lag)."""
-    lines = [r"\setlength{\tabcolsep}{2.0pt}", r"\begin{tabular}{@{}l cccc ccc@{}}", r"\toprule",
-             r" & \multicolumn{4}{c}{memlen-$L$-recall} & \multicolumn{3}{c}{RepeatPrevious} \\",
-             r"\cmidrule(lr){2-5}\cmidrule(l){6-8}",
-             r" & $L$=8 & 16 & 32 & 64 & $k$=4 & 32 & 64$^\ast$ \\", r"\midrule"]
+    """Table 2: world-model probes, memlen-L-recall and RepeatPrevious (precise lag): final reward AUC."""
+    lines = [r"\setlength{\tabcolsep}{2.4pt}", r"\begin{tabular}{@{}l cccc ccc@{}}", r"\toprule"] + PROBE_HEAD
     for m, label in MODELS:
-        run_p = lambda t: f"recall/bsuite_memlen-{t}-recall/{mt.key(m, 'probe')}"
-        cells = [probe(run_p(L)) for L in (8, 16, 32, 64)]
-        cells += [probe(f"diag_rp/popgym_RepeatPrevious{d}/{mt.key(m, 'probe')}") for d in ("Easy", "Medium", "Hard")]
         if m == "OURS":
             lines.append(r"\midrule")
-        lines.append(label + " & " + " & ".join(cells) + r" \\")
+        lines.append(label + " & " + " & ".join(auc(r) for r in probe_runs(m)) + r" \\")
     lines += [r"\bottomrule", r"\end{tabular}"]
     write("probe", lines)
 
 
-ABLATIONS = [("PD2Lreshalf_tau1000", r"\method"),
-             ("PD2Lreshalfreset_tau1000", "dendrites cleared every step"),
-             ("PD2Lreshalf_tau16", r"single $\tau=16$"), ("PD2Lreshalf_tau128", r"single $\tau=128$"),
-             ("PD2Lreshalffix_tau1000", r"$\tau$ fixed at initialization"),
-             ("PD2Lreshalfeuler_tau1000", r"Euler write gain $1-\lambda$"),
-             ("PDreshalf_tau1000", "one PDN layer"),
-             ("PD2L_tau1000", "no resonant channels"), ("PD2Lres_tau1000", "all channels resonant"),
-             ("PD2Lreshalfcap_tau1000", "firing rate capped at 0.06"),
-             ("PD2Lreshalfsomalif_tau1000", "soma with membrane and reset"),
-             ("PD2Lreshalffeedback_tau1000", "spike feedback into dendrites")]
+ABLATIONS = [("PD2Lreshalfthermofbch2_tau1000", r"\method"),
+             ("SDDreset_tau1000", "dendrites cleared every step"),
+             ("SDD_tau16", r"single $\tau=16$"), ("SDD_tau128", r"single $\tau=128$"),
+             ("SDDfix_tau1000", r"$\tau$ fixed at initialization"),
+             ("SDDeuler_tau1000", r"Euler write gain $1-\lambda$"),
+             ("SDD1L_tau1000", "one PDN layer"), ("SDD1LT1_tau1000", r"one PDN layer, $T=1$"),
+             ("SDDnores_tau1000", "no resonant channels"), ("SDDres_tau1000", "all channels resonant"),
+             ("SDDcap_tau1000", "firing rate capped at 0.06"),
+             ("SDDsomalif_tau1000", "soma with membrane and reset"),
+             ("SDDstep_tau1000", "Heaviside soma"), ("SDDch4_tau1000", r"$M=4$ channels"),
+             ("SDDnofb_tau1000", "no spike feedback")]
+ABL_RUNS = ("recall/bsuite_memlen-32-recall", "recall/bsuite_memlen-64-recall", "diag_rp/popgym_RepeatPreviousMedium")
 
 
 def ablation_table():
-    """Table 6: ablations on the world-model probes."""
+    """Table 4: ablations of the final model on the world-model probes (final reward AUC) and firing rate."""
     lines = [r"\begin{tabular}{@{}l cc c c@{}}", r"\toprule",
              r" & \multicolumn{2}{c}{memlen-$L$-recall} & RepeatPrev. & firing \\",
              r"\cmidrule(lr){2-3}", r"variant & $L$=32 & 64 & $k$=32 & rate \\", r"\midrule"]
     for name, label in ABLATIONS:
-        l32 = probe(f"recall/bsuite_memlen-32-recall/{name}")
-        l64 = probe(f"recall/bsuite_memlen-64-recall/{name}")
-        rp_run = f"diag_rp/popgym_RepeatPreviousMedium/{name}"
-        rp = probe(rp_run) if mt.planned(rp_run) else r"\nr"
-        if l32 == r"\nr":
-            l32 = r"\nr"
         r = rate(f"recall/bsuite_memlen-64-recall/{name}")
-        lines.append(label + " & " + " & ".join([l32, l64, rp, f"{r:.2f}" if r is not None else r"\nr"]) + r" \\")
-        if name == "PD2Lreshalf_tau1000":
+        lines.append(label + " & " + " & ".join([auc(f"{t}/{name}") for t in ABL_RUNS] + [f"{r:.2f}" if r is not None else r"\nr"]) + r" \\")
+        if name == ABLATIONS[0][0]:
             lines.append(r"\midrule")
     lines += [r"\bottomrule", r"\end{tabular}"]
     write("ablation", lines)
+
+
+def probe_detail_table():
+    """Supp.: updates until the reward AUC exceeds 0.9, for the models of table 2 and the ablations of table 4."""
+    lines = [r"\setlength{\tabcolsep}{2.4pt}", r"\begin{tabular}{@{}l cccc ccc@{}}", r"\toprule"] + PROBE_HEAD
+    for m, label in SUPP_MODELS:
+        lines.append(label + " & " + " & ".join(probe(r) for r in probe_runs(m)) + r" \\")
+    lines += [r"\midrule", r"\emph{ablations} & & & 32 & 64 & & 32 & \\", r"\midrule"]
+    for name, label in ABLATIONS:
+        l32, l64, med = (probe(f"{t}/{name}") for t in ABL_RUNS)
+        lines.append(f"{label} & & & {l32} & {l64} & & {med} & " + r"\\")
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("probe_detail", lines)
 
 
 MM_PAPER = [("RSSM~\\cite{pasukonis2023memorymaze}", "8.3", "89.0"), ("RSSM, TBTT~\\cite{pasukonis2023memorymaze}", "6.2", "94.0")]
@@ -168,7 +237,7 @@ MM_PAPER = [("RSSM~\\cite{pasukonis2023memorymaze}", "8.3", "89.0"), ("RSSM, TBT
 def mm_cell(run, key, scale=1.0, fmt="{:.1f}"):
     ev = [r for r in mt.rows(run) if f"eval_{key}" in r]
     if not ev:
-        return r"\nr" if not mt.planned(run) else r"\pend{$\cdot$}", r"\pend{$\cdot$}"
+        return missing(run), PEND
     last = ev[-1]
     final = last["step"] >= 1_000_000 and done(run)
     a = fmt.format(scale * last[f"eval_{key}"])
@@ -176,38 +245,48 @@ def mm_cell(run, key, scale=1.0, fmt="{:.1f}"):
     return (a, b) if final else (rf"\pend{{{a}}}", rf"\pend{{{b}}}")
 
 
+def pixel_run(m):
+    """Walker walk from pixels, 1M frames (ours: group dmcpix1m, the baselines: dmcpix)."""
+    return f"dmcpix1m/dmc_walker_walk/{mt.key(m, 'dmc')}" if m == "OURS" else f"dmcpix/dmc_walker_walk/{m}"
+
+
 def mm_dmc_energy_table():
-    """Table 4: Memory Maze probe and DMC return, one row per model (energy: supp. table, energy_table)."""
+    """Table 3: Memory Maze probe and DMC return (proprioception and walker walk from pixels), one row per model."""
     dmc = ["walker_walk", "cheetah_run", "cartpole_swingup"]
-    lines = [r"\begin{tabular}{@{}l cc ccc@{}}", r"\toprule",
-             r" & \multicolumn{2}{c}{Memory Maze 9$\times$9} & \multicolumn{3}{c}{DMC return $\uparrow$} \\",
-             r"\cmidrule(lr){2-3}\cmidrule(l){4-6}",
-             r" & obj.\ MSE $\downarrow$ & walls \% $\uparrow$ & walk & run & swing \\", r"\midrule"]
+    lines = [r"\begin{tabular}{@{}l cc ccc c@{}}", r"\toprule",
+             r" & \multicolumn{2}{c}{Memory Maze 9$\times$9} & \multicolumn{3}{c}{DMC, proprio.\ $\uparrow$} & pixels $\uparrow$ \\",
+             r"\cmidrule(lr){2-3}\cmidrule(lr){4-6}\cmidrule(l){7-7}",
+             r" & obj.\ MSE $\downarrow$ & walls \% $\uparrow$ & walk & run & swing & walk \\", r"\midrule"]
     for m, label in MODELS:
         mm = f"mmaze_official/memory_maze_9x9/{mt.key(m, 'mmaze')}"
         o = mm_cell(mm, "objects_mse")[0]
         w = mm_cell(mm, "walls_acc", 100)[0]
         d = [final_return(f"dmc500/dmc_{t}/{mt.key(m, 'dmc')}", fmt="{:.0f}") for t in dmc]
+        d.append(final_return(pixel_run(m), fmt="{:.0f}"))
         if m == "OURS":
             lines.append(r"\midrule")
         lines.append(label + " & " + " & ".join([o, w] + d) + r" \\")
     lines.append(r"\midrule")
     for label, o, w in MM_PAPER:
-        lines.append(label + f" & {o} & {w} & " + " & ".join([r"\nr"] * 3) + r" \\")
+        lines.append(label + f" & {o} & {w} & " + " & ".join([r"\nr"] * 4) + r" \\")
     lines += [r"\bottomrule", r"\end{tabular}"]
     write("mm_dmc_energy", lines)
 
 
+def energy_path(m):
+    return mt.RUNS / f"rl3/bsuite_memlen-32/{mt.key(m, 'bsuite')}/s0/energy.json"
+
+
 def energy_table():
-    """Supp.: operations and energy per environment step of the BSuite L=32 RL agents (energy.py)."""
+    """Supp.: operations and energy per environment step of the BSuite L=32 RL agents (energy.py, group rl3)."""
     lines = [r"\begin{tabular}{@{}l ccc c c@{}}", r"\toprule",
              r" & \multicolumn{3}{c}{world-model filter} & actor & agent \\", r"\cmidrule(lr){2-4}",
              r"model & AC (M) & MAC (M) & $\mu$J & $\mu$J & $\mu$J \\", r"\midrule"]
     for m, label in MODELS:
-        e_path = mt.RUNS / f"rl2/bsuite_memlen-32/{mt.key(m, 'bsuite')}/s0/energy.json"
-        if m == "R2I" or not e_path.exists():
+        if not energy_path(m).exists():
+            lines.append(label + " & " + " & ".join([PEND] * 5) + r" \\")
             continue
-        e = json.loads(e_path.read_text())
+        e = json.loads(energy_path(m).read_text())
         cells = [f"{e['ac_per_step'] / 1e6:.2f}", f"{e['mac_per_step'] / 1e6:.2f}", f"{e['energy_nj_per_step'] / 1e3:.1f}",
                  f"{e['actor_energy_nj_per_step'] / 1e3:.1f}", f"{e['agent_energy_nj_per_step'] / 1e3:.1f}"]
         lines.append(label + " & " + " & ".join(cells) + r" \\")
@@ -216,17 +295,11 @@ def energy_table():
 
 
 def policy_table():
-    """Supp.: the actor inputs of FwF. The dendritic spikes reach the actor and critic through rank-64 weights
-    (FwF, 4.7M), through full weights with the actor-critic narrowed to the baselines' 3.4M (142 units; its runs of
-    RepeatPrevious Easy, cheetah and cartpole were stopped when FwF switched to rank 64, EXPERIMENTS.md §19.16),
-    or through full weights (12.9M); last row: soma spikes only, 3.4M."""
-    variants = [("PD2Lv2r64_tau1000", r"+ dendritic spikes, rank 64 (\method)", "4.7M"),
-                ("PD2Lv2m_tau1000", r"+ dendritic spikes, 142 units", "3.4M"),
-                ("PD2Lv2_tau1000", r"+ dendritic spikes", "12.9M"),
-                ("PD2Lreshalf_tau1000", r"only", "3.4M")]
-    stopped = {"popgym/popgym_RepeatPreviousEasy/PD2Lv2m_tau1000", "dmc500/dmc_cheetah_run/PD2Lv2m_tau1000",
-               "dmc500/dmc_cartpole_swingup/PD2Lv2m_tau1000"}
-    cols = [("rl2", L) for L in (8, 16, 32, 64)] + [("r2i", L) for L in (51, 71, 101)]
+    """Supp.: the actor input of the final model. The dendritic spikes reach the actor and critic through rank-64
+    weights (4.7M); the control reads the soma spikes only (3.4M, the baselines' size). The control's R2I runs are
+    the diagnostic runs of round 36 (L71, L101; L51 not run)."""
+    variants = [(mt.OURS["bsuite"], r"+ dendritic spikes, rank 64 (\method)", "4.7M"),
+                (mt.OURSALT["bsuite"], r"only", "3.4M")]
     dmc = ["walker_walk", "cheetah_run", "cartpole_swingup"]
     lines = [r"\begin{tabular}{@{}l c ccccccc cc ccc@{}}", r"\toprule",
              r" & & \multicolumn{7}{c}{BSuite: env.\ steps to 0.9 $\downarrow$} & \multicolumn{2}{c}{RepeatPrev.} & \multicolumn{3}{c}{DMC} \\",
@@ -234,42 +307,13 @@ def policy_table():
              r"actor input: $(z_t, h_t)$ & params & 8 & 16 & 32 & 64 & 51 & 71 & 101 & Easy & Med. & walk & run & swing \\",
              r"\midrule"]
     for run, label, size in variants:
-        cells = [steps_to(f"{g}/bsuite_memlen-{L}/{run}") for g, L in cols]
+        ours = run == mt.OURS["bsuite"]
+        cells = [steps_to(f"{g if ours or g != 'r2i' else 'diag_r2i'}/bsuite_memlen-{L}/{run}") for g, L in BSUITE]
         cells += [final_return(f"popgym/popgym_RepeatPrevious{d}/{run}") for d in ("Easy", "Medium")]
         cells += [final_return(f"dmc500/dmc_{t}/{run}", fmt="{:.0f}") for t in dmc]
-        runs = [f"{g}/bsuite_memlen-{L}/{run}" for g, L in cols] + [f"popgym/popgym_RepeatPrevious{d}/{run}" for d in ("Easy", "Medium")]
-        runs += [f"dmc500/dmc_{t}/{run}" for t in dmc]
-        cells = [r"\nr" if r in stopped else c for r, c in zip(runs, cells)]
         lines.append(label + " & " + size + " & " + " & ".join(cells) + r" \\")
     lines += [r"\bottomrule", r"\end{tabular}"]
     write("policy", lines)
-
-
-def stability_table():
-    """Supp.: BSuite RL, per model and length: env. steps to a return of 0.9, then the mean return and the
-    fraction of evaluations with return >= 0.5 from that evaluation on (single runs; Stage 3 review, RM-4)."""
-    cols = [("rl2", L) for L in (8, 16, 32, 64)] + [("r2i", L) for L in (51, 71, 101)]
-    lines = [r"\begin{tabular}{@{}l ccccccc@{}}", r"\toprule",
-             r"model & $L$=8 & 16 & 32 & 64 & 51$^\dagger$ & 71$^\dagger$ & 101$^\dagger$ \\", r"\midrule"]
-    for m, label in MODELS:
-        if m == "R2I":
-            continue
-        cells = []
-        for g, L in cols:
-            run = f"{g}/bsuite_memlen-{L}/{mt.key(m, 'bsuite')}"
-            ev = [(r["step"], r["eval_return"]) for r in evals(run, "eval_return")]
-            if not ev:
-                cells.append(r"\pend{$\cdot$}" if mt.planned(run) else r"\nr")
-                continue
-            hit = next((i for i, (_, v) in enumerate(ev) if v >= 0.9), None)
-            if hit is None:
-                cells.append("--" if done(run) else r"\pend{$\cdot$}")
-                continue
-            after = [v for _, v in ev[hit:]]
-            cells.append(wrap(f"{np.mean(after):.2f}\\,{{\\tiny({100 * np.mean([v >= 0.5 for v in after]):.0f}\\%)}}", run))
-        lines.append(label + " & " + " & ".join(cells) + r" \\")
-    lines += [r"\bottomrule", r"\end{tabular}"]
-    write("stability", lines)
 
 
 def numbers():
@@ -277,7 +321,7 @@ def numbers():
     def ret(run):
         ev = evals(run, "eval_return")
         if not ev:
-            return r"\pend{$\cdot$}", r"\pend{$\cdot$}"
+            return PEND, PEND
         v = f"{np.mean([r['eval_return'] for r in ev[-3:]]):.2f}"
         total = mt.budget(run)
         pct = f"{100 * ev[-1]['step'] / total:.0f}\\%" if total else "?"
@@ -289,24 +333,22 @@ def numbers():
         out.append(rf"\newcommand{{\numRtwoI{d}}}{{{r2i_popgym('RepeatPrevious' + d)}}}")
     # BSuite (EXPERIMENTS.md §19.16): steps to 0.9, mean return and % of evaluations >= 0.5 from then on, final return
     names = {8: "Eight", 16: "Sixteen", 32: "ThirtyTwo", 64: "SixtyFour", 51: "FiftyOne", 71: "SeventyOne", 101: "HundredOne"}
-    for g, L in [("rl2", L) for L in (8, 16, 32, 64)] + [("r2i", L) for L in (51, 71, 101)]:
+    for g, L in BSUITE:
         run = f"{g}/bsuite_memlen-{L}/{mt.key('OURS', 'bsuite')}"
         ev = [r["eval_return"] for r in evals(run, "eval_return")]
         hit = next((i for i, v in enumerate(ev) if v >= 0.9), None)
         after = ev[hit:] if hit is not None else []
-        pend = r"\pend{$\cdot$}"
         out += [rf"\newcommand{{\numFwfTo{names[L]}}}{{{steps_to(run)}}}",
-                rf"\newcommand{{\numFwfAfter{names[L]}}}{{{wrap(f'{np.mean(after):.2f}', run) if after else pend}}}",
-                rf"\newcommand{{\numFwfAfterFrac{names[L]}}}{{{wrap(f'{100 * np.mean([v >= 0.5 for v in after]):.0f}', run) if after else pend}}}",
+                rf"\newcommand{{\numFwfAfter{names[L]}}}{{{wrap(f'{np.mean(after):.2f}', run) if after else PEND}}}",
+                rf"\newcommand{{\numFwfAfterFrac{names[L]}}}{{{wrap(f'{100 * np.mean([v >= 0.5 for v in after]):.0f}', run) if after else PEND}}}",
                 rf"\newcommand{{\numFwfFinal{names[L]}}}{{{final_return(run)}}}"]
     for t, name in (("walker_walk", "Walk"), ("cheetah_run", "Run"), ("cartpole_swingup", "Swing")):
         out.append(rf"\newcommand{{\numFwfDmc{name}}}{{{final_return(f'dmc500/dmc_{t}/' + mt.key('OURS', 'dmc'), fmt='{:.0f}')}}}")
-    # energy per environment step of the BSuite L=32 agents (energy.py; pending until the energy count of our run exists)
+    # energy per environment step of the BSuite L=32 agents (energy.py on the rl3 runs; pending until measured)
     def energy(m):
-        path = mt.RUNS / f"rl2/bsuite_memlen-32/{mt.key(m, 'bsuite')}/s0/energy.json"
-        return json.loads(path.read_text()) if path.exists() else None
+        return json.loads(energy_path(m).read_text()) if energy_path(m).exists() else None
     ours, dv = energy("OURS"), energy("ann_tau2")
-    spiking = [e for e in map(energy, ("base_tau2", "LIF_tau2", "GRSN_tau2", "ABG_tau128")) if e]
+    spiking = [e for e in map(energy, ("base_tau2", "LIF_tau2", "GRSN_tau2", "DHSNN", "TCLIF")) if e]
     uj = lambda e, k: f"{e[k] / 1e3:.1f}"
     vals = {"Agent": uj(ours, "agent_energy_nj_per_step") if ours else None,
             "Filter": uj(ours, "energy_nj_per_step") if ours else None,
@@ -316,19 +358,20 @@ def numbers():
             "AgentDv": uj(dv, "agent_energy_nj_per_step") if dv else None,
             "FilterDv": uj(dv, "energy_nj_per_step") if dv else None,
             "Spiking": "--".join(f"{x / 1e3:.1f}" for x in (min(e["agent_energy_nj_per_step"] for e in spiking),
-                                                           max(e["agent_energy_nj_per_step"] for e in spiking)))}
-    pend = r"\pend{$\cdot$}"
-    out += [rf"\newcommand{{\numEnergy{k}}}{{{v or pend}}}" for k, v in vals.items()]
+                                                           max(e["agent_energy_nj_per_step"] for e in spiking))) if spiking else None}
+    out += [rf"\newcommand{{\numEnergy{k}}}{{{v or PEND}}}" for k, v in vals.items()]
     write("numbers", out)
 
 
 if __name__ == "__main__":
     numbers()
     rl_table()
+    rl_detail_table()
     probe_table()
+    probe_detail_table()
     ablation_table()
     mm_dmc_energy_table()
-    stability_table()
     energy_table()
     policy_table()
+    (OUT / "stability.tex").unlink(missing_ok=True)  # merged into rl_detail.tex (2026-10-11)
     print("tables written to", OUT)

@@ -5,18 +5,21 @@
 \cmidrule(lr){2-3}
 variant & $L$=32 & 64 & $k$=32 & rate \\
 \midrule
-\method & 1.5k & 3.5k & 6k & 0.18 \\
+\method & 1.00 & 1.00 & 0.92 & 0.25 \\
 \midrule
-dendrites cleared every step & \nr & --\,{\tiny(0.50)} & \nr & 0.18 \\
-single $\tau=16$ & \nr & --\,{\tiny(0.50)} & \nr & 0.18 \\
-single $\tau=128$ & 1k & 3k & \nr & 0.19 \\
-$\tau$ fixed at initialization & 1.5k & 4k & \nr & 0.17 \\
-Euler write gain $1-\lambda$ & 3.5k & --\,{\tiny(0.50)} & \nr & 0.17 \\
-one PDN layer & 2k & --\,{\tiny(0.51)} & \nr & 0.18 \\
-no resonant channels & 1.5k & 4k & --\,{\tiny(0.54)} & 0.17 \\
-all channels resonant & 1.5k & 6.5k\,{\tiny(0.86)} & 5k & 0.17 \\
-firing rate capped at 0.06 & 2k & --\,{\tiny(0.52)} & \nr & 0.06 \\
-soma with membrane and reset & \nr & --\,{\tiny(0.50)} & 6k & 0.17 \\
-spike feedback into dendrites & \nr & 4k & 7k & 0.16 \\
+dendrites cleared every step & 0.51 & 0.50 & 0.50 & 0.25 \\
+single $\tau=16$ & 1.00 & 0.49 & 0.92 & 0.24 \\
+single $\tau=128$ & 1.00 & 1.00 & 0.93 & 0.26 \\
+$\tau$ fixed at initialization & 1.00 & 1.00 & 0.93 & 0.24 \\
+Euler write gain $1-\lambda$ & 1.00 & 0.52 & 0.76 & 0.21 \\
+one PDN layer & 1.00 & 0.50 & 0.91 & 0.21 \\
+one PDN layer, $T=1$ & 0.99 & 0.99 & 0.50 & 0.15 \\
+no resonant channels & 1.00 & 1.00 & 0.57 & 0.27 \\
+all channels resonant & 1.00 & 1.00 & 0.95 & 0.23 \\
+firing rate capped at 0.06 & 1.00 & 0.51 & 0.92 & 0.06 \\
+soma with membrane and reset & 1.00 & 0.52 & 0.77 & 0.18 \\
+Heaviside soma & 1.00 & 1.00 & 0.88 & 0.16 \\
+$M=4$ channels & 1.00 & 1.00 & 0.93 & 0.25 \\
+no spike feedback & 1.00 & 1.00 & 0.94 & 0.23 \\
 \bottomrule
 \end{tabular}

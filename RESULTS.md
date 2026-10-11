@@ -3,12 +3,12 @@
 Single seed (s0). A value with (NN%) is from a run still in progress; · = queued or no evaluation yet;
 — = not part of the plan.
 
-Queue at 2026-10-07 15:15:20: 216/240 done, 24 running, 0 pending.
+Queue at 2026-10-11 07:23:42: 358/394 done, 32 running, 4 pending.
 
 ## Table 2. Memory tasks, RL: evaluation return (mean of the last 3 evaluations)
 
 BSuite memory length L (return 1 = always recalls the cue, 0 = chance). L8-L64: 0.15-0.5M env steps,
-the 4 parallel envs share one seed (runs before 2026-09-28 21:00; the same for every model);
+a different seed per parallel env (group rl3, EXPERIMENTS.md §19.30); R2I lengths: rerun rule of §19.36;
 L51-L101 and POPGym RepeatPrevious (return in [-1, 1], -0.5 = chance): protocol of R2I (Samsami et al.
 2024), 1M / 2M env steps, a different seed per parallel env. BSuite: action-indexed reward head for
 all models; POPGym: DreamerV3's default reward head and R2I's POPGym settings (8 envs, train ratio 64).
@@ -16,29 +16,31 @@ RepeatPreviousMedium: Spiking-WM, A+B+G, ours and DreamerV3.
 
 | model | L8 | L16 | L32 | L64 | L51 | L71 | L101 | RepeatPreviousEasy | RepeatPreviousMedium |
 |---|---|---|---|---|---|---|---|---|---|
-| Spiking-WM | 0.08 | -0.25 | -0.08 | -0.33 | -0.04 | 0.19 | -0.04 | 0.43 | -0.50 |
-| LIF | 1.00 | -0.25 | -0.08 | -0.08 | — | — | — | 0.69 | -0.51 (73%) |
-| GRSN | 0.98 | 0.94 | -0.08 | 0.08 | — | — | — | 0.33 | -0.50 (83%) |
-| Spiking-WM + A+B+G | 1.00 | 1.00 | 0.79 | -0.04 | -0.04 | 0.08 | -0.04 | -0.29 | -0.50 |
-| **Ours** | 1.00 | 0.98 | 0.98 | 0.96 | 0.90 | 0.96 | 1.00 (32%) | 0.68 (88%) | 0.57 |
-| DreamerV3 (ANN) | 0.98 | 0.94 | 0.98 | -0.08 | 0.98 | 0.04 | 0.04 | 0.39 | -0.44 |
-| spiking enc. + GRU | — | 1.00 | 1.00 | — | — | — | — | — | — |
-| ours, other actor input | 1.00 | 0.98 | 0.98 | 0.73 | 0.94 | 0.88 | 0.52 | 0.16 | 0.02 |
-| ours before §18 (integrator dendrites only) | 0.98 | 1.00 | 1.00 | 0.98 | 0.96 | 1.00 | 0.96 | 0.59 | -0.50 |
+| Spiking-WM | 0.02 | 0.02 | -0.02 | -0.04 | -0.04 | 0.19 | -0.04 | 0.43 | -0.50 |
+| LIF | 0.65 | 0.02 | -0.02 | 0.04 | -0.28 (2%) | — | — | 0.69 | -0.50 |
+| GRSN | 1.00 | 0.94 | 0.06 | -0.04 | · | — | — | 0.33 | -0.51 |
+| DH-SNN | 0.17 (22%) | 0.56 (21%) | 0.06 (14%) | 0.06 (8%) | · | — | — | -0.48 (0%) | -0.46 (0%) |
+| TC-LIF | 1.00 (22%) | 1.00 (21%) | 0.98 (14%) | 0.23 (10%) | · | — | — | -0.52 (0%) | -0.49 (0%) |
+| **Ours** | 0.98 | 0.98 | 1.00 | 0.98 | 0.79 | 0.96 | 0.94 | 0.66 | 0.32 |
+| DreamerV3 (ANN) | 1.00 | 0.92 | 0.96 | 0.04 | 0.98 | 0.04 | 0.04 | 0.39 | -0.44 |
+| Spiking-WM + A+B+G (ablation) | 0.96 | 0.98 | 1.00 | 0.04 | -0.04 | 0.08 | -0.04 | -0.29 | -0.50 |
+| spiking enc. + GRU | — | 1.00 | -0.02 | — | — | — | — | — | — |
+| ours, actor reads the soma only | 0.98 | 1.00 | 1.00 | 0.96 | — | — | — | 0.26 (13%) | -0.30 (25%) |
 
 ## Table 3. BSuite: env steps until the evaluation return first reaches 0.9
 
 | model | L8 | L16 | L32 | L64 | L51 | L71 | L101 |
 |---|---|---|---|---|---|---|---|
-| Spiking-WM | > 152k | > 202k | > 302k | > 503k | > 1002k | > 1002k | > 1002k |
-| LIF | 62k | > 202k | > 302k | > 502k | — | — | — |
-| GRSN | 32k | 112k | > 302k | > 502k | — | — | — |
-| Spiking-WM + A+B+G | 12k | 22k | 52k | > 507k | > 1002k | > 1002k | > 1002k |
-| **Ours** | 12k | 22k | 42k | 132k | 102k | 222k | 262k |
-| DreamerV3 (ANN) | 12k | 32k | 62k | > 502k | 902k | > 1002k | > 1002k |
-| spiking enc. + GRU | — | 32k | 102k | — | — | — | — |
-| ours, other actor input | 12k | 22k | 32k | 102k | 82k | 282k | 362k |
-| ours before §18 (integrator dendrites only) | 12k | 22k | 32k | 82k | 62k | 382k | 202k |
+| Spiking-WM | > 152k | > 202k | > 302k | > 502k | > 1002k | > 1002k | > 1002k |
+| LIF | 142k | > 202k | > 302k | > 502k | > 22k … | — | — |
+| GRSN | 22k | 142k | > 302k | > 502k | · | — | — |
+| DH-SNN | 32k | > 42k … | > 42k … | > 42k … | · | — | — |
+| TC-LIF | 12k | 22k | 22k | > 52k … | · | — | — |
+| **Ours** | 12k | 12k | 22k | 82k | 62k | 182k | 142k |
+| DreamerV3 (ANN) | 12k | 22k | 112k | > 502k | 902k | > 1002k | > 1002k |
+| Spiking-WM + A+B+G (ablation) | 12k | 22k | 42k | > 502k | > 1002k | > 1002k | > 1002k |
+| spiking enc. + GRU | — | 32k | > 302k | — | — | — | — |
+| ours, actor reads the soma only | 12k | 12k | 22k | 92k | — | — | — |
 
 ## Table 4. World-model probe (memlen-L-recall, random-policy data)
 
@@ -49,11 +51,12 @@ Updates until reward AUC > 0.9 / final AUC (firing rate of the recurrent state).
 | Spiking-WM | > 12000 | > 12000 | 12000 | > 12000 | 0.493 (0.081) | 0.537 (0.083) | 0.660 (0.101) | 0.516 (0.089) |
 | LIF | 6000 | > 12000 | > 12000 | > 12000 | 0.999 (0.085) | 0.521 (0.099) | 0.503 (0.103) | 0.505 (0.092) |
 | GRSN | 1500 | 4000 | > 12000 | > 12000 | 0.999 (0.079) | 0.998 (0.080) | 0.507 (0.096) | 0.508 (0.119) |
-| Spiking-WM + A+B+G | 500 | 500 | 2000 | > 12000 | 1.000 (0.119) | 1.000 (0.176) | 1.000 (0.193) | 0.514 (0.246) |
-| **Ours** | 500 | 500 | 1500 | 3500 | 1.000 (0.164) | 0.999 (0.173) | 1.000 (0.172) | 0.999 (0.176) |
+| DH-SNN | 1500 | 2000 | 4500 | > 12000 | 0.998 (0.037) | 0.999 (0.068) | 0.999 (0.097) | 0.521 (0.118) |
+| TC-LIF | 500 | 500 | 1000 | 3500 | 1.000 (0.247) | 1.000 (0.290) | 1.000 (0.351) | 0.999 (0.382) |
+| **Ours** | 500 | 500 | 1000 | 5500 | 1.000 (0.232) | 1.000 (0.244) | 1.000 (0.236) | 1.000 (0.249) |
 | DreamerV3 (ANN) | 500 | 1000 | 6000 | > 12000 | 1.000 (-0.001) | 1.000 (0.025) | 0.999 (0.015) | 0.497 (0.035) |
+| Spiking-WM + A+B+G (ablation) | 500 | 500 | 2000 | > 12000 | 1.000 (0.119) | 1.000 (0.176) | 1.000 (0.193) | 0.514 (0.246) |
 | spiking enc. + GRU | 500 | 1000 | 5000 | > 12000 | 1.000 (0.018) | 1.000 (0.030) | 1.000 (0.031) | 0.502 (0.012) |
-| ours before §18 (integrator dendrites only) | 500 | 1000 | 1500 | 4000 | 1.000 (0.169) | 1.000 (0.174) | 0.998 (0.175) | 1.000 (0.169) |
 
 ## Table 4b. World-model probe, precise-lag recall (POPGym RepeatPrevious, random-action data)
 
@@ -66,10 +69,11 @@ window 128, 20k updates. Updates until AUC > 0.9 / final AUC (firing rate).
 | Spiking-WM | 5000 | > 10000 | > 20000 | 0.973 (0.139) | 0.502 (0.066) | 0.500 (0.060) |
 | LIF | 4000 | > 10000 | > 20000 | 0.985 (0.114) | 0.501 (0.102) | 0.499 (0.089) |
 | GRSN | > 10000 | > 10000 | > 20000 | 0.894 (0.082) | 0.507 (0.091) | 0.503 (0.058) |
-| Spiking-WM + A+B+G | > 10000 | > 10000 | > 20000 | 0.814 (0.199) | 0.539 (0.191) | 0.539 (0.221) |
-| **Ours** | 2000 | 6000 | 7000 | 0.976 (0.201) | 0.930 (0.174) | 0.935 (0.178) |
+| DH-SNN | > 10000 | > 10000 | > 11000 … | 0.627 (0.115) | 0.503 (0.147) | 0.499 (0.149) (55%) |
+| TC-LIF | > 10000 | > 10000 | > 14000 … | 0.855 (0.352) | 0.503 (0.284) | 0.537 (0.369) (70%) |
+| **Ours** | 3000 | 8000 | 8000 | 0.979 (0.296) | 0.920 (0.261) | 0.936 (0.248) |
 | DreamerV3 (ANN) | 3000 | > 10000 | > 20000 | 0.949 (0.002) | 0.502 (0.067) | 0.502 (0.083) |
-| ours before §18 (integrator dendrites only) | 8000 | > 10000 | — | 0.939 (0.190) | 0.538 (0.161) | — |
+| Spiking-WM + A+B+G (ablation) | > 10000 | > 10000 | > 20000 | 0.814 (0.199) | 0.539 (0.191) | 0.539 (0.221) |
 
 ## Table 5. Memory Maze 9×9 offline probing benchmark (Pasukonis et al. 2023; official data and probe)
 
@@ -81,14 +85,15 @@ Constant predictor on our split: objects MSE 24.0, walls accuracy 80.8.
 
 | model | objects MSE ↓ 200k | objects MSE ↓ 1M | walls acc. (%) ↑ 200k | walls acc. (%) ↑ 1M |
 |---|---|---|---|---|
-| Spiking-WM | 12.1 / 12.0 | 11.8 / 12.0 (620k) | 82.0 / 81.8 | 83.2 / 82.9 (620k) |
-| LIF | 12.0 / 12.0 | 11.7 / 11.9 (700k) | 82.0 / 81.9 | 83.6 / 83.3 (700k) |
-| GRSN | 11.7 / 12.1 | 11.6 / 12.0 (740k) | 82.0 / 81.8 | 83.3 / 83.2 (740k) |
-| Spiking-WM + A+B+G | 11.3 / 12.1 | 11.4 / 12.0 (610k) | 82.2 / 81.8 | 83.4 / 83.0 (610k) |
-| **Ours** | 9.8 / 12.1 | 9.1 / 12.2 (420k) | 82.3 / 82.0 | 83.0 / 82.7 (420k) |
+| Spiking-WM | 12.1 / 12.0 | 11.8 / 12.0 (920k) | 82.0 / 81.8 | 83.5 / 83.2 (920k) |
+| LIF | 12.0 / 12.0 | 11.7 / 12.0 | 82.0 / 81.9 | 83.7 / 83.0 |
+| GRSN | 11.7 / 12.1 | 11.5 / 12.0 | 82.0 / 81.8 | 83.3 / 83.0 |
+| DH-SNN | — | — | — | — |
+| TC-LIF | — | — | — | — |
+| **Ours** | 9.8 / 12.1 | 9.8 / 12.1 (250k) | 82.3 / 81.9 | 82.6 / 82.1 (250k) |
 | DreamerV3 (ANN) | 10.6 / 11.9 | 9.8 / 11.8 | 82.7 / 81.8 | 85.3 / 83.5 |
+| Spiking-WM + A+B+G (ablation) | 11.3 / 12.1 | 11.2 / 12.0 (910k) | 82.2 / 81.8 | 83.7 / 83.2 (910k) |
 | spiking enc. + GRU | — | — | — | — |
-| ours before §18 (integrator dendrites only) | 11.9 / 12.1 | 11.9 / 12.1 (230k) | 82.0 / 81.9 | 82.5 / 82.4 (230k) |
 | constant (paper) |  | 23.9 |  | 80.8 |
 | VAE, no memory (paper) |  | 17.2 |  | 84.1 |
 | RSSM (paper) |  | 8.3 |  | 89.0 |
@@ -103,13 +108,12 @@ a different seed per parallel env.
 | model | walker_walk | cheetah_run | cartpole_swingup |
 |---|---|---|---|
 | Spiking-WM | 923 | 343 | 497 |
-| LIF | 893 (81%) | 478 (69%) | 739 (61%) |
-| GRSN | 820 (93%) | 349 (77%) | 628 (69%) |
-| Spiking-WM + A+B+G | 884 (65%) | 389 (57%) | 559 (41%) |
-| **Ours** | 908 | 470 (93%) | 755 (85%) |
+| LIF | 807 | 532 | 811 |
+| GRSN | 863 | 392 | 652 |
+| **Ours** | 923 | 408 (85%) | 494 (77%) |
 | DreamerV3 (ANN) | 953 | 699 | 871 |
-| ours, other actor input | 747 | 528 | 720 |
-| ours before §18 (integrator dendrites only) | 851 | 433 | 732 |
+| Spiking-WM + A+B+G (ablation) | 785 | 471 | 848 |
+| ours, actor reads the soma only | 818 (77%) | 516 (89%) | 790 (85%) |
 
 ## Table 7. Ablations of our model (probe, memlen-L-recall and RepeatPrevious Medium)
 
@@ -117,19 +121,21 @@ Updates until reward AUC > 0.9 / final AUC (firing rate).
 
 | variant | L32 updates | L32 AUC (rate) | L64 updates | L64 AUC (rate) | Medium updates | Medium AUC (rate) |
 |---|---|---|---|---|---|---|
-| ours | 1500 | 1.000 (0.172) | 3500 | 0.999 (0.176) | 6000 | 0.930 (0.174) |
-| dendrites cleared every env step | — | — | > 12000 | 0.498 (0.176) | — | — |
-| single τ = 16 | — | — | > 12000 | 0.498 (0.180) | — | — |
-| single τ = 128 | 1000 | 1.000 (0.194) | 3000 | 1.000 (0.187) | — | — |
-| Euler input gain 1 − λ | 3500 | 1.000 (0.175) | > 12000 | 0.502 (0.165) | — | — |
-| τ fixed (not learned) | 1500 | 1.000 (0.179) | 4000 | 0.999 (0.167) | — | — |
-| firing rate capped at 0.06 | 2000 | 0.999 (0.056) | > 12000 | 0.523 (0.057) | — | — |
-| 1 layer | 2000 | 1.000 (0.141) | > 12000 | 0.513 (0.178) | — | — |
-| 1 layer, T = 1 | 3500 | 0.996 (0.160) | — | — | — | — |
-| all channels resonant | 1500 | 1.000 (0.170) | 6500 | 0.861 (0.166) | 5000 | 0.944 (0.181) |
-| no resonant channels (before §18) | 1500 | 0.998 (0.175) | 4000 | 1.000 (0.169) | > 10000 | 0.538 (0.161) |
-| soma with membrane (τ = 2) and spike reset | — | — | > 12000 | 0.498 (0.172) | 6000 | 0.920 (0.193) |
-| spike feedback into the dendrites | — | — | 4000 | 1.000 (0.155) | 7000 | 0.910 (0.169) |
+| ours | 1000 | 1.000 (0.236) | 5500 | 1.000 (0.249) | 8000 | 0.920 (0.261) |
+| dendrites cleared every env step | > 12000 | 0.511 (0.233) | > 12000 | 0.505 (0.247) | > 10000 | 0.502 (0.216) |
+| single τ = 16 | 1000 | 1.000 (0.238) | > 12000 | 0.487 (0.240) | 9000 | 0.918 (0.263) |
+| single τ = 128 | 1000 | 0.998 (0.253) | 2500 | 1.000 (0.261) | 8000 | 0.925 (0.285) |
+| Euler input gain 1 − λ | 2500 | 1.000 (0.225) | > 12000 | 0.516 (0.208) | 10000 | 0.761 (0.271) |
+| τ fixed (not learned) | 1000 | 1.000 (0.232) | 4000 | 1.000 (0.238) | 7000 | 0.926 (0.273) |
+| firing rate capped at 0.06 | 3000 | 0.999 (0.059) | > 12000 | 0.506 (0.061) | 8000 | 0.922 (0.072) |
+| 1 layer | 1500 | 1.000 (0.217) | > 12000 | 0.503 (0.206) | 8000 | 0.914 (0.248) |
+| 1 layer, T = 1 | 2000 | 0.994 (0.161) | 11000 | 0.990 (0.146) | > 10000 | 0.504 (0.154) |
+| all channels resonant | 1000 | 0.999 (0.243) | 4500 | 1.000 (0.234) | 6000 | 0.947 (0.295) |
+| no resonant channels | 1000 | 1.000 (0.251) | 3000 | 1.000 (0.267) | > 10000 | 0.565 (0.227) |
+| soma with membrane and spike reset | 2500 | 1.000 (0.179) | > 12000 | 0.523 (0.183) | > 10000 | 0.768 (0.168) |
+| binary (step) soma | 1000 | 0.998 (0.164) | 3500 | 0.998 (0.157) | > 10000 | 0.883 (0.173) |
+| 4 channels | 1000 | 1.000 (0.240) | 5000 | 1.000 (0.247) | 7000 | 0.928 (0.267) |
+| no spike feedback into the dendrites | 1500 | 1.000 (0.235) | 7000 | 0.999 (0.232) | 6000 | 0.941 (0.288) |
 
 ## Table 8. Operations and energy per environment step (world-model filter: encoder + posterior; agent: filter + actor)
 
@@ -138,11 +144,12 @@ Spike counts corrected on 2026-10-04 (a binary spike frame was counted T times b
 
 | model | filter AC (M) | filter MAC (M) | filter energy (µJ) | agent energy (µJ) | recurrent firing rate |
 |---|---|---|---|---|---|
-| Spiking-WM | 1.94 | 0.30 | 3.14 | 3.48 | 0.100 |
-| LIF | 1.63 | 0.21 | 2.43 | 2.76 | 0.094 |
-| GRSN | 1.62 | 0.13 | 2.04 | 2.40 | 0.108 |
-| Spiking-WM + A+B+G | 2.27 | 0.30 | 3.44 | 3.88 | 0.139 |
-| **Ours** | 3.36 | 0.15 | 3.72 | 5.18 | 0.164 |
-| DreamerV3 (ANN) | 0.02 | 3.73 | 17.18 | 22.02 | 0.037 |
-| spiking enc. + GRU | 1.46 | 5.63 | 27.23 | nan | 0.017 |
-| ours before §18 (integrator dendrites only) | 5.90 | 0.15 | 5.99 | nan | 0.160 |
+| Spiking-WM | · | · | · | · | · |
+| LIF | · | · | · | · | · |
+| GRSN | · | · | · | · | · |
+| DH-SNN | · | · | · | · | · |
+| TC-LIF | · | · | · | · | · |
+| **Ours** | · | · | · | · | · |
+| DreamerV3 (ANN) | · | · | · | · | · |
+| Spiking-WM + A+B+G (ablation) | · | · | · | · | · |
+| spiking enc. + GRU | · | · | · | · | · |

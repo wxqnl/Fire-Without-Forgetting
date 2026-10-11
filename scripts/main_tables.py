@@ -21,18 +21,23 @@ import numpy as np
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 RUNS = ROOT / "runs"
-MAIN = [("base_tau2", "Spiking-WM"), ("LIF_tau2", "LIF"), ("GRSN_tau2", "GRSN"),
-        ("ABG_tau128", "Spiking-WM + A+B+G"), ("OURS", "**Ours**"), ("ann_tau2", "DreamerV3 (ANN)")]
-EXTRA = [("gru_tau2", "spiking enc. + GRU"), ("OURSALT", "ours, other actor input"),
-         ("PD2L_tau1000", "ours before §18 (integrator dendrites only)")]
+MAIN = [("base_tau2", "Spiking-WM"), ("LIF_tau2", "LIF"), ("GRSN_tau2", "GRSN"), ("DHSNN", "DH-SNN"), ("TCLIF", "TC-LIF"),
+        ("OURS", "**Ours**"), ("ann_tau2", "DreamerV3 (ANN)")]
+# A+B+G (Spiking-WM-NR) is an ablation of Spiking-WM since 2026-10-11 (EXPERIMENTS.md §19.44), not a main baseline
+EXTRA = [("ABG_tau128", "Spiking-WM + A+B+G (ablation)"), ("gru_tau2", "spiking enc. + GRU"),
+         ("OURSALT", "ours, actor reads the soma only")]
 # Our model (EXPERIMENTS.md §18, §19.6): one configuration on every task; the actor and critic read the
 # soma spikes and the second-layer dendrites as ON/OFF spikes (policymem). The world-model probes do
 # not involve the actor (their runs are named PD2Lreshalf). OURSALT: soma spikes only, appendix ablation.
 # Since 2026-10-06 (EXPERIMENTS.md §19.16) the dendritic spikes reach the actor and critic through rank-64
 # weights (aclowrank, 4.7M; PD2Lv2r64). Memory Maze trains the world model only, so its run keeps the name PD2Lv2.
-OURS = {"bsuite": "PD2Lv2r64_tau1000", "dmc": "PD2Lv2r64_tau1000", "probe": "PD2Lreshalf_tau1000",
-        "popgym": "PD2Lv2r64_tau1000", "mmaze": "PD2Lv2_tau1000"}
-OURSALT = {"bsuite": "PD2Lreshalf_tau1000", "dmc": "PD2Lreshalf_tau1000", "popgym": "PD2Lreshalf_tau1000"}
+# Final model since 2026-10-08 (EXPERIMENTS.md §19.27, kept on 2026-10-11, §19.47): thermometer soma, spike feedback
+# into the dendrites, 2 channels (thermofbch2).
+OURS = {"bsuite": "PD2Lv2r64thermofbch2_tau1000", "dmc": "PD2Lv2r64thermofbch2_tau1000",
+        "probe": "PD2Lreshalfthermofbch2_tau1000", "popgym": "PD2Lv2r64thermofbch2_tau1000",
+        "mmaze": "PD2Lv2thermofbch2_tau1000"}
+OURSALT = {"bsuite": "PD2Lreshalfthermofbch2_tau1000", "dmc": "PD2Lreshalfthermofbch2_tau1000",
+           "popgym": "PD2Lreshalfthermofbch2_tau1000"}
 
 
 def key(model, family):
@@ -46,20 +51,21 @@ def key(model, family):
 def family(run):
     return "popgym" if run.startswith("popgym") else "dmc" if run.startswith("dmc") else "bsuite"
 
-BSUITE = [f"bsuite_memlen-{n}" for n in (8, 16, 32, 64)]
+BSUITE = [f"bsuite_memlen-{n}" for n in (8, 16, 32, 64)]  # group rl3 (one seed per parallel env, §19.30; rl2 void)
 BSUITE_LONG = [f"bsuite_memlen-{n}" for n in (51, 71, 101)]  # round 8, R2I protocol (1M steps)
 POPGYM = ["popgym_RepeatPreviousEasy", "popgym_RepeatPreviousMedium"]  # round 13, R2I tasks and config
 MM_PAPER = [("constant (paper)", "23.9", "80.8"), ("VAE, no memory (paper)", "17.2", "84.1"),
             ("RSSM (paper)", "8.3", "89.0"), ("VAE+GRU TBTT (paper)", "7.8", "90.0"), ("RSSM TBTT (paper)", "6.2", "94.0")]
 DMC = ["dmc_walker_walk", "dmc_cheetah_run", "dmc_cartpole_swingup"]
-ABLATIONS = [("PD2Lreshalf_tau1000", "ours"), ("PD2Lreshalfreset_tau1000", "dendrites cleared every env step"),
-             ("PD2Lreshalf_tau16", "single τ = 16"), ("PD2Lreshalf_tau128", "single τ = 128"),
-             ("PD2Lreshalfeuler_tau1000", "Euler input gain 1 − λ"), ("PD2Lreshalffix_tau1000", "τ fixed (not learned)"),
-             ("PD2Lreshalfcap_tau1000", "firing rate capped at 0.06"), ("PDreshalf_tau1000", "1 layer"),
-             ("PDT1reshalf_tau1000", "1 layer, T = 1"), ("PD2Lres_tau1000", "all channels resonant"),
-             ("PD2L_tau1000", "no resonant channels (before §18)"),
-             ("PD2Lreshalfsomalif_tau1000", "soma with membrane (τ = 2) and spike reset"),
-             ("PD2Lreshalffeedback_tau1000", "spike feedback into the dendrites")]
+# ablations of the final model (round 31, EXPERIMENTS.md §19.30): one config changed each
+ABLATIONS = [("PD2Lreshalfthermofbch2_tau1000", "ours"), ("SDDreset_tau1000", "dendrites cleared every env step"),
+             ("SDD_tau16", "single τ = 16"), ("SDD_tau128", "single τ = 128"),
+             ("SDDeuler_tau1000", "Euler input gain 1 − λ"), ("SDDfix_tau1000", "τ fixed (not learned)"),
+             ("SDDcap_tau1000", "firing rate capped at 0.06"), ("SDD1L_tau1000", "1 layer"),
+             ("SDD1LT1_tau1000", "1 layer, T = 1"), ("SDDres_tau1000", "all channels resonant"),
+             ("SDDnores_tau1000", "no resonant channels"), ("SDDsomalif_tau1000", "soma with membrane and spike reset"),
+             ("SDDstep_tau1000", "binary (step) soma"), ("SDDch4_tau1000", "4 channels"),
+             ("SDDnofb_tau1000", "no spike feedback into the dendrites")]
 
 
 def jobs():
@@ -74,8 +80,21 @@ def jobs():
 JOBS = jobs()
 
 
+def seed(run):
+    """Run directory reported for `run`: R2I lengths follow the rerun rule (EXPERIMENTS.md §19.36): a length counts as
+    learned if s0 or the rerun s1 has an evaluation >= 0.9, and the learned run is reported; otherwise s0."""
+    if run.startswith("r2i/") and (RUNS / run / "s1").exists():
+        def learned(s):
+            path = RUNS / run / s / "metrics.jsonl"
+            return path.exists() and any(json.loads(l).get("eval_return", -1) >= 0.9 for l in path.read_text().splitlines() if l.strip())
+        finished = (RUNS / run / "s1" / ".exit").exists()
+        if not learned("s0") and (learned("s1") or not finished):
+            return "s1"
+    return "s0"
+
+
 def rows(run):
-    path = RUNS / run / "s0" / "metrics.jsonl"
+    path = RUNS / run / seed(run) / "metrics.jsonl"
     out = []
     if path.exists():
         for line in path.read_text().splitlines():
@@ -92,7 +111,7 @@ def planned(run):
 
 
 def exit_code(run):
-    path = RUNS / run / "s0" / ".exit"
+    path = RUNS / run / seed(run) / ".exit"
     return path.read_text().strip() if path.exists() else None
 
 
@@ -183,7 +202,7 @@ def mm_baseline():
 
 
 def energy_cell(run):
-    path = RUNS / run / "s0" / "energy.json"
+    path = RUNS / run / seed(run) / "energy.json"
     if not path.exists():
         return ["·"] * 5
     e = json.loads(path.read_text())
@@ -204,19 +223,19 @@ def main():
 
     out += ["## Table 2. Memory tasks, RL: evaluation return (mean of the last 3 evaluations)", "",
             "BSuite memory length L (return 1 = always recalls the cue, 0 = chance). L8-L64: 0.15-0.5M env steps,",
-            "the 4 parallel envs share one seed (runs before 2026-09-28 21:00; the same for every model);",
+            "a different seed per parallel env (group rl3, EXPERIMENTS.md §19.30); R2I lengths: rerun rule of §19.36;",
             "L51-L101 and POPGym RepeatPrevious (return in [-1, 1], -0.5 = chance): protocol of R2I (Samsami et al.",
             "2024), 1M / 2M env steps, a different seed per parallel env. BSuite: action-indexed reward head for",
             "all models; POPGym: DreamerV3's default reward head and R2I's POPGym settings (8 envs, train ratio 64).",
             "RepeatPreviousMedium: Spiking-WM, A+B+G, ours and DreamerV3.", ""]
-    rl_runs = ([(f"rl2/{t}", short(t)) for t in BSUITE] + [(f"r2i/{t}", short(t)) for t in BSUITE_LONG]
+    rl_runs = ([(f"rl3/{t}", short(t)) for t in BSUITE] + [(f"r2i/{t}", short(t)) for t in BSUITE_LONG]
                + [(f"popgym/{t}", short(t)) for t in POPGYM])
     out += table(["model"] + [lab for _, lab in rl_runs],
                  [[label] + [rl_cell(f"{r}/{key(m, family(r))}") for r, _ in rl_runs] for m, label in models])
     out += [""]
 
     out += ["## Table 3. BSuite: env steps until the evaluation return first reaches 0.9", ""]
-    bs_runs = [(f"rl2/{t}", short(t)) for t in BSUITE] + [(f"r2i/{t}", short(t)) for t in BSUITE_LONG]
+    bs_runs = [(f"rl3/{t}", short(t)) for t in BSUITE] + [(f"r2i/{t}", short(t)) for t in BSUITE_LONG]
     out += table(["model"] + [lab for _, lab in bs_runs], [[label] + [steps_to(f"{r}/{key(m, 'bsuite')}") for r, _ in bs_runs]
                                                           for m, label in models])
 
@@ -262,7 +281,7 @@ def main():
             "500k env steps, train ratio 512, action repeat 2 (DreamerV3's protocol for DMC from proprioception),",
             "a different seed per parallel env.", ""]
     dmc_models = [(m, label) for m, label in models if m in ("base_tau2", "LIF_tau2", "GRSN_tau2", "ABG_tau128", "OURS", "ann_tau2",
-                                                             "OURSALT", "PD2L_tau1000")]  # all spiking baselines since §19.18
+                                                             "OURSALT")]  # all spiking baselines since §19.18
     out += table(["model"] + [short(t) for t in DMC], [[label] + [rl_cell(f"dmc500/{t}/{key(m, 'dmc')}", fmt="{:.0f}") for t in DMC]
                                                        for m, label in dmc_models])
 
@@ -279,7 +298,7 @@ def main():
             "45 nm: 0.9 pJ per AC, 4.6 pJ per MAC; memory access not counted. Models of the BSuite L32 RL runs.",
             "Spike counts corrected on 2026-10-04 (a binary spike frame was counted T times before).", ""]
     out += table(["model", "filter AC (M)", "filter MAC (M)", "filter energy (µJ)", "agent energy (µJ)", "recurrent firing rate"],
-                 [[label, *energy_cell(f"rl2/bsuite_memlen-32/{key(m, 'bsuite')}")] for m, label in models if m != "OURSALT"])
+                 [[label, *energy_cell(f"rl3/bsuite_memlen-32/{key(m, 'bsuite')}")] for m, label in models if m != "OURSALT"])
     text = "\n".join(out) + "\n"
     (ROOT / "RESULTS.md").write_text(text)
     print(text)

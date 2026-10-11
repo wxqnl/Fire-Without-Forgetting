@@ -4,9 +4,9 @@
 \begin{table*}[t]
   \centering\tabfont
   \caption{\textbf{Memory in reinforcement learning.}
-  BSuite memory length~\cite{osband2020bsuite}: environment steps until the evaluation return first reaches 0.9 (-- = not within the budget); $^\dagger$lengths, budget and windows of R2I~\cite{samsami2024r2i} (1M steps, one seed per environment; action-indexed reward head).
+  BSuite memory length~\cite{osband2020bsuite}: success as in R2I~\cite{samsami2024r2i}, \ie the evaluation return reaches 0.9 within the budget (\cmark) or not (\xmark); steps and returns in Supp.~\suppref{supp:impl}{A}. $^\dagger$Lengths, budget and windows of R2I (1M steps; action-indexed reward head).
   POPGym RepeatPrevious~\cite{morad2023popgym}, environment settings of R2I's code: final return, mean of the last three evaluations (chance $=-0.5$).
-  \nr: not run, as LIF and GRSN fail at 32 steps.
+  \nr: not run, as the model fails at a shorter length.
   $^\ddagger$R2I, official code and configuration, 2M steps: mean training-episode return over the last 200k steps (for our models the two measures differ by at most 0.04).
   \pend{Blue}: in progress.}
   \label{tab:rl}
@@ -20,8 +20,9 @@
 All models share one spiking world model, the DreamerV3-style network of \swm~\cite{sun2025spikingwm} at the size of DreamerV3-S (512 units, $T=5$), and differ in the recurrent core:
 \textbf{\swm} (multi-compartment neurons with both resets, $\tau=2$);
 \textbf{recurrent LIF} neurons, cleared at every environment step as usual in spiking RL;
-\textbf{GRSN}~\cite{qin2025grsn}, gated recurrent spiking neurons updated once per environment step with their state carried;
-\textbf{\swmnr}, \swm with A+B+G (\cref{sec:causal}) and $\tau_d=128$, \ie without both resets;
+\textbf{GRSN}~\cite{qin2025grsn}, gated recurrent spiking neurons;
+\textbf{DH-SNN}~\cite{zheng2024dhsnn}, LIF neurons with eight dendritic branches of learned time constants;
+\textbf{TC-LIF}~\cite{zhang2024tclif}, two-compartment LIF neurons for long-term sequences (GRSN, DH-SNN and TC-LIF update once per environment step and carry their state);
 \textbf{\dv}~\cite{hafner2025dreamerv3}, the same architecture without spikes (GRU core, SiLU, one simulation step);
 and \textbf{\method} with two PDN layers.
 As the state of the art among ANN world models on memory tasks we also report \textbf{R2I}~\cite{samsami2024r2i}, a DreamerV3 agent with a state-space recurrence, run with its official code and configuration on POPGym, and with its published results on BSuite.
@@ -41,7 +42,7 @@ This head also helps \dv, which solves 51 steps here, whereas R2I reported it fa
 
 \paragraph{World-model probes.}
 To measure memory without exploration and credit assignment, we also train world models alone on random-policy data and measure the AUC of their reward prediction where reward depends on the past (\cref{sec:causal}): \emph{memlen-$L$-recall}, where the terminal reward is the cue $L$ steps back, and \emph{RepeatPrevious}, where the reward indicates whether the action names the card $k$ steps back.
-We report updates until the AUC exceeds 0.9 within 12k (memlen) or 10k (RepeatPrevious) updates.
+As probing benchmarks do~\cite{pasukonis2023memorymaze}, we report the final AUC after a fixed budget, 12k (memlen) or 10k (RepeatPrevious) updates; the updates until the AUC exceeds 0.9 are in Supp.~\suppref{supp:probe}{C}.
 
 \paragraph{Evaluation.}
 Evaluations average 32 episodes on BSuite (every 10k steps, 20k with R2I's lengths) and 16 on POPGym (every 50k), with the mode of the policy; Supp.~\suppref{supp:impl}{A} reports how the return holds after it first reaches 0.9.
@@ -56,6 +57,7 @@ Evaluations average 32 episodes on BSuite (every 10k steps, 20k with R2I's lengt
   \label{fig:rl_curves}
 \end{figure*}
 
+\TODO{Rewrite \cref{sec:rl,sec:probe,sec:ablation,sec:energy} for the final model (thermometer soma, spike feedback, two channels), DH-SNN and TC-LIF, and the measures of the tables (success, final AUC); the prose below still describes an earlier model.}
 \Cref{tab:rl}, \cref{fig:memory_length} and \cref{fig:rl_curves} show that every spiking baseline stops at a memory length set by its resets.
 \swm never recalls a cue, not even 8 steps back.
 Recurrent LIF, cleared at every step, solves 8 steps; GRSN, which keeps its state but resets its membrane at every spike, solves 16; \swmnr, without both resets, solves 32.
@@ -80,7 +82,7 @@ At 2M steps, the comparison is one of sample efficiency.
 
 \begin{table}[t]
   \centering\tabfont
-  \caption{\textbf{World-model probes} (random-policy data, no policy). Updates until the reward AUC exceeds 0.9; -- = not within 12k (memlen) or 10k (RepeatPrevious) updates; in parentheses the final AUC (0.5 = no memory) when it ends below 0.9. $^\ast$Held out (not used during development): 20k updates, training window 128.}
+  \caption{\textbf{World-model probes} (random-policy data, no policy). Final reward AUC (0.5 = no memory), mean of the last three evaluations after 12k (memlen) or 10k (RepeatPrevious) updates; updates until 0.9 in Supp.~\suppref{supp:probe}{C}. $^\ast$Held out (not used during development): 20k updates, training window 128. \pend{Blue}: in progress.}
   \label{tab:probe}
   \input{tables/probe}
 \end{table}
@@ -102,9 +104,9 @@ RepeatPrevious Hard ($k=64$), which we did not use during development, tests it 
 \begin{table}[t]
   \centering\tabfont
   \setlength{\tabcolsep}{3pt}
-  \caption{\textbf{Memory Maze and DMC.} Memory Maze 9$\times$9 offline probing~\cite{pasukonis2023memorymaze}: probes on the frozen state after 1M updates, second half of the evaluation episodes (constant predictor: 23.9 MSE, 80.8\% walls). DMC from proprioception: return after 500k steps. Bottom: reference results from~\cite{pasukonis2023memorymaze} (larger RSSM).}
+  \caption{\textbf{Memory Maze and DMC.} Memory Maze 9$\times$9 offline probing~\cite{pasukonis2023memorymaze}: probes on the frozen state after 1M updates, second half of the evaluation episodes (constant predictor: 23.9 MSE, 80.8\% walls). DMC from proprioception: return after 500k steps; walker walk from pixels: return after 1M frames. \nr: not run. Bottom: reference results from~\cite{pasukonis2023memorymaze} (larger RSSM).}
   \label{tab:mm}
-  \input{tables/mm_dmc_energy}
+  \resizebox{\columnwidth}{!}{\input{tables/mm_dmc_energy}}
 \end{table}
 
 \TODO{Memory Maze: final probes after 1M updates (in progress); the values shown are the latest in-training probes.}

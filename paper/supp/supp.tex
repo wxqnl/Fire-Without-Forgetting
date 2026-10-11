@@ -20,6 +20,10 @@ The ANN reference (\dv) replaces all LIF neurons by SiLU, uses one simulation st
 \swmnr: the same neurons with state kept across environment steps, no dendritic reset and dendritic input scaled by $\sqrt{\tau_d/2}$, $\tau_d=128$.
 Recurrent LIF: one layer of 512 LIF neurons ($\tau=2$) whose input is the current input spikes and the previous environment step's spikes at the same simulation step, cleared at every environment step.
 GRSN~\cite{qin2025grsn}: gated current $c_t=F\odot c_{t-1}+(1-F)\odot I$ and membrane $u_t=\beta\odot\hat u_{t-1}+(1-\beta)\odot c_t$ with soft reset, one update per environment step, state carried across steps; we add a LayerNorm to the input-gate pre-activation, without which the neurons never reach threshold in this world model.
+DH-SNN~\cite{zheng2024dhsnn}: the recurrent DH-LIF layer of the official code; each neuron has 8 dendritic branches, each reading a fixed random eighth of the inputs $[\xx_t,\ssp_{t-1}]$, with currents $i_{t,b}=\beta_b\odot i_{t-1,b}+(1-\beta_b)\odot W_b[\xx_t,\ssp_{t-1}]$ and membrane $u_t=\alpha\odot u_{t-1}+(1-\alpha)\odot\sum_b i_{t,b}-\vartheta\ssp_{t-1}$, $\ssp_t=\Hv(u_t-\vartheta)$, $\vartheta=1$; $\beta_b$ and $\alpha$ are sigmoids of learned time constants initialized as in the code ($U[2,6]$ and $U[0,4]$); as for GRSN, a LayerNorm on the branch inputs lets the neurons reach threshold.
+TC-LIF~\cite{zhang2024tclif}: the two-compartment neuron of the official code with input current $W\xx_t+U\ssp_{t-1}$: $v^d_t=v^d_{t-1}-\sigma(\beta_1)v^s_{t-1}+W\xx_t+U\ssp_{t-1}$, $v^s_t=v^s_{t-1}+\sigma(\beta_2)v^d_t$, $\ssp_t=\Hv(v^s_t-\vartheta)$, after which $v^d$ drops by $\gamma\ssp_t$ and $v^s$ by $\vartheta\ssp_t$ ($\gamma=0.5$, $\vartheta=1$, learned $\beta_1,\beta_2$ initialized at 0).
+Both update once per environment step, carry their state across steps and use the surrogate derivative of the world model.
+\TODO{Final model: thermometer soma, spike feedback, two channels.}
 \method: two PDN layers, 512 neurons with 4 channels (2 integrator, 2 resonant), retention times log-uniform in $[1,1000]$ and phases uniform in $[0,2\pi)$ at initialization, both learned.
 
 \paragraph{Benchmarks.}
@@ -45,7 +49,8 @@ GRSN~\cite{qin2025grsn}: gated current $c_t=F\odot c_{t-1}+(1-F)\odot I$ and mem
 \end{table}
 
 On BSuite the training window covers the whole episode, which R2I found necessary for memory length~\cite{samsami2024r2i}: 32, 64, 64 and 80 steps for $L=8$, 16, 32, 64 and 64, 80 and 128 steps for $L=51$, 71, 101.
-For $L\ge51$ we follow R2I: 1M steps and a different seed per parallel environment; the $L\le64$ runs share one seed across the four parallel environments, identically for all models.
+For $L\ge51$ we follow R2I with 1M steps; all runs use a different seed per parallel environment.
+At these lengths every model was run once more, with another seed, at its shortest length not learned; a length counts as learned if one of the runs learned it, and a model that fails at a length is not run at longer ones.
 POPGym uses the environment settings of R2I's code: DreamerV3's default reward head, unscaled rewards, eight environments, train ratio 64; the network sizes and the batch shape are those of our shared world model.
 R2I itself runs with the official POPGym configuration of its code (batches of $4\times1024$ steps), changed only in the budget (2M steps, as for all models) and the replay capacity (2M steps, so that no step of the run is evicted).
 
@@ -57,17 +62,16 @@ Capacity does not explain the results: the GRU core of \dv is larger than the co
 \paragraph{Evaluation.}
 BSuite evaluations average 32 episodes every 10k environment steps (20k with R2I's lengths), POPGym evaluations 16 episodes every 50k steps and DMC evaluations 10 episodes every 20k steps, all with the mode of the policy.
 \Cref{fig:rl_curves} smooths the evaluation returns with an exponential moving average, $m \leftarrow 0.6\,m + 0.4\,r$.
-For $L\le64$ the four parallel environments of a run share one seed and therefore present the same sequence of cues, for all models alike; the runs with R2I's lengths use a different seed per environment.
 The Heaviside step of the PDN soma is trained with the triangular surrogate derivative of \swm, $\max(0,\alpha-\alpha^2|x|)$ with $\alpha=2$.
-\Cref{tab:stability} shows how the return holds after it first reaches 0.9.
+\Cref{tab:rl_detail} gives, per BSuite length, the steps until the return first reaches 0.9, the final return, and how the return holds after 0.9.
 Code will be released.
 
 \begin{table*}[t]
   \centering\tabfont
   \setlength{\tabcolsep}{2.4pt}
-  \caption{\textbf{BSuite after the return first reaches 0.9}: mean return over that evaluation and all later ones, and in parentheses the fraction of them with a return of at least 0.5 (-- = 0.9 not reached; $^\dagger$lengths and budget of R2I).}
-  \label{tab:stability}
-  \input{tables/stability}
+  \caption{\textbf{BSuite in detail} (the success of \cref{tab:rl} is a return of 0.9 within the budget). Top: environment steps until the evaluation return first reaches 0.9 (-- = not within the budget). Middle: final return, mean of the last three evaluations. Bottom: mean return from the first 0.9 on, and in parentheses the fraction of those evaluations with a return of at least 0.5. $^\dagger$Lengths and budget of R2I, reported run as described in the text. \pend{Blue}: in progress; \nr: not run.}
+  \label{tab:rl_detail}
+  \input{tables/rl_detail}
 \end{table*}
 
 \section{Reward that depends on cue and action}
@@ -94,6 +98,16 @@ Every 500 updates we filter the held-out episodes from their start and compute t
 Random-action episodes of POPGym RepeatPrevious Easy ($k=4$) and Medium ($k=32$).
 The reward indicates whether the action names the suit of the card shown $k$ steps earlier; we use unit rewards ($\pm1$) because the environment's per-step reward of $\pm1/(n-k)$ is too small for a regression head to learn within the probe budget for any model.
 World models are trained for 10k updates with batches of 16$\times$64 and an action-indexed reward head; the AUC is computed over all steps of held-out episodes.
+
+\paragraph{Updates until 0.9.}
+\Cref{tab:probe_detail} reports how fast the probes of \cref{tab:probe,tab:ablation} learn.
+
+\begin{table}[t]
+  \centering\tabfont
+  \caption{\textbf{World-model probes: updates until the reward AUC exceeds 0.9} (-- = not within the budget; in parentheses the final AUC when it ends below 0.9). Bottom: the ablations of \cref{tab:ablation}. \pend{Blue}: in progress.}
+  \label{tab:probe_detail}
+  \resizebox{\columnwidth}{!}{\input{tables/probe_detail}}
+\end{table}
 
 \begin{figure*}[t]
   \centering
@@ -128,6 +142,7 @@ With A and $\tau_d=128$, the membrane potentials still encode it after 8 steps (
   \input{tables/policy}
 \end{table*}
 
+\TODO{Rewrite for the final model: the table now compares \method with the control that reads $(z_t,h_t)$ only.}
 \Cref{tab:policy} compares how the actor and critic of \method read the dendritic spikes.
 \method passes them to the first layer through a rank-64 factor and keeps 512 units, which gives the actor-critic 4.7M parameters.
 The second row uses full weights and narrows the actor-critic to the 3.4M of the baselines (142 units), the third uses full weights at 512 units (12.9M), and the last reads $(z_t,h_t)$ only (3.4M).
