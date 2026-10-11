@@ -296,9 +296,9 @@ def energy_table():
 
 def policy_table():
     """Supp.: the actor input of the final model. The dendritic spikes reach the actor and critic through rank-64
-    weights (4.7M); the control reads the soma spikes only (3.4M, the baselines' size). The control's R2I runs are
+    weights (4.1M: actor, critic and its slow copy on POPGym); the control reads the soma spikes only (3.4M, the baselines' size). The control's R2I runs are
     the diagnostic runs of round 36 (L71, L101; L51 not run)."""
-    variants = [(mt.OURS["bsuite"], r"+ dendritic spikes, rank 64 (\method)", "4.7M"),
+    variants = [(mt.OURS["bsuite"], r"+ dendritic spikes, rank 64 (\method)", "4.1M"),
                 (mt.OURSALT["bsuite"], r"only", "3.4M")]
     dmc = ["walker_walk", "cheetah_run", "cartpole_swingup"]
     lines = [r"\begin{tabular}{@{}l c ccccccc cc ccc@{}}", r"\toprule",
@@ -314,6 +314,31 @@ def policy_table():
         lines.append(label + " & " + size + " & " + " & ".join(cells) + r" \\")
     lines += [r"\bottomrule", r"\end{tabular}"]
     write("policy", lines)
+
+
+PIX_DIAG = [("LIF_tau2", "Recurrent LIF"), ("base_tau2", r"\swm"), ("ann_tau2", r"\dv (ANN)"),
+            ("PD2Lv2_tau1000", r"one spike per step, $M=4$"), ("PD2Lv2stepfbch2_tau1000", r"one spike per step + feedback"),
+            ("PD2Lv2thermoch2_tau1000", r"spike count"), ("PD2Lv2thermofbch2_tau1000", r"spike count + feedback (\method)")]
+
+
+def pix_diag_table():
+    """Supp.: world models trained alone on the same recorded pixel walker episodes (diag_wm_offline.py, 30k updates,
+    EXPERIMENTS.md §19.22, §19.27): image loss, KL, open-loop image loss 1 and 4 steps ahead, R^2 of a linear
+    read-out of the walker's velocity and orientation from h_t. The PDN rows differ only in the soma and feedback."""
+    keys = [("recon", "{:.1f}"), ("kl", "{:.1f}"), ("ol1", "{:.1f}"), ("ol4", "{:.0f}"), ("r2_vel_h", "{:.2f}"), ("r2_ori_h", "{:.2f}")]
+    lines = [r"\begin{tabular}{@{}l cccc cc@{}}", r"\toprule",
+             r" & \multicolumn{4}{c}{image loss $\downarrow$} & \multicolumn{2}{c}{read-out $R^2$ $\uparrow$} \\",
+             r"\cmidrule(lr){2-5}\cmidrule(l){6-7}",
+             r"model & recon. & KL & 1 step & 4 steps & velocity & orient. \\", r"\midrule"]
+    for name, label in PIX_DIAG:
+        run = f"diag_pix/dmc_walker_walk/{name}"
+        last = mt.rows(run)[-1] if mt.rows(run) else None
+        cells = [wrap(f.format(last[k]), run) if last else missing(run) for k, f in keys]
+        if name == "PD2Lv2_tau1000":
+            lines.append(r"\midrule")
+        lines.append(label + " & " + " & ".join(cells) + r" \\")
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("pix_diag", lines)
 
 
 def numbers():
@@ -373,5 +398,6 @@ if __name__ == "__main__":
     mm_dmc_energy_table()
     energy_table()
     policy_table()
+    pix_diag_table()
     (OUT / "stability.tex").unlink(missing_ok=True)  # merged into rl_detail.tex (2026-10-11)
     print("tables written to", OUT)

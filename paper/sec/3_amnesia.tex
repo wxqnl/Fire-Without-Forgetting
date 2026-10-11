@@ -70,5 +70,5 @@ The gain does not work by raising the firing rate: capped at a firing rate of 0.
 
 \emph{Removing resets is not sufficient for longer memory.}
 A+B+G fails at 64 steps even with $\tau_d=512$, and in reinforcement learning it stops at 32 steps (\swmnr in \cref{fig:memory_length}).
-Its time constants are counted in simulation steps, its soma still resets, and its dendrites still receive the core's spikes.
-\Cref{sec:method} removes all three; in our model, a resetting soma alone loses 64-step recall (\cref{sec:ablation}).
+Its time constants are counted in simulation steps, and its soma still resets.
+\Cref{sec:method} removes both; in our model, a resetting soma alone loses 64-step recall (\cref{sec:ablation}).

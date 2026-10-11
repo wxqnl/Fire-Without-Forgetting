@@ -1852,3 +1852,12 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
   - 附录：`rl_detail.tex`（步数、最终回报、学会后的平均回报，取代 `stability.tex`），`probe_detail.tex`（模型和消融的更新数）。
 - 表格换成最终模型（`scripts/main_tables.py` 的 `OURS`）：BSuite L8–L64 用 rl3；R2I 长度的报告运行由 `seed()` 按重跑规则选；行为 Spiking-WM、LIF、GRSN、DH-SNN、TC-LIF、DreamerV3、本文，A+B+G 只在附录明细表和 §3；表 3 加像素 walker 一列；表 4 换成最终模型的 14 个消融；附录 actor 输入表换成最终模型对只读胞体的对照（3.4M，R2I 长度用 diag_r2i 的运行）。
 - 论文：表注、Setup 的模型和探针指标、补充材料的 DH-SNN/TC-LIF 实现与 BSuite 种子说明已改；结果段落、方法部分（仍写 4 通道、Heaviside 胞体、无反馈）和附录 actor 输入段标了 TODO，等训练跑完一起改。能耗表待 rl3 L32 的运行（含 DH-SNN、TC-LIF）跑完后统一重测；`energy.py` 还要加这两种单元的计数。
+
+### 19.49 方法部分与主图换成最终模型（10 月 11 日 08:30；用户："1 你改吧，那模型主图也要重新生成了，美观一点，清晰一点"）
+
+- §4 重写：输入电流 `LN(B x_t + R s̄_{t-1})`（脉冲反馈）；每个神经元 M = 2 个通道（一个积分、一个共振）；无状态胞体在第 k 个仿真步发 `H(N(u_t) − kθ/T)`，一个环境步内的脉冲数按 T + 1 级编码；"记忆路径不经过阈值"改成"沿通道衰减的路径不经过阈值，反馈是第二条路径，只写入不清零；去掉反馈仍能回忆 64 步（表 4）"；新增一段"脉冲计数和反馈用于预测运动"，引用像素诊断。actor-critic 读第二层树突的 3 个状态变量/神经元，即每个仿真步 3072 个二值输入。
+- 参数量（POPGym，从 checkpoint 数，actor + critic + critic 慢更新副本，与基线 3.4M 同一算法）：最终模型 actor-critic 4.1M（原写 4.7M 是旧模型），世界模型 8.56M（核心 2.64M）。正文 Setup、附录参数和能耗段、actor 输入表已改；"恰好 3.4M 时仍学会所有 BSuite 长度"一句是旧模型的 142 单元对照，删去，改为指向只读 (z_t, h_t) 的 3.4M 对照。
+- §3 结尾："§4 去掉这三点"改成两点（时间常数按仿真步计、胞体复位）：最终模型的树突接收本层脉冲。
+- 附录新增像素世界模型诊断表（`paper_tables.pix_diag_table()` → `tables/pix_diag.tex`，`diag_pix` 的 30k 次更新结果）：一步预测图像损失 LIF 44.1、Spiking-WM 46.2、最终模型 44.3、只有脉冲计数无反馈 46.0、每步一个脉冲加反馈 55.3、每步一个脉冲（M = 4，无反馈）54.9。
+- 主图（`paper/fig/overview_svg.py`）重画：每个神经元两条通道、各神经元旁边画脉冲计数、反馈 R、(b) 中 PDN 的反馈箭头写入通道但不清零；最小字号从 13–15 提到 17–19 单位（约 5pt），去掉重叠。rsvg-convert 不在 fwf 环境里，用 `seamdet` 环境的：`python fig/overview_svg.py /home/user01/miniconda3/envs/seamdet/bin/rsvg-convert`。
+- 正文现在超出 8 页约 1/3 页（新增两行基线、方法多一段、结果段落仍是旧文字），结果部分重写时一起压回 8 页。

@@ -27,7 +27,7 @@ All models share one spiking world model, the DreamerV3-style network of \swm~\c
 and \textbf{\method} with two PDN layers.
 As the state of the art among ANN world models on memory tasks we also report \textbf{R2I}~\cite{samsami2024r2i}, a DreamerV3 agent with a state-space recurrence, run with its official code and configuration on POPGym, and with its published results on BSuite.
 Within a benchmark, all models use identical hyperparameters, budgets and evaluation.
-The actor and critic of every model read $(z_t,h_t)$, where $h_t$ is the spike output of the core (for \dv its GRU state); those of \method also read its dendritic state as spikes (\cref{sec:wm}), which gives its actor-critic 4.7M parameters instead of 3.4M (Supp.~\suppref{supp:impl}{A}); at exactly 3.4M it still learns every BSuite length and RepeatPrevious Medium (Supp.~\suppref{supp:policy}{E}).
+The actor and critic of every model read $(z_t,h_t)$, where $h_t$ is the spike output of the core (for \dv its GRU state); those of \method also read its dendritic state as spikes (\cref{sec:wm}), which gives its actor-critic 4.1M parameters instead of 3.4M (Supp.~\suppref{supp:impl}{A}); Supp.~\suppref{supp:policy}{E} compares an actor-critic of 3.4M that reads $(z_t,h_t)$ only.
 On POPGym, \method has 8.6M world-model parameters, \dv 7.5M and \swm 7.2M.
 
 \paragraph{Benchmarks.}
@@ -142,6 +142,6 @@ Half of each kind keeps both strengths.
 On DMC (\cref{tab:mm}), \method reaches \numFwfDmcWalk, \numFwfDmcRun\ and \numFwfDmcSwing\ on walker walk, cheetah run and cartpole swingup, against 923, 343 and 497 for \swm and 953, 699 and 871 for \dv in the same setting.
 
 Per environment step (Supp.~\suppref{supp:energy}{H}), the agent of \method, world-model filter and actor, costs \numEnergyAgent\,$\mu$J, \numEnergyRatio$\times$ less than \dv (\numEnergyAgentDv\,$\mu$J); the filter alone costs \numEnergyFilter\ against \numEnergyFilterDv\,$\mu$J, at a recurrent firing rate of \numEnergyRate.
-Most of its operations are accumulates triggered by spikes, including those of the 6144 dendritic spike inputs of the actor (\numEnergyActor\,$\mu$J for the whole actor); the multiply-accumulates of the dendrites are local to each neuron (3 per integrator and 6 per resonant channel and step).
+Most of its operations are accumulates triggered by spikes, including those of the 3072 dendritic spike inputs of the actor (\numEnergyActor\,$\mu$J for the whole actor); the multiply-accumulates of the dendrites are local to each neuron (3 per integrator and 6 per resonant channel and step).
 The spiking baselines cost \numEnergySpiking\,$\mu$J but do not remember beyond 8--32 steps.
 These estimates count 32-bit arithmetic only~\cite{horowitz2014energy}, the convention of SNN energy reports; memory access, which a hardware-aware study shows can dominate~\cite{dampfhoffer2023energy}, is not included for any model.

@@ -23,8 +23,7 @@ GRSN~\cite{qin2025grsn}: gated current $c_t=F\odot c_{t-1}+(1-F)\odot I$ and mem
 DH-SNN~\cite{zheng2024dhsnn}: the recurrent DH-LIF layer of the official code; each neuron has 8 dendritic branches, each reading a fixed random eighth of the inputs $[\xx_t,\ssp_{t-1}]$, with currents $i_{t,b}=\beta_b\odot i_{t-1,b}+(1-\beta_b)\odot W_b[\xx_t,\ssp_{t-1}]$ and membrane $u_t=\alpha\odot u_{t-1}+(1-\alpha)\odot\sum_b i_{t,b}-\vartheta\ssp_{t-1}$, $\ssp_t=\Hv(u_t-\vartheta)$, $\vartheta=1$; $\beta_b$ and $\alpha$ are sigmoids of learned time constants initialized as in the code ($U[2,6]$ and $U[0,4]$); as for GRSN, a LayerNorm on the branch inputs lets the neurons reach threshold.
 TC-LIF~\cite{zhang2024tclif}: the two-compartment neuron of the official code with input current $W\xx_t+U\ssp_{t-1}$: $v^d_t=v^d_{t-1}-\sigma(\beta_1)v^s_{t-1}+W\xx_t+U\ssp_{t-1}$, $v^s_t=v^s_{t-1}+\sigma(\beta_2)v^d_t$, $\ssp_t=\Hv(v^s_t-\vartheta)$, after which $v^d$ drops by $\gamma\ssp_t$ and $v^s$ by $\vartheta\ssp_t$ ($\gamma=0.5$, $\vartheta=1$, learned $\beta_1,\beta_2$ initialized at 0).
 Both update once per environment step, carry their state across steps and use the surrogate derivative of the world model.
-\TODO{Final model: thermometer soma, spike feedback, two channels.}
-\method: two PDN layers, 512 neurons with 4 channels (2 integrator, 2 resonant), retention times log-uniform in $[1,1000]$ and phases uniform in $[0,2\pi)$ at initialization, both learned.
+\method: two PDN layers of 512 neurons with 2 channels each (one integrator, one resonant), retention times log-uniform in $[1,1000]$ and phases uniform in $[0,2\pi)$ at initialization, both learned; spike-count soma with thresholds $k\vartheta/T$, $k=1,\dots,5$, $\vartheta=0.5$; feedback $R$ of each layer's firing rate into its dendrites.
 
 \paragraph{Benchmarks.}
 \Cref{tab:supp_bench} lists the settings. Within a benchmark they are identical for all models.
@@ -55,7 +54,7 @@ POPGym uses the environment settings of R2I's code: DreamerV3's default reward h
 R2I itself runs with the official POPGym configuration of its code (batches of $4\times1024$ steps), changed only in the budget (2M steps, as for all models) and the replay capacity (2M steps, so that no step of the run is evicted).
 
 \paragraph{Parameters.}
-On POPGym the world models have 7.2M (\swm, \swmnr), 6.4M (LIF), 6.5M (GRSN), 7.5M (\dv) and 8.6M (\method) parameters, of which the recurrent core has 1.3M, 0.5M, 0.5M, 1.6M and 2.6M; the actor-critic has 3.4M for the baselines and 4.7M for \method, which also reads the 6144 dendritic spikes through a rank-64 factor (Supp.~\suppref{supp:policy}{E} controls for this size).
+On POPGym the world models have 7.2M (\swm, \swmnr), 6.4M (LIF), 6.5M (GRSN), 7.5M (\dv) and 8.6M (\method) parameters, of which the recurrent core has 1.3M, 0.5M, 0.5M, 1.6M and 2.6M; the actor-critic (actor, critic and the critic's slowly updated copy) has 3.4M for the baselines and 4.1M for \method, which also reads the 3072 dendritic spikes through a rank-64 factor (Supp.~\suppref{supp:policy}{E} controls for this size).
 Capacity does not explain the results: the GRU core of \dv is larger than the cores of the spiking baselines and fails at 64 steps, and variants of \method with the same size but dendrites cleared at every step, or a single retention time of 16 steps, stay at chance (\cref{tab:ablation}).
 
 
@@ -176,6 +175,20 @@ Without the dendritic spikes the policy learns 64 steps slightly sooner, since a
 \Cref{tab:supp_diag} shows that on Medium the world models themselves fail to predict the reward, so the policy cannot do better than chance.
 This diagnosis motivated the resonant channels; the probe of \cref{sec:probe} confirms that they solve it.
 
+\paragraph{Pixel world model.}
+To compare world models on the same data, we train them alone on the recorded episodes of a \dv pixel walker run (the last 64 episodes held out) for 30k updates.
+We report the image loss of the posterior, the KL between posterior and prior, the image loss of the prior 1 and 4 steps after the last observed frame (open loop with the recorded actions), and the $R^2$ of a linear read-out of the walker's velocity and orientation from $h_t$.
+\Cref{tab:pix_diag} varies only the soma and the feedback of the PDN.
+With one spike per step, the world model reconstructs the frames as well as \swm but predicts motion worse; the spike count closes most of the gap, and the feedback the rest, to the level of recurrent LIF neurons.
+
+\begin{table}[h]
+  \centering\tabfont
+  \setlength{\tabcolsep}{3pt}
+  \caption{\textbf{Pixel world models} trained on the same walker episodes (30k updates). PDN rows: $M=2$ channels unless noted; the last row is \method.}
+  \label{tab:pix_diag}
+  \resizebox{\columnwidth}{!}{\input{tables/pix_diag}}
+\end{table}
+
 \section{Memory Maze}
 \label{supp:mm}
 
@@ -192,10 +205,10 @@ All models use the size of DreamerV3-S, smaller than the RSSM of the reference r
 
 We count the operations of the world-model filter per environment step, \ie, the encoder and the posterior update that an agent runs at every step, averaged over evaluation episodes of the BSuite $L=32$ RL models.
 A synaptic operation on a spike input is an accumulate (AC, 0.9\,pJ), any operation on a graded input a multiply-accumulate (MAC, 4.6\,pJ)~\cite{horowitz2014energy}.
-For the PDN, the synaptic maps $B\xx_t$ and $D\xx_t$ read spike rates and count as ACs per spike; the dendritic update counts 3 MACs per integrator channel (decay, write, readout) and 6 per resonant channel. For all models, a normalization counts 2 MACs per element and a neuron update counts per element (LIF 1 per simulation step, MCN 4 per simulation step, GRSN and GRU 4 per environment step).
+For the PDN, the synaptic maps $B\xx_t$, $R\bar\ssp_{t-1}$ and $D\xx_t$ read spike rates and count as ACs per spike; the dendritic update counts 3 MACs per integrator channel (decay, write, readout) and 6 per resonant channel. For all models, a normalization counts 2 MACs per element and a neuron update counts per element (LIF 1 per simulation step, MCN 4 per simulation step, GRSN and GRU 4 per environment step).
 Memory access is not counted for any model.
-For the RL agents we also count the actor, which runs at every step: it reads $(z_t,h_t)$, and for \method also the 6144 dendritic spike inputs, through the rank-64 factor (\cref{sec:wm}); the factor reads spikes (ACs), and the first layer reads its 64 graded outputs (MACs).
-A binary spike frame counts once per simulation step; a spike that the PDN or GRSN soma repeats over the $T$ simulation steps counts $T$ times.
+For the RL agents we also count the actor, which runs at every step: it reads $(z_t,h_t)$, and for \method also the 3072 dendritic spike inputs, through the rank-64 factor (\cref{sec:wm}); the factor reads spikes (ACs), and the first layer reads its 64 graded outputs (MACs).
+A binary spike frame counts once per simulation step: each spike of the PDN soma's count counts once, and a spike that the GRSN soma repeats over the $T$ simulation steps counts $T$ times.
 \Cref{tab:energy} lists the counts; the recurrent firing rate of \method is \numEnergyRate.
 
 \begin{table}[t]
