@@ -1406,6 +1406,97 @@ class GRSNCell(nn.Module):
         return outputs, [torch.stack(outputs, dim=0)]
 
 
+class DHSNNCell(nn.Module):
+    """Baseline: DH-SRNN (Zheng et al., Nature Communications 2024), the recurrent DH-LIF layer of the official code
+    (eva1801/DH-SNN, spike_rnn_test_denri_wotanh_R), one update per environment step with its state carried, as
+    GRSN. Each neuron has `branches` dendritic branches with their own timing factor; every branch sees a random,
+    non-overlapping 1/branches of the inputs [x, s_{t-1}] (a fixed mask):
+
+        i_t,d = β_d ⊙ i_{t-1,d} + (1 - β_d) ⊙ (W_d [x_t, s_{t-1}])     β_d = sigmoid(τ_n,d), τ_n ~ U[low_n, high_n]
+        u_t = α ⊙ u_{t-1} + (1 - α) ⊙ Σ_d i_t,d - θ s_{t-1}           α = sigmoid(τ_m), τ_m ~ U[low_m, high_m]
+        s_t = H(u_t - θ)
+
+    Defaults are those of the code's SHD DH-SRNN (8 branches, τ_n ~ U[2, 6], τ_m ~ U[0, 4], θ = 1). x is the rate of
+    the T input spikes and s_t is repeated T times; s_{t-1} is the previous step's output (state deter). The world
+    model's surrogate gradient is used instead of the code's multi-Gaussian one. Adaptation, as for GRSN: a LayerNorm
+    on the branch inputs W_d [x_t, s_{t-1}] puts them at the input scale of the other cells; without it the neurons
+    never reach θ in this world model (firing rate 0, EXPERIMENTS.md §19.44). Use with persist_state."""
+
+    def __init__(self, config, input_size, size, act=None, norm="PopNorm", device="cuda"):
+        super().__init__()
+        p = config.DHSNN
+        self.T, self._size, self.threshold, self.branches = config.spike_times, size, p["threshold"], p["branches"]
+        self.neuron = PDState(["i", "u"])
+        self.mem_sizes = {"i": size * self.branches, "u": size}
+        n_in = input_size + size
+        self.dense = nn.Linear(n_in, size * self.branches)
+        mask = torch.zeros(size * self.branches, n_in)
+        for k in range(size):  # as create_mask: a random permutation of the inputs split among the branches
+            perm = torch.randperm(n_in)
+            for d in range(self.branches):
+                mask[k * self.branches + d, perm[d * n_in // self.branches:(d + 1) * n_in // self.branches]] = 1
+        self.register_buffer("mask", mask)
+        self.in_norm = nn.LayerNorm(size * self.branches, eps=1e-3)
+        self.tau_n = nn.Parameter(torch.empty(size, self.branches).uniform_(p["low_n"], p["high_n"]))
+        self.tau_m = nn.Parameter(torch.empty(size).uniform_(p["low_m"], p["high_m"]))
+        self.act_fun = node.QGateGrad(alpha=2.0, requires_grad=False)
+
+    def forward(self, inputs, state):
+        x, s_prev = sum(inputs) / self.T, state[0][-1]
+        i, u = self.neuron.mems["i"], self.neuron.mems["u"]
+        if i is None:
+            i = torch.zeros(x.shape[0], self._size * self.branches, device=x.device)
+            u = torch.zeros(x.shape[0], self._size, device=x.device)
+        beta = torch.sigmoid(self.tau_n).flatten()
+        syn = F.linear(torch.cat([x, s_prev], -1), self.dense.weight * self.mask, self.dense.bias)
+        i = beta * i + (1 - beta) * self.in_norm(syn)
+        alpha = torch.sigmoid(self.tau_m)
+        u = alpha * u + (1 - alpha) * i.view(-1, self._size, self.branches).sum(-1) - self.threshold * s_prev
+        spike = self.act_fun(u - self.threshold)
+        self.neuron.mems["i"], self.neuron.mems["u"] = i, u
+        outputs = [spike] * self.T
+        return outputs, [torch.stack(outputs, dim=0)]
+
+
+class TCLIFCell(nn.Module):
+    """Baseline: TC-LIF (Zhang et al., AAAI 2024), the two-compartment neuron of the official code (ZhangShimin1/TC-LIF,
+    TCLIFNode) in its recurrent network (RecurrentContainer: input current W x_t + U s_{t-1}), one update per
+    environment step with both compartments carried, as GRSN:
+
+        v1_t = v1_{t-1} - sigmoid(β1) v2_{t-1} + I_t      (dendritic compartment)
+        v2_t = v2_{t-1} + sigmoid(β2) v1_t                (somatic compartment)
+        s_t = H(v2_t - θ);   soft reset: v1 -= γ s_t, v2 -= θ s_t
+
+    β1, β2 are learnable scalars; defaults are the code's (β1 = β2 = 0, γ = 0.5, θ = 1). x is the rate of the T input
+    spikes and s_t is repeated T times. The world model's surrogate gradient is used instead of the code's triangle.
+    Use with persist_state."""
+
+    def __init__(self, config, input_size, size, act=None, norm="PopNorm", device="cuda"):
+        super().__init__()
+        p = config.TCLIF
+        self.T, self._size, self.threshold, self.gamma = config.spike_times, size, p["threshold"], p["gamma"]
+        self.neuron = PDState(["v1", "v2"])
+        self.mem_sizes = {"v1": size, "v2": size}
+        self.inp = nn.Linear(input_size, size)
+        self.hid = nn.Linear(size, size)
+        self.decay = nn.Parameter(torch.tensor([float(p["beta1"]), float(p["beta2"])]))
+        self.act_fun = node.QGateGrad(alpha=2.0, requires_grad=False)
+
+    def forward(self, inputs, state):
+        x, s_prev = sum(inputs) / self.T, state[0][-1]
+        v1, v2 = self.neuron.mems["v1"], self.neuron.mems["v2"]
+        if v1 is None:
+            v1 = torch.zeros(x.shape[0], self._size, device=x.device)
+            v2 = torch.zeros_like(v1)
+        v1 = v1 - torch.sigmoid(self.decay[0]) * v2 + self.inp(x) + self.hid(s_prev)
+        v2 = v2 + torch.sigmoid(self.decay[1]) * v1
+        spike = self.act_fun(v2 - self.threshold)
+        v1, v2 = v1 - self.gamma * spike, v2 - self.threshold * spike
+        self.neuron.mems["v1"], self.neuron.mems["v2"] = v1, v2
+        outputs = [spike] * self.T
+        return outputs, [torch.stack(outputs, dim=0)]
+
+
 class Conv2dSame(torch.nn.Conv2d):
     def calc_same_pad(self, i, k, s, d):
         return max((math.ceil(i / s) - 1) * s + (k - 1) * d + 1 - i, 0)

@@ -1799,3 +1799,16 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
 - 第 41 轮（`make_jobs.round41()`，2 个任务，排在队尾）：LIF、GRSN 的 R2I L51，命令复制自 Spiking-WM 的 L51 任务。学不会 L51 就不再跑 L71、L101。任务列表备份为 `runs/jobs.round40.jsonl`。
 - A+B+G 是我们在 Spiking-WM 上做的最小修改（论文里的 \swmnr，§3"遗忘"一节）：A 跨环境步保留状态，B 树突不随胞体复位，G 树突输入增益 √(τ/2)，τ = 128。它回答的是"只去掉复位够不够"：能到 32 步，64 步学不会。它是论文故事的一部分，建议保留。
 - 较新的 LIF 变体：基线里已有 GRSN（AAAI 2025）。针对长记忆、又和本文最接近的是 DH-SNN（Nature Communications 2024，异质树突时间常数）和 TC-LIF（AAAI 2024，双室神经元），论文相关工作里已引用。建议加 DH-SNN 作为新基线（不替换 A+B+G），待用户确认。
+
+### 19.44 基线只跑核心两张表；A+B+G 当消融；加 DH-SNN、TC-LIF（10 月 11 日 02:50；用户："DH-SNN 和 TC-LIF 都加上吧。但是我其实是想说，我们这么多 benchmark 的表，没必要所有的 baseline 都跑你懂吧，时间成本太高了，当然主表或者最核心的两个表都跑，其他的没必要都跑，就比如 ABG 这个，完全可以当做消融的地方的，更不需要每个都跑了"）
+
+- 核心两张表：表 1（RL：BSuite 记忆长度 rl3 L8–L64、R2I L51–L101，POPGym RepeatPrevious）和世界模型探针表（回忆 L8–L64，RepeatPrevious Easy/Medium/Hard）。新基线只跑这两张。
+- A+B+G 以后当消融，不再新加运行：第 37 轮的 A+B+G 像素 walker（01:11 启动）01:46 停掉，日志移到 `runs/_superseded/abg_pix_round37`。已有的 A+B+G 结果保留。
+- B 的只读胞体对照（附录消融）只留 POPGym Medium 一个任务（同 §19.7 用户的说法："就在消融里面做一个任务就够了呀"），第 40 轮里另外 8 个还没启动的任务删除。
+- 新基线（`networks.DHSNNCell`、`networks.TCLIFCell`，配置块 `dhsnn`、`tclif`），按官方代码实现，和 GRSN 一样每个环境步更新一次、状态跨步保留：
+  - DH-SRNN（eva1801/DH-SNN，`spike_rnn_test_denri_wotanh_R`，SHD 设置）：每个神经元 8 个树突分支，每支只连随机、互不重叠的 1/8 输入（固定掩码）；分支时间因子 β = sigmoid(τ_n)，τ_n ~ U[2, 6]；胞体 α = sigmoid(τ_m)，τ_m ~ U[0, 4]；θ = 1，软复位。
+    - 按原样在本世界模型里完全不发放（发放率 0，梯度 0）。和 GRSN 一样，在分支输入上加 LayerNorm 后梯度能传，但初始发放率仍很低（L64 后段 0.004）：τ_n ~ U[2, 6] 的树突要几十步才充满。保留官方初始化，用探针先看能不能学起来。
+    - 掩码以稠密矩阵存储：单元参数 4.20M，实际有效 0.53M，与其他基线相同。
+  - TC-LIF（ZhangShimin1/TC-LIF，`TCLIFNode` + `RecurrentContainer`）：树突、胞体两个房室，β1 = β2 = 0、γ = 0.5、θ = 1（代码默认值），输入电流 W x_t + U s_{t-1}。不加改动就能发放（L64 后段 0.10）。
+  - 两者都用本世界模型共用的替代梯度，不用原代码的多高斯 / 三角形替代梯度。
+- 第 42 轮（`make_jobs.round42()`，28 个任务，复制 GRSN 的任务）：14 个探针排在队首（检查能不能学），14 个 RL 排在队尾。任务列表备份为 `runs/jobs.round41b.jsonl`。

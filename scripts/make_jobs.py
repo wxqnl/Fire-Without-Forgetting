@@ -1057,7 +1057,9 @@ def round37(jobs):
     copied from the Spiking-WM pixel job with each baseline's cell configs as in dmc500."""
     src = next(j for j in jobs if j["name"] == "dmcpix/dmc_walker_walk/base_tau2/s0")
     out = []
-    for cell, cfg in (("LIF_tau2", "lifcell"), ("GRSN_tau2", "grsn"), ("ABG_tau128", "persist nodendreset taud128 dendgain")):
+    # 2026-10-11 02:30 (§19.44), user: "ABG 这个，完全可以当做消融的地方的，更不需要每个都跑了": A+B+G dropped (stopped
+    # after 1h20m, log moved to runs/_superseded/abg_pix_round37)
+    for cell, cfg in (("LIF_tau2", "lifcell"), ("GRSN_tau2", "grsn")):
         name = f"dmcpix/dmc_walker_walk/{cell}/s0"
         cmd = src["cmd"].replace("--configs dmc_vision ", f"--configs dmc_vision {cfg} ").replace(f"/runs/{src['name']}", f"/runs/{name}")
         assert f"dmc_vision {cfg} --task" in cmd and "--steps 1e6" in cmd and cmd.endswith(f"/runs/{name}")
@@ -1096,10 +1098,9 @@ def round40(jobs):
     RepeatPrevious Easy and Hard, xor L101, the pixel world-model diagnostic), the table 7 ablations on B's world
     model (variants with feedback; the 1-layer ones and 'no feedback' are the same models as before), and last the
     soma-only actor-critic control of the appendix. The old model's runs stay until the decision on B."""
-    main, probes, abl, ctrl = [], [], [], []
+    main, probes, abl = [], [], []
     for L in (8, 16, 32, 64):
         main.append(swap_cell(jobs, f"rl3/bsuite_memlen-{L}/PD2Lv2r64thermofbch2_tau1000/s0", "PD2Lv2r64thermofb1ch2_tau1000"))
-        ctrl.append(swap_cell(jobs, f"rl3/bsuite_memlen-{L}/PD2Lreshalfthermofbch2_tau1000/s0", "PD2Lreshalfthermofb1ch2_tau1000"))
     for name in ("r2i/bsuite_memlen-51", "r2i/bsuite_memlen-101", "popgym/popgym_RepeatPreviousEasy"):
         main.append(swap_cell(jobs, f"{name}/PD2Lv2r64thermofbch2_tau1000/s0", "PD2Lv2r64thermofb1ch2_tau1000"))
     for name in ("recall/bsuite_memlen-8-recall", "recall/bsuite_memlen-16-recall", "recall/bsuite_memlen-32-recall",
@@ -1112,9 +1113,9 @@ def round40(jobs):
         if cell.startswith("SDD") and " pdfeedback " in j["cmd"] and not cell.startswith("SDD1L"):
             stem, tau = cell.rsplit("_tau", 1)  # SDDreset_tau1000 -> SDDresetfb1_tau1000, SDD_tau16 -> SDDfb1_tau16
             abl.append(swap_cell(jobs, j["name"], f"{stem}fb1_tau{tau}"))
-    for name in ("dmc500/dmc_walker_walk", "dmc500/dmc_cheetah_run", "dmc500/dmc_cartpole_swingup",
-                 "popgym/popgym_RepeatPreviousEasy", "popgym/popgym_RepeatPreviousMedium"):
-        ctrl.append(swap_cell(jobs, f"{name}/PD2Lreshalfthermofbch2_tau1000/s0", "PD2Lreshalfthermofb1ch2_tau1000"))
+    # 2026-10-11 02:30 (§19.44): the actor-critic control is an appendix ablation, one task is enough (as in §19.7,
+    # user: "就在消融里面做一个任务就够了呀"): POPGym Medium only, where the actor input mattered most
+    ctrl = [swap_cell(jobs, "popgym/popgym_RepeatPreviousMedium/PD2Lreshalfthermofbch2_tau1000/s0", "PD2Lreshalfthermofb1ch2_tau1000")]
     out = main + probes + abl + ctrl
     assert not {j["name"] for j in out} & {j["name"] for j in jobs}, "a copy kept the name of an existing job"
     return out
@@ -1132,6 +1133,24 @@ def round41(jobs):
         assert f"bsuite {cfg} rewardbyact" in cmd and cmd.endswith(f"/runs/{name}")
         out.append(dict(name=name, cmd=cmd, logdir=str(RUNS / name), mem_gb=src["mem_gb"]))
     return out
+
+
+def round42(jobs):
+    """2026-10-11 02:50 (EXPERIMENTS.md §19.44), user: "DH-SNN 和 TC-LIF 都加上吧。但是 ... 没必要所有的 baseline 都跑 ...
+    主表或者最核心的两个表都跑". DH-SRNN and TC-LIF (configs dhsnn, tclif) on the two core tables only: table 1
+    (BSuite rl3 L8-L64, R2I L51, POPGym RepeatPrevious Easy/Medium) and the world-model probes (recall L8-L64,
+    RepeatPrevious Easy/Medium/Hard). Copies of the GRSN jobs; the probes first, as the check that the cells learn."""
+    probes, rl = [], []
+    for j in jobs:
+        group = j["name"].split("/")[0]
+        if "/GRSN_tau2/" not in j["name"] or group not in ("recall", "diag_rp", "rl3", "r2i", "popgym"):
+            continue
+        for cell, cfg in (("DHSNN", "dhsnn"), ("TCLIF", "tclif")):
+            name = j["name"].replace("/GRSN_tau2/", f"/{cell}/")
+            cmd = j["cmd"].replace(" grsn ", f" {cfg} ").replace(f"/runs/{j['name']}", f"/runs/{name}")
+            assert f" {cfg} " in cmd and " grsn " not in cmd and cmd.endswith(f"/runs/{name}")
+            (probes if group in ("recall", "diag_rp") else rl).append(dict(name=name, cmd=cmd, logdir=str(RUNS / name), mem_gb=j["mem_gb"]))
+    return probes + rl
 
 
 def swap_cell(jobs, name, cell):
@@ -1179,6 +1198,10 @@ def main():
     easy = [j for j in jobs if j["name"] == "popgym/popgym_RepeatPreviousEasy/PD2Lreshalfthermofbch2_tau1000/s0"]
     jobs = jobs[:1] + easy + round38(jobs) + round39(jobs) + round40(jobs) + [j for j in jobs[1:] if j not in easy]
     jobs = jobs + round41(jobs)  # baselines last: they do not depend on the choice of our model
+    # the new baselines' probes right after the pinned job (they check that the cells learn), their RL runs after B's
+    r42 = round42(jobs)
+    n_probe = sum(j["name"].split("/")[0] in ("recall", "diag_rp") for j in r42)
+    jobs = jobs[:1] + r42[:n_probe] + jobs[1:] + r42[n_probe:]
     # 2026-10-09 (EXPERIMENTS.md §19.29), user: "可以停": the binary-soma Memory Maze run is superseded by the final
     # model's (round 30, which copies its job); stopped at 540k updates
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2Lv2_tau1000/s0"]

@@ -98,6 +98,8 @@ defaults:
   # baselines in the same world model (configs blocks lifcell, grsn)
   LIFRNN: {tau: 2.0, threshold: 0.5, gain: False}
   GRSN: {threshold: 1.0, beta_init: 0.5}
+  DHSNN: {branches: 8, low_n: 2.0, high_n: 6.0, low_m: 0.0, high_m: 4.0, threshold: 1.0}
+  TCLIF: {beta1: 0.0, beta2: 0.0, gamma: 0.5, threshold: 1.0}
 
   # Training
   batch_size: 16
@@ -386,6 +388,14 @@ lifcell:
   dyn_cell: 'LIFRNN'
 grsn:
   dyn_cell: 'GRSNCell'
+  persist_state: True
+# DH-SRNN (Zheng et al., Nature Communications 2024) and TC-LIF (Zhang et al., AAAI 2024), official-code defaults,
+# one update per env step with the state carried as GRSN (EXPERIMENTS.md §19.44)
+dhsnn:
+  dyn_cell: 'DHSNNCell'
+  persist_state: True
+tclif:
+  dyn_cell: 'TCLIFCell'
   persist_state: True
 liftau128:
   LIFRNN: {tau: 128.0}
