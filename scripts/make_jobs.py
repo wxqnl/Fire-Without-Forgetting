@@ -1120,6 +1120,20 @@ def round40(jobs):
     return out
 
 
+def round41(jobs):
+    """2026-10-11 02:15 (EXPERIMENTS.md §19.43), user: "可以补". R2I BSuite L51 for LIF and GRSN, which were not run
+    at the R2I lengths because they fail at 16 / 32 steps; copied from the Spiking-WM job with each baseline's cell
+    configs. As with the rerun rule, a model that does not learn L51 is not run at L71 and L101."""
+    src = next(j for j in jobs if j["name"] == "r2i/bsuite_memlen-51/base_tau2/s0")
+    out = []
+    for cell, cfg in (("LIF_tau2", "lifcell"), ("GRSN_tau2", "grsn")):
+        name = f"r2i/bsuite_memlen-51/{cell}/s0"
+        cmd = src["cmd"].replace("--configs bsuite ", f"--configs bsuite {cfg} ").replace(f"/runs/{src['name']}", f"/runs/{name}")
+        assert f"bsuite {cfg} rewardbyact" in cmd and cmd.endswith(f"/runs/{name}")
+        out.append(dict(name=name, cmd=cmd, logdir=str(RUNS / name), mem_gb=src["mem_gb"]))
+    return out
+
+
 def swap_cell(jobs, name, cell):
     """Copy of the job `name` with pdfeedback -> pdfeedback1 under the run name `cell`."""
     src = next(j for j in jobs if j["name"] == name)
@@ -1164,6 +1178,7 @@ def main():
     # candidate B (round 38) ahead of the pixel baselines, behind the POPGym Easy control (both decide the model)
     easy = [j for j in jobs if j["name"] == "popgym/popgym_RepeatPreviousEasy/PD2Lreshalfthermofbch2_tau1000/s0"]
     jobs = jobs[:1] + easy + round38(jobs) + round39(jobs) + round40(jobs) + [j for j in jobs[1:] if j not in easy]
+    jobs = jobs + round41(jobs)  # baselines last: they do not depend on the choice of our model
     # 2026-10-09 (EXPERIMENTS.md §19.29), user: "可以停": the binary-soma Memory Maze run is superseded by the final
     # model's (round 30, which copies its job); stopped at 540k updates
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2Lv2_tau1000/s0"]
