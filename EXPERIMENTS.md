@@ -1765,3 +1765,6 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
 - 第 38 轮（`make_jobs.round38()`，7 个任务，排在 POPGym Easy 对照之后、像素基线之前；任务列表备份为 `runs/jobs.round37.jsonl`）：
   - 探针关：L64 回忆、RepeatPrevious Medium（`PD2Lreshalfthermofb1ch2`）；
   - 筛选：R2I L71、DMC walker / cheetah / cartpole、POPGym Medium（`PD2Lv2r64thermofb1ch2`，最终模型的 actor-critic）。按完整协议长度跑，选中 B 时直接作为正式结果；在 800k / 300k / 1M 时按 §19.40 的判据判定。
+- 23:33：只读胞体的 L71 对照在 542.5k 也跌到 0.06（此前 13 次都 ≥ 0.88），比最终模型第一次回落（582k）还早。522.5k→542.5k 之间胞体码变了 0.42，前两个间隔是 0.15、0.17。
+  - 两次回落都发生在世界模型的码突然大变之后（变化是平时的 2.5–5 倍），和 actor 读什么无关。回落是 thermo + 反馈这个世界模型在长记忆任务上的问题，只读胞体也躲不开。
+  - 这让方案 B（改世界模型里的闭环）比任何只改 actor 的方案更对路。不带反馈的旧版本回落都少（旧 r64、PD2Lv2、PD2L），但完全去掉反馈时 RL 学得很慢（去掉反馈的 L71 诊断到 450k 还没学会）。
