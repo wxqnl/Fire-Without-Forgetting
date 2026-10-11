@@ -1166,6 +1166,27 @@ def round43(jobs):
     return out
 
 
+def priority(job):
+    """Queue class of a job (§19.46): 1 candidate B on the paper's tables (RL, Memory Maze, pixel, table 2 probes),
+    2 the new baselines on the core tables, 3 the pixel baselines, 5 the rest, 8 table 4 ablations, 9 the
+    supplementary items of B and the R2I L51 runs of LIF, GRSN, DH-SNN and TC-LIF (run if time is left)."""
+    group, cell = job["name"].split("/")[0], job["name"].split("/")[-2]
+    task = job["name"].split("/")[1]
+    if cell.startswith("SDD") and "fb1" in cell:
+        return 8
+    if group == "r2i" and task == "bsuite_memlen-51" and cell in ("LIF_tau2", "GRSN_tau2", "DHSNN", "TCLIF"):
+        return 9
+    if "fb1ch2" in cell:
+        if group in ("xor", "diag_pix") or task == "bsuite_memlen-101-recall" or cell.startswith("PD2Lreshalf") and group == "popgym":
+            return 9
+        return 1
+    if cell in ("DHSNN", "TCLIF"):
+        return 3 if group == "dmcpix" else 2
+    if group == "dmcpix":
+        return 3
+    return 5
+
+
 def swap_cell(jobs, name, cell):
     """Copy of the job `name` with pdfeedback -> pdfeedback1 under the run name `cell`."""
     src = next(j for j in jobs if j["name"] == name)
@@ -1222,6 +1243,9 @@ def main():
     for job in jobs:  # DreamerV3 (ANN) needs about 4 GB (measured 2026-09-30), the spiking models 14-20 GB
         if "/ann_" in job["name"] and job["mem_gb"] > 6:
             job["mem_gb"] = 7 if job["name"].startswith("mmaze") else 6
+    # 2026-10-11 02:30 (EXPERIMENTS.md §19.46), user: "3 表四可以稍微往后排？ 4 ... 因为当前时间原因可以这么干 ... 5 补充材料
+    # ... 可以先放后面": queue order by class, stable within a class; the pinned job stays first
+    jobs = [jobs[0]] + sorted(jobs[1:], key=priority)
     # 2026-10-11 (EXPERIMENTS.md §19.45): the world-model probes take 5-7.5 GB, not the 2.5-6 GB declared; with 30 of
     # them started at once the GPUs ran full and three failed out of memory
     for job in jobs:
