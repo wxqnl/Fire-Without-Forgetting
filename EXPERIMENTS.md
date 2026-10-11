@@ -1889,3 +1889,4 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
 - `paper/scripts/paper_tables.py`：新增 `mmer()`，表 1 和附录 actor 输入表的 POPGym 两列、`\numFwfEasy`/`\numFwfMedium` 都改用它；R2I（官方代码只有训练回合）取 50k 步窗口内训练回合平均的最大值（与我们的评估间隔相同）；我们的模型训练与评估两种 MMER 相差 ≤ 0.07（原来的"≤ 0.04"是最后 200k 窗口的值），表注同步改。
 - 新数值（Easy / Medium）：本文 0.72 / 0.48；LIF 0.74 / −0.44；Spiking-WM 0.64 / −0.46；GRSN 0.37 / −0.47；DreamerV3 0.42 / −0.41；R2I −0.48 / −0.46；DH-SNN、TC-LIF 还在跑（200k 步，仍在随机水平）。结论不变：Medium 只有我们离开随机水平；Easy 我们仍略低于 LIF。
 - 内部状态表 `scripts/main_tables.py` 仍按最后三次平均，便于看训练末期的状态。
+- 12:10 用户："算了这个最后再说吧，也先别改 Paper 了"。POPGym 用 MMER 还是最后三次平均，留到最后再定；论文先不再改动。现在提交的版本（7b1284d）是 MMER，要回到最后三次平均就 `git revert 7b1284d`。
