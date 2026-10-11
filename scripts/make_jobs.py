@@ -1065,6 +1065,30 @@ def round37(jobs):
     return out
 
 
+def round38(jobs):
+    """2026-10-11 00:00 (EXPERIMENTS.md §19.41), candidate B of §19.40: spike feedback in the first layer only
+    (pdfeedback1), so that the second layer's dendrites, which the actor and critic read, stay linear in their
+    inputs. Gate: the L64 recall and RepeatPrevious Medium probes of the final model. Screening: R2I L71, the three
+    proprio DMC tasks and POPGym Medium with the final model's actor-critic, run at full protocol length so that
+    they stand as the final runs if B is chosen; the decision is taken at 800k / 300k / 1M (criteria in §19.40)."""
+    out = []
+    for task in ("recall/bsuite_memlen-64-recall", "diag_rp/popgym_RepeatPreviousMedium"):
+        out.append(swap_cell(jobs, f"{task}/PD2Lreshalfthermofbch2_tau1000/s0", "PD2Lreshalfthermofb1ch2_tau1000"))
+    for task in ("r2i/bsuite_memlen-71", "dmc500/dmc_walker_walk", "dmc500/dmc_cheetah_run",
+                 "dmc500/dmc_cartpole_swingup", "popgym/popgym_RepeatPreviousMedium"):
+        out.append(swap_cell(jobs, f"{task}/PD2Lv2r64thermofbch2_tau1000/s0", "PD2Lv2r64thermofb1ch2_tau1000"))
+    return out
+
+
+def swap_cell(jobs, name, cell):
+    """Copy of the job `name` with pdfeedback -> pdfeedback1 under the run name `cell`."""
+    src = next(j for j in jobs if j["name"] == name)
+    new = name.replace(name.split("/")[-2], cell)
+    cmd = src["cmd"].replace(" pdfeedback ", " pdfeedback1 ").replace(f"/runs/{name}", f"/runs/{new}")
+    assert " pdfeedback1 " in cmd and cmd.endswith(f"/runs/{new}")
+    return dict(name=new, cmd=cmd, logdir=str(RUNS / new), mem_gb=src["mem_gb"])
+
+
 def main():
     # priority: rounds 3-4, round 5 probes and BSuite RL, L64 ablations and controls (rounds 7, 9),
     # Memory Maze pipeline check (round 10), Memory Maze on the official data once downloaded, round 8
@@ -1097,6 +1121,9 @@ def main():
     med = "popgym/popgym_RepeatPreviousMedium/PD2Lreshalfthermofbch2_tau1000/s0"
     jobs = jobs[:4] + [j for j in jobs if j["name"] == med] + [j for j in jobs[4:] if j["name"] != med]
     jobs = jobs + round37(jobs)  # after everything already queued (the POPGym Easy control keeps its turn)
+    # candidate B (round 38) ahead of the pixel baselines, behind the POPGym Easy control (both decide the model)
+    easy = [j for j in jobs if j["name"] == "popgym/popgym_RepeatPreviousEasy/PD2Lreshalfthermofbch2_tau1000/s0"]
+    jobs = jobs[:1] + easy + round38(jobs) + [j for j in jobs[1:] if j not in easy]
     # 2026-10-09 (EXPERIMENTS.md §19.29), user: "可以停": the binary-soma Memory Maze run is superseded by the final
     # model's (round 30, which copies its job); stopped at 540k updates
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2Lv2_tau1000/s0"]

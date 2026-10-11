@@ -337,6 +337,10 @@ pdsomalif:
   PDRNN: {soma: 'lif', soma_tau: 2.0}
 pdfeedback:
   PDRNN: {spike_feedback: True}
+# spike feedback in the first layer only: the second layer's dendrites, which policymem reads, stay linear in their
+# inputs (EXPERIMENTS.md §19.41)
+pdfeedback1:
+  PDRNN: {spike_feedback: True, feedback_layers: 1}
 # two dendritic channels per neuron instead of four (one integrator, one resonant with resonanthalf): with
 # pdfeedback the synapses B and R together have the parameters of B alone with four channels (EXPERIMENTS.md §19.26)
 pdch2:
