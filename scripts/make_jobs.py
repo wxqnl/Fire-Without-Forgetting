@@ -1153,6 +1153,19 @@ def round42(jobs):
     return probes + rl
 
 
+def round43(jobs):
+    """2026-10-11 02:10 (EXPERIMENTS.md §19.46), user: "像素的还是都比吧，毕竟是 CVPR", then "要加": the pixel walker 1M
+    for DH-SRNN and TC-LIF too, copied from the LIF pixel job."""
+    src = next(j for j in jobs if j["name"] == "dmcpix/dmc_walker_walk/LIF_tau2/s0")
+    out = []
+    for cell, cfg in (("DHSNN", "dhsnn"), ("TCLIF", "tclif")):
+        name = f"dmcpix/dmc_walker_walk/{cell}/s0"
+        cmd = src["cmd"].replace(" lifcell ", f" {cfg} ").replace(f"/runs/{src['name']}", f"/runs/{name}")
+        assert f"dmc_vision {cfg} --task" in cmd and cmd.endswith(f"/runs/{name}")
+        out.append(dict(name=name, cmd=cmd, logdir=str(RUNS / name), mem_gb=src["mem_gb"]))
+    return out
+
+
 def swap_cell(jobs, name, cell):
     """Copy of the job `name` with pdfeedback -> pdfeedback1 under the run name `cell`."""
     src = next(j for j in jobs if j["name"] == name)
@@ -1202,6 +1215,7 @@ def main():
     r42 = round42(jobs)
     n_probe = sum(j["name"].split("/")[0] in ("recall", "diag_rp") for j in r42)
     jobs = jobs[:1] + r42[:n_probe] + jobs[1:] + r42[n_probe:]
+    jobs = jobs + round43(jobs)
     # 2026-10-09 (EXPERIMENTS.md §19.29), user: "可以停": the binary-soma Memory Maze run is superseded by the final
     # model's (round 30, which copies its job); stopped at 540k updates
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2Lv2_tau1000/s0"]
