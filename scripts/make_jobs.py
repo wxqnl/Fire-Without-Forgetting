@@ -1089,6 +1089,37 @@ def round39(jobs):
             swap_cell(jobs, "dmcpix1m/dmc_walker_walk/PD2Lv2r64thermofbch2_tau1000/s0", "PD2Lv2r64thermofb1ch2_tau1000")]
 
 
+def round40(jobs):
+    """2026-10-11 02:00 (EXPERIMENTS.md §19.42), user: "从设计上个来说，B 的世界模型是否是更好讲故事已经优化的更好的？如果
+    是的话那就直接全面跑他吧". Everything the paper needs from candidate B that rounds 38-39 do not run yet, in order:
+    main RL runs (BSuite rl3 L8-L64, R2I L51 and L101, POPGym Easy), world-model probes (recall L8-L32 and L101,
+    RepeatPrevious Easy and Hard, xor L101, the pixel world-model diagnostic), the table 7 ablations on B's world
+    model (variants with feedback; the 1-layer ones and 'no feedback' are the same models as before), and last the
+    soma-only actor-critic control of the appendix. The old model's runs stay until the decision on B."""
+    main, probes, abl, ctrl = [], [], [], []
+    for L in (8, 16, 32, 64):
+        main.append(swap_cell(jobs, f"rl3/bsuite_memlen-{L}/PD2Lv2r64thermofbch2_tau1000/s0", "PD2Lv2r64thermofb1ch2_tau1000"))
+        ctrl.append(swap_cell(jobs, f"rl3/bsuite_memlen-{L}/PD2Lreshalfthermofbch2_tau1000/s0", "PD2Lreshalfthermofb1ch2_tau1000"))
+    for name in ("r2i/bsuite_memlen-51", "r2i/bsuite_memlen-101", "popgym/popgym_RepeatPreviousEasy"):
+        main.append(swap_cell(jobs, f"{name}/PD2Lv2r64thermofbch2_tau1000/s0", "PD2Lv2r64thermofb1ch2_tau1000"))
+    for name in ("recall/bsuite_memlen-8-recall", "recall/bsuite_memlen-16-recall", "recall/bsuite_memlen-32-recall",
+                 "recall/bsuite_memlen-101-recall", "diag_rp/popgym_RepeatPreviousEasy", "diag_rp/popgym_RepeatPreviousHard",
+                 "xor/bsuite_memlen-101"):
+        probes.append(swap_cell(jobs, f"{name}/PD2Lreshalfthermofbch2_tau1000/s0", "PD2Lreshalfthermofb1ch2_tau1000"))
+    probes.append(swap_cell(jobs, "diag_pix/dmc_walker_walk/PD2Lv2thermofbch2_tau1000/s0", "PD2Lv2thermofb1ch2_tau1000"))
+    for j in jobs:
+        cell = j["name"].split("/")[-2]
+        if cell.startswith("SDD") and " pdfeedback " in j["cmd"] and not cell.startswith("SDD1L"):
+            stem, tau = cell.rsplit("_tau", 1)  # SDDreset_tau1000 -> SDDresetfb1_tau1000, SDD_tau16 -> SDDfb1_tau16
+            abl.append(swap_cell(jobs, j["name"], f"{stem}fb1_tau{tau}"))
+    for name in ("dmc500/dmc_walker_walk", "dmc500/dmc_cheetah_run", "dmc500/dmc_cartpole_swingup",
+                 "popgym/popgym_RepeatPreviousEasy", "popgym/popgym_RepeatPreviousMedium"):
+        ctrl.append(swap_cell(jobs, f"{name}/PD2Lreshalfthermofbch2_tau1000/s0", "PD2Lreshalfthermofb1ch2_tau1000"))
+    out = main + probes + abl + ctrl
+    assert not {j["name"] for j in out} & {j["name"] for j in jobs}, "a copy kept the name of an existing job"
+    return out
+
+
 def swap_cell(jobs, name, cell):
     """Copy of the job `name` with pdfeedback -> pdfeedback1 under the run name `cell`."""
     src = next(j for j in jobs if j["name"] == name)
@@ -1132,7 +1163,7 @@ def main():
     jobs = jobs + round37(jobs)  # after everything already queued (the POPGym Easy control keeps its turn)
     # candidate B (round 38) ahead of the pixel baselines, behind the POPGym Easy control (both decide the model)
     easy = [j for j in jobs if j["name"] == "popgym/popgym_RepeatPreviousEasy/PD2Lreshalfthermofbch2_tau1000/s0"]
-    jobs = jobs[:1] + easy + round38(jobs) + round39(jobs) + [j for j in jobs[1:] if j not in easy]
+    jobs = jobs[:1] + easy + round38(jobs) + round39(jobs) + round40(jobs) + [j for j in jobs[1:] if j not in easy]
     # 2026-10-09 (EXPERIMENTS.md §19.29), user: "可以停": the binary-soma Memory Maze run is superseded by the final
     # model's (round 30, which copies its job); stopped at 540k updates
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2Lv2_tau1000/s0"]
