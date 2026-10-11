@@ -1841,3 +1841,4 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
 - 操作：`make_jobs.main()` 去掉第 38–40 轮 B 的全部任务（备份 `runs/jobs.round44.jsonl`，剩 394 个）；B 在跑的 16 个任务（RL 6 个、探针 7 个、表 4 消融 3 个）停掉，39 个 B 的日志目录移到 `runs/_superseded/candidateB/`。原最终模型的表 4 消融和补充项早已跑完，剩下只有 Memory Maze（25%）、像素 walker 1M（26%）、DMC cheetah（86%）和 cartpole（75%）；POPGym 对照和 R2I 诊断照常跑完。
 - 新基线探针结果（表 2）：TC-LIF 回忆 L8/L16/L32/L64 = 0.5k/0.5k/1k/3.5k，RepeatPrevious Easy ✗ (0.86)、Medium ✗ (0.50)；DH-SNN 1.5k/2k/4.5k/✗ (0.52)，Easy ✗ (0.63)、Medium ✗ (0.50)；两者的 Hard 还在跑。回忆 L64 是表 2 唯一一格被基线（TC-LIF 3.5k）超过的。
 - DMC 本体：最终模型 cheetah（约 430k 步，近几次 380–440）和 cartpole（约 380k 步，400–560）明显低于 LIF（500k 最后 3 次 532 / 811）；只读胞体的 actor-critic 对照（未缩小，不满足同规模）在两项上更高（541 / 749–831），walker 更低（836 对 929）。
+- 用户决定（10 月 11 日 07:00）："先接受吧？L64 这个稍弱其实还好，毕竟这不是最长的那个点，不影响我们的结论"：不再换模型，DMC cheetah/cartpole 低于 LIF、回忆 L64 慢于 TC-LIF 这两处照实报告。
