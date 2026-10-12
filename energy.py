@@ -9,7 +9,7 @@ agent, over held-out episodes and counts with forward hooks:
   MAC  multiply-accumulate operations: Linear layers with real-valued input (rows x in x out),
        normalisation layers (2 per element) and neuron state updates per element and call
        (LIF 1 per SNN step, MCN 4 per SNN step, PDRNN 3 per integrator and 6 per resonant dendritic
-       channel, GRSN 4, GRU 4)
+       channel, GRSN 4, GRU 4, DH-SNN 2 per dendritic branch and 2 per soma, TC-LIF 2)
 
 Energy with the 45 nm figures common in SNN papers (Horowitz 2014): 0.9 pJ per AC, 4.6 pJ per
 MAC. For RL runs the actor is counted as well (actor_*, agent_energy_nj_per_step).
@@ -85,6 +85,22 @@ class Counter:
             self.mac += per_element * out.numel()
         return hook
 
+    def dhsnn(self, mod, inp, out):
+        """DH-SNN: the masked synapses run through F.linear, not mod.dense, so they are counted here. Each input (x: the
+        rate of the T input frames; s_{t-1}: one binary frame) reaches the branches the mask connects it to (AC). At
+        the first step s_{t-1} is the learned initial state, real-valued: multiply-accumulates, as for nn.Linear."""
+        inputs, state = inp
+        x, s = sum(inputs), state[0][-1]
+        assert bool(((x - x.round()).abs() < 1e-4).all()), "DH-SNN inputs must be spikes"
+        fan = mod.mask.sum(0)
+        n_x = x.shape[-1]
+        self.ac += float((x * fan[:n_x]).sum())
+        if bool(((s == 0) | (s == 1)).all()):
+            self.ac += float((s * fan[n_x:]).sum())
+        else:
+            self.mac += s[..., 0].numel() * float(fan[n_x:].sum())
+        self.mac += (2 * mod.branches + 2) * out[0][0].numel()  # beta i + (1 - beta) W x per branch, alpha u + (1 - alpha) sum
+
     def spiking(self, per_element):
         def hook(mod, inp, out):
             self.mac += per_element * out.numel()
@@ -121,6 +137,11 @@ def attach(wm, counter, parts=None):
                 if isinstance(mod, networks.GRSNCell):
                     mod.forget._rate_input = mod.inp._rate_input = True
                 handles.append(mod.register_forward_hook(counter.elementwise(4)))
+            elif isinstance(mod, networks.DHSNNCell):
+                handles.append(mod.register_forward_hook(counter.dhsnn))
+            elif isinstance(mod, networks.TCLIFCell):
+                mod.inp._rate_input = True  # hid reads s_{t-1}, one binary frame
+                handles.append(mod.register_forward_hook(counter.elementwise(2)))  # v1 -= g1 v2, v2 += g2 v1
             elif isinstance(mod, networks.LIFRNN):
                 handles.append(mod.register_forward_hook(counter.elementwise(counter.T)))  # T updates per call
     return handles

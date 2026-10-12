@@ -1166,6 +1166,20 @@ def round43(jobs):
     return out
 
 
+def round44(jobs):
+    """2026-10-11 20:40 (EXPERIMENTS.md §19.54), user: "那你弄吧". TC-LIF learned R2I L51 (102.5k), so by the rule of
+    §19.36 it goes on to the longer lengths: L71 and L101, run in parallel as the s0 runs of ours and DreamerV3 were.
+    Copies of the Spiking-WM jobs with the tclif configs; memory scaled from the 13.2 GB TC-LIF uses at L51."""
+    out = []
+    for L, mem in ((71, 20), (101, 28)):
+        src = next(j for j in jobs if j["name"] == f"r2i/bsuite_memlen-{L}/base_tau2/s0")
+        name = f"r2i/bsuite_memlen-{L}/TCLIF/s0"
+        cmd = src["cmd"].replace("--configs bsuite ", "--configs bsuite tclif ").replace(f"/runs/{src['name']}", f"/runs/{name}")
+        assert "bsuite tclif rewardbyact" in cmd and cmd.endswith(f"/runs/{name}")
+        out.append(dict(name=name, cmd=cmd, logdir=str(RUNS / name), mem_gb=mem))
+    return out
+
+
 def priority(job):
     """Queue class of a job (§19.46): 1 candidate B on the paper's tables (RL, Memory Maze, pixel, table 2 probes),
     2 the new baselines on the core tables, 3 the pixel baselines, 5 the rest, 8 table 4 ablations, 9 the
@@ -1238,6 +1252,7 @@ def main():
     n_probe = sum(j["name"].split("/")[0] in ("recall", "diag_rp") for j in r42)
     jobs = jobs[:1] + r42[:n_probe] + jobs[1:] + r42[n_probe:]
     jobs = jobs + round43(jobs)
+    jobs = jobs + round44(jobs)
     # 2026-10-09 (EXPERIMENTS.md §19.29), user: "可以停": the binary-soma Memory Maze run is superseded by the final
     # model's (round 30, which copies its job); stopped at 540k updates
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2Lv2_tau1000/s0"]
