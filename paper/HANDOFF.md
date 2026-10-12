@@ -189,7 +189,7 @@
    - POPGym 的 DH-SNN、TC-LIF 和只读胞体对照：约 10 月 13 日；
    - 像素 walker：10 月 14–15 日；
    - Memory Maze 本文：约 10 月 19 日。
-7. **最后：** 压回 8 页；用 `make data` 重新生成图 1、3、4；投稿前在 `preamble.tex` 关掉 `\pend` 和 `\draftnote`，并确认没有 `\TODO`。
+7. **最后：** 压回 8 页；用 `make data` 重新生成图 1、3、4；投稿前在 `preamble.tex` 关掉 `\pend`，并确认没有 `\TODO`。
 
 ## 8. 改论文会话的进展（2026-10-12 01:30）
 
