@@ -26,4 +26,4 @@ Removing the reset makes the membrane linear and parallelizable~\cite{fang2023ps
 These neurons are trained and tested on offline sequence classification, where the network sees the whole sequence and is reset between samples.
 A world model filters an unbounded stream step by step and also rolls its state forward in imagination; we run DH-SNN and TC-LIF in this setting as baselines.
 \method is designed for it: memory is carried across environment steps only in dendrites that no spike resets, retention times are counted in environment steps, and the soma that produces spikes holds no state.
-Biological dendrites act as computational subunits~\cite{london2005dendritic,poirazi2003pyramidal,larkum2013cellular,beniaguev2021single} and many neurons resonate below threshold~\cite{hutcheon2000resonance}; PDNs borrow both properties in functional form.
+Biological dendrites act as computational subunits~\cite{london2005dendritic,poirazi2003pyramidal,larkum2013cellular,beniaguev2021single} and many neurons resonate below threshold~\cite{hutcheon2000resonance}; PDNs borrow both properties.

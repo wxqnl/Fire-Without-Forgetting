@@ -28,7 +28,7 @@ On BSuite memory length, \swm does not recall a cue 8 steps back; recurrent LIF 
 The cause is reset.
 First, every environment step starts from cleared membrane potentials, the standard practice in spiking RL~\cite{tang2020popsan,liu2023dsqn,sun2025spikingwm}; only the binary spike output reaches the next step.
 Second, a somatic spike resets the dendrites together with the soma, so a dendritic trace survives only until the neuron fires again.
-Memory must therefore be encoded into spikes again at every step, gradients cross a surrogate derivative at every step, and the time constants act only on the few simulation steps inside one environment step.
+The time constants therefore act only within one environment step.
 Long time constants do not help even without the resets: the Euler update writes input with gain $1/\tau$, so a compartment with a time constant of 128 simulation steps stores a cue at about one percent of the firing threshold.
 
 We call this failure \emph{reset amnesia} and test it causally (\cref{sec:amnesia}).
@@ -41,7 +41,7 @@ These results give a design rule: memory should live in a state that no spike re
 We build the \methodfull (\method) from \emph{persistent dendritic neurons} (PDNs) that follow this rule (\cref{sec:method}).
 A PDN keeps linear dendritic channels across environment steps; spikes write into them through synapses but never clear them, and the write gain is normalized across retention times from 1 to 1000 environment steps.
 Integrator channels hold \emph{what} was seen; resonant channels, damped oscillators in the tradition of resonate-and-fire neurons~\cite{izhikevich2001resonate}, also encode \emph{when}.
-A stateless soma reads the channels and sends a spike count over the simulation steps of each environment step, the only signal that other neurons of the world model receive; the graded state stays inside the neuron, as in neuromorphic cores whose neurons hold several state variables~\cite{orchard2021loihi2}.
+A stateless soma reads the channels and sends a spike count, the only signal that other neurons receive; the graded state stays inside the neuron, as on neuromorphic cores~\cite{orchard2021loihi2}.
 
 We evaluate on memory benchmarks with published protocols and ANN results, and on DMC as a control task without a memory demand (\cref{sec:experiments}).
 On BSuite memory length, \method reaches a return of 0.9 at every length, up to 101 steps with the lengths and budget of R2I~\cite{samsami2024r2i}, where \dv stops at 51.
@@ -51,6 +51,6 @@ The agent uses \numEnergyRatio$\times$ less arithmetic energy per step than \dv.
 Our contributions are:
 \begin{itemize}
 \item We identify reset amnesia in spiking world models (step reset, spike reset, and a write gain tied to the time constant) and establish it with causal interventions.
-\item We propose the persistent dendritic neuron, in which persistent, normalized integrator and resonant dendrites store memory and a stateless soma communicates by spike counts, and build the spiking world model \method from it.
-\item We give the first evaluation of spiking world models on standard memory benchmarks (BSuite memory length up to 101 steps, POPGym RepeatPrevious, Memory Maze), against five spiking recurrent cores and \dv, with DMC as a control and the energy of each step.
+\item We propose the persistent dendritic neuron, whose persistent, normalized integrator and resonant dendrites store memory while a stateless soma communicates by spike counts, and build \method from it.
+\item We give the first evaluation of spiking world models on standard memory benchmarks (BSuite memory length, POPGym RepeatPrevious, Memory Maze) against five spiking recurrent cores and \dv, with DMC as a control and the energy per step.
 \end{itemize}

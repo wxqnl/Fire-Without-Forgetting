@@ -166,7 +166,7 @@
 <text x="1064.0" y="548.0" font-family="Nimbus Sans, Helvetica, Arial, sans-serif" font-size="18" font-weight="normal" font-style="normal" fill="#5F6670" text-anchor="start">feedback</text>
 <line x1="1158" y1="44" x2="1158" y2="548" stroke="#E5E7EB" stroke-width="2"/>
 <text x="1180.0" y="28.0" font-family="Nimbus Sans, Helvetica, Arial, sans-serif" font-size="26" font-weight="bold" font-style="normal" fill="#1F2328" text-anchor="start">(b) Where memory lives</text>
-<text x="1180.0" y="66.0" font-family="Nimbus Sans, Helvetica, Arial, sans-serif" font-size="21" font-weight="bold" font-style="normal" fill="#1F2328" text-anchor="start">Spiking-WM: multi-compartment neuron</text>
+<text x="1180.0" y="66.0" font-family="Nimbus Sans, Helvetica, Arial, sans-serif" font-size="21" font-weight="bold" font-style="normal" fill="#1F2328" text-anchor="start">Spiking-WM: multicompartment neuron</text>
 <rect x="1180" y="80" width="218" height="178" rx="10" fill="#FFFFFF" stroke="#C9CDD3" stroke-width="1.6" stroke-dasharray="7 5"/>
 <text x="1190.0" y="104.0" font-family="Nimbus Sans, Helvetica, Arial, sans-serif" font-size="18" font-weight="normal" font-style="normal" fill="#5F6670" text-anchor="start">step t−1</text>
 <circle cx="1297.0" cy="146" r="18" fill="#F3F4F6" stroke="#1F2328" stroke-width="2.2"/>

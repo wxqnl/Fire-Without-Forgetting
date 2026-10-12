@@ -32,17 +32,15 @@ The actor and critic of every model read $(z_t,h_t)$; those of \method also read
 \paragraph{Benchmarks.}
 We use benchmarks with published protocols and ANN results.
 \emph{BSuite memory length}~\cite{osband2020bsuite} shows a cue, then $L$ uninformative steps, and rewards the agent for recalling the cue; we run $L\in\{8,16,32,64\}$, and $L\in\{51,71,101\}$ with the lengths, budget (1M steps) and training windows of R2I~\cite{samsami2024r2i}.
-\emph{POPGym RepeatPrevious}~\cite{morad2023popgym} rewards the agent at every step for naming the suit of the card shown $k$ steps earlier ($k=4$ Easy, $k=32$ Medium), one of the three POPGym tasks with the highest memory demand that R2I evaluates; we use the environment settings of R2I's code (eight parallel environments, train ratio 64, unscaled rewards) for 2M steps.
+\emph{POPGym RepeatPrevious}~\cite{morad2023popgym} rewards the agent at every step for naming the suit of the card shown $k$ steps earlier ($k=4$ Easy, $k=32$ Medium), one of the three POPGym tasks with the highest memory demand that R2I evaluates; we use the environment settings of R2I's code for 2M steps.
 \emph{Memory Maze 9$\times$9}~\cite{pasukonis2023memorymaze} is first-person 3D navigation with episodes of 1000 steps; we use its offline probing benchmark with the official dataset and probes: after 1M world model updates with truncated backpropagation through time, probes decode the positions of the target objects (MSE) and the maze layout (accuracy) from the frozen state.
 \emph{DMC}~\cite{tassa2018dmc} from proprioception (walker walk, cheetah run, cartpole swingup; 500k steps, train ratio 512, as in DreamerV3) and walker walk from pixels (1M frames) serve as control tasks without a memory demand.
 On BSuite the reward depends on cue \emph{and} action, which the scalar reward head of a Dreamer world model does not learn within our budgets; all models therefore use a reward head with one output per action (Supp.~\suppref{supp:reward}{B}).
+Supp.~\suppref{supp:impl}{A} gives the settings and the evaluation protocol of each benchmark.
 
 \paragraph{World model probes.}
 To measure memory without exploration and credit assignment, we also train world models alone on data of a random policy and measure the AUC of their reward prediction where the reward depends on the past (\cref{sec:causal}): \emph{cue recall}, where the terminal reward is the cue $L$ steps back, and \emph{RepeatPrevious}, where the reward indicates whether the action names the card $k$ steps back.
-As in probing benchmarks~\cite{pasukonis2023memorymaze}, we report the final AUC after a fixed budget of 12k (cue recall) or 10k (RepeatPrevious) updates; Supp.~\suppref{supp:probe}{C} gives the updates until the AUC exceeds 0.9.
-
-\paragraph{Evaluation.}
-Evaluations average 32 episodes on BSuite (every 10k steps, 20k with R2I's lengths) and 16 on POPGym (every 50k), with the mode of the policy; Supp.~\suppref{supp:impl}{A} reports how the return holds after it first reaches 0.9.
+As in probing benchmarks~\cite{pasukonis2023memorymaze}, we report the final AUC after a fixed number of updates (Supp.~\suppref{supp:probe}{C}).
 
 \subsection{Memory in reinforcement learning}
 \label{sec:rl}
@@ -68,7 +66,7 @@ R2I reports a median return of about 0.9 at 51 and 71 memory steps and about 0.3
 On RepeatPrevious Easy, \method reaches \numFwfEasy, close to the best baseline, recurrent LIF (0.74).
 On Medium, which asks for the card of exactly 32 steps ago, every baseline, \dv included, stays at chance after 2M steps, while \method reaches \numFwfMedium.
 R2I, run with its official code, stays at chance on both tasks within 2M steps.
-In its published curves over 50M steps, R2I leaves chance on Medium after about 3M steps and DreamerV3 learns Easy but not Medium (Fig.~9 of~\cite{samsami2024r2i}), as in our runs; \method learns Medium within a budget in which R2I has not yet left chance.
+In its published curves, R2I leaves chance on Medium only after about 3M steps, and DreamerV3 learns Easy but not Medium (Fig.~9 of~\cite{samsami2024r2i}), as in our runs.
 \TODO{DH-SNN and TC-LIF on POPGym (runs in progress).}
 
 \subsection{What the world model remembers}
@@ -126,8 +124,7 @@ On the wall layout, all models of this size stay within 5 points of the constant
 \emph{Write gain}: with the Euler gain $1-\lambda$ the channels with long retention times are too faint, and the model fails at 64 steps (0.52) and reaches only 0.76 at $k=32$.
 \emph{Stateless soma}: a soma that keeps a membrane potential and is reset by its spike fails at 64 steps (0.52) and reaches 0.77 at $k=32$.
 \emph{Resonance}: without resonant channels the model fails at $k=32$ (0.57); with resonant channels only it solves all three tasks, as does \method with one channel of each kind.
-\emph{Depth}: one PDN layer fails at 64 steps; with one layer and one simulation step it recalls 64 steps but no longer the exact lag (0.50).
-\emph{Sparsity}: capping the firing rate at 0.06 (from 0.25) keeps 32 steps and the exact lag but loses 64 steps within the budget.
+\emph{Depth and sparsity}: one PDN layer, or a firing rate capped at 0.06 (from 0.25), fails at 64 steps.
 The spike count, the feedback and the number of channels leave the memory nearly unchanged (AUC 0.88 to 0.94 at $k=32$); the spike count and the feedback serve the prediction of motion (\cref{sec:why}).
 
 \subsection{Control tasks and energy}
@@ -138,6 +135,5 @@ An actor that reads $(z_t,h_t)$ only reaches the same return with the same world
 \TODO{Walker walk from pixels after 1M frames (runs in progress).}
 
 Per environment step (Supp.~\suppref{supp:energy}{H}), the agent of \method, world model filter and actor, costs \numEnergyAgent\,$\mu$J, \numEnergyRatio$\times$ less than \dv (\numEnergyAgentDv\,$\mu$J); the filter alone costs \numEnergyFilter\ against \numEnergyFilterDv\,$\mu$J.
-Most of its operations are accumulates triggered by spikes; the multiply-accumulates of the dendrites stay inside each neuron.
 The spiking baselines cost \numEnergySpiking\,$\mu$J, less than \method: its filter performs more accumulates (\numEnergyAc M against \numEnergySpikingAc M, at a recurrent firing rate of \numEnergyRate), and its actor also reads the 3072 dendritic spike inputs (\numEnergyActor\ against \numEnergySpikingActor\,$\mu$J).
 As in SNN energy reports, the estimates count 32-bit arithmetic~\cite{horowitz2014energy} and leave out memory access, which can dominate on hardware~\cite{dampfhoffer2023energy}, for all models.

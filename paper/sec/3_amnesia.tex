@@ -57,16 +57,16 @@ Three interventions target the mechanisms above: \textbf{A} keeps all compartmen
 
 \emph{With resets, time constants do not matter.}
 \swm fails at 8 and 16 steps for $\tau_d\in\{2,16,128\}$, and the cue can be decoded from its spikes for only 2 to 3 steps after it is shown.
-The one exception supports this diagnosis: at 32 steps, one of two seeds crosses an AUC of 0.9 at the last of 12k updates by holding the cue in self-sustained recurrent firing, a memory that exists only as spikes and is learned slowly and unreliably.
+At 32 steps, one of two seeds crosses an AUC of 0.9 at the last of 12k updates by holding the cue in self-sustained recurrent firing, a memory that exists only as spikes.
 
 \emph{Persistence is necessary.}
 Without A, neither B nor G helps.
-With A and $\tau_d=128$, the world model recalls 8 and 16 steps; removing the dendritic reset as well (A+B) nearly halves the updates needed at 16 steps (4.5k instead of 8k to 8.5k).
+With A and $\tau_d=128$, the world model recalls 8 and 16 steps; removing the dendritic reset too (A+B) nearly halves the updates at 16 steps (4.5k instead of 8k to 8.5k).
 
 \emph{The write gain limits long time constants.}
 A+B fails at 32 steps although a linear probe still decodes the cue from the membrane potentials at the recall step (accuracy 0.88): the trace is there, but too faint to drive spikes.
 Restoring the gain (A+B+G) recalls 8 and 16 steps within 500 updates and 32 steps within 2000 to 3000, faster than the GRU core.
-The gain does not work by raising the firing rate: capped at a firing rate of 0.06, A+B+G still learns 32 steps in 2000 updates.
+The gain does not act through the firing rate: capped at a rate of 0.06, A+B+G still learns 32 steps in 2000 updates.
 
 \emph{Longer memory needs more than removing resets.}
 A+B+G fails at 64 steps even with $\tau_d=512$, and in reinforcement learning it stops at 32 steps (\swmnr in Supp.~\suppref{supp:impl}{A}).

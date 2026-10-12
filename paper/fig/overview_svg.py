@@ -218,8 +218,8 @@ def frame(x, y, label):
     text(x + 10, y + 24, label, S_TXT - 1, color=GREY)
 
 
-# multi-compartment neuron (Spiking-WM): cleared at each step, dendrites reset by a spike
-text(X0, 66, "Spiking-WM: multi-compartment neuron", S_LAB, weight="bold")
+# multicompartment neuron (Spiking-WM): cleared at each step, dendrites reset by a spike
+text(X0, 66, "Spiking-WM: multicompartment neuron", S_LAB, weight="bold")
 y = 80
 for x, lab in zip(FX, ("step t−1", "step t")):
     frame(x, y, lab)

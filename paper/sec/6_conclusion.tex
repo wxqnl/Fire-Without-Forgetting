@@ -1,9 +1,9 @@
 \section{Conclusion}
 \label{sec:conclusion}
 
-Spiking world models forget because their neurons are reset at every environment step and at every spike, which leaves their time constants nothing to act on.
+Existing spiking world models forget because their neurons are cleared at every environment step and at every spike, which leaves their time constants nothing to act on.
 \method keeps memory in persistent integrator and resonant dendrites, written with a normalized gain and never reset by spikes, and communicates through the spike counts of a stateless soma.
-A spiking world model built from these neurons recalls cues 101 steps back on BSuite within the budget of R2I and is the only model in our comparison that recalls exact lags of 32 and 64 steps, at \numEnergyRatio$\times$ less arithmetic energy per step than DreamerV3.
+It recalls cues 101 steps back on BSuite within the budget of R2I and is the only model in our comparison that recalls exact lags of 32 and 64 steps, at \numEnergyRatio$\times$ less arithmetic energy per step than DreamerV3.
 
 \paragraph{Limitations.}
 The dendritic state is graded, so deployment needs neuromorphic cores whose neurons hold several state variables and that compute layer normalization; our energy estimate counts arithmetic and leaves out memory access.
