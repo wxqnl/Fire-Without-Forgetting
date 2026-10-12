@@ -20,11 +20,11 @@ However, these world models are artificial neural networks (ANNs) that compute w
 
 Spiking neural networks (SNNs) reduce this cost through sparse, event-driven computation~\cite{roy2019towards}.
 Unlike ANNs, spiking neurons trigger synaptic computation only when spikes arrive and replace MACs with accumulate (AC) operations, which take about a fifth of the energy of a MAC on a 45\,nm chip~\cite{horowitz2014energy}; neuromorphic processors exploit this sparsity~\cite{davies2018loihi,orchard2021loihi2}.
-Spiking neurons are also dynamical systems with membrane and dendritic time constants, and these dynamics are widely credited with a capacity for temporal memory~\cite{bellec2018lsnn,zhang2024tclif,zheng2024dhsnn}.
-These properties make SNNs a natural basis for embodied world models: \swm~\cite{sun2025spikingwm} builds one on multicompartment neurons whose dendrites integrate over long timescales.
+Moreover, spiking neurons are dynamical systems with membrane and dendritic time constants, and these dynamics are widely believed to provide temporal memory~\cite{bellec2018lsnn,zhang2024tclif,zheng2024dhsnn}.
+These properties make SNNs a natural basis for embodied world models, and spiking world models have been built on multicompartment neurons whose dendrites integrate over long timescales~\cite{sun2025spikingwm}.
 
 Despite these properties, we find that existing spiking world models forget within a few steps (\cref{fig:memory_length}).
-On BSuite memory length, \swm does not recall a cue 8 steps back; recurrent LIF neurons stop at 8 steps, and gated recurrent spiking neurons (GRSN)~\cite{qin2025grsn} and DH-SNN~\cite{zheng2024dhsnn} at 16.
+On BSuite memory length, \swm~\cite{sun2025spikingwm} does not recall a cue 8 steps back; recurrent LIF neurons stop at 8 steps, and gated recurrent spiking neurons (GRSN)~\cite{qin2025grsn} and DH-SNN~\cite{zheng2024dhsnn} at 16.
 The cause is reset.
 First, every environment step starts from cleared membrane potentials, the standard practice in spiking RL~\cite{tang2020popsan,liu2023dsqn,sun2025spikingwm}, so only the binary spike output reaches the next step.
 Second, a somatic spike resets the dendrites together with the soma, so a dendritic trace survives only until the neuron fires again.
