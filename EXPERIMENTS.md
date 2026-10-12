@@ -1927,3 +1927,11 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
 
 - 最终模型比 DreamerV3 少 4.6 倍（旧版本 `PD2Lv2r64` 是 5.18 µJ，4.3 倍）。它是脉冲模型里最高的（基线 2.4–4.0 µJ）：滤波器的 AC 多（发放率 0.18，基线约 0.1），actor 读 3072 个树突脉冲输入，多了 0.85 µJ。
 - `paper/tables/numbers.tex` 的能耗宏还是待定值。论文暂停修改，所以没有重新生成表格；恢复后运行 `paper_tables.py` 就会填上。
+
+### 19.55 运行状态（10 月 12 日 00:10）
+
+- 20:45 以后只有一个任务跑完：DMC cartpole，最终模型 21:42 结束，最后 3 次平均 676（actor 只读胞体的对照 813）。队列 376/396，20 个在跑，没有失败，8 张卡都还有我们的任务。
+- R2I L51（约 66–74%）：TC-LIF 102.5k 学会；DH-SNN 最高 0.81，还没到 0.9；LIF 最高 0.31，GRSN 0.44。TC-LIF 的 L71 在 202.5k（最高 0.31），L101 在 222.5k（最高 0.88，接近学会）。
+- POPGym（45–60%）：DH-SNN、TC-LIF 的 Easy 和 Medium 仍在随机水平（MMER −0.30 到 −0.48）。只读胞体的对照 Easy 0.58，Medium 0.22。
+- 像素 walker：最终模型 405k，365k–405k 的评估均值 842（同一区间 Spiking-WM 716，Spiking-WM 1M 终值 917，DreamerV3 943）；LIF、GRSN、DH-SNN、TC-LIF 在 145k–225k。
+- Memory Maze：最终模型 310k，objects MSE 9.37、walls 82.8%（DreamerV3 1M 终值 9.8 / 85.3）；Spiking-WM、A+B+G 在 970k，几小时内跑完。
