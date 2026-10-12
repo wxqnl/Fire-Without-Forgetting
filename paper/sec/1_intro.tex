@@ -27,22 +27,20 @@ Despite these properties, existing spiking world models forget within a few step
 First, spiking reinforcement learning (RL) methods clear the membrane potentials at the start of every environment step~\cite{tang2020popsan,liu2023dsqn,sun2025spikingwm}, so only binary spikes carry information to the next step, and the time constants act within a single step.
 Second, in the multicompartment neurons of existing spiking world models, a somatic spike also resets the dendrites~\cite{sun2025spikingwm}, so a dendritic trace survives only until the neuron fires again.
 Moreover, the standard Euler update writes input with a gain of $1/\tau$, so compartments with long time constants store their input too weakly to drive spikes.
+We term this failure reset amnesia and confirm its causes with interventions on a spiking world model (\cref{sec:amnesia}).
 
-We term this failure reset amnesia and confirm it with causal interventions (\cref{sec:amnesia}).
-In a world model probe that isolates memory from exploration, removing the dendritic reset or restoring the write gain has no effect while the step reset remains.
-With persistent state the world model recalls cues 16 steps back, and the normalized write gain extends this to 32 steps, learned faster than with a GRU core.
-Clearing the dendrites of our own model at every step erases its memory.
-The spiking neurons we compare support the same diagnosis: TC-LIF~\cite{zhang2024tclif}, whose two compartments carry their state across steps without decay and are never cleared, recalls 64 steps in the probe and learns 101 steps in RL.
-These results yield a design rule: memory should live in a state that no spike resets, written with a gain that holds for long time constants, and spikes should carry information out of it.
-
-Following this rule, we propose the \methodfull (\method), a spiking world model built from persistent dendritic neurons (PDNs) (\cref{sec:method}).
-As shown in \cref{fig:overview}, a PDN keeps linear dendritic channels across environment steps; spikes write into them through synapses but never clear them, and the write gain is normalized across retention times from 1 to 1000 environment steps.
+To address these problems, we propose the \methodfull (\method), a spiking world model built from persistent dendritic neurons (PDNs) (\cref{sec:method}).
+As shown in \cref{fig:overview}, a PDN keeps linear dendritic channels across environment steps, so information persists beyond a single step.
+Spikes write into these channels through synapses but never reset them, so a dendritic trace survives later spikes.
+The write gain is normalized across retention times from 1 to 1000 environment steps, so channels with long retention times store their input at the same scale as short ones.
 Integrator channels hold what was seen, and resonant channels, damped oscillators in the tradition of resonate-and-fire neurons~\cite{izhikevich2001resonate}, also hold when it was seen.
 A stateless soma reads the channels and sends a spike count, the only signal that other neurons receive; the graded state stays inside the neuron, as on neuromorphic cores~\cite{orchard2021loihi2}.
+
 We evaluate \method on BSuite memory length, POPGym RepeatPrevious and Memory Maze with their published protocols, and on DMC as a control task without a memory demand (\cref{sec:experiments}).
 On BSuite, \method reaches a return of 0.9 at every memory length up to 101 steps within the budget of R2I~\cite{samsami2024r2i}, where \dv stops at 51.
 On POPGym RepeatPrevious Medium~\cite{morad2023popgym}, which rewards naming the card of exactly 32 steps ago, it is the only model whose return rises above chance within 2M steps; every other model, TC-LIF, \dv and R2I included, stays at chance.
 World model probes trace this to a memory of exact time: only \method recalls lags of 32 and 64 steps (AUC 0.92 and 0.94; all others at most 0.57), and only with its resonant channels.
+Ablations confirm that this memory requires the persistent channels and the normalized write gain.
 Its agent uses \numEnergyRatio$\times$ less arithmetic energy per step than \dv.
 The main contributions are as follows:
 \begin{itemize}
