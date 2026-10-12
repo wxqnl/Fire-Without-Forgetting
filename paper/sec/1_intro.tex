@@ -23,13 +23,10 @@ Unlike ANNs, spiking neurons trigger synaptic computation only when spikes arriv
 Moreover, spiking neurons are dynamical systems with membrane and dendritic time constants, and these dynamics are widely believed to provide temporal memory~\cite{bellec2018lsnn,zhang2024tclif,zheng2024dhsnn}.
 These properties make SNNs a natural basis for embodied world models, and spiking world models have been built on multicompartment neurons whose dendrites integrate over long timescales~\cite{sun2025spikingwm}.
 
-Despite these properties, we find that existing spiking world models forget within a few steps (\cref{fig:memory_length}).
-On BSuite memory length, \swm~\cite{sun2025spikingwm} does not recall a cue 8 steps back; recurrent LIF neurons stop at 8 steps, and gated recurrent spiking neurons (GRSN)~\cite{qin2025grsn} and DH-SNN~\cite{zheng2024dhsnn} at 16.
-The cause is reset.
-First, every environment step starts from cleared membrane potentials, the standard practice in spiking RL~\cite{tang2020popsan,liu2023dsqn,sun2025spikingwm}, so only the binary spike output reaches the next step.
-Second, a somatic spike resets the dendrites together with the soma, so a dendritic trace survives only until the neuron fires again.
-The time constants therefore act only within one environment step.
-Moreover, long time constants fail even without the resets: the Euler update writes input with gain $1/\tau$, so a compartment with a time constant of 128 simulation steps stores a cue at about 1\% of the threshold.
+Despite these properties, existing spiking world models forget within a few steps (\cref{fig:memory_length}), because the states of their neurons are reset in two ways.
+First, spiking reinforcement learning (RL) methods clear the membrane potentials at the start of every environment step~\cite{tang2020popsan,liu2023dsqn,sun2025spikingwm}, so only binary spikes carry information to the next step, and the time constants act within a single step.
+Second, in the multicompartment neurons of existing spiking world models, a somatic spike also resets the dendrites~\cite{sun2025spikingwm}, so a dendritic trace survives only until the neuron fires again.
+Moreover, the standard Euler update writes input with a gain of $1/\tau$, so compartments with long time constants store their input too weakly to drive spikes.
 
 We term this failure reset amnesia and confirm it with causal interventions (\cref{sec:amnesia}).
 In a world model probe that isolates memory from exploration, removing the dendritic reset or restoring the write gain has no effect while the step reset remains.
