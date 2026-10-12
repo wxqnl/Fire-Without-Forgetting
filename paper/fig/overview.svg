@@ -31,7 +31,7 @@
 <path d="M 444 108 L 806 108 L 806 206" stroke="#1F2328" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round" marker-end="url(#arr1F2328)"/>
 <rect x="140" y="206" width="566" height="260" rx="14" fill="#FDF3EC" stroke="#E5A884" stroke-width="2"/>
 <text x="154.0" y="236.0" font-family="Nimbus Sans, Helvetica, Arial, sans-serif" font-size="23" font-weight="bold" font-style="normal" fill="#D55E00" text-anchor="start">PDN core</text>
-<text x="692.0" y="236.0" font-family="Nimbus Sans, Helvetica, Arial, sans-serif" font-size="19" font-weight="normal" font-style="italic" fill="#5F6670" text-anchor="end">dendrites are never reset</text>
+<text x="692.0" y="236.0" font-family="Nimbus Sans, Helvetica, Arial, sans-serif" font-size="19" font-weight="normal" font-style="normal" fill="#5F6670" text-anchor="end">dendrites are never reset</text>
 <text x="154.0" y="268.0" font-family="Nimbus Sans, Helvetica, Arial, sans-serif" font-size="19" font-weight="normal" font-style="normal" fill="#5F6670" text-anchor="start">layer 2</text>
 <line x1="292.0" y1="277.0" x2="292.0" y2="302.0" stroke="#555555" stroke-width="1.8" stroke-linecap="round"/>
 <circle cx="292" cy="262" r="15" fill="#FFFFFF" stroke="#1F2328" stroke-width="2.2"/>

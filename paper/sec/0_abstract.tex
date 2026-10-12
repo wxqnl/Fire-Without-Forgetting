@@ -4,7 +4,7 @@ Spiking neural networks (SNNs) compute with sparse binary spikes and run on neur
 Such agents see only part of their world, and a world model gives them memory by compressing past observations into a recurrent state.
 We find that existing spiking world models forget within a few steps, even when their neurons have long time constants.
 The cause is reset: membrane potentials are cleared at every environment step and dendrites at every somatic spike, so all memory has to pass through binary spikes at every step.
-Causal interventions on a spiking world model confirm this \emph{reset amnesia} and show that long time constants also need a normalized write gain.
+Causal interventions on a spiking world model confirm this reset amnesia and show that long time constants also need a normalized write gain.
 Building on these findings, we propose the \methodfull (\method), a spiking world model in which dendrites store memory and spikes communicate it.
 Its persistent dendritic neurons keep integrator and resonant dendritic channels that spikes never reset, with retention times from 1 to 1000 environment steps.
 The integrators hold what the agent has seen, and the resonators also record when.

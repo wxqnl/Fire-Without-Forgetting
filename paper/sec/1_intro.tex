@@ -31,16 +31,16 @@ Second, a somatic spike resets the dendrites together with the soma, so a dendri
 The time constants therefore act only within one environment step.
 Moreover, long time constants fail even without the resets: the Euler update writes input with gain $1/\tau$, so a compartment with a time constant of 128 simulation steps stores a cue at about 1\% of the threshold.
 
-We term this failure \emph{reset amnesia} and confirm it with causal interventions (\cref{sec:amnesia}).
+We term this failure reset amnesia and confirm it with causal interventions (\cref{sec:amnesia}).
 In a world model probe that isolates memory from exploration, removing the dendritic reset or restoring the write gain has no effect while the step reset remains.
 With persistent state the world model recalls cues 16 steps back, and the normalized write gain extends this to 32 steps, learned faster than with a GRU core.
 Clearing the dendrites of our own model at every step erases its memory.
 The spiking neurons we compare support the same diagnosis: TC-LIF~\cite{zhang2024tclif}, whose two compartments carry their state across steps without decay and are never cleared, recalls 64 steps in the probe and learns 101 steps in RL.
 These results yield a design rule: memory should live in a state that no spike resets, written with a gain that holds for long time constants, and spikes should carry information out of it.
 
-Following this rule, we propose the \methodfull (\method), a spiking world model built from \emph{persistent dendritic neurons} (PDNs) (\cref{sec:method}).
+Following this rule, we propose the \methodfull (\method), a spiking world model built from persistent dendritic neurons (PDNs) (\cref{sec:method}).
 As shown in \cref{fig:overview}, a PDN keeps linear dendritic channels across environment steps; spikes write into them through synapses but never clear them, and the write gain is normalized across retention times from 1 to 1000 environment steps.
-Integrator channels hold \emph{what} was seen, and resonant channels, damped oscillators in the tradition of resonate-and-fire neurons~\cite{izhikevich2001resonate}, also encode \emph{when}.
+Integrator channels hold what was seen, and resonant channels, damped oscillators in the tradition of resonate-and-fire neurons~\cite{izhikevich2001resonate}, also hold when it was seen.
 A stateless soma reads the channels and sends a spike count, the only signal that other neurons receive; the graded state stays inside the neuron, as on neuromorphic cores~\cite{orchard2021loihi2}.
 We evaluate \method on BSuite memory length, POPGym RepeatPrevious and Memory Maze with their published protocols, and on DMC as a control task without a memory demand (\cref{sec:experiments}).
 On BSuite, \method reaches a return of 0.9 at every memory length up to 101 steps within the budget of R2I~\cite{samsami2024r2i}, where \dv stops at 51.
@@ -49,7 +49,7 @@ World model probes trace this to a memory of exact time: only \method recalls la
 Its agent uses \numEnergyRatio$\times$ less arithmetic energy per step than \dv.
 The main contributions are as follows:
 \begin{itemize}
-\item We identify \emph{reset amnesia} in spiking world models, caused by the step reset, the spike reset and a write gain tied to the time constant, and establish it with causal interventions.
+\item We identify reset amnesia in spiking world models, caused by the step reset, the spike reset and a write gain tied to the time constant, and establish it with causal interventions.
 \item We propose the persistent dendritic neuron, in which persistent integrator and resonant dendrites with a normalized write gain store memory and a stateless soma communicates by spike counts.
 \item Building on this neuron, we develop \method and give the first evaluation of spiking world models on standard memory benchmarks against five spiking recurrent cores and \dv, with DMC as a control and the energy per step.
 \end{itemize}

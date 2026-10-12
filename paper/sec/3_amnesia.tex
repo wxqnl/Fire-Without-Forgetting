@@ -51,24 +51,24 @@ With both resets removed (\cref{sec:causal}), a cue moved the basal potential of
 \end{table}
 
 We test these mechanisms with interventions on \swm in a world model probe that isolates memory from exploration and credit assignment.
-The data are BSuite memory length episodes~\cite{osband2020bsuite} collected by a random policy, with the terminal reward set to the cue ($\pm1$, \emph{cue recall}); only the world model is trained, and we measure the AUC of its reward prediction at the recall step on evaluation episodes, from 0.5 without memory to 1 with perfect recall (details in Supp.~\suppref{supp:probe}{C}).
+The data are BSuite memory length episodes~\cite{osband2020bsuite} collected by a random policy, with the terminal reward set to the cue ($\pm1$, cue recall); only the world model is trained, and we measure the AUC of its reward prediction at the recall step on evaluation episodes, from 0.5 without memory to 1 with perfect recall (details in Supp.~\suppref{supp:probe}{C}).
 Three interventions target the mechanisms above: \textbf{A} keeps all compartments across environment steps and clears them only at episode starts; \textbf{B} keeps the dendrites when the soma fires; \textbf{G} multiplies the dendritic input by $\sqrt{\tau_d/2}$, which equalizes the stationary spread across dendritic time constants $\tau_d$.
 \Cref{tab:interventions} gives four findings.
 
-\emph{With resets, time constants do not matter.}
+\paragraph{With resets, time constants do not matter.}
 \swm fails at 8 and 16 steps for $\tau_d\in\{2,16,128\}$, and the cue can be decoded from its spikes for only 2 to 3 steps after it is shown.
 At 32 steps, one of two seeds crosses an AUC of 0.9 at the last of 12k updates by holding the cue in self-sustained recurrent firing, a memory that exists only as spikes.
 
-\emph{Persistence is necessary.}
+\paragraph{Persistence is necessary.}
 Without A, neither B nor G helps.
 With A and $\tau_d=128$, the world model recalls 8 and 16 steps; removing the dendritic reset too (A+B) nearly halves the updates at 16 steps (4.5k instead of 8k to 8.5k).
 
-\emph{The write gain limits long time constants.}
+\paragraph{The write gain limits long time constants.}
 A+B fails at 32 steps although a linear probe still decodes the cue from the membrane potentials at the recall step (accuracy 0.88): the trace is there, but too faint to drive spikes.
 Restoring the gain (A+B+G) recalls 8 and 16 steps within 500 updates and 32 steps within 2000 to 3000, faster than the GRU core.
 The gain does not act through the firing rate: capped at a rate of 0.06, A+B+G still learns 32 steps in 2000 updates.
 
-\emph{Longer memory needs more than removing resets.}
+\paragraph{Longer memory needs more than removing resets.}
 A+B+G fails at 64 steps even with $\tau_d=512$, and in reinforcement learning it stops at 32 steps (\swmnr in Supp.~\suppref{supp:impl}{A}).
 Its time constants are counted in simulation steps, and its soma still resets.
 \Cref{sec:method} removes both; in our model, a soma with a membrane and a reset loses the recall of 64 steps (\cref{sec:ablation}).

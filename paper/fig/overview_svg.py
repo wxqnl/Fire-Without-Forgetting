@@ -134,7 +134,7 @@ path("M 444 108 L 806 108 L 806 206")
 CX0, CX1, CY0, CY1 = 140, 706, 206, 466
 box(CX0, CY0, CX1 - CX0, CY1 - CY0, "pdn", r=14)
 text(CX0 + 14, CY0 + 30, "PDN core", S_HEAD, weight="bold", color=OURS)
-text(CX1 - 14, CY0 + 30, "dendrites are never reset", S_TXT, "end", color=GREY, style="italic")
+text(CX1 - 14, CY0 + 30, "dendrites are never reset", S_TXT, "end", color=GREY)
 NX = [292, 372, 452, 532]
 BX0, BX1 = CX0 + 52, CX1 - 74
 LAYERS = ((262, "layer 2"), (372, "layer 1"))
