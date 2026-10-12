@@ -13,21 +13,19 @@
   \label{fig:memory_length}
 \end{figure}
 
-World models~\cite{ha2018world,hafner2019planet} compress the history of observations and actions into a recurrent latent state and predict the future from it, which enables agents to learn behavior in imagination~\cite{hafner2020dreamer} and provides a general foundation for control across diverse domains~\cite{hafner2025dreamerv3}.
-In partially observable environments, this latent state also serves as the agent's memory and must retain information over many steps~\cite{osband2020bsuite,morad2023popgym,pasukonis2023memorymaze}.
-However, the recurrent cores of common world models struggle to retain information over long horizons~\cite{samsami2024r2i}.
-To this end, world models built on state space models~\cite{deng2023s4wm,samsami2024r2i} retain information for hundreds of steps.
-However, like other artificial neural networks (ANNs), they rely on dense multiply-accumulate (MAC) operations at every environment step, making repeated inference costly during closed-loop control on robots that run on batteries.
-Therefore, developing world models that keep a long memory at a low energy cost per step is an important direction for embodied agents.
+Spiking neural networks (SNNs)~\cite{maass1997networks} process information with sparse binary spikes, following the dynamics and spike-based communication of biological neurons~\cite{roy2019towards}.
+Unlike artificial neural networks (ANNs), spiking neurons trigger synaptic computation only when spikes arrive and replace multiply-accumulate (MAC) operations with accumulate (AC) operations, which take about a fifth of the energy of a MAC on a 45\,nm chip~\cite{horowitz2014energy}; neuromorphic processors exploit this sparsity~\cite{davies2018loihi,orchard2021loihi2}.
+Trained directly with surrogate gradients~\cite{neftci2019surrogate,wu2018stbp}, SNNs now classify images with deep residual and transformer architectures~\cite{fang2021sew,zhou2023spikformer,yao2023sdt} and control agents through reinforcement learning (RL)~\cite{tang2020popsan,liu2023dsqn}.
+Spiking neurons are also dynamical systems with membrane and dendritic time constants, and these dynamics are widely believed to provide temporal memory~\cite{bellec2018lsnn}.
+Neuron models with adaptive thresholds~\cite{bellec2018lsnn,yin2021adaptive}, dendritic branches with heterogeneous time constants~\cite{zheng2024dhsnn}, two compartments~\cite{zhang2024tclif} or gated recurrence~\cite{qin2025grsn} extend this memory on long sequences and in partially observable control.
 
-Spiking neural networks (SNNs)~\cite{maass1997networks} offer an energy-efficient alternative through sparse, event-driven computation~\cite{roy2019towards}.
-Unlike ANNs, spiking neurons trigger synaptic computation only when spikes arrive and replace MACs with accumulate (AC) operations, which take about a fifth of the energy of a MAC on a 45\,nm chip~\cite{horowitz2014energy}; neuromorphic processors exploit this sparsity~\cite{davies2018loihi,orchard2021loihi2}.
-Moreover, spiking neurons are dynamical systems with membrane and dendritic time constants, and these dynamics are widely believed to provide temporal memory~\cite{bellec2018lsnn,zhang2024tclif,zheng2024dhsnn}.
-These properties make SNNs a natural basis for world models of the Dreamer family, which update a recurrent state at every step of closed-loop control and, in memory tasks, must keep information in this state over many steps.
+World models~\cite{ha2018world,hafner2019planet,hafner2020dreamer,hafner2025dreamerv3} compress the history of observations and actions into a recurrent latent state, predict the future from it, and let an agent learn behavior in imagination.
+In partially observable environments, this latent state also serves as the agent's memory and must retain information over many steps~\cite{osband2020bsuite,morad2023popgym,pasukonis2023memorymaze}; ANN world models built on state space models retain it for hundreds of steps~\cite{deng2023s4wm,samsami2024r2i}.
+A world model updates this state at every step of closed-loop control, so spike-driven computation saves energy at every step, and the dynamics of spiking neurons offer a natural place for its memory.
+Accordingly, a recent spiking world model builds on multicompartment neurons whose dendrites integrate over long timescales~\cite{sun2025spikingwm}.
 
-Existing work on memory in SNNs designs richer neuron dynamics, such as adaptive thresholds~\cite{bellec2018lsnn,yin2021adaptive}, dendritic branches with heterogeneous time constants~\cite{zheng2024dhsnn}, two compartments~\cite{zhang2024tclif} and gated recurrence~\cite{qin2025grsn}, and a recent spiking world model builds on multicompartment neurons whose dendrites integrate over long timescales~\cite{sun2025spikingwm}.
-These designs treat memory as a matter of longer time constants and overlook how the neuron state evolves across environment steps.
-Spiking reinforcement learning (RL) methods clear the membrane potentials at the start of every environment step~\cite{tang2020popsan,liu2023dsqn,sun2025spikingwm}, so the time constants act only within a single step.
+However, existing neuron models and spiking world models extend memory through longer time constants and overlook how the neuron state evolves across environment steps.
+Spiking RL methods clear the membrane potentials at the start of every environment step~\cite{tang2020popsan,liu2023dsqn,sun2025spikingwm}, so the time constants act only within a single step.
 In the multicompartment neurons of spiking world models, a somatic spike also resets the dendrites~\cite{sun2025spikingwm}, so a dendritic trace survives only until the neuron fires again.
 Moreover, the standard Euler update writes input with a gain of $1/\tau$, so compartments with long time constants store their input too weakly to drive spikes.
 As a result, existing spiking world models forget within a few steps (\cref{fig:memory_length}); we term this failure reset amnesia and confirm its causes with interventions (\cref{sec:amnesia}).
