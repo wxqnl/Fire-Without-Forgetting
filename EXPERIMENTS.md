@@ -1946,3 +1946,11 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
 - §5.6：DMC 按终值改写（只读 (z,h) 的 actor 在 walker、cheetah 上相同（904、473），cartpole 更高（813 对 676））；能耗 4.6 倍，脉冲基线 2.4 to 3.4 µJ 更低，因为本文滤波器的 AC 多（3.1M 对 1.6–2.2M，发放率 0.18）且 actor 读树突脉冲（1.3 对 0.3–0.6 µJ）。`numbers.tex` 新增能耗范围宏（写成 "a to b"）和只读胞体对照的 POPGym 宏。附录 H 补上 DH-SNN、TC-LIF 的神经元更新计数。
 - 摘要和引言："spiking world models forget" 改成 "existing spiking world models forget"（TC-LIF 是我们放进世界模型的，它能学会 101 步）。
 - 提交 `0fe62b6`、`717bcb2`。正文仍超出 8 页约 22 行（含 TODO 约 6 行），下一步压缩。
+
+### 19.57 运行状态（10 月 12 日 04:45）
+
+- 21:42 以后没有任务结束，也没有失败。队列 376/396，20 个在跑，8 张卡都还有我们的任务。
+- R2I L51 快跑完（86–94%）：LIF（最高 0.31）、GRSN（0.44）、DH-SNN（0.81）都没学会，按 §19.36 三者会各在 L51 换种子重跑一次（结束后排 s1，用户已同意过这条规则）；TC-LIF 102.5k 学会。TC-LIF L101 242.5k 学会（最后 3 次 0.83，50%），L71 在 482.5k 最高 0.44，还没学会。
+- POPGym（50–68%）：DH-SNN、TC-LIF 仍在随机水平（MMER Easy −0.44 / −0.26，Medium −0.44 / −0.48）；只读胞体的对照 Easy 0.62，Medium 0.26。
+- 像素 walker：本文 425k 849；LIF 245k 720，GRSN 285k 413，DH-SNN 225k 437，TC-LIF 185k 528。
+- Memory Maze：本文 320k，9.28 / 83.0%；Spiking-WM 990k、A+B+G 980k，快结束。
