@@ -1935,3 +1935,4 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
 - POPGym（45–60%）：DH-SNN、TC-LIF 的 Easy 和 Medium 仍在随机水平（MMER −0.30 到 −0.48）。只读胞体的对照 Easy 0.58，Medium 0.22。
 - 像素 walker：最终模型 405k，365k–405k 的评估均值 842（同一区间 Spiking-WM 716，Spiking-WM 1M 终值 917，DreamerV3 943）；LIF、GRSN、DH-SNN、TC-LIF 在 145k–225k。
 - Memory Maze：最终模型 310k，objects MSE 9.37、walls 82.8%（DreamerV3 1M 终值 9.8 / 85.3）；Spiking-WM、A+B+G 在 970k，几小时内跑完。
+- 00:30 用户："你可以帮我开一个子对话吗？就是集成咱们之前的所有内容，我想过去专门改论文了"。写了 `paper/HANDOFF.md`（分工、长期要求、最终模型、当前数字、要跟着新结果改的地方），新会话从它接手改论文；本会话继续负责实验，不改论文。
