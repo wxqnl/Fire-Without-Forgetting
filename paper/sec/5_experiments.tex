@@ -119,9 +119,9 @@ On the wall layout, all models of this size stay within 5 points of the constant
 \end{table}
 
 \Cref{tab:ablation} changes one design choice at a time (updates until 0.9 in Supp.~\suppref{supp:probe}{C}).
-\textbf{Persistence}: clearing the dendrites at every environment step erases the memory (AUC 0.50 to 0.51 on all three tasks), the direct test of reset amnesia inside our own model.
+\textbf{PDM}: clearing the dendrites at every environment step erases the memory (AUC 0.50 to 0.51 on all three tasks), the direct test of reset amnesia inside our own model.
 \textbf{Retention time}: a single retention time of 16 steps fails at 64 steps and one of 128 succeeds; the spectrum from 1 to 1000 steps succeeds without being set for the task, learned or kept at its initialization.
-\textbf{Write gain}: with the Euler gain $1-\lambda$ the channels with long retention times are too faint, and the model fails at 64 steps (0.52) and reaches only 0.76 at $k=32$.
+\textbf{NWG}: with the Euler gain $1-\lambda$ the channels with long retention times are too faint, and the model fails at 64 steps (0.52) and reaches only 0.76 at $k=32$.
 \textbf{Stateless soma}: a soma that keeps a membrane potential and is reset by its spike fails at 64 steps (0.52) and reaches 0.77 at $k=32$.
 \textbf{Resonance}: without resonant channels the model fails at $k=32$ (0.57); with resonant channels only it solves all three tasks, as does \method with one channel of each kind.
 \textbf{Depth and sparsity}: one PDN layer, or a firing rate capped at 0.06 (from 0.25), fails at 64 steps.
