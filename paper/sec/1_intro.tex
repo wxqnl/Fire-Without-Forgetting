@@ -13,11 +13,12 @@
   \label{fig:memory_length}
 \end{figure}
 
-World models~\cite{ha2018world,hafner2019planet,hafner2020dreamer,hafner2025dreamerv3} compress the history of observations and actions into a recurrent latent state, predict the future from it, and let an agent learn behavior in imagination.
-In partially observable environments, the agent must retain information over many steps, so this latent state serves as its memory.
-Memory benchmarks test this ability~\cite{osband2020bsuite,morad2023popgym,pasukonis2023memorymaze}, and world models built on state space models retain information for hundreds of steps~\cite{samsami2024r2i,deng2023s4wm}.
-However, these world models are artificial neural networks (ANNs) that compute with dense multiply-accumulate (MAC) operations at every environment step, which makes closed-loop inference costly for robots that run on batteries.
-Therefore, embodied agents need world models that keep a long memory at a low energy cost per step.
+World models~\cite{ha2018world,hafner2019planet} compress the history of observations and actions into a recurrent latent state and predict the future from it, which enables agents to learn behavior in imagination~\cite{hafner2020dreamer} and provides a general foundation for control across diverse domains~\cite{hafner2025dreamerv3}.
+In partially observable environments, this latent state also serves as the agent's memory and must retain information over many steps~\cite{osband2020bsuite,morad2023popgym,pasukonis2023memorymaze}.
+However, the recurrent cores of common world models struggle to retain information over long horizons~\cite{samsami2024r2i}.
+To this end, world models built on state space models~\cite{deng2023s4wm,samsami2024r2i} retain information for hundreds of steps.
+However, like other artificial neural networks (ANNs), they rely on dense multiply-accumulate (MAC) operations at every environment step, making repeated inference costly during closed-loop control on robots that run on batteries.
+Therefore, developing world models that keep a long memory at a low energy cost per step is an important direction for embodied agents.
 
 Spiking neural networks (SNNs)~\cite{maass1997networks} offer an energy-efficient alternative through sparse, event-driven computation~\cite{roy2019towards}.
 Unlike ANNs, spiking neurons trigger synaptic computation only when spikes arrive and replace MACs with accumulate (AC) operations, which take about a fifth of the energy of a MAC on a 45\,nm chip~\cite{horowitz2014energy}; neuromorphic processors exploit this sparsity~\cite{davies2018loihi,orchard2021loihi2}.
