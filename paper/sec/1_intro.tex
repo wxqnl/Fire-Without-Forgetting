@@ -8,7 +8,7 @@
   Final return on BSuite memory length~\cite{osband2020bsuite}: the agent sees a cue, then $L$ uninformative steps, and is rewarded for recalling the cue (1 = always correct, 0 = chance).
   All models share one spiking world model and differ in the recurrent core (\cref{sec:setup}).
   Left: budgets of 150k to 500k environment steps. Right: $L$ = 51, 71 and 101 with the lengths and budget of R2I~\cite{samsami2024r2i} (1M steps).
-  \swm fails at every length, recurrent LIF neurons stop at 8 steps, and GRSN and DH-SNN at 16; TC-LIF, whose state is carried across steps and never cleared, reaches 64.
+  \swm fails at every length, recurrent LIF neurons stop at 8 steps, and GRSN and DH-SNN at 16; TC-LIF, whose state is carried across steps and never cleared, learns 51 and 101 steps \pend{(71: in progress)}.
   \method reaches a return of 0.9 at every length up to 101 steps, and \dv up to 51 (\cref{tab:rl}). \pend{Open markers: runs in progress.}}
   \label{fig:memory_length}
 \end{figure}
@@ -23,8 +23,8 @@ Spiking neural networks (SNNs) communicate with binary events, replace multiply-
 Spiking neurons are dynamical systems with membrane and dendritic time constants, and these dynamics are widely credited with a capacity for temporal memory~\cite{bellec2018lsnn,zhang2024tclif,zheng2024dhsnn}.
 \swm~\cite{sun2025spikingwm} builds a spiking world model on multicompartment neurons whose dendrites integrate information over long timescales.
 
-We find that spiking world models forget within a few steps (\cref{fig:memory_length}).
-On BSuite memory length, \swm does not recall a cue 8 steps back; recurrent LIF neurons stop at 8 steps and gated recurrent spiking neurons (GRSN)~\cite{qin2025grsn} at 16.
+We find that existing spiking world models forget within a few steps (\cref{fig:memory_length}).
+On BSuite memory length, \swm does not recall a cue 8 steps back; recurrent LIF neurons stop at 8 steps, and gated recurrent spiking neurons (GRSN)~\cite{qin2025grsn} and DH-SNN~\cite{zheng2024dhsnn} at 16.
 The cause is reset.
 First, every environment step starts from cleared membrane potentials, the standard practice in spiking RL~\cite{tang2020popsan,liu2023dsqn,sun2025spikingwm}; only the binary spike output reaches the next step.
 Second, a somatic spike resets the dendrites together with the soma, so a dendritic trace survives only until the neuron fires again.
@@ -35,7 +35,7 @@ We call this failure \emph{reset amnesia} and test it causally (\cref{sec:amnesi
 In a world model probe that isolates memory from exploration, removing the dendritic reset or restoring the write gain has no effect while the step reset remains.
 With persistent state the world model recalls cues 16 steps back, and the normalized write gain extends this to 32 steps, learned faster than with a GRU core.
 Clearing the dendrites of our own model at every step erases its memory.
-The spiking neurons we compare confirm the diagnosis: TC-LIF~\cite{zhang2024tclif}, whose two compartments carry their state across steps and are never cleared, recalls 64 steps.
+The spiking neurons we compare confirm the diagnosis: TC-LIF~\cite{zhang2024tclif}, whose two compartments carry their state across steps without decay and are never cleared, recalls 64 steps in the probe and learns 101 steps in RL.
 
 These results give a design rule: memory should live in a state that no spike resets, written with a gain that holds for long time constants, and spikes should carry information out of it.
 We build the \methodfull (\method) from \emph{persistent dendritic neurons} (PDNs) that follow this rule (\cref{sec:method}).
@@ -45,7 +45,7 @@ A stateless soma reads the channels and sends a spike count over the simulation 
 
 We evaluate on memory benchmarks with published protocols and ANN results, and on DMC as a control task without a memory demand (\cref{sec:experiments}).
 On BSuite memory length, \method reaches a return of 0.9 at every length, up to 101 steps with the lengths and budget of R2I~\cite{samsami2024r2i}, where \dv stops at 51.
-On POPGym RepeatPrevious Medium~\cite{morad2023popgym}, which rewards naming the card of exactly 32 steps ago, it is the only model whose return rises above chance within 2M steps; every other model, \dv and R2I included, stays at chance.
+On POPGym RepeatPrevious Medium~\cite{morad2023popgym}, which rewards naming the card of exactly 32 steps ago, it is the only model whose return rises above chance within 2M steps; every other model, TC-LIF, \dv and R2I included, stays at chance.
 World model probes show that this is a memory of exact time: only \method recalls lags of 32 and 64 steps (AUC 0.92 and 0.94; all others at most 0.57), and only with its resonant channels.
 The agent uses \numEnergyRatio$\times$ less arithmetic energy per step than \dv.
 Our contributions are:

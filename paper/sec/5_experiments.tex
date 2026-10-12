@@ -55,15 +55,14 @@ Evaluations average 32 episodes on BSuite (every 10k steps, 20k with R2I's lengt
 \end{figure*}
 
 \Cref{tab:rl}, \cref{fig:memory_length} and \cref{fig:rl_curves} show how far each model remembers.
-The spiking baselines stop where their neurons lose state.
-\swm, cleared at every step and at every spike, recalls no cue, not even 8 steps back.
-Recurrent LIF neurons, cleared at every step, solve 8 steps; GRSN, which carries its state but resets its membrane at every spike, solves 16, and so does DH-SNN.
-TC-LIF carries both compartments across steps, and its spikes subtract a fixed amount from them instead of clearing them; it solves 64 steps, as the design rule of \cref{sec:amnesia} predicts.
+The spiking baselines remember as far as their neurons keep their state.
+\swm, cleared at every step and at every spike, recalls no cue, not even 8 steps back, and recurrent LIF neurons, cleared at every step, solve 8 steps.
+GRSN and DH-SNN carry leaky states across steps and solve 16 steps.
+TC-LIF adds its input to two compartments that do not decay, and its spikes subtract a fixed amount from them instead of clearing them; it solves 64 steps and, with R2I's lengths, 51 and 101 steps \pend{(71: in progress)}, as the design rule of \cref{sec:amnesia} predicts.
 \dv solves up to 32 steps in the short budgets and 51 steps with R2I's lengths (after 902k of 1M steps), and fails at 64, 71 and 101.
 \TODO{Recurrent LIF, GRSN and DH-SNN at 51 steps (runs in progress).}
 
-\method reaches a return of 0.9 at every length.
-Up to 64 steps it is as fast as the fastest baseline or faster (64 steps after \numFwfToSixtyFour\ environment steps, TC-LIF after 112k), and with R2I's lengths it learns 51, 71 and 101 steps after \numFwfToFiftyOne, \numFwfToSeventyOne\ and \numFwfToHundredOne\ steps (returns in Supp.~\suppref{supp:impl}{A}).
+\method reaches a return of 0.9 at every length, as fast as the fastest baseline or faster: 64 steps after \numFwfToSixtyFour\ environment steps (TC-LIF 112k), and with R2I's lengths 51, 71 and 101 steps after \numFwfToFiftyOne, \numFwfToSeventyOne\ and \numFwfToHundredOne\ (TC-LIF 102k, \pend{$>$222k} and 242k; returns in Supp.~\suppref{supp:impl}{A}).
 R2I reports a median return of about 0.9 at 51 and 71 memory steps and about 0.35 at 101 after 1M steps (10 seeds; Fig.~7 of~\cite{samsami2024r2i}), with DreamerV3's default reward head and lengths that count one step less.
 
 On RepeatPrevious Easy, \method reaches \numFwfEasy, close to the best baseline, recurrent LIF (0.74).
@@ -90,6 +89,7 @@ RepeatPrevious asks for a different memory: the input of an exact lag among a st
 At $k=4$ most models learn it (AUC 0.86 to 0.99; \method 0.98).
 At $k=32$, \method is the only model that learns it (AUC 0.92); all others, TC-LIF and \dv included, stay at 0.50 to 0.51.
 Resonance is the reason: without resonant channels the same model reaches only 0.57 (\cref{tab:ablation}).
+TC-LIF recalls the cue 64 steps back as well as \method, but its compartments oscillate without decay at one period of about 12 steps that all neurons share (Supp.~\suppref{supp:impl}{A}), whereas each resonant channel of \method has its own phase and retention time.
 We added resonant channels after an earlier model with integrator channels only failed this task (Supp.~\suppref{supp:diag}{F}) and used RepeatPrevious Hard ($k=64$) for no design choice.
 On Hard, \method reaches an AUC of 0.94, and all other models stay at 0.50 to 0.57.
 

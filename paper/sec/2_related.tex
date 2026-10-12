@@ -18,7 +18,7 @@ Spiking actors and Q-networks~\cite{tang2020popsan,liu2023dsqn} simulate a feedf
 \swm~\cite{sun2025spikingwm} brings multicompartment neurons into the world model of DreamerV3 and evaluates it on DeepMind Control from pixels and on speech classification.
 GRSN~\cite{qin2025grsn} aligns a gated recurrent spiking neuron with environment time and carries its state across steps for model-free RL in POMDPs.
 Spiking model-based control has also been trained end to end with recurrent LIF networks~\cite{huebotter2025spiking}.
-These works evaluate control and classification; on memory benchmarks, the resets they inherit limit memory to at most 16 steps (\cref{sec:rl}).
+These works evaluate control and classification; on memory benchmarks, they remember at most 16 steps (\cref{sec:rl}).
 
 \paragraph{Spiking neurons with long memory.}
 Adaptive thresholds~\cite{bellec2018lsnn,yin2021adaptive}, two-compartment neurons~\cite{zhang2024tclif}, heterogeneous dendritic time constants~\cite{zheng2024dhsnn} and resonate-and-fire dynamics~\cite{izhikevich2001resonate,higuchi2024brf,zhang2025drf} extend the memory of spiking neurons.
