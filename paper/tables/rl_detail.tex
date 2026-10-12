@@ -5,20 +5,20 @@ model & $L$=8 & 16 & 32 & 64 & 51$^\dagger$ & 71$^\dagger$ & 101$^\dagger$ \\
 \midrule
 \multicolumn{8}{@{}l}{\emph{environment steps until the return first reaches 0.9}} \\
 \swm~\cite{sun2025spikingwm} & -- & -- & -- & -- & -- & -- & -- \\
-Recurrent LIF & 142k & -- & -- & -- & \pend{$>$182k} & \nr & \nr \\
-GRSN~\cite{qin2025grsn} & 22k & 142k & -- & -- & \pend{$>$62k} & \nr & \nr \\
-DH-SNN~\cite{zheng2024dhsnn} & 32k & 162k & \pend{$>$212k} & \pend{$>$232k} & \pend{$>$22k} & \nr & \nr \\
-TC-LIF~\cite{zhang2024tclif} & 12k & 22k & 22k & 112k & \pend{$>$22k} & \nr & \nr \\
+Recurrent LIF & 142k & -- & -- & -- & \pend{$>$762k} & \nr & \nr \\
+GRSN~\cite{qin2025grsn} & 22k & 142k & -- & -- & \pend{$>$742k} & \nr & \nr \\
+DH-SNN~\cite{zheng2024dhsnn} & 32k & 162k & -- & -- & \pend{$>$682k} & \nr & \nr \\
+TC-LIF~\cite{zhang2024tclif} & 12k & 22k & 22k & 112k & 102k & \pend{$>$242k} & 242k \\
 \swmnr & 12k & 22k & 42k & -- & -- & -- & -- \\
 \dv (ANN)~\cite{hafner2025dreamerv3} & 12k & 22k & 112k & -- & 902k & -- & -- \\
 \textbf{\method (ours)} & 12k & 12k & 22k & 82k & 62k & 182k & 142k \\
 \midrule
 \multicolumn{8}{@{}l}{\emph{final return (mean of the last three evaluations)}} \\
 \swm~\cite{sun2025spikingwm} & 0.02 & 0.02 & -0.02 & -0.04 & -0.04 & 0.19 & -0.04 \\
-Recurrent LIF & 0.65 & 0.02 & -0.02 & 0.04 & \pend{0.10} & \nr & \nr \\
-GRSN~\cite{qin2025grsn} & 1.00 & 0.94 & 0.06 & -0.04 & \pend{-0.06} & \nr & \nr \\
-DH-SNN~\cite{zheng2024dhsnn} & \pend{1.00} & \pend{0.96} & \pend{0.29} & \pend{-0.06} & \pend{-0.22} & \nr & \nr \\
-TC-LIF~\cite{zhang2024tclif} & \pend{1.00} & \pend{1.00} & \pend{0.94} & \pend{1.00} & \pend{-0.19} & \nr & \nr \\
+Recurrent LIF & 0.65 & 0.02 & -0.02 & 0.04 & \pend{-0.23} & \nr & \nr \\
+GRSN~\cite{qin2025grsn} & 1.00 & 0.94 & 0.06 & -0.04 & \pend{0.00} & \nr & \nr \\
+DH-SNN~\cite{zheng2024dhsnn} & 1.00 & 0.92 & 0.48 & 0.06 & \pend{0.35} & \nr & \nr \\
+TC-LIF~\cite{zhang2024tclif} & 1.00 & 1.00 & 1.00 & 0.88 & \pend{0.81} & \pend{0.19} & \pend{0.56} \\
 \swmnr & 0.96 & 0.98 & 1.00 & 0.04 & -0.04 & 0.08 & -0.04 \\
 \dv (ANN)~\cite{hafner2025dreamerv3} & 1.00 & 0.92 & 0.96 & 0.04 & 0.98 & 0.04 & 0.04 \\
 \textbf{\method (ours)} & 0.98 & 0.98 & 1.00 & 0.98 & 0.79 & 0.96 & 0.94 \\
@@ -27,8 +27,8 @@ TC-LIF~\cite{zhang2024tclif} & \pend{1.00} & \pend{1.00} & \pend{0.94} & \pend{1
 \swm~\cite{sun2025spikingwm} & -- & -- & -- & -- & -- & -- & -- \\
 Recurrent LIF & 1.00\,{\tiny(100\%)} & -- & -- & -- & \pend{$\cdot$} & \nr & \nr \\
 GRSN~\cite{qin2025grsn} & 1.00\,{\tiny(100\%)} & 0.95\,{\tiny(100\%)} & -- & -- & \pend{$\cdot$} & \nr & \nr \\
-DH-SNN~\cite{zheng2024dhsnn} & \pend{1.00\,{\tiny(100\%)}} & \pend{0.95\,{\tiny(100\%)}} & \pend{$\cdot$} & \pend{$\cdot$} & \pend{$\cdot$} & \nr & \nr \\
-TC-LIF~\cite{zhang2024tclif} & \pend{1.00\,{\tiny(100\%)}} & \pend{0.99\,{\tiny(100\%)}} & \pend{0.98\,{\tiny(100\%)}} & \pend{1.00\,{\tiny(100\%)}} & \pend{$\cdot$} & \nr & \nr \\
+DH-SNN~\cite{zheng2024dhsnn} & 1.00\,{\tiny(100\%)} & 0.93\,{\tiny(100\%)} & -- & -- & \pend{$\cdot$} & \nr & \nr \\
+TC-LIF~\cite{zhang2024tclif} & 1.00\,{\tiny(100\%)} & 0.99\,{\tiny(100\%)} & 0.98\,{\tiny(100\%)} & 0.87\,{\tiny(98\%)} & \pend{0.93\,{\tiny(100\%)}} & \pend{$\cdot$} & \pend{1.00\,{\tiny(100\%)}} \\
 \swmnr & 0.98\,{\tiny(100\%)} & 0.99\,{\tiny(100\%)} & 0.99\,{\tiny(100\%)} & -- & -- & -- & -- \\
 \dv (ANN)~\cite{hafner2025dreamerv3} & 1.00\,{\tiny(100\%)} & 0.98\,{\tiny(100\%)} & 0.98\,{\tiny(100\%)} & -- & 0.98\,{\tiny(100\%)} & -- & -- \\
 \textbf{\method (ours)} & 0.98\,{\tiny(100\%)} & 0.99\,{\tiny(100\%)} & 0.99\,{\tiny(100\%)} & 0.95\,{\tiny(98\%)} & 0.96\,{\tiny(98\%)} & 0.68\,{\tiny(67\%)} & 0.69\,{\tiny(73\%)} \\

@@ -143,9 +143,9 @@ With A and $\tau_d=128$, the membrane potentials still encode it after 8 steps (
 
 \Cref{tab:policy} compares \method with an actor and critic of the baselines' size (3.4M parameters) that read $(z_t,h_t)$ only, on the same world model.
 On BSuite both learn every length they were run on, at nearly the same speed: one cue fits in the spike counts of $h_t$.
-On RepeatPrevious the policy needs the dendritic state: without it, the return reaches \pend{0.56} on Easy and \pend{0.10} on Medium, against 0.72 and 0.48.
-On DMC the dendritic readout helps on walker walk (923 against \pend{881}), while cheetah run and cartpole swingup are learned better without it (\pend{499} and \pend{787} against \pend{433} and \pend{517}).
-\TODO{Final POPGym and DMC numbers of the control (runs in progress).}
+On RepeatPrevious the policy needs the dendritic state: without it, the return reaches \numAltEasy\ on Easy and \numAltMedium\ on Medium, against \numFwfEasy\ and \numFwfMedium.
+On DMC the two actors reach the same return on walker walk and cheetah run (\numFwfDmcWalk\ and \numFwfDmcRun\ with the dendritic input, 904 and 473 without), and the actor without it reaches more on cartpole swingup (813 against \numFwfDmcSwing).
+\TODO{Final POPGym numbers of the control (runs in progress).}
 
 \section{Diagnosing the world model in RL}
 \label{supp:diag}
@@ -202,7 +202,7 @@ All models use the size of DreamerV3-S, smaller than the RSSM of the reference r
 
 We count the operations of the world model filter per environment step, \ie, the encoder and the posterior update that an agent runs at every step, averaged over evaluation episodes of the BSuite $L=32$ RL models.
 A synaptic operation on a spike input is an accumulate (AC, 0.9\,pJ), any operation on a graded input a multiply-accumulate (MAC, 4.6\,pJ)~\cite{horowitz2014energy}.
-For the PDN, the synaptic maps $B\xx_t$, $R\bar\ssp_{t-1}$ and $D\xx_t$ read spike rates and count as ACs per spike; the dendritic update counts 3 MACs per integrator channel (decay, write, readout) and 6 per resonant channel. For all models, a normalization counts 2 MACs per element and a neuron update counts per element (LIF 1 per simulation step, MCN 4 per simulation step, GRSN and GRU 4 per environment step).
+For the PDN, the synaptic maps $B\xx_t$, $R\bar\ssp_{t-1}$ and $D\xx_t$ read spike rates and count as ACs per spike; the dendritic update counts 3 MACs per integrator channel (decay, write, readout) and 6 per resonant channel. For all models, a normalization counts 2 MACs per element and a neuron update counts per element (LIF 1 per simulation step, MCN 4 per simulation step; per environment step GRSN and GRU 4, DH-SNN 2 per dendritic branch and 2 for the soma, TC-LIF 2).
 Memory access is not counted for any model.
 For the RL agents we also count the actor, which runs at every step: it reads $(z_t,h_t)$, and for \method also the 3072 dendritic spike inputs, through the factor of rank 64 (\cref{sec:wm}); the factor reads spikes (ACs), and the first layer reads its 64 graded outputs (MACs).
 A binary spike frame counts once per simulation step: each spike of the PDN soma's count counts once, and a spike that the GRSN soma repeats over the $T$ simulation steps counts $T$ times.

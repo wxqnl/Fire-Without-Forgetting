@@ -368,6 +368,8 @@ def numbers():
         v, pct = ret(f"popgym/popgym_RepeatPrevious{d}/{mt.key('OURS', 'popgym')}")
         out += [rf"\newcommand{{\numFwf{d}}}{{{v}}}", rf"\newcommand{{\numFwf{d}Progress}}{{{pct}}}"]
         out.append(rf"\newcommand{{\numRtwoI{d}}}{{{r2i_popgym('RepeatPrevious' + d)}}}")
+        # actor and critic that read (z_t, h_t) only (Supp. policy input), MMER as in Table 1
+        out.append(rf"\newcommand{{\numAlt{d}}}{{{ret(f'popgym/popgym_RepeatPrevious{d}/' + mt.key('OURSALT', 'popgym'))[0]}}}")
     # BSuite (EXPERIMENTS.md §19.16): steps to 0.9, mean return and % of evaluations >= 0.5 from then on, final return
     names = {8: "Eight", 16: "Sixteen", 32: "ThirtyTwo", 64: "SixtyFour", 51: "FiftyOne", 71: "SeventyOne", 101: "HundredOne"}
     for g, L in BSUITE:
@@ -387,6 +389,7 @@ def numbers():
     ours, dv = energy("OURS"), energy("ann_tau2")
     spiking = [e for e in map(energy, ("base_tau2", "LIF_tau2", "GRSN_tau2", "DHSNN", "TCLIF")) if e]
     uj = lambda e, k: f"{e[k] / 1e3:.1f}"
+    span = lambda k, scale: " to ".join(f"{x / scale:.1f}" for x in (min(e[k] for e in spiking), max(e[k] for e in spiking)))
     vals = {"Agent": uj(ours, "agent_energy_nj_per_step") if ours else None,
             "Filter": uj(ours, "energy_nj_per_step") if ours else None,
             "Actor": uj(ours, "actor_energy_nj_per_step") if ours else None,
@@ -394,8 +397,11 @@ def numbers():
             "Rate": f"{ours['deter_rate']:.2f}" if ours else None,
             "AgentDv": uj(dv, "agent_energy_nj_per_step") if dv else None,
             "FilterDv": uj(dv, "energy_nj_per_step") if dv else None,
-            "Spiking": "--".join(f"{x / 1e3:.1f}" for x in (min(e["agent_energy_nj_per_step"] for e in spiking),
-                                                           max(e["agent_energy_nj_per_step"] for e in spiking))) if spiking else None}
+            "Ac": f"{ours['ac_per_step'] / 1e6:.1f}" if ours else None,
+            # ranges over the spiking baselines, written "a to b" as in the text
+            "Spiking": span("agent_energy_nj_per_step", 1e3) if spiking else None,
+            "SpikingAc": span("ac_per_step", 1e6) if spiking else None,
+            "SpikingActor": span("actor_energy_nj_per_step", 1e3) if spiking else None}
     out += [rf"\newcommand{{\numEnergy{k}}}{{{v or PEND}}}" for k, v in vals.items()]
     write("numbers", out)
 

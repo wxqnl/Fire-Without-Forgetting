@@ -60,7 +60,7 @@ The spiking baselines stop where their neurons lose state.
 Recurrent LIF neurons, cleared at every step, solve 8 steps; GRSN, which carries its state but resets its membrane at every spike, solves 16, and so does DH-SNN.
 TC-LIF carries both compartments across steps, and its spikes subtract a fixed amount from them instead of clearing them; it solves 64 steps, as the design rule of \cref{sec:amnesia} predicts.
 \dv solves up to 32 steps in the short budgets and 51 steps with R2I's lengths (after 902k of 1M steps), and fails at 64, 71 and 101.
-\TODO{DH-SNN at 32 and 64 steps and DH-SNN, TC-LIF and recurrent LIF at 51 steps (runs in progress).}
+\TODO{Recurrent LIF, GRSN and DH-SNN at 51 steps (runs in progress).}
 
 \method reaches a return of 0.9 at every length.
 Up to 64 steps it is as fast as the fastest baseline or faster (64 steps after \numFwfToSixtyFour\ environment steps, TC-LIF after 112k), and with R2I's lengths it learns 51, 71 and 101 steps after \numFwfToFiftyOne, \numFwfToSeventyOne\ and \numFwfToHundredOne\ steps (returns in Supp.~\suppref{supp:impl}{A}).
@@ -107,7 +107,7 @@ On Hard, \method reaches an AUC of 0.94, and all other models stay at 0.50 to 0.
 Memory Maze tests whether a world model builds a map of a 3D maze from first-person views over 1000 steps.
 \Cref{tab:mm} reports the probes on the state that the policy reads: $(z_t,h_t)$ for all models, and in addition the dendritic spikes for \method.
 \method locates the target objects as well as \dv (MSE 9.8) and better than every spiking baseline (11.5 to 11.8).
-On the wall layout, all models of this size stay within 5 points of the constant predictor (80.8\%), \method at 82.6\% and \dv at 85.3\%; the larger RSSM of~\cite{pasukonis2023memorymaze} reaches 89.0\%.
+On the wall layout, all models of this size stay within 5 points of the constant predictor (80.8\%), \method at 82.8\% and \dv at 85.3\%; the larger RSSM of~\cite{pasukonis2023memorymaze} reaches 89.0\%.
 \TODO{Memory Maze: final probes after 1M updates (in progress); the values are the latest probes during training.}
 
 \subsection{Ablations}
@@ -133,11 +133,11 @@ The spike count, the feedback and the number of channels leave the memory nearly
 \subsection{Control tasks and energy}
 \label{sec:energy}
 
-On DMC from proprioception (\cref{tab:mm}), \method matches the best spiking model on walker walk (\numFwfDmcWalk; \swm 923) and trails recurrent LIF on cheetah run and cartpole swingup (\numFwfDmcRun\ and \numFwfDmcSwing\ against 532 and 811).
-With an actor that reads $(z_t,h_t)$ only, the same world model reaches \pend{499} and \pend{787} on these two tasks (Supp.~\suppref{supp:policy}{E}), so the gap lies in the policy input.
-\TODO{Final DMC returns, including walker walk from pixels (runs in progress).}
+On DMC from proprioception (\cref{tab:mm}), \method matches the best spiking model on walker walk (\numFwfDmcWalk, as \swm) and reaches \numFwfDmcRun\ on cheetah run and \numFwfDmcSwing\ on cartpole swingup, where recurrent LIF reaches 532 and 811.
+An actor that reads $(z_t,h_t)$ only reaches the same return with the same world model on walker walk and cheetah run (904 and 473) and a higher one on cartpole swingup (813; Supp.~\suppref{supp:policy}{E}).
+\TODO{Walker walk from pixels after 1M frames (runs in progress).}
 
-Per environment step (Supp.~\suppref{supp:energy}{H}), the agent of \method, world model filter and actor, costs \numEnergyAgent\,$\mu$J, \numEnergyRatio$\times$ less than \dv (\numEnergyAgentDv\,$\mu$J); the filter alone costs \numEnergyFilter\ against \numEnergyFilterDv\,$\mu$J, at a recurrent firing rate of \numEnergyRate.
-Most of its operations are accumulates triggered by spikes, including those of the 3072 dendritic spike inputs of the actor (\numEnergyActor\,$\mu$J for the whole actor); the multiply-accumulates of the dendrites stay inside each neuron.
-The spiking baselines cost \numEnergySpiking\,$\mu$J.
+Per environment step (Supp.~\suppref{supp:energy}{H}), the agent of \method, world model filter and actor, costs \numEnergyAgent\,$\mu$J, \numEnergyRatio$\times$ less than \dv (\numEnergyAgentDv\,$\mu$J); the filter alone costs \numEnergyFilter\ against \numEnergyFilterDv\,$\mu$J.
+Most of its operations are accumulates triggered by spikes; the multiply-accumulates of the dendrites stay inside each neuron.
+The spiking baselines cost \numEnergySpiking\,$\mu$J, less than \method: its filter performs more accumulates (\numEnergyAc M against \numEnergySpikingAc M, at a recurrent firing rate of \numEnergyRate), and its actor also reads the 3072 dendritic spike inputs (\numEnergyActor\ against \numEnergySpikingActor\,$\mu$J).
 As in SNN energy reports, the estimates count 32-bit arithmetic~\cite{horowitz2014energy} and leave out memory access, which can dominate on hardware~\cite{dampfhoffer2023energy}, for all models.
