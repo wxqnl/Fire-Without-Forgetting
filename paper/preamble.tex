@@ -23,6 +23,13 @@
 %% references into the supplementary: resolved in `make full`, fixed letters in the paper-only build
 \newcommand{\suppref}[2]{\ifwithsupp\ref{#1}\else #2\fi}
 
+%% upright Latin abbreviations (cvpr.sty sets them in italics)
+\def\eg{e.g\onedot} \def\Eg{E.g\onedot}
+\def\ie{i.e\onedot} \def\Ie{I.e\onedot}
+\def\cf{cf\onedot} \def\Cf{Cf\onedot}
+\def\etc{etc\onedot} \def\vs{vs\onedot}
+\def\etal{et al\onedot}
+
 %% annotations (switch off for submission)
 \newcommand{\TODO}[1]{\textbf{\color{red}[TODO: #1]}}
 % a value from a run that is still in progress; refreshed from runs/ by paper/scripts/paper_tables.py

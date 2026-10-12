@@ -174,7 +174,7 @@ def rl_detail_table():
     for title, cell in ((r"environment steps until the return first reaches 0.9", steps_to),
                         (r"final return (mean of the last three evaluations)", final_return),
                         (r"from the first return of 0.9 on: mean return (evaluations $\ge0.5$)", after)):
-        lines += [r"\midrule", rf"\multicolumn{{8}}{{@{{}}l}}{{\emph{{{title}}}}} \\"]
+        lines += [r"\midrule", rf"\multicolumn{{8}}{{c}}{{{title}}} \\"]
         for m, label in SUPP_MODELS:
             lines.append(label + " & " + " & ".join(cell(f"{g}/bsuite_memlen-{L}/{mt.key(m, 'bsuite')}") for g, L in BSUITE) + r" \\")
     lines += [r"\bottomrule", r"\end{tabular}"]
@@ -235,7 +235,7 @@ def probe_detail_table():
     lines = [r"\setlength{\tabcolsep}{2.4pt}", r"\begin{tabular}{@{}l cccc ccc@{}}", r"\toprule"] + PROBE_HEAD
     for m, label in SUPP_MODELS:
         lines.append(label + " & " + " & ".join(probe(r) for r in probe_runs(m)) + r" \\")
-    lines += [r"\midrule", r"\emph{ablations} & & & 32 & 64 & & 32 & \\", r"\midrule"]
+    lines += [r"\midrule", r"Ablations & & & 32 & 64 & & 32 & \\", r"\midrule"]
     for name, label in ABLATIONS:
         l32, l64, med = (probe(f"{t}/{name}") for t in ABL_RUNS)
         lines.append(f"{label} & & & {l32} & {l64} & & {med} & " + r"\\")
