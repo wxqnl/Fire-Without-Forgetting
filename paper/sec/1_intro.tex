@@ -14,8 +14,8 @@
 \end{figure}
 
 World models~\cite{ha2018world,hafner2019planet,hafner2020dreamer,hafner2025dreamerv3} compress the history of observations and actions into a recurrent latent state, predict the future from it, and let an agent learn behavior in imagination.
-For an embodied agent that sees only part of its surroundings, this state is also its memory.
-Recent world models remember for hundreds of steps~\cite{samsami2024r2i,deng2023s4wm}, and memory benchmarks measure how far~\cite{osband2020bsuite,morad2023popgym,pasukonis2023memorymaze}.
+In partially observable environments, the agent must retain information over many steps, so this latent state serves as its memory.
+Memory benchmarks test this ability~\cite{osband2020bsuite,morad2023popgym,pasukonis2023memorymaze}, and world models built on state space models retain information for hundreds of steps~\cite{samsami2024r2i,deng2023s4wm}.
 However, these world models are artificial neural networks (ANNs) that compute with dense multiply-accumulate (MAC) operations at every environment step, which makes closed-loop inference costly for robots that run on batteries.
 
 Spiking neural networks (SNNs) reduce this cost through sparse, event-driven computation~\cite{roy2019towards}.
