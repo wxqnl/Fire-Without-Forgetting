@@ -5,8 +5,8 @@
   \centering
   \includegraphics[width=\textwidth]{fig/overview}
   \caption{\textbf{\methodfull.}
-  (a) Two layers of persistent dendritic neurons (PDNs) form the recurrent core of a spiking Dreamer. Each neuron has an integrator (blue) and a resonant (orange) dendritic channel, which carry the memory across environment steps and are never reset; its stateless soma sends a spike count over the $T=5$ simulation steps, and the spikes of a layer also feed back into its dendrites ($R$). The actor and critic also read the dendrites of the second layer as ON and OFF spikes.
-  (b) In \swm, all compartments are cleared at every step and the dendrites at every somatic spike, so only spikes reach the next step. In a PDN, the dendritic channels persist; spikes add to them but never clear them.}
+  (a) Two layers of persistent dendritic neurons (PDNs) form the recurrent core of a spiking Dreamer. Each neuron has an integrator (blue) and a resonant (orange) dendritic channel; PDM carries them across environment steps without reset, and NWG writes into them on one scale for every retention time. Its stateless soma sends a spike count over the $T=5$ simulation steps, and the spikes of a layer also feed back into its dendrites ($R$). The actor and critic also read the dendrites of the second layer as ON and OFF spikes.
+  (b) In \swm, all compartments are cleared at every step and the dendrites at every somatic spike, so only spikes reach the next step. In a PDN, PDM keeps the dendritic channels across steps; spikes add to them but never clear them.}
   \label{fig:overview}
 \end{figure*}
 

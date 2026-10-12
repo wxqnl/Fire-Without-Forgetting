@@ -57,7 +57,7 @@ R2I itself runs with the official POPGym configuration of its code (batches of $
 
 \paragraph{Parameters.}
 On POPGym the world models have 7.2M (\swm, \swmnr), 6.4M (LIF), 6.5M (GRSN), 7.5M (\dv) and 8.6M (\method) parameters, of which the recurrent core has 1.3M, 0.5M, 0.5M, 1.6M and 2.6M; the actor-critic (actor, critic and the critic's slowly updated copy) has 3.4M for the baselines and 4.1M for \method, which also reads the 3072 dendritic spikes through a factor of rank 64 (Supp.~\suppref{supp:policy}{E} controls for this size).
-Capacity does not explain the results: the GRU core of \dv is larger than the cores of the spiking baselines and fails at 64 steps, and variants of \method with the same size but dendrites cleared at every step, or a single retention time of 16 steps, stay at chance (\cref{tab:ablation}).
+Capacity does not explain the results: the GRU core of \dv is larger than the cores of the spiking baselines and fails at 64 steps, and variants of \method with the same size but without PDM, or a single retention time of 16 steps, stay at chance (\cref{tab:ablation}).
 
 
 \paragraph{Evaluation.}
@@ -113,8 +113,8 @@ World models are trained for 10k updates with batches of 16$\times$64 and a rewa
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{fig/probe_panels}
-  \caption{\textbf{Persistence, retention time, write gain and resonance} (world model probes, AUC of the reward prediction; 0.5 = no memory).
-  (a) Variants of \method recalling a cue 64 steps back: clearing the dendrites at every step, retention times shorter than the memory, or the Euler write gain all leave the world model without memory.
+  \caption{\textbf{PDM, retention time, NWG and resonance} (world model probes, AUC of the reward prediction; 0.5 = no memory).
+  (a) Variants of \method recalling a cue 64 steps back: clearing the dendrites at every step (no PDM), retention times shorter than the memory, or the Euler write gain in place of NWG all leave the world model without memory.
   (b) Recalling the card of exactly 32 steps ago: only \method with resonant channels learns it.}
   \label{fig:probe}
 \end{figure*}

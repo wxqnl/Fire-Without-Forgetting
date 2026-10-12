@@ -134,7 +134,7 @@ path("M 444 108 L 806 108 L 806 206")
 CX0, CX1, CY0, CY1 = 140, 706, 206, 466
 box(CX0, CY0, CX1 - CX0, CY1 - CY0, "pdn", r=14)
 text(CX0 + 14, CY0 + 30, "PDN core", S_HEAD, weight="bold", color=OURS)
-text(CX1 - 14, CY0 + 30, "dendrites are never reset", S_TXT, "end", color=GREY)
+text(CX1 - 14, CY0 + 30, "PDM: dendrites are never reset", S_TXT, "end", color=GREY)
 NX = [292, 372, 452, 532]
 BX0, BX1 = CX0 + 52, CX1 - 74
 LAYERS = ((262, "layer 2"), (372, "layer 1"))
@@ -159,6 +159,8 @@ yb = CY1 + 12
 for x in NX:
     line(x + 28, yb, x + 28, LAYERS[1][0] + 66, INK, 1.8)
 path(f"M {NX[0] + 28} {yb} L {NX[-1] + 28} {yb}", INK, 1.8, False)
+# every write into the channels uses the normalized write gain
+text(NX[0] + 18, yb - 22, "NWG write", S_TXT - 1, "end", color=GREY)
 path(f"M {(NX[0] + NX[-1]) / 2 + 28} {yb} L {(NX[0] + NX[-1]) / 2 + 28} {yb + 10}", INK, 1.8, False)
 rich((NX[0] + NX[-1]) / 2 + 28, yb + 34, ["spikes of ", m("z", "t−1", 22), " and ", m("a", "t−1", 22)], anchor="middle", size=S_TXT)
 
@@ -253,6 +255,7 @@ for x, lab, n in zip(FX, ("step t−1", "step t"), (4, 2)):
         line(cx + side * 28, y + 122, cx + side * 10, y + 80, "#555555", 2)
     rich(cx + 36, y + 112, ["∑", m("C", None, 19), m("d", None, 19)], size=S_TXT - 2, color=GREY)
 channels(X0 - 10, X0 + 2 * FW + GAP + 10, y + 128, gap=18, w=2.8)
+text(gx, y + 100, "PDM:", S_TXT - 2, "middle")
 text(gx, y + 120, "never reset", S_TXT - 2, "middle")
 # the spikes of step t-1 feed back into the dendrites of step t; they add to the channels, they do not clear them
 path(f"M {FX[0] + FW / 2 + 30} {y + 26} C {gx + 30} {y + 26}, {FX[1] + 36} {y + 36}, {FX[1] + 40} {y + 118}", FB, 2.2)

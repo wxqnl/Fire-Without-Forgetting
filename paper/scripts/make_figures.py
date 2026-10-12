@@ -150,11 +150,11 @@ def probe_panels():
     RepeatPrevious Medium probe (input of exactly 32 steps ago). Runs as in main_tables.ABLATIONS."""
     fig, axes = plt.subplots(1, 2, figsize=(6.9, 2.2))
     ax = axes[0]
-    sweep = [("SDDreset_tau1000", "cleared every step", "#999999", ":"),
+    sweep = [("SDDreset_tau1000", "no PDM (cleared every step)", "#999999", ":"),
              ("SDD_tau16", r"single $\tau=16$", "#56B4E9", "-."),
              ("SDD_tau128", r"single $\tau=128$", "#0072B2", "--"),
-             ("SDDeuler_tau1000", r"Euler write gain $1-\lambda$", "#009E73", (0, (3, 1, 1, 1))),
-             (mt.OURS["probe"], r"SD-Dreamer ($\tau\in[1,1000]$, gain $\sqrt{1-\lambda^2}$)", "#D55E00", "-")]
+             ("SDDeuler_tau1000", r"no NWG (Euler gain $1-\lambda$)", "#009E73", (0, (3, 1, 1, 1))),
+             (mt.OURS["probe"], r"SD-Dreamer ($\tau\in[1,1000]$, PDM and NWG)", "#D55E00", "-")]
     for name, label, color, ls in sweep:
         x, y = curve(f"recall/bsuite_memlen-64-recall/{name}", "eval_auc")
         if len(x):

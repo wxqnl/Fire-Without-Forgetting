@@ -203,10 +203,10 @@ def probe_table():
 
 
 ABLATIONS = [("PD2Lreshalfthermofbch2_tau1000", r"\method"),
-             ("SDDreset_tau1000", "dendrites cleared every step"),
+             ("SDDreset_tau1000", "no PDM (cleared every step)"),
              ("SDD_tau16", r"single $\tau=16$"), ("SDD_tau128", r"single $\tau=128$"),
              ("SDDfix_tau1000", r"$\tau$ fixed at initialization"),
-             ("SDDeuler_tau1000", r"Euler write gain $1-\lambda$"),
+             ("SDDeuler_tau1000", r"no NWG (Euler gain $1-\lambda$)"),
              ("SDD1L_tau1000", "one PDN layer"), ("SDD1LT1_tau1000", r"one PDN layer, $T=1$"),
              ("SDDnores_tau1000", "no resonant channels"), ("SDDres_tau1000", "all channels resonant"),
              ("SDDcap_tau1000", "firing rate capped at 0.06"),
