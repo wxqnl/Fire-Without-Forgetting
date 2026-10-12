@@ -1962,3 +1962,11 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
 - 像素 walker（§5.6，`fig/walker_viz.pdf`）：本文最新评测 episode，5 帧观测后按动作开环预测 45 帧，8 段平均的像素 MSE：本文每一步都低于 Spiking-WM，第 15 步起低于 DreamerV3（DreamerV3 前 14 步更低）。本文用的是 448k 帧的 checkpoint。
 - 树突（§5.3，`fig/dendrites_viz.pdf`）：R2I L101 的智能体（本文按 `seed()` 规则是 s1），最新评测 episode 和只翻转线索（第 0、1 行）的同一 episode，随机潜变量取众数。Spiking-WM 核心脉冲在线索后 10 步变得完全相同；本文树突差异保持 101 步，soma 脉冲在第 101 步仍差 3.4%；长保留时间的积分通道保持同号，共振通道按各自周期（例：52、24、12 步）振荡。
 - Memory Maze 和像素 walker 跑完后要重跑：`nice -n 19 python paper/scripts/viz_infer.py mmaze`、`... walker`，再 `make data`，并核对 §5.4、§5.6 和图注里标了 `\pend` 的数字。
+
+### 19.58 R2I L51 基线与 Memory Maze 基线跑完（10 月 12 日 08:25）
+
+- 06:12–07:56 跑完，全部 exit 0：
+  - R2I L51：LIF 没学会（最高 0.31，最后 3 次 −0.04）；GRSN 没学会（0.44，0.04）；DH-SNN 没学会（0.81，0.50）；TC-LIF 102.5k 学会（最后 3 次 0.98）。按 §19.57 的决定，三个没学会的不重跑。
+  - Memory Maze 1M（状态探针 / 无记忆探针）：Spiking-WM objects MSE 11.79 / 12.00，walls 83.5 / 83.0%；A+B+G 11.25 / 12.02，83.7 / 83.0%。
+- 在跑的：TC-LIF L101 742.5k（242.5k 学会，最后 3 次 1.00）；TC-LIF L71 682.5k，最高 0.44，没学会。Memory Maze 本文 340k，9.18 / 12.05，83.2 / 82.7%。
+- 队列 382/396，14 个在跑。8 张卡都还有我们的任务（gpu0、gpu3、gpu7 各只剩 1 个），没有卡可释放。监控到了 20 小时上限，已重启。
