@@ -31,18 +31,16 @@ Moreover, the standard Euler update writes input with a gain of $1/\tau$, so com
 As a result, existing spiking world models forget within a few steps (\cref{fig:memory_length}); we term this failure reset amnesia and confirm its causes with interventions (\cref{sec:amnesia}).
 Despite these advances in neuron dynamics, building a spiking world model that retains what it saw, and when, over long horizons remains challenging.
 
-To address these problems, we propose the \methodfull (\method), a spiking world model built from persistent dendritic neurons (PDNs) (\cref{sec:method}).
-As shown in \cref{fig:overview}, a PDN removes each cause of reset amnesia.
-First, its linear dendritic channels persist across environment steps, so information outlasts a single step.
-Second, spikes write into these channels through synapses but never reset them, so a dendritic trace survives later spikes.
-Third, the write gain is normalized across retention times from 1 to 1000 environment steps, so channels with long retention times store their input at the same scale as short ones.
-In addition, integrator channels hold what was seen, and resonant channels, damped oscillators in the tradition of resonate-and-fire neurons~\cite{izhikevich2001resonate}, also hold when it was seen.
-A stateless soma reads the channels and sends a spike count, the only signal that other neurons receive; the graded state stays inside the neuron, as on neuromorphic cores~\cite{orchard2021loihi2}.
-We evaluate \method on BSuite memory length, POPGym RepeatPrevious and Memory Maze with their published protocols, and on DMC as a control task without a memory demand (\cref{sec:experiments}).
-On BSuite, it reaches a return of 0.9 at every memory length up to 101 steps within the budget of R2I~\cite{samsami2024r2i}, where \dv stops at 51.
-On POPGym RepeatPrevious Medium~\cite{morad2023popgym}, which rewards naming the card of exactly 32 steps ago, it is the only model, ANN baselines included, whose return rises above chance within 2M steps.
-World model probes show that only \method recalls exact lags of 32 and 64 steps, and only with its resonant channels; ablations confirm that this memory also requires the persistent channels and the normalized write gain.
-Its agent uses \numEnergyRatio$\times$ less arithmetic energy per step than \dv.
+To address these problems, we propose the \methodfull (\method), a spiking world model whose recurrent core is built from a new neuron, the persistent dendritic neuron (PDN).
+As shown in \cref{fig:overview}, a PDN separates memory from communication: its dendritic channels store the memory, and its soma communicates it with spikes.
+First, to remove both resets, we keep the memory in linear dendritic channels that persist across environment steps; spikes write into them through synapses but never reset them, so information survives later steps and later somatic spikes.
+Second, to correct the write gain, we normalize it so that every channel keeps its state on the same scale, and channels with long retention times drive the soma as strongly as short ones.
+Third, we equip each neuron with two types of channels: integrator channels accumulate what the agent has seen, and resonant channels, damped oscillators that follow resonate-and-fire neurons~\cite{izhikevich2001resonate}, also encode how many steps ago it was seen.
+Finally, a stateless soma reads the channels and emits a spike count, the only signal sent to other neurons, so the graded state stays inside the neuron as on neuromorphic cores~\cite{orchard2021loihi2}.
+We evaluate \method on BSuite memory length, POPGym RepeatPrevious and Memory Maze with their published protocols, and on DMC~\cite{tassa2018dmc} as control tasks without a memory demand (\cref{sec:experiments}).
+Extensive experiments show that \method recalls a cue 101 steps back within the budget of R2I~\cite{samsami2024r2i}, whereas \dv fails beyond 51 steps, and that on POPGym RepeatPrevious Medium, which rewards naming the card shown exactly 32 steps earlier, it is the only model, ANN baselines included, whose return rises above chance within 2M steps.
+World model probes further show that only \method recalls exact lags of 32 and 64 steps, which relies on its resonant channels, and ablations confirm that its memory also requires the persistent channels and the normalized write gain.
+\method thus gives agents long-horizon memory with spike-driven computation at \numEnergyRatio$\times$ less arithmetic energy per step than \dv.
 The main contributions are as follows:
 \begin{itemize}
 \item We identify reset amnesia in spiking world models, caused by the step reset, the spike reset and a write gain tied to the time constant, and establish it with causal interventions.
