@@ -1954,3 +1954,11 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
 - POPGym（50–68%）：DH-SNN、TC-LIF 仍在随机水平（MMER Easy −0.44 / −0.26，Medium −0.44 / −0.48）；只读胞体的对照 Easy 0.62，Medium 0.26。
 - 像素 walker：本文 425k 849；LIF 245k 720，GRSN 285k 413，DH-SNN 225k 437，TC-LIF 185k 528。
 - Memory Maze：本文 320k，9.28 / 83.0%；Spiking-WM 990k、A+B+G 980k，快结束。
+
+### 19.58 论文：三张可视化图（10 月 12 日 06:20，改论文会话；用户选的三张图，同意在 CPU 上只读推理）
+
+- 新脚本 `paper/scripts/viz_infer.py`：在 CPU 上读 runs/ 里的 checkpoint 推理（8 线程、nice 19，不用 GPU），结果写到 `paper/fig/data/*.npz`（`data/` 在 .gitignore 里，不进 git）；`make_figures.py` 新增 `mmaze_viz`、`walker_viz`、`dendrites_viz`，有数据时才画。
+- Memory Maze（§5.4，`fig/mmaze_viz.pdf`）：前 100 条评测轨迹，各模型探针每步预测的物体位置；按"距物体上次在视野内（90° 视野、射线不穿墙）的步数"分组的平方误差。在视野内：DreamerV3 1.4，本文 2.9，脉冲基线 2.2–3.5。离开 3–5 步：脉冲基线 7.3–11.7，本文 3.8，DreamerV3 2.9。离开 6–100 步本文在所有模型中最低（6–10 步 4.7 对 DreamerV3 5.3；11–20 步 6.9 对 8.8；21–50 步 10.1 对 11.4；51–100 步 12.1 对 12.5；脉冲基线 9.8–13.4）。示例按规则选：第一条轨迹里第一次"物体连续在视野内 5 步、随后离开至少 40 步"（轨迹 0，第 44 步，物体 1）。本文用的是 330k 的 checkpoint。
+- 像素 walker（§5.6，`fig/walker_viz.pdf`）：本文最新评测 episode，5 帧观测后按动作开环预测 45 帧，8 段平均的像素 MSE：本文每一步都低于 Spiking-WM，第 15 步起低于 DreamerV3（DreamerV3 前 14 步更低）。本文用的是 448k 帧的 checkpoint。
+- 树突（§5.3，`fig/dendrites_viz.pdf`）：R2I L101 的智能体（本文按 `seed()` 规则是 s1），最新评测 episode 和只翻转线索（第 0、1 行）的同一 episode，随机潜变量取众数。Spiking-WM 核心脉冲在线索后 10 步变得完全相同；本文树突差异保持 101 步，soma 脉冲在第 101 步仍差 3.4%；长保留时间的积分通道保持同号，共振通道按各自周期（例：52、24、12 步）振荡。
+- Memory Maze 和像素 walker 跑完后要重跑：`nice -n 19 python paper/scripts/viz_infer.py mmaze`、`... walker`，再 `make data`，并核对 §5.4、§5.6 和图注里标了 `\pend` 的数字。

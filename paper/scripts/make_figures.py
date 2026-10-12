@@ -183,8 +183,218 @@ def probe_panels():
     plt.close(fig)
 
 
+MM_MODELS = {"base_tau2": "base", "LIF_tau2": "lif", "GRSN_tau2": "grsn", "ann_tau2": "ann", "OURS": "ours"}
+MM_DATA = ROOT / "data" / "memory_maze_9x9_official" / "eval.zip"
+
+
+def mm_visible(layout, agent, direction, obj, half_fov=np.pi / 4):
+    """The object is in view: within the 90 degree field of view and no wall tile on the line of sight
+    (layout[y, x] = 1 marks a free tile)."""
+    v = obj - agent
+    dist = np.linalg.norm(v)
+    if dist < 1e-6:
+        return True
+    if np.arccos(np.clip(v @ direction / dist, -1, 1)) > half_fov:
+        return False
+    pts = agent + np.outer(np.linspace(0, 1, int(dist * 20) + 2), v)
+    ix = np.clip(np.floor(pts).astype(int), 0, layout.shape[0] - 1)
+    return bool(np.all(layout[ix[:, 1], ix[:, 0]] == 1))
+
+
+def mm_since_seen(d):
+    """Steps since each object was last in view, (episodes, steps, 3); a large number before the first sighting."""
+    E, T = d["agent_pos"].shape[:2]
+    out = np.full((E, T, 3), 10**6)
+    for e in range(E):
+        for o in range(3):
+            last = -10**6
+            for t in range(T):
+                if mm_visible(d["maze_layout"][e], d["agent_pos"][e, t], d["agent_dir"][e, t], d["targets_pos"][e, o]):
+                    last = t
+                out[e, t, o] = t - last
+    return out
+
+
+def mm_frames(episode, steps):
+    """First-person frames of an evaluation trajectory, read from the official dataset (as probe_mm.Episodes)."""
+    import io
+    import zipfile
+    with zipfile.ZipFile(MM_DATA) as zf:
+        name = sorted(n for n in zf.namelist() if n.endswith(".npz"))[episode]
+        return np.load(io.BytesIO(zf.read(name)))["image"][list(steps)]
+
+
+def mmaze_viz(seen=5, gone=40, shown=(-3, 0, 5, 15), maps=(3, 10, 15)):
+    """Fig.: Memory Maze 9x9, the first 100 evaluation trajectories (fig/data/mmaze_viz.npz, scripts/viz_infer.py mmaze).
+    (a) first-person views around the first time that an object, in view for `seen` steps, leaves the view for at
+    least `gone` steps; (b) the positions of that object that the probe of each model predicts `maps` steps later;
+    (c) object error against the steps since the object was last in view, all trajectories."""
+    d = dict(np.load(FIG / "data" / "mmaze_viz.npz"))
+    since = mm_since_seen(d)
+    # the example: first trajectory and step (in order) that satisfy the rule; no choice by the predictions
+    ev = next((e, t, o) for e in range(len(since)) for t in range(seen, since.shape[1] - gone) for o in range(3)
+              if since[e, t, o] == 0 and np.all(since[e, t - seen: t, o] == 0) and np.all(since[e, t + 1: t + 1 + gone, o] > 0))
+    e, t0, o = ev
+    fig = plt.figure(figsize=(6.9, 2.1))
+    gs = fig.add_gridspec(2, 8, width_ratios=[0.62, 0.62, 0.06, 1, 1, 1, 0.3, 2.05], wspace=0.06, hspace=0.16,
+                          left=0.005, right=0.99, top=0.87, bottom=0.19)
+    frames = mm_frames(int(d["episodes"][e]), [t0 + k for k in shown])
+    for k, (dt, img) in enumerate(zip(shown, frames)):
+        ax = fig.add_subplot(gs[k // 2, k % 2])
+        ax.imshow(img)
+        ax.set_xticks([]), ax.set_yticks([])
+        label = "in view" if dt < 0 else "last seen" if dt == 0 else f"+{dt}"
+        ax.text(3, 10, label, color="white", fontsize=6)
+        if k == 0:
+            ax.set_title("(a) first-person view", loc="left", pad=2)
+    for k, dt in enumerate(maps):
+        ax = fig.add_subplot(gs[:, 3 + k])
+        t1 = t0 + dt
+        ax.imshow(1 - d["maze_layout"][e], cmap="Greys", vmin=0, vmax=2.2, origin="lower", extent=(0, 9, 0, 9))
+        ax.plot(*d["agent_pos"][e, t0: t1 + 1].T, color="#9AA0A6", lw=0.8)
+        p, q = d["agent_pos"][e, t1], d["agent_dir"][e, t1]
+        ax.annotate("", xy=p + 0.8 * q, xytext=p, arrowprops=dict(arrowstyle="-|>", color="#1F2328", lw=0.8))
+        ax.scatter(*d["targets_pos"][e, o], s=60, facecolor="none", edgecolor="#1F2328", lw=1.1, zorder=4)
+        for m, n in MM_MODELS.items():
+            ax.scatter(*d["pred_" + n][e, t1, o], s=30 if m == "OURS" else 12, color=STYLE[m]["color"],
+                       marker="*" if m == "OURS" else "o", zorder=5 if m == "OURS" else 3, lw=0)
+        ax.set_xlim(0, 9), ax.set_ylim(0, 9), ax.set_xticks([]), ax.set_yticks([]), ax.set_aspect("equal")
+        for sp in ax.spines.values():
+            sp.set_visible(True), sp.set_linewidth(0.4), sp.set_color("#9AA0A6")
+        ax.text(4.5, -0.5, f"+{dt} steps", ha="center", va="top", fontsize=7)
+        if k == 0:
+            ax.set_title("(b) predicted position of the object (ring)", loc="left", pad=2)
+    ax = fig.add_subplot(gs[:, 7])
+    edges = np.array([0, 1, 3, 6, 11, 21, 51, 101, 201, 1001])
+    for m, n in MM_MODELS.items():
+        err = ((d["pred_" + n] - d["targets_pos"][:, None]) ** 2).sum(-1)[:, 1:]
+        s = since[:, 1:]
+        y = [err[(s >= a) & (s < b)].mean() for a, b in zip(edges[:-1], edges[1:])]
+        x = [np.sqrt(a * (b - 1)) if a else 0.5 for a, b in zip(edges[:-1], edges[1:])]
+        ax.plot(x, y, marker="o", ms=2.2, **{k: v for k, v in STYLE[m].items() if k != "label"}, label=STYLE[m]["label"])
+    ax.set_xscale("log")
+    ax.set_xlim(0.28, 700)
+    ax.set_xticks([0.5, 2, 10, 100], ["in view", "2", "10", "100"])
+    ax.xaxis.set_minor_locator(matplotlib.ticker.NullLocator())
+    ax.set_xlabel("steps since the object was last in view")
+    ax.set_ylabel("squared error")
+    ax.set_title("(c) 100 evaluation trajectories", loc="left", pad=2)
+    ax.legend(loc="lower right", handlelength=1.6, ncol=1)
+    fig.savefig(FIG / "mmaze_viz.pdf")
+    plt.close(fig)
+    return ev
+
+
+def dendrites_viz(show=(0, 101)):
+    """Fig.: BSuite memory length 101, two evaluation episodes that differ only in the cue
+    (fig/data/dendrites_viz.npz, scripts/viz_infer.py dendrites). (a) difference of the spikes that carry the
+    recurrent state; (b) difference of the dendritic channels of the second PDN layer, integrators sorted by
+    retention time and resonators by phase; (c) the difference of three resonant channels in their (a, b) plane."""
+    d = np.load(FIG / "data" / "dendrites_viz.npz")
+    M = int(d["channels"])
+    n = 512 * M
+    mem = d["mem_d1"]
+    delta = mem[0] - mem[1]
+    da, db = delta[:, :n], delta[:, n:]
+    tau, theta = d["tau1"], d["theta1"]
+    res = theta != 0
+    t = np.arange(delta.shape[0]) - 1  # step 0: the first cue row
+    fig = plt.figure(figsize=(6.9, 2.0))
+    gs = fig.add_gridspec(1, 4, width_ratios=[1.25, 1.3, 1.3, 1.0], wspace=0.42, left=0.065, right=0.965, top=0.86, bottom=0.2)
+    ax = fig.add_subplot(gs[0])
+    for name, key in (("Spiking-WM", "base_tau2"), ("SD-Dreamer", "OURS")):
+        r = d["rate_" + ("ours" if key == "OURS" else "base")]
+        y = np.abs(r[0] - r[1]).mean(-1) / r.mean()
+        ax.plot(t[1:], y[1:], color=STYLE[key]["color"], lw=STYLE[key].get("lw", 1.2), label=name + " spikes")
+    y = np.abs(da).mean(-1) / np.abs(mem[0][:, :n]).mean()
+    ax.plot(t[1:], y[1:], color=STYLE["OURS"]["color"], ls="--", lw=1.2, label="SD-Dreamer dendrites")
+    ax.set_yscale("symlog", linthresh=1e-2)
+    ax.set_ylim(0, 4)
+    ax.set_yticks([0, 1e-2, 1e-1, 1])
+    ax.set_xlabel("steps after the cue")
+    ax.set_ylabel("relative difference")
+    ax.set_title("(a) cue A vs. cue B", loc="left", pad=2)
+    ax.legend(loc="upper right", handlelength=1.6)
+    freq = np.minimum(theta, 2 * np.pi - theta)  # rotation per step; theta and 2 pi - theta oscillate alike
+    for k, (sel, order, title) in enumerate((
+            (~res, np.argsort(tau[~res]), "(b) integrator channels"),
+            (res, np.argsort(freq[res]), "(c) resonant channels"))):
+        ax = fig.add_subplot(gs[1 + k])
+        z = da[:, sel][:, order]
+        z = z / (np.abs(z).max(0, keepdims=True) + 1e-9)
+        ax.imshow(z.T, aspect="auto", cmap="RdBu_r", vmin=-1, vmax=1, interpolation="nearest",
+                  extent=(t[0] - 0.5, t[-1] + 0.5, sel.sum(), 0))
+        ax.set_xlabel("steps after the cue")
+        ax.set_title(title, loc="left", pad=2)
+        if k == 0:
+            q = np.sort(tau[~res])
+            ticks = [np.searchsorted(q, v) for v in (1, 10, 100, 1000) if v <= q[-1] + 1]
+            ax.set_yticks(ticks, [str(v) for v in (1, 10, 100, 1000)][: len(ticks)])
+            ax.set_ylabel(r"retention time $\tau$")
+        else:
+            q = np.sort(freq[res])
+            per = [100, 20, 5, 2]
+            ticks = [np.searchsorted(q, 2 * np.pi / v) for v in per]
+            ax.set_yticks(ticks, [str(v) for v in per])
+            ax.set_ylabel("period (steps)")
+    ax = fig.add_subplot(gs[3])
+    idx = np.where(res & (tau > 200))[0]
+    for c, (period, col) in enumerate(zip((50, 25, 12), ["#0072B2", "#009E73", "#CC79A7"])):
+        j = idx[np.argmin(np.abs(freq[idx] - 2 * np.pi / period))]
+        y = da[1:, j] / np.abs(da[1:, j]).max()
+        ax.plot(t[1:], y - 2.3 * c, color=col, lw=0.9)
+        ax.text(102, -2.3 * c, f"{2 * np.pi / freq[j]:.0f}", fontsize=6, va="center", color=col)
+    ax.set_yticks([])
+    ax.spines["left"].set_visible(False)
+    ax.set_xlabel("steps after the cue")
+    ax.set_title("(d) three resonators", loc="left", pad=2)
+    ax.text(102, 1.1, "period", fontsize=6, ha="left", color="#5F6670")
+    fig.savefig(FIG / "dendrites_viz.pdf")
+    plt.close(fig)
+
+
+
+def walker_viz(steps=(1, 5, 10, 15, 20, 30, 45)):
+    """Fig.: DMC walker walk from pixels, open-loop prediction (fig/data/walker_viz.npz, scripts/viz_infer.py walker).
+    Left: one segment of an evaluation episode, the last observed frame and the frames predicted from the actions
+    alone; right: pixel MSE of the prediction over the segments of the episode."""
+    d = np.load(FIG / "data" / "walker_viz.npz")
+    C = int(d["context"])
+    rows = [("truth", None, d["truth"])] + [(STYLE[k]["label"].replace(" (ours)", "").replace(" (ANN)", ""), k, d["pred_" + n])
+                                           for k, n in (("base_tau2", "base"), ("ann_tau2", "ann"), ("OURS", "ours"))]
+    cols = [C - 1] + [C - 1 + h for h in steps]
+    fig = plt.figure(figsize=(6.9, 2.35))
+    gs = fig.add_gridspec(len(rows), len(cols) + 2, width_ratios=[1] * len(cols) + [0.75, 2.6], wspace=0.04, hspace=0.06,
+                          left=0.095, right=0.99, top=0.9, bottom=0.17)
+    for r, (name, key, frames) in enumerate(rows):
+        for c, t in enumerate(cols):
+            ax = fig.add_subplot(gs[r, c])
+            ax.imshow(frames[t])
+            ax.set_xticks([]), ax.set_yticks([])
+            for sp in ax.spines.values():
+                sp.set_visible(c == 0), sp.set_color("#5F6670"), sp.set_linewidth(0.8)
+            if r == 0:
+                ax.set_title("observed" if c == 0 else f"+{t - C + 1}", pad=2, fontsize=7)
+            if c == 0:
+                ax.set_ylabel(name, rotation=0, ha="right", va="center", fontsize=7,
+                              color=STYLE["OURS"]["color"] if key == "OURS" else "black",
+                              fontweight="bold" if key == "OURS" else "normal")
+    ax = fig.add_subplot(gs[:, -1])
+    for k, n in (("base_tau2", "base"), ("ann_tau2", "ann"), ("OURS", "ours")):
+        y = d["mse_" + n][C:]
+        ax.plot(np.arange(1, len(y) + 1), y, **{a: v for a, v in STYLE[k].items() if a != "label"}, label=STYLE[k]["label"])
+    ax.set_xlabel("prediction step")
+    ax.set_ylabel("pixel MSE")
+    ax.legend(loc="upper left", handlelength=1.6)
+    fig.savefig(FIG / "walker_viz.pdf")
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     memory_length()
     rl_curves()
     probe_panels()
+    for viz in (mmaze_viz, dendrites_viz, walker_viz):  # inference results of scripts/viz_infer.py, kept out of git
+        if (FIG / "data" / f"{viz.__name__}.npz").exists():
+            viz()
     print("figures written to", FIG)
