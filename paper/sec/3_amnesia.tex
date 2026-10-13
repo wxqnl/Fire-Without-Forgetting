@@ -6,37 +6,40 @@
 
 Our world model is the recurrent state space model (RSSM)~\cite{hafner2019planet} of DreamerV3~\cite{hafner2025dreamerv3}.
 An RSSM learns the dynamics of an environment in a compact latent space, and the agent learns its policy from trajectories imagined in this space; with one fixed configuration, DreamerV3 learns more than 150 tasks, from continuous control to Atari and Minecraft~\cite{hafner2025dreamerv3}.
-At environment step $t$, a recurrent core updates the deterministic state $h_t$, from which the posterior and the prior infer the stochastic latent $z_t$:
+At environment step $t$, the sequence model updates the deterministic state $h_t$, the encoder infers the stochastic latent $z_t$ from $h_t$ and the observation $o_t$, and the dynamics predictor predicts $z_t$ from $h_t$ alone:
 \begin{equation}
 \begin{aligned}
-h_t &= f(h_{t-1}, z_{t-1}, a_{t-1}),\\
-z_t &\sim q(z_t \mid h_t, e_t), \quad \hat z_t \sim p(\hat z_t \mid h_t),
+h_t &= f_\phi(h_{t-1}, z_{t-1}, a_{t-1}),\\
+z_t &\sim q_\phi(z_t \mid h_t, o_t), \quad \hat z_t \sim p_\phi(\hat z_t \mid h_t).
 \end{aligned}
 \label{eq:rssm}
 \end{equation}
-where $e_t$ is the embedding of the observation $o_t$, and heads on $(h_t,z_t)$ predict the observation, the reward and the continuation of the episode.
-The core $f$, a GRU in DreamerV3, is the only path from one step to the next, so in a partially observable task $h_t$ is the memory of the agent, both when the model filters observations and when it imagines.
+Reward, continuation and decoder heads read $(h_t,z_t)$.
+The sequence model $f_\phi$, a GRU in DreamerV3, is the only path from one step to the next, so in a partially observable task $h_t$ is the memory of the agent, both when the model filters observations and when it imagines.
 
 \subsection{Spiking neurons and spiking world models}
 \label{sec:swm}
 
 SNNs compute with neurons that integrate synaptic input into a membrane potential and communicate by binary spikes~\cite{maass1997networks}.
-The leaky integrate-and-fire (LIF) neuron, discretized with the Euler method, updates its potential $v$ in simulation step $n$ as
+The leaky integrate-and-fire (LIF) neuron, discretized with the Euler method~\cite{fang2021plif}, charges, fires and resets in simulation step $n$ as
 \begin{equation}
-v[n] = \lambda\, v[n-1] + (1-\lambda)\, I[n], \quad s[n] = \Hv\big(v[n] - \vartheta\big),
+\begin{aligned}
+\tilde u[n] &= u[n-1] + \frac{1}{\tau}\big(I[n] - u[n-1]\big),\\
+s[n] &= \Hv\big(\tilde u[n] - \vartheta\big), \quad u[n] = \tilde u[n]\big(1 - s[n]\big),
+\end{aligned}
 \label{eq:lif}
 \end{equation}
-where $I[n]$ is the synaptic current of the input spikes, $\lambda=1-1/\tau$ is the leak of the time constant $\tau$, $\vartheta$ is the threshold and $\Hv$ is the Heaviside step, trained with a surrogate derivative~\cite{neftci2019surrogate,wu2018stbp}.
-A spike resets the potential, $v[n]\leftarrow(1-s[n])\,v[n]$.
+where $I[n]$ is the synaptic current of the input spikes, $\tau$ is the membrane time constant, $\tilde u$ and $u$ are the potential before and after the reset, $\vartheta$ is the threshold and $\Hv$ is the Heaviside step, trained with a surrogate derivative~\cite{neftci2019surrogate,wu2018stbp}.
 
-\swm~\cite{sun2025spikingwm} builds the RSSM from LIF layers that run $T=5$ simulation steps per environment step, and replaces the GRU core with multicompartment neurons (MCNs), so that $h_t\in\{0,1\}^{T\times N}$ is the spike output of the core.
-In an MCN, a basal and an apical dendrite integrate synaptic current as in \cref{eq:lif}, and the soma integrates the basal potential under a gate set by the apical one:
+\swm~\cite{sun2025spikingwm} builds the RSSM of \cref{eq:rssm} from LIF layers that run $T=5$ simulation steps per environment step, and replaces the GRU with multicompartment neurons (MCNs), so that $h_t\in\{0,1\}^{T\times N}$ is the spike output of the sequence model.
+An MCN has a basal dendrite, an apical dendrite and a soma.
+Each dendrite $c\in\{\mathrm{b},\mathrm{a}\}$ integrates its synaptic current with its own time constant $\tau_c$, and the soma integrates the basal potential through a gate set by the apical potential:
 \begin{align}
-v^{c}[n] &= \lambda_c\, v^{c}[n-1] + (1-\lambda_c)\, I^{c}[n], \label{eq:mcn}\\
-u[n] &= (1-\gamma[n])\, u[n-1] + \gamma[n]\big(v^{\mathrm{bas}}[n] + I^{\mathrm{som}}[n]\big), \nonumber
+v^{c}[n] &= v^{c}[n-1] + \frac{1}{\tau_c}\big(I^{c}[n] - v^{c}[n-1]\big), \label{eq:mcn}\\
+\tilde u[n] &= u[n-1] + \frac{\sigma(v^{\mathrm{a}}[n])}{\tau}\big(v^{\mathrm{b}}[n] + I^{\mathrm{s}}[n] - u[n-1]\big), \nonumber
 \end{align}
-where $c\in\{\mathrm{bas},\mathrm{api}\}$, $I^{c}[n] = W_c\,[\,x_t[n];\,h_{t-1}[n]\,]$ combines the input spikes $x_t[n]$, which encode $(z_{t-1},a_{t-1})$, with the spikes of the core at the previous environment step, $I^{\mathrm{som}}[n]=W_s x_t[n]$, and $\gamma[n]=\sigma(v^{\mathrm{api}}[n])/\tau_s$.
-The soma fires $s[n]=\Hv(u[n]-\vartheta)$.
+where $I^{c}[n] = W^{c}x_t[n] + W^{h,c}h_{t-1}[n]$ combines the input spikes $x_t[n]$, which encode $(z_{t-1},a_{t-1})$, with the spikes of the sequence model at the previous environment step, $I^{\mathrm{s}}[n]=W^{\mathrm{s}}x_t[n]$, and $\sigma$ is the sigmoid.
+The soma fires and resets as in \cref{eq:lif}.
 Two resets act on this neuron: the step reset sets all compartments to zero at the start of every environment step, and the spike reset clears the soma and both dendrites whenever the soma fires.\footnote{The equations of~\cite{sun2025spikingwm} show only the somatic reset; the dendritic reset is part of its official implementation (\texttt{MCNode.calc\_spike}), which all our \swm runs use.}
 
 \subsection{Reset amnesia}
@@ -52,11 +55,11 @@ The time constants act only within the $T$ simulation steps of one environment s
 The spike reset of the LIF neuron and of the MCN truncates a trace at the next spike.
 For a compartment with this reset, the influence of a past input on the potential is
 \begin{equation}
-\frac{\partial v[n]}{\partial I[n-j]} = (1-\lambda)\,\lambda^{j}\prod_{i=1}^{j}\big(1-s[n-i]\big),
+\frac{\partial \tilde u[n]}{\partial I[n-j]} = \frac{1}{\tau}\Big(1-\frac{1}{\tau}\Big)^{j}\prod_{i=1}^{j}\big(1-s[n-i]\big),
 \label{eq:spike_reset}
 \end{equation}
 which vanishes once the neuron has fired, so the memory of the compartment lasts at most until its next spike.
-Even without resets, the Euler update writes the input with the gain $1-\lambda=1/\tau$: for an input of unit variance that is uncorrelated over time, the state has the stationary variance $(1-\lambda)/(1+\lambda)\approx1/(2\tau)$, so a compartment with a long time constant keeps a cue but stores it too faintly to drive spikes.
+Even without resets, the Euler updates of \cref{eq:lif,eq:mcn} write the input with the gain $1/\tau$: for an input of unit variance that is uncorrelated over time, the potential has the stationary variance $1/(2\tau-1)\approx1/(2\tau)$, so a compartment with a long time constant keeps a cue but stores it too faintly to drive spikes.
 
 Reset amnesia thus gives a design rule: the memory of a spiking world model must reside in a state that persists across environment steps, is not reset by spikes, and is written with a gain that does not vanish for long time constants.
 \Cref{sec:causal} tests each mechanism with interventions on \swm.
