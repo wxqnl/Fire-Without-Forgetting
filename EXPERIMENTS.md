@@ -2022,3 +2022,11 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
 - 08:41 cartpole TC-LIF 在 gpu5 启动，第 45 轮 8 个运行全部在跑，日志没有报错。队列 390/404 完成，14 个在跑，没有等待的任务。
 - gpu2 上 10:54 起多了一个 `cts` 环境的预训练进程（59 GB，不是本项目的，没碰），gpu2 显存用到 76/81.5 GB；我们的像素 GRSN 一直稳定在 16.8 GB。
 - CPU 负载仍约 315（128 核）。
+
+### 19.65 像素 GRSN 从 gpu2 换到 gpu0；释放 gpu2（10 月 13 日 11:35；用户："gpu2 上面的任务能不能换到别的卡上去呀，现在有点影响别的训练速度"）
+
+- gpu2 上 10:54 起有别人的 `cts` 预训练（59 GB），和我们的像素 GRSN 抢同一张卡。
+- 做法：checkpoint（`latest_model.pt`）11:20 刚存过（605k），11:35 停掉 GRSN（exit 143），队列按 `make_jobs.py` 里新加的固定（`gpus` [0]，`mem_gb` 24 → 18，实际用 16.8 GB；24 时 gpu0 的实时检查放不下）在 gpu0 上重启。`dreamer.py` 从 `latest_model.pt` 读回权重，回放数据从 `train_eps` 读回。任务列表备份 `runs/jobs.before_round46.jsonl`。
+- 代价：checkpoint 不含优化器状态，Adam 从零重新累积；11:20–11:35 的约 1k 次更新没有保存。重启后第一次评估（604k）642.8，重启前 605k 649.4，接上了。
+- 11:36 通过 `.mps/gpu2/pipe` 停掉 gpu2 的 MPS 守护进程，gpu2 上只剩 `cts` 进程。已释放 gpu1、2、3、4，本项目只用 gpu0、5、6、7。
+- gpu0 现在有像素 LIF、像素 GRSN、Memory Maze DH-SNN、DMC cheetah TC-LIF 四个运行。

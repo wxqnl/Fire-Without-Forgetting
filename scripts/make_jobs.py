@@ -1275,6 +1275,12 @@ def main():
     jobs = jobs + round43(jobs)
     jobs = jobs + round44(jobs)
     jobs = jobs + round45(jobs)
+    # 2026-10-13 11:40 (EXPERIMENTS.md §19.65), user: "gpu2 上面的任务能不能换到别的卡上去呀，现在有点影响别的训练速度": the
+    # pixel GRSN run is stopped right after a checkpoint and resumes from latest_model.pt on gpu0 (it uses 16.8 GB;
+    # with 24 the live check finds no room there), so that gpu2 can be released
+    for job in jobs:
+        if job["name"] == "dmcpix/dmc_walker_walk/GRSN_tau2/s0":
+            job.update(gpus=[0], mem_gb=18)
     # 2026-10-09 (EXPERIMENTS.md §19.29), user: "可以停": the binary-soma Memory Maze run is superseded by the final
     # model's (round 30, which copies its job); stopped at 540k updates
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2Lv2_tau1000/s0"]
