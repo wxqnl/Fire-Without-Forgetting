@@ -31,7 +31,7 @@ All operations act elementwise on the neurons and channels of a layer.
 \subsection{Persistent Dendritic Memory}
 \label{sec:pdm}
 
-In \swm, the step reset clears all compartments at every environment step and the spike reset clears the dendrites at every somatic spike, so no trace outlasts the next step (\cref{sec:forget}).
+In \swm, the step reset clears all compartments at every environment step and the spike reset clears the dendrites at every somatic spike, so no trace outlasts the next step (\cref{sec:amnesia}).
 Persistent Dendritic Memory (PDM) keeps the dendritic state through both.
 Each channel has a retention time $\tau$, counted in environment steps, a decay $\lambda=e^{-1/\tau}$ and a phase $\theta$, and its state is a damped rotation driven by the current:
 \begin{equation}
@@ -52,8 +52,8 @@ A resonator also stores when: an input of age $k$ appears at phase $k\theta$, wh
 \subsection{Normalized Write Gain}
 \label{sec:nwg}
 
-Persistence alone does not make long retention times useful, since the gain with which a channel stores its input must not vanish as $\tau$ grows (\cref{sec:forget}).
-The Euler update of \cref{eq:mcn} corresponds to $g=1-\lambda\approx1/\tau$, for which an input of unit variance gives the state a variance of $(1-\lambda)/(1+\lambda)\approx1/(2\tau)$: channels with long retention times store their input too faintly to drive the soma.
+Persistence alone does not make long retention times useful, since the gain with which a channel stores its input must not vanish as $\tau$ grows.
+The Euler gain $g=1-\lambda\approx1/\tau$ gives the state the variance of \cref{eq:write_gain}, about $1/(2\tau)$, so channels with long retention times store their input too faintly to drive the soma.
 The Normalized Write Gain (NWG) sets
 \begin{equation}
 g(\lambda)=\sqrt{1-\lambda^2},
