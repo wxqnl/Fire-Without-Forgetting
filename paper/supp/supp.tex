@@ -209,6 +209,7 @@ Memory access is not counted for any model.
 For the RL agents we also count the actor, which runs at every step: it reads $(z_t,h_t)$, and for \method also the 3072 dendritic spike inputs, through the factor of rank 64 (\cref{sec:wm}); the factor reads spikes (ACs), and the first layer reads its 64 graded outputs (MACs).
 A binary spike frame counts once per simulation step: each spike of the PDN soma's count counts once, and a spike that the GRSN soma repeats over the $T$ simulation steps counts $T$ times.
 \Cref{tab:energy} lists the counts; the recurrent firing rate of \method is \numEnergyRate.
+The spiking baselines cost less than \method: its filter performs more accumulates, and its actor also reads the 3072 dendritic spike inputs.
 
 \begin{table}[t]
   \centering\tabfont

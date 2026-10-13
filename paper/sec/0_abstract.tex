@@ -11,6 +11,5 @@ The integrators hold what the agent has seen, and the resonators also record whe
 A stateless soma reads the channels and sends a spike count, the only signal that passes between neurons.
 On BSuite memory length, \method recalls a cue 101 steps back within the budget of R2I, while DreamerV3 fails beyond 51 steps.
 On POPGym RepeatPrevious, it is the only model, spiking or not, that learns to name the card shown exactly 32 steps earlier within 2M environment steps, and its world model also recalls exact lags of 64 steps on a task held out from development.
-The agent uses \numEnergyRatio$\times$ less arithmetic energy per step than DreamerV3.
 Spiking world models thus remember over long horizons once their memory lives in dendrites that spikes do not reset.
 \end{abstract}

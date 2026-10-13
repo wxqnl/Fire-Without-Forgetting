@@ -156,8 +156,8 @@ Once the object leaves the view, the error of the spiking baselines rises within
 \textbf{Depth and sparsity}: one PDN layer, or a firing rate capped at 0.06 (from 0.25), fails at 64 steps.
 The spike count, the feedback and the number of channels leave the memory nearly unchanged (AUC 0.88 to 0.94 at $k=32$); the spike count and the feedback serve the prediction of motion (\cref{sec:why}).
 
-\subsection{Control tasks and energy}
-\label{sec:energy}
+\subsection{Control tasks}
+\label{sec:control}
 
 On DMC from proprioception (\cref{tab:mm}), \method matches the best spiking model on walker walk (\numFwfDmcWalk, as \swm) and reaches \numFwfDmcRun\ on cheetah run and \numFwfDmcSwing\ on cartpole swingup, where recurrent LIF reaches 532 and 811.
 An actor that reads $(z_t,h_t)$ only reaches the same return with the same world model on walker walk and cheetah run (904 and 473) and a higher one on cartpole swingup (813; Supp.~\suppref{supp:policy}{E}).
@@ -173,6 +173,3 @@ From pixels, every world model predicts the walker from the actions alone for ab
   \label{fig:walker_viz}
 \end{figure*}
 
-Per environment step (Supp.~\suppref{supp:energy}{H}), the agent of \method, world model filter and actor, costs \numEnergyAgent\,$\mu$J, \numEnergyRatio$\times$ less than \dv (\numEnergyAgentDv\,$\mu$J); the filter alone costs \numEnergyFilter\ against \numEnergyFilterDv\,$\mu$J.
-The spiking baselines cost \numEnergySpiking\,$\mu$J, less than \method: its filter performs more accumulates (\numEnergyAc M against \numEnergySpikingAc M, at a recurrent firing rate of \numEnergyRate), and its actor also reads the 3072 dendritic spike inputs (\numEnergyActor\ against \numEnergySpikingActor\,$\mu$J).
-As in SNN energy reports, the estimates count 32-bit arithmetic~\cite{horowitz2014energy} and leave out memory access, which can dominate on hardware~\cite{dampfhoffer2023energy}, for all models.

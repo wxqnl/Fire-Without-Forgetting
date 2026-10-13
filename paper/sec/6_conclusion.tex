@@ -3,7 +3,7 @@
 
 Existing spiking world models forget because their neurons are cleared at every environment step and at every spike, which leaves their time constants nothing to act on.
 \method is built on persistent dendritic neurons: PDM keeps their integrator and resonant dendrites through environment steps and somatic spikes without reset, NWG writes into channels of every retention time on one scale, and a stateless soma communicates the memory by spike counts.
-It recalls cues 101 steps back on BSuite within the budget of R2I and is the only model in our comparison that recalls exact lags of 32 and 64 steps, at \numEnergyRatio$\times$ less arithmetic energy per step than DreamerV3.
+It recalls cues 101 steps back on BSuite within the budget of R2I and is the only model in our comparison that recalls exact lags of 32 and 64 steps.
 
 \paragraph{Limitations.}
-The dendritic state is graded, so deployment needs neuromorphic cores whose neurons hold several state variables and that compute layer normalization; our energy estimate counts arithmetic and leaves out memory access.
+The dendritic state is graded, so deployment needs neuromorphic cores whose neurons hold several state variables and that compute layer normalization.
