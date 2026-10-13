@@ -11,89 +11,65 @@
 \end{figure*}
 
 \Cref{sec:amnesia} gives a design rule: memory must live in a state that spikes never reset, written with a gain that does not vanish for long time constants.
-We build \method from neurons that follow this rule, keeping the rest of the spiking world model unchanged (\cref{fig:overview}).
+The persistent dendritic neuron (PDN) follows this rule by separating memory from communication: dendritic channels store the memory, and a stateless soma communicates it by spike counts.
+\method builds the recurrent core of the spiking world model from PDNs and keeps the rest of the model unchanged (\cref{fig:overview}).
 
 \subsection{Persistent dendritic neuron}
 \label{sec:pdn}
 
-A layer has $N$ neurons with $M$ dendritic channels each.
-At environment step $t$ it receives the firing rate $\xx_t$ of its input spikes over the $T$ simulation steps and its own firing rate $\bar\ssp_{t-1}$ of the previous step.
-The synaptic current into the dendrites is
+A PDN layer has $N$ neurons with $M$ dendritic channels each.
+At environment step $t$ it receives the firing rate $x_t$ of its input spikes over the $T$ simulation steps and its own firing rate $\bar s_{t-1}$ of the previous step, and its dendrites receive the synaptic current
 \begin{equation}
-\vect{w}_t = \LN\big(B\xx_t + R\,\bar\ssp_{t-1}\big)\in\mathbb{R}^{NM},
+I_t = \LN\big(B x_t + R\,\bar s_{t-1}\big)\in\mathbb{R}^{NM},
 \label{eq:input}
 \end{equation}
-where $B$ and $R$ are synaptic matrices applied to spikes and $\LN$ is layer normalization~\cite{ba2016layernorm}.
-Each channel has a retention time $\tau$, in environment steps, and a decay $\lambda=e^{-1/\tau}$.
+where $B$ and $R$ are synaptic matrices and $\LN$ is layer normalization with learned scale and bias~\cite{ba2016layernorm}.
+All operations below act elementwise on the neurons and channels of a layer.
 
-\paragraph{Integrator channels} add the current to a leaky trace,
+\paragraph{Persistent Dendritic Memory (PDM).}
+Each channel has a retention time $\tau$, counted in environment steps, a decay $\lambda=e^{-1/\tau}$ and a phase $\theta$.
+Its state $(d_t,\tilde d_t)$ is a damped rotation driven by the current:
 \begin{equation}
-d_t = \lambda\, d_{t-1} + \sqrt{1-\lambda^{2}}\; w_t .
-\label{eq:integrator}
+\begin{pmatrix} d_t \\ \tilde d_t \end{pmatrix}
+= \lambda\, Q(\theta) \begin{pmatrix} d_{t-1} \\ \tilde d_{t-1} \end{pmatrix}
++ g(\lambda) \begin{pmatrix} I_t \\ 0 \end{pmatrix},
+\label{eq:pdm}
 \end{equation}
+where $Q(\theta)$ is the rotation by the angle $\theta$ and $g(\lambda)$ is a write gain.
+An integrator channel has $\theta=0$ and $\tilde d\equiv0$, so $d_t=\lambda d_{t-1}+g(\lambda)I_t$ is a leaky trace; a resonant channel is a damped oscillator, as in resonate-and-fire neurons~\cite{izhikevich2001resonate}.
+\Cref{eq:pdm} is the only update of the channels: they keep their state across environment steps and through somatic spikes, the spikes of the layer enter only as current through $R$, and the state is cleared only at the start of an episode.
+The influence of a current $k$ steps back, $g(\lambda)\lambda^{k}Q(k\theta)$, therefore does not depend on what the neuron fired in between, and the gradient along this path crosses no surrogate derivative.
+An integrator stores what was seen, with inputs of all ages superposed under the smoothly decaying weights $\lambda^{k}$.
+A resonator also stores when: an input of age $k$ appears at phase $k\theta$, which separates it from inputs of age $k\pm1$.
 
-\paragraph{Resonant channels} are damped oscillators with two state variables that rotate by a phase $\theta$ at every step:
-\begin{equation}
-\begin{pmatrix} a_t \\ b_t \end{pmatrix}
-= \lambda \begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix}
-\begin{pmatrix} a_{t-1} \\ b_{t-1} \end{pmatrix}
-+ \sqrt{1-\lambda^{2}} \begin{pmatrix} w_t \\ 0 \end{pmatrix}.
-\label{eq:resonant}
-\end{equation}
-An integrator channel is the special case $\theta=0$ with $b\equiv0$.
+\paragraph{Normalized Write Gain (NWG).}
+The write gain sets how strongly a channel stores its input.
+The Euler update of \cref{eq:mcn} corresponds to $g=1-\lambda\approx1/\tau$, for which an input of unit variance gives the state a variance of $(1-\lambda)/(1+\lambda)\approx1/(2\tau)$: channels with long retention times store their input too faintly to drive the soma (\cref{sec:amnesia}).
+NWG sets $g(\lambda)=\sqrt{1-\lambda^2}$, the normalization of the LRU~\cite{orvieto2023lru}, which gives a variance of $(1-\lambda^2)\sum_{k\ge0}\lambda^{2k}=1$ for every $\tau$; intervention G equalizes the channels of \swm in the same way.
+With all channels on one scale, a layer can hold a wide spectrum of retention times, so no time constant is tuned for a task.
 
-\paragraph{The soma} has no state. It reads the channels of its neuron and the direct input,
+\paragraph{Stateless soma.}
+The soma reads the channels of its neuron and the direct input,
 \begin{equation}
-u_t = \textstyle\sum_{m=1}^{M} \big(C_m a_{t,m} + C'_m b_{t,m}\big) + D\xx_t,
+u_t = \textstyle\sum_{m=1}^{M} \big(c_m \odot d_{t,m} + \tilde c_m \odot \tilde d_{t,m}\big) + D x_t,
 \label{eq:soma}
 \end{equation}
-where $C_m, C'_m$ are weights of each neuron and $D$ is a synaptic matrix, and in simulation step $k$ it emits $s^{k}_t = \Hv\big(\mathrm{N}(u_t) - k\vartheta/T\big)$, $k=1,\dots,T$, with $\mathrm{N}$ the normalization used throughout the world model and $\vartheta=0.5$.
-The number of spikes in an environment step thus encodes $u_t$ in $T+1$ levels.
+where $c_m,\tilde c_m\in\mathbb{R}^{N}$ are weights of each neuron and $D$ is a synaptic matrix, and in simulation step $n=1,\dots,T$ it emits $s^{n}_t = \Hv\big(\LN(u_t) - n\vartheta/T\big)$ with the Heaviside step $\Hv$ and $\vartheta=0.5$.
+The soma keeps no state between environment steps, and its spike count encodes $u_t$ in $T+1$ levels.
 These binary frames are the only signal the neuron sends; the next layer and the feedback read their rate $\bar s_t$.
-
-\paragraph{Parameters.}
-We use $N=512$ and $M=2$: one integrator and one resonant channel per neuron.
-Retention times are initialized uniformly on a log scale in $[1,1000]$ environment steps and phases uniformly in $[0,2\pi)$ (the initialization of the LRU~\cite{orvieto2023lru}); both are learned.
-The Heaviside step is trained with a surrogate derivative, and all states are reset only at the start of an episode.
-
-\subsection{Why the neuron remembers}
-\label{sec:why}
-
-\paragraph{Persistent dendritic memory (PDM).}
-Along the decay of a channel, the influence of a current $k$ steps back is $\partial d_t/\partial w_{t-k} = \sqrt{1-\lambda^2}\,\lambda^{k}$ for an integrator and $\sqrt{1-\lambda^2}\,\lambda^{k} R(k\theta)$ for a resonator, whatever the neuron fired in between.
-This path never crosses a surrogate derivative, so the memory and its gradient decay with the retention time alone.
-The feedback $R\bar\ssp_{t-1}$ adds a second path, through the threshold, that writes into the channels and never clears them; the memory holds without it, as the world model without feedback still recalls 64 steps and the exact lag of 32 steps (\cref{sec:ablation}).
-
-\paragraph{Normalized write gain (NWG).}
-For white input of unit variance, \cref{eq:integrator} gives $\mathrm{Var}(d_t)=(1-\lambda^2)\sum_{k\ge0}\lambda^{2k}=1$ for every $\tau$, whereas the Euler gain $1-\lambda$ of \cref{eq:mcn} gives $(1-\lambda)/(1+\lambda)\approx 1/(2\tau)$.
-The LRU normalization~\cite{orvieto2023lru} thus keeps channels of every retention time on one scale; intervention G is the same scaling up to a factor of 2.
-
-\paragraph{A spectrum of retention times.}
-Retention times spread uniformly on a log scale cover memory lengths from one to a thousand steps, so no time constant is tuned per task.
-
-\paragraph{Resonance tells time.}
-An input that arrived $k$ steps ago contributes $\lambda^{k}(\cos k\theta,\ \sin k\theta)\,w_{t-k}$ to a resonant channel: its phase identifies the lag.
-In integrator channels, inputs of different ages are superposed with smoothly decaying weights $\lambda^{j}$, so isolating the input of exactly $k$ steps ago from those of $k\pm1$ steps ago requires subtracting channels with nearby retention times, a poorly conditioned readout.
-Integrators hold what was seen, and resonators also hold when it was seen.
-
-\paragraph{Spike counts and feedback predict motion.}
-One spike per step gives a downstream neuron one bit, a spike count $T+1$ levels; the feedback adds a nonlinear recurrence that linear dendrites lack.
-On the same pixel walker episodes, the world model with both predicts the next frame as well as recurrent LIF neurons (image loss 44.3 vs.\ 44.1), and with one spike per step it does not (55.3; Supp.~\suppref{supp:diag}{F}).
-
-\paragraph{Spikes communicate.}
-All signals between neurons are spikes, so the synaptic operations $B\xx_t$, $R\bar\ssp_{t-1}$ and $D\xx_t$ are accumulates.
-The dendritic recurrence and the readout are local to a neuron, and the normalizations need only the mean and variance of a layer, as in every spiking world model we compare: $O(NM)$ multiply-accumulates per step, against $O(N^2)$ for the dense recurrent matrix of a GRU.
+The synaptic operations $Bx_t$, $R\bar s_{t-1}$ and $Dx_t$ thus act on spikes, and the dendritic update is local to each neuron, with $O(NM)$ operations per step against $O(N^2)$ for the dense recurrent matrix of a GRU.
 
 \subsection{Spiking world model}
 \label{sec:wm}
 
-\method replaces the recurrent core of the spiking world model (\cref{sec:swm}) by two PDN layers; the second layer reads the spikes of the first, and its spikes form the deterministic state $h_t$.
-Everything else is unchanged and spiking: the input layer that reads $(z_{t-1},a_{t-1})$, the encoder, the posterior and prior over $z_t$ (32 categorical variables with 32 classes), and the decoder, reward and continuation heads, all built from LIF neurons with $T=5$ simulation steps, trained with the losses of DreamerV3~\cite{hafner2025dreamerv3}.
-The dendritic state is carried through training sequences and through imagination rollouts, and is cleared only at episode starts.
+\method replaces the recurrent core of the spiking world model (\cref{sec:swm}) by two PDN layers: the second layer reads the spikes of the first, and its spikes form the deterministic state $h_t$.
+Each layer has $N=512$ neurons with $M=2$ channels, one integrator and one resonant.
+Retention times are initialized uniformly on a log scale in $[1,1000]$ environment steps and phases uniformly in $[0,2\pi)$, as in the LRU~\cite{orvieto2023lru}, and both are learned.
+The rest of the world model is unchanged: the input layer that reads $(z_{t-1},a_{t-1})$, the encoder, the posterior and prior over $z_t$ (32 categorical variables with 32 classes), and the decoder, reward and continuation heads are built from LIF neurons with $T=5$ simulation steps and trained with the losses of DreamerV3~\cite{hafner2025dreamerv3}.
+All Heaviside steps are trained with the surrogate derivative of the world model.
+The dendritic state is carried through training sequences and imagination rollouts and cleared only at episode starts.
 
 \paragraph{Policy input.}
-The actor and critic read $z_t$, $h_t$ and the state of the dendrites of the second layer, on every task; the Memory Maze probes read the same features.
-The soma sends at most $T$ spikes per neuron and step, whereas the dendrites hold the memory in graded form.
-To pass them on as spikes, each state variable is standardized over the layer and encoded by $T$ ON and $T$ OFF thresholds at $\pm(k-\tfrac12)\tfrac{2}{T}$, $k=1,\dots,T$, giving $2T$ binary frames whose rates represent $2T+1$ levels.
-With three state variables per neuron (the integrator and the two of the resonator), the actor and critic receive 3072 additional binary inputs per simulation step, the only path by which the dendritic state leaves a neuron; their first layer reads these inputs through a factor of rank 64.
+The actor and critic read $z_t$, $h_t$ and the dendritic state of the second layer, and the Memory Maze probes read the same features.
+The dendritic state leaves the neurons as spikes: each state variable, standardized over the layer, is compared with $T$ positive and $T$ negative thresholds $\pm(n-\tfrac12)\tfrac{2}{T}$, $n=1,\dots,T$, which gives $2T$ ON and OFF spike frames per environment step.
 Supp.~\suppref{supp:policy}{E} compares a policy that reads $(z_t,h_t)$ only.

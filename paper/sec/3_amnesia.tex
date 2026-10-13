@@ -5,19 +5,19 @@
 \label{sec:swm}
 
 We follow the recurrent state space model of DreamerV3~\cite{hafner2025dreamerv3}.
-At environment step $t$ a recurrent core updates a deterministic state $h_t$ from $h_{t-1}$, the previous stochastic latent $z_{t-1}$ and action $a_{t-1}$; the posterior infers $z_t$ from $h_t$ and the observation embedding, the prior predicts it from $h_t$ alone, and decoder, reward and continuation heads read $(h_t, z_t)$.
+At environment step $t$ a recurrent core updates a deterministic state $h_t$ from $h_{t-1}$, the previous stochastic latent $z_{t-1}$ and action $a_{t-1}$; the posterior infers $z_t$ from $h_t$ and the embedding $e_t$ of the observation $o_t$, the prior predicts it from $h_t$ alone, and decoder, reward and continuation heads read $(h_t, z_t)$.
 In a spiking world model~\cite{sun2025spikingwm} every layer is spiking and is simulated for $T$ steps per environment step ($T=5$), and $h_t\in\{0,1\}^{T\times N}$ is the spike output of the core.
 
 \swm uses multicompartment neurons (MCNs).
-In simulation step $k$ of environment step $t$, a basal and an apical dendrite integrate synaptic input with leaks discretized by the Euler method, and the soma integrates the basal potential gated by the apical one:
+In simulation step $n$ of environment step $t$, a basal and an apical dendrite integrate synaptic input with leaks discretized by the Euler method, and the soma integrates the basal potential gated by the apical one:
 \begin{equation}
 \begin{aligned}
-v^{c}[k] &= v^{c}[k-1] + \tfrac{1}{\tau_c}\big(I^{c}[k] - v^{c}[k-1]\big), \quad c\in\{\mathrm{bas},\mathrm{api}\},\\
-s[k] &= \Hv\big(v^{\mathrm{som}}[k] - \vartheta\big),
+v^{c}[n] &= v^{c}[n-1] + \tfrac{1}{\tau_c}\big(I^{c}[n] - v^{c}[n-1]\big), \quad c\in\{\mathrm{bas},\mathrm{api}\},\\
+s[n] &= \Hv\big(v^{\mathrm{som}}[n] - \vartheta\big),
 \end{aligned}
 \label{eq:mcn}
 \end{equation}
-where $I^{c}[k] = W_c\,[\,x_t[k];\,h_{t-1}[k]\,]$ combines the current input spikes with the core's spikes of the previous environment step and $\Hv$ is the Heaviside step, trained with a surrogate derivative~\cite{neftci2019surrogate,wu2018stbp}.
+where $I^{c}[n] = W_c\,[\,x_t[n];\,h_{t-1}[n]\,]$ combines the current input spikes with the core's spikes of the previous environment step and $\Hv$ is the Heaviside step, trained with a surrogate derivative~\cite{neftci2019surrogate,wu2018stbp}.
 Two resets act on this neuron:
 \begin{enumerate}
 \item \textbf{Step reset.} All compartments are set to zero at the start of every environment step.
@@ -30,7 +30,7 @@ The gradient from a reward $L$ steps after a cue crosses $L$ surrogate derivativ
 The time constants $\tau_c$ act only within the $T$ simulation steps of one environment step, which explains why changing them barely changes the performance of \swm~\cite{sun2025spikingwm}.
 The spike reset additionally truncates a dendritic trace at the next spike: with $\alpha=1-1/\tau_c$,
 \begin{equation}
-\frac{\partial v^{c}[k]}{\partial I^{c}[k-j]} = \frac{1}{\tau_c}\,\alpha^{j}\prod_{i=1}^{j}\big(1-s[k-i]\big),
+\frac{\partial v^{c}[n]}{\partial I^{c}[n-j]} = \frac{1}{\tau_c}\,\alpha^{j}\prod_{i=1}^{j}\big(1-s[n-i]\big),
 \label{eq:spike_reset}
 \end{equation}
 which vanishes as soon as the neuron has fired once, so the effective memory is the shorter of $\tau_c$ and the interval between spikes.

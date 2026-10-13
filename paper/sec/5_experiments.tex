@@ -7,7 +7,7 @@
   BSuite memory length~\cite{osband2020bsuite}: success as in R2I~\cite{samsami2024r2i}, \ie whether the evaluation return reaches 0.9 within the budget (\cmark) or not (\xmark); steps and returns in Supp.~\suppref{supp:impl}{A}. $^\dagger$Lengths, budget and training windows of R2I (1M steps; reward head with one output per action).
   POPGym RepeatPrevious~\cite{morad2023popgym} with the environment settings of R2I's code: max-mean episodic return, the metric of POPGym (chance $=-0.5$).
   \nr: not run, as the model fails at a shorter length.
-  $^\ddagger$R2I with its official code and configuration for 2M steps, measured on its training episodes (for our models the two measures differ by at most 0.07).
+  $^dagger$R2I with its official code and configuration for 2M steps, measured on its training episodes (for our models the two measures differ by at most 0.07).
   \pend{Blue}: in progress.}
   \label{tab:rl}
   \input{tables/rl}
@@ -154,7 +154,7 @@ Once the object leaves the view, the error of the spiking baselines rises within
 \textbf{Stateless soma}: a soma that keeps a membrane potential and is reset by its spike fails at 64 steps (0.52) and reaches 0.77 at $k=32$.
 \textbf{Resonance}: without resonant channels the model fails at $k=32$ (0.57); with resonant channels only it solves all three tasks, as does \method with one channel of each kind.
 \textbf{Depth and sparsity}: one PDN layer, or a firing rate capped at 0.06 (from 0.25), fails at 64 steps.
-The spike count, the feedback and the number of channels leave the memory nearly unchanged (AUC 0.88 to 0.94 at $k=32$); the spike count and the feedback serve the prediction of motion (\cref{sec:why}).
+The spike count, the feedback and the number of channels leave the memory nearly unchanged (AUC 0.88 to 0.94 at $k=32$); the spike count and the feedback serve the prediction of motion: on the same pixel walker episodes, the world model with both predicts the next frame as well as recurrent LIF neurons (image loss 44.3 vs.\ 44.1), and with one spike per step it does not (55.3; Supp.~\suppref{supp:diag}{F}).
 
 \subsection{Control tasks}
 \label{sec:control}
