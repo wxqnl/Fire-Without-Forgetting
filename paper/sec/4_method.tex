@@ -10,66 +10,76 @@
   \label{fig:overview}
 \end{figure*}
 
-\Cref{sec:amnesia} gives a design rule: memory must live in a state that spikes never reset, written with a gain that does not vanish for long time constants.
-The persistent dendritic neuron (PDN) follows this rule by separating memory from communication: dendritic channels store the memory, and a stateless soma communicates it by spike counts.
-\method builds the recurrent core of the spiking world model from PDNs and keeps the rest of the model unchanged (\cref{fig:overview}).
+\method follows the design rule of \cref{sec:amnesia}: it keeps the spiking world model of \cref{sec:swm} and replaces its recurrent core with two layers of persistent dendritic neurons (PDNs), as shown in \cref{fig:overview}.
+The second layer reads the spikes of the first, and its spikes form the deterministic state $h_t$; the encoder, the latent, the heads and the actor-critic remain LIF networks trained with the losses of DreamerV3~\cite{hafner2025dreamerv3}.
 
-\subsection{Persistent dendritic neuron}
-\label{sec:pdn}
-
-A PDN layer has $N$ neurons with $M$ dendritic channels each.
-At environment step $t$ it receives the firing rate $x_t$ of its input spikes over the $T$ simulation steps and its own firing rate $\bar s_{t-1}$ of the previous step, and its dendrites receive the synaptic current
+A PDN separates memory from communication: dendritic channels store the memory, and a stateless soma communicates it by spikes.
+A layer has $N$ neurons with $M$ dendritic channels each.
+At environment step $t$ it receives the firing rate $x_t$ of its input spikes over the $T$ simulation steps and its own firing rate $\bar s_{t-1}$ of the previous step, and computes
 \begin{equation}
-I_t = \LN\big(B x_t + R\,\bar s_{t-1}\big)\in\mathbb{R}^{NM},
+\begin{aligned}
+I_t &= \LN\big(B x_t + R\,\bar s_{t-1}\big),\\
+(d_t,\tilde d_t) &= \mathrm{PDM}\big(d_{t-1},\tilde d_{t-1}; I_t\big),\\
+s_t &= \mathrm{Soma}\big(d_t,\tilde d_t, x_t\big),
+\end{aligned}
 \label{eq:input}
 \end{equation}
-where $B$ and $R$ are synaptic matrices and $\LN$ is layer normalization with learned scale and bias~\cite{ba2016layernorm}.
-All operations below act elementwise on the neurons and channels of a layer.
+where $B$ and $R$ are synaptic matrices, $\LN$ is layer normalization with learned scale and bias~\cite{ba2016layernorm}, $I_t\in\mathbb{R}^{NM}$ is the synaptic current into the dendrites, $(d_t,\tilde d_t)$ is the state of the dendritic channels and $s_t$ are the $T$ binary spike frames of the layer.
+Persistent Dendritic Memory (\cref{sec:pdm}) carries the dendritic state across environment steps and somatic spikes, the Normalized Write Gain (\cref{sec:nwg}) writes the current into channels of every retention time on one scale, and the stateless soma (\cref{sec:soma}) turns the state into spike counts.
+All operations act elementwise on the neurons and channels of a layer.
 
-\paragraph{Persistent Dendritic Memory (PDM).}
-Each channel has a retention time $\tau$, counted in environment steps, a decay $\lambda=e^{-1/\tau}$ and a phase $\theta$.
-Its state $(d_t,\tilde d_t)$ is a damped rotation driven by the current:
+\subsection{Persistent Dendritic Memory}
+\label{sec:pdm}
+
+In \swm, the step reset clears all compartments at every environment step and the spike reset clears the dendrites at every somatic spike, so no trace outlasts the next step (\cref{sec:forget}).
+Persistent Dendritic Memory (PDM) keeps the dendritic state through both.
+Each channel has a retention time $\tau$, counted in environment steps, a decay $\lambda=e^{-1/\tau}$ and a phase $\theta$, and its state is a damped rotation driven by the current:
 \begin{equation}
 \begin{pmatrix} d_t \\ \tilde d_t \end{pmatrix}
 = \lambda\, Q(\theta) \begin{pmatrix} d_{t-1} \\ \tilde d_{t-1} \end{pmatrix}
 + g(\lambda) \begin{pmatrix} I_t \\ 0 \end{pmatrix},
 \label{eq:pdm}
 \end{equation}
-where $Q(\theta)$ is the rotation by the angle $\theta$ and $g(\lambda)$ is a write gain.
+where $Q(\theta)$ is the rotation by the angle $\theta$ and $g(\lambda)$ is the write gain of \cref{sec:nwg}.
 An integrator channel has $\theta=0$ and $\tilde d\equiv0$, so $d_t=\lambda d_{t-1}+g(\lambda)I_t$ is a leaky trace; a resonant channel is a damped oscillator, as in resonate-and-fire neurons~\cite{izhikevich2001resonate}.
+
 \Cref{eq:pdm} is the only update of the channels: they keep their state across environment steps and through somatic spikes, the spikes of the layer enter only as current through $R$, and the state is cleared only at the start of an episode.
 The influence of a current $k$ steps back, $g(\lambda)\lambda^{k}Q(k\theta)$, therefore does not depend on what the neuron fired in between, and the gradient along this path crosses no surrogate derivative.
+The two kinds of channels store different aspects of the past.
 An integrator stores what was seen, with inputs of all ages superposed under the smoothly decaying weights $\lambda^{k}$.
 A resonator also stores when: an input of age $k$ appears at phase $k\theta$, which separates it from inputs of age $k\pm1$.
 
-\paragraph{Normalized Write Gain (NWG).}
-The write gain sets how strongly a channel stores its input.
-The Euler update of \cref{eq:mcn} corresponds to $g=1-\lambda\approx1/\tau$, for which an input of unit variance gives the state a variance of $(1-\lambda)/(1+\lambda)\approx1/(2\tau)$: channels with long retention times store their input too faintly to drive the soma (\cref{sec:amnesia}).
-NWG sets $g(\lambda)=\sqrt{1-\lambda^2}$, the normalization of the LRU~\cite{orvieto2023lru}, which gives a variance of $(1-\lambda^2)\sum_{k\ge0}\lambda^{2k}=1$ for every $\tau$; intervention G equalizes the channels of \swm in the same way.
-With all channels on one scale, a layer can hold a wide spectrum of retention times, so no time constant is tuned for a task.
+\subsection{Normalized Write Gain}
+\label{sec:nwg}
 
-\paragraph{Stateless soma.}
+Persistence alone does not make long retention times useful, since the gain with which a channel stores its input must not vanish as $\tau$ grows (\cref{sec:forget}).
+The Euler update of \cref{eq:mcn} corresponds to $g=1-\lambda\approx1/\tau$, for which an input of unit variance gives the state a variance of $(1-\lambda)/(1+\lambda)\approx1/(2\tau)$: channels with long retention times store their input too faintly to drive the soma.
+The Normalized Write Gain (NWG) sets
+\begin{equation}
+g(\lambda)=\sqrt{1-\lambda^2},
+\label{eq:nwg}
+\end{equation}
+the normalization of the LRU~\cite{orvieto2023lru}.
+For a normalized current of unit variance, the state then has a variance of $(1-\lambda^2)\sum_{k\ge0}\lambda^{2k}=1$ for every $\tau$.
+With all channels on one scale, one layer can hold a wide spectrum of retention times: we initialize them uniformly on a log scale in $[1,1000]$ environment steps and learn them, so no time constant is tuned for a task.
+
+\subsection{Stateless soma and policy input}
+\label{sec:soma}
+
 The soma reads the channels of its neuron and the direct input,
 \begin{equation}
 u_t = \textstyle\sum_{m=1}^{M} \big(c_m \odot d_{t,m} + \tilde c_m \odot \tilde d_{t,m}\big) + D x_t,
 \label{eq:soma}
 \end{equation}
-where $c_m,\tilde c_m\in\mathbb{R}^{N}$ are weights of each neuron and $D$ is a synaptic matrix, and in simulation step $n=1,\dots,T$ it emits $s^{n}_t = \Hv\big(\LN(u_t) - n\vartheta/T\big)$ with the Heaviside step $\Hv$ and $\vartheta=0.5$.
-The soma keeps no state between environment steps, and its spike count encodes $u_t$ in $T+1$ levels.
+where $c_m,\tilde c_m\in\mathbb{R}^{N}$ are weights of each neuron and $D$ is a synaptic matrix, and in simulation step $n=1,\dots,T$ it emits $s^{n}_t = \Hv\big(\LN(u_t) - n\vartheta/T\big)$ with $\vartheta=0.5$.
+The soma keeps no state between environment steps, so no reset touches the memory, and its spike count encodes $u_t$ in $T+1$ levels instead of the single bit of one spike per step.
 These binary frames are the only signal the neuron sends; the next layer and the feedback read their rate $\bar s_t$.
 The synaptic operations $Bx_t$, $R\bar s_{t-1}$ and $Dx_t$ thus act on spikes, and the dendritic update is local to each neuron, with $O(NM)$ operations per step against $O(N^2)$ for the dense recurrent matrix of a GRU.
-
-\subsection{Spiking world model}
-\label{sec:wm}
-
-\method replaces the recurrent core of the spiking world model (\cref{sec:swm}) by two PDN layers: the second layer reads the spikes of the first, and its spikes form the deterministic state $h_t$.
-Each layer has $N=512$ neurons with $M=2$ channels, one integrator and one resonant.
-Retention times are initialized uniformly on a log scale in $[1,1000]$ environment steps and phases uniformly in $[0,2\pi)$, as in the LRU~\cite{orvieto2023lru}, and both are learned.
-The rest of the world model is unchanged: the input layer that reads $(z_{t-1},a_{t-1})$, the encoder, the posterior and prior over $z_t$ (32 categorical variables with 32 classes), and the decoder, reward and continuation heads are built from LIF neurons with $T=5$ simulation steps and trained with the losses of DreamerV3~\cite{hafner2025dreamerv3}.
-All Heaviside steps are trained with the surrogate derivative of the world model.
-The dendritic state is carried through training sequences and imagination rollouts and cleared only at episode starts.
 
 \paragraph{Policy input.}
 The actor and critic read $z_t$, $h_t$ and the dendritic state of the second layer, and the Memory Maze probes read the same features.
 The dendritic state leaves the neurons as spikes: each state variable, standardized over the layer, is compared with $T$ positive and $T$ negative thresholds $\pm(n-\tfrac12)\tfrac{2}{T}$, $n=1,\dots,T$, which gives $2T$ ON and OFF spike frames per environment step.
 Supp.~\suppref{supp:policy}{E} compares a policy that reads $(z_t,h_t)$ only.
+
+\paragraph{Training.}
+The dendritic state is carried through training sequences and imagination rollouts and cleared only at episode starts, and all Heaviside steps are trained with the surrogate derivative of the world model.

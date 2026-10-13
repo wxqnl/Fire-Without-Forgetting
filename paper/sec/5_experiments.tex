@@ -24,10 +24,10 @@ All models share one spiking world model, the network of \swm~\cite{sun2025spiki
 \textbf{DH-SNN}~\cite{zheng2024dhsnn}, LIF neurons with eight dendritic branches of learned time constants;
 \textbf{TC-LIF}~\cite{zhang2024tclif}, two-compartment LIF neurons for long sequences (GRSN, DH-SNN and TC-LIF update once per environment step and carry their state);
 \textbf{\dv}~\cite{hafner2025dreamerv3}, the same architecture without spikes (GRU core, SiLU, one simulation step);
-and \textbf{\method} with two PDN layers.
+and \textbf{\method} with two PDN layers of $N=512$ neurons with $M=2$ channels, one integrator and one resonant.
 R2I~\cite{samsami2024r2i}, a DreamerV3 agent with a state space recurrence and the state of the art among ANN world models on memory tasks, runs with its official code and configuration on POPGym; on BSuite we compare with its published results.
 Within a benchmark, all models use identical hyperparameters, budgets and evaluation.
-The actor and critic of every model read $(z_t,h_t)$; those of \method also read its dendritic state as spikes (\cref{sec:wm}), with 4.1M instead of 3.4M parameters (sizes in Supp.~\suppref{supp:impl}{A}, an actor-critic of 3.4M in Supp.~\suppref{supp:policy}{E}).
+The actor and critic of every model read $(z_t,h_t)$; those of \method also read its dendritic state as spikes (\cref{sec:soma}), with 4.1M instead of 3.4M parameters (sizes in Supp.~\suppref{supp:impl}{A}, an actor-critic of 3.4M in Supp.~\suppref{supp:policy}{E}).
 
 \paragraph{Benchmarks.}
 We use benchmarks with published protocols and ANN results.
@@ -39,7 +39,7 @@ On BSuite the reward depends on both the cue and the action, which the scalar re
 Supp.~\suppref{supp:impl}{A} gives the settings and the evaluation protocol of each benchmark.
 
 \paragraph{World model probes.}
-To measure memory without exploration and credit assignment, we also train world models alone on data of a random policy and measure the AUC of their reward prediction where the reward depends on the past (\cref{sec:causal}): cue recall, where the terminal reward is the cue $L$ steps back, and RepeatPrevious, where the reward indicates whether the action names the card $k$ steps back.
+To measure memory without exploration and credit assignment, we also train world models alone on episodes of a random policy and measure the AUC of their reward prediction where the reward depends on the past, from 0.5 without memory to 1 with perfect recall: cue recall, BSuite memory length with the terminal reward set to the cue $L$ steps back ($\pm1$), and RepeatPrevious, where the reward indicates whether the action names the card $k$ steps back.
 As in probing benchmarks~\cite{pasukonis2023memorymaze}, we report the final AUC after a fixed number of updates (Supp.~\suppref{supp:probe}{C}).
 
 \subsection{Memory in reinforcement learning}
@@ -136,6 +136,33 @@ Once the object leaves the view, the error of the spiking baselines rises within
   \pend{\method: checkpoint after 330k of 1M updates.}}
   \label{fig:mm_viz}
 \end{figure*}
+
+\subsection{Causes of reset amnesia}
+\label{sec:causal}
+
+\begin{table}[t]
+  \centering\tabfont
+  \caption{\textbf{Interventions on \swm} (world model probe, cue recall over $L$ steps). Updates until the reward AUC exceeds 0.9, two seeds; -- = not within 12k updates; blank = not run. A: state kept across environment steps; B: no dendritic reset on a somatic spike; G: dendritic input scaled by $\sqrt{\tau_d/2}$. GRU: reference core with continuous state.}
+  \label{tab:interventions}
+  \input{tables/interventions}
+\end{table}
+
+We test the three mechanisms of \cref{sec:forget} with interventions on \swm in the cue recall probe (\cref{tab:interventions}; details in Supp.~\suppref{supp:probe}{C}).
+\textbf{A} keeps all compartments across environment steps and clears them only at episode starts, \textbf{B} keeps the dendrites when the soma fires, and \textbf{G} multiplies the dendritic input by $\sqrt{\tau_d/2}$, which equalizes the stationary spread across dendritic time constants $\tau_d$.
+
+\textbf{With resets, time constants do not matter.}
+\swm fails at 8 and 16 steps for $\tau_d\in\{2,16,128\}$, and the cue can be decoded from its spikes for only 2 to 3 steps after it is shown.
+At 32 steps, one of two seeds crosses an AUC of 0.9 at the last of 12k updates by holding the cue in self-sustained recurrent firing, a memory that exists only as spikes.
+\textbf{Persistence is necessary.}
+Without A, neither B nor G helps.
+With A and $\tau_d=128$, the world model recalls 8 and 16 steps; removing the dendritic reset too (A+B) nearly halves the updates at 16 steps (4.5k instead of 8k to 8.5k).
+\textbf{The write gain limits long time constants.}
+With both resets removed, a cue moves the basal potential of a $\tau_d=128$ dendrite by 0.004 to 0.009, about 1\% of the threshold, against 0.19 at $\tau_d=2$.
+A+B therefore fails at 32 steps, although a linear probe still decodes the cue from the membrane potentials at the recall step (accuracy 0.88): the trace is there, but too faint to drive spikes.
+Restoring the gain (A+B+G) recalls 8 and 16 steps within 500 updates and 32 steps within 2000 to 3000, faster than the GRU core, and still learns 32 steps in 2000 updates with the firing rate capped at 0.06.
+\textbf{Longer memory needs more than removing resets.}
+A+B+G fails at 64 steps even with $\tau_d=512$, and in reinforcement learning it stops at 32 steps (\swmnr in Supp.~\suppref{supp:impl}{A}).
+Its time constants are counted in simulation steps, and its soma still resets; a PDN counts retention times in environment steps and has a stateless soma.
 
 \subsection{Ablations}
 \label{sec:ablation}
