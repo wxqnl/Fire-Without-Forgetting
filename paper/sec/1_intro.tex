@@ -13,37 +13,42 @@
   \label{fig:memory_length}
 \end{figure}
 
-Spiking neural networks (SNNs)~\cite{maass1997networks} process information with sparse binary spikes, following the dynamics and spike-based communication of biological neurons~\cite{roy2019towards}.
-Unlike artificial neural networks (ANNs), spiking neurons trigger synaptic computation only when spikes arrive and replace multiply-accumulate (MAC) operations with accumulate (AC) operations, which take about a fifth of the energy of a MAC on a 45\,nm chip~\cite{horowitz2014energy}; neuromorphic processors exploit this sparsity~\cite{davies2018loihi,orchard2021loihi2}.
-Trained directly with surrogate gradients~\cite{neftci2019surrogate,wu2018stbp}, SNNs now classify images with deep residual and transformer architectures~\cite{fang2021sew,zhou2023spikformer,yao2023sdt} and control agents through reinforcement learning (RL)~\cite{tang2020popsan,liu2023dsqn}.
-Spiking neurons are also dynamical systems with membrane and dendritic time constants, and these dynamics are widely believed to provide temporal memory~\cite{bellec2018lsnn}.
-Neuron models with adaptive thresholds~\cite{bellec2018lsnn,yin2021adaptive}, dendritic branches with heterogeneous time constants~\cite{zheng2024dhsnn}, two compartments~\cite{zhang2024tclif} or gated recurrence~\cite{qin2025grsn} extend this memory on long sequences and in partially observable control.
+Neuromorphic computing brings the structure and dynamics of biological nervous systems into the design of computational models and hardware~\cite{roy2019towards}.
+Its representative model, the spiking neural network (SNN)~\cite{maass1997networks}, processes information through neuron dynamics and communicates by discrete spikes.
+Sparse activation and event-driven computation make SNNs a basis for energy-efficient inference on neuromorphic hardware~\cite{davies2018loihi,orchard2021loihi2}.
+SNNs have recently been applied to image recognition~\cite{fang2021sew,zhou2023spikformer,yao2023sdt}, temporal modeling~\cite{bellec2018lsnn,yin2021adaptive,zheng2024dhsnn,zhang2024tclif} and control through reinforcement learning (RL)~\cite{tang2020popsan,liu2023dsqn,qin2025grsn}.
 
-World models~\cite{ha2018world,hafner2019planet,hafner2020dreamer,hafner2025dreamerv3} compress the history of observations and actions into a recurrent latent state, predict the future from it, and let an agent learn behavior in imagination.
-In partially observable environments, this latent state also serves as the agent's memory and must retain information over many steps~\cite{osband2020bsuite,morad2023popgym,pasukonis2023memorymaze}; ANN world models built on state space models retain it for hundreds of steps~\cite{deng2023s4wm,samsami2024r2i}.
-A world model updates this state at every step of closed-loop control, so spike-driven computation saves energy at every step, and the dynamics of spiking neurons offer a natural place for its memory.
-Accordingly, a recent spiking world model builds on multicompartment neurons whose dendrites integrate over long timescales~\cite{sun2025spikingwm}.
+Unlike standard deep learning tasks, RL requires an agent to learn a decision policy from the experience of interacting with its environment.
+Model-based RL learns the dynamics of the environment with a world model, predicts the consequences of actions, and uses these predictions to improve the policy~\cite{ha2018world,hafner2019planet}.
+Methods represented by Dreamer~\cite{hafner2020dreamer,hafner2025dreamerv3} integrate past observations and actions into a recurrently updated latent state, generate imagined trajectories in the latent space and learn the policy from them.
+In partially observable tasks, this state also serves as memory and must retain information relevant to later decisions across many environment steps~\cite{osband2020bsuite,morad2023popgym,pasukonis2023memorymaze}.
+World models built on artificial neural networks (ANNs) have strengthened this long-horizon memory with state space models~\cite{deng2023s4wm,samsami2024r2i}.
+In SNNs, membrane potentials and dendritic states evolve over time and can retain past information~\cite{bellec2018lsnn,zheng2024dhsnn,zhang2024tclif}.
+Building on this, a recent spiking world model uses multicompartment neurons to reduce inference energy substantially while approaching the performance of ANN world models~\cite{sun2025spikingwm}.
 
-However, existing neuron models and spiking world models extend memory through longer time constants and overlook how the neuron state evolves across environment steps.
-Spiking RL methods clear the membrane potentials at the start of every environment step~\cite{tang2020popsan,liu2023dsqn,sun2025spikingwm}, so the time constants act only within a single step.
-In the multicompartment neurons of spiking world models, a somatic spike also resets the dendrites~\cite{sun2025spikingwm}, so a dendritic trace survives only until the neuron fires again.
-Moreover, the standard Euler update writes input with a gain of $1/\tau$, so compartments with long time constants store their input too weakly to drive spikes.
-As a result, existing spiking world models forget within a few steps (\cref{fig:memory_length}); we term this failure reset amnesia and confirm its causes with interventions (\cref{sec:amnesia}).
-Despite these advances in neuron dynamics, building a spiking world model that retains what it saw, and when, over long horizons remains challenging.
+However, existing spiking world models still face two challenges on long-horizon memory tasks: writing early observations effectively into neuron states with long time constants, and preserving this information through continued interaction and spiking until later decisions need it.
+In the standard Euler update, the write gain of $1/\tau$, tied to the time constant, makes compartments with long time constants respond too weakly to input to drive spikes.
+Meanwhile, several spiking RL methods and world models clear the membrane potentials at the start of every environment step~\cite{tang2020popsan,liu2023dsqn,sun2025spikingwm}, which confines the memory held by the membrane potential to a single step.
+In multicompartment neurons, a somatic spike also resets the dendritic state~\cite{sun2025spikingwm}, so a dendritic memory trace survives only until the neuron fires again.
+We term the memory failure caused by these mechanisms reset amnesia.
+As a result, even with longer time constants, existing spiking world models are limited in forming and retaining long-term memory and cannot carry key information from early observations to later decisions (\cref{fig:memory_length}).
 
-To address these problems, we propose the \methodfull (\method), a spiking world model whose recurrent core is built on a new neuron, the Persistent Dendritic Neuron (PDN).
-As shown in \cref{fig:overview}, a PDN separates memory from communication: dendritic channels store the memory, and a stateless soma communicates it by spike counts.
-First, we propose Persistent Dendritic Memory (PDM) to remove both the step reset and the spike reset: the linear dendritic channels carry their state across environment steps, and spikes write into them through synapses but never reset them, so information survives later steps and later somatic spikes.
-Second, we design a Normalized Write Gain (NWG) to replace the Euler gain of $1/\tau$: it keeps every channel on the same scale, so channels with long retention times drive the soma as strongly as short ones.
-In addition, integrator channels accumulate what the agent has seen, and resonant channels, damped oscillators that follow resonate-and-fire neurons~\cite{izhikevich2001resonate}, also encode how many steps ago it was seen.
-We compare \method with recent spiking neurons and spiking world models, and with \dv as an ANN reference, on long-horizon memory tasks in RL, from vector observations in BSuite memory length and POPGym RepeatPrevious to first-person images of 3D mazes in Memory Maze, and verify that it retains both what it saw and when it saw it.
-Notably, \method recalls a cue 101 steps back on BSuite within the budget of R2I~\cite{samsami2024r2i}, whereas \dv fails beyond 51 steps, and on POPGym RepeatPrevious Medium, which rewards naming the card shown exactly 32 steps earlier, it is the only model, \dv included, whose return rises above chance within 2M steps.
+To address these problems, we propose the \methodfull (\method), a spiking world model whose recurrent core is built from a newly designed Persistent Dendritic Neuron (PDN).
+As shown in \cref{fig:overview}, a PDN separates memory storage from communication between neurons.
+First, we propose Persistent Dendritic Memory (PDM): integrator channels store the content of past observations, resonant channels~\cite{izhikevich2001resonate} encode the time elapsed since an observation, and both keep their state across environment steps and through somatic spikes, so this information persists.
+Next, we design a Normalized Write Gain (NWG), which scales the write of spike input by the retention time of each channel; it compensates the input attenuation of channels with long retention times, so the memory they store can drive the soma.
+Finally, a stateless soma reads this dendritic memory and emits a spike count, passing information between neurons while the memory stays inside the neuron.
+We evaluate the long-horizon memory of \method on several RL tasks, with vector observations and first-person images of 3D mazes.
+The results show that \method outperforms the compared spiking baselines overall on long-horizon memory tasks, including models with recent spiking neurons and an existing spiking world model.
+Specifically, within the training budget of R2I~\cite{samsami2024r2i}, \method acts on a cue seen 101 steps earlier in BSuite, whereas \dv fails beyond 51 steps.
+On POPGym RepeatPrevious Medium, which requires recalling the card shown exactly 32 steps earlier, \method is the only compared model whose return rises above chance within 2M environment steps.
+World model probes and ablations further confirm the roles of PDM and NWG in long-horizon memory and show that exact recall of the observation at a specific past step depends on the resonant channels.
 % DMC from pixels: check "comparable" when the pixel walker runs finish.
-We further evaluate \method on the standard control tasks of DMC~\cite{tassa2018dmc} from proprioception and from pixels, which need little memory, where it reaches returns comparable to the spiking baselines, verifying its basic world modeling ability.
-Together with world model probes and ablations, these results show that PDM and NWG give a spiking world model long-horizon memory, which \method attains at \numEnergyRatio$\times$ less arithmetic energy per step than \dv.
+We further evaluate \method on the standard control tasks of DMC~\cite{tassa2018dmc}, where its returns from both proprioception and pixels are comparable to those of the spiking baselines.
+These results show that \method offers an effective way to build spiking world models with long-horizon memory.
 The main contributions are as follows:
 \begin{itemize}
-\item We identify reset amnesia in spiking world models, caused by the step reset, the spike reset and a write gain tied to the time constant, and establish it with causal interventions.
-\item We propose the persistent dendritic neuron, which stores memory in integrator and resonant dendrites with PDM and NWG and communicates it by the spike counts of a stateless soma.
-\item Building on this neuron, we develop \method and give the first evaluation of spiking world models on standard memory benchmarks against five spiking recurrent cores and \dv, with DMC as a control and the energy per step.
+\item We identify and analyze reset amnesia in spiking world models, show how the step reset, the spike reset and a write gain tied to the time constant limit the formation and retention of long-term memory, and confirm their roles with causal interventions.
+\item We propose Persistent Dendritic Memory (PDM) and a Normalized Write Gain (NWG). PDM carries the state of integrator and resonant channels across environment steps and keeps it through somatic spikes, storing both the content and the timing of past observations; NWG scales the write by the retention time to compensate the input attenuation of channels with long retention times. Together with a stateless soma, they form the Persistent Dendritic Neuron (PDN), which separates memory storage from spike communication.
+\item Building on PDN, we develop \method, evaluate its long-horizon memory on BSuite memory length, POPGym RepeatPrevious and Memory Maze, and verify the roles of PDM, NWG and the resonant channels with world model probes and ablations. Its long-horizon memory surpasses the compared spiking baselines overall, and on DMC its returns from proprioception and pixels are comparable to those of the spiking baselines.
 \end{itemize}
