@@ -40,7 +40,7 @@ v^{c}[n] &= v^{c}[n-1] + \frac{1}{\tau_c}\big(I^{c}[n] - v^{c}[n-1]\big), \label
 \end{align}
 where $I^{c}[n] = W^{c}x_t[n] + W^{h,c}h_{t-1}[n]$ combines the input spikes $x_t[n]$, which encode $(z_{t-1},a_{t-1})$, with the spikes of the sequence model at the previous environment step, $I^{\mathrm{s}}[n]=W^{\mathrm{s}}x_t[n]$, and $\sigma$ is the sigmoid.
 The soma fires and resets as in \cref{eq:lif}.
-Two resets act on this neuron: the step reset sets all compartments to zero at the start of every environment step, and the spike reset clears the soma and both dendrites whenever the soma fires.\footnote{The equations of~\cite{sun2025spikingwm} show only the somatic reset; the dendritic reset is part of its official implementation (\texttt{MCNode.calc\_spike}), which all our \swm runs use.}
+Two resets act on this neuron: the step reset sets all compartments to zero at the start of every environment step, and the spike reset clears the soma and both dendrites whenever the soma fires.\footnote{\Cref{eq:mcn} and the resets follow the official implementation of~\cite{sun2025spikingwm} (\texttt{MCNode}), which all our \swm runs use; its paper writes the somatic leak outside the gate and shows only the somatic reset.}
 
 \subsection{Reset amnesia}
 \label{sec:amnesia}
