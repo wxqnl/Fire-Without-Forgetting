@@ -1180,6 +1180,27 @@ def round44(jobs):
     return out
 
 
+def round45(jobs):
+    """2026-10-13 00:30 (EXPERIMENTS.md §19.62), user: "维持我们这个项目使用 4 张卡，把这些都跑了，DMC 也跑，尽量加加速":
+    DH-SNN and TC-LIF on Memory Maze (1M updates) and the three proprioceptive DMC tasks (500k), copied from the LIF
+    jobs. Pinned to the four GPUs this project keeps (gpu2 and gpu3 are released once their last runs end), two new
+    runs per GPU and only one on gpu6, whose 44 GB already hold our pixel and Memory Maze runs. Memory Maze: 19.5 GB
+    measured in a smoke test (DH-SNN), 0.9 s per update."""
+    pins = {"DHSNN": {"memory_maze_9x9": 0, "dmc_walker_walk": 5, "dmc_cheetah_run": 6, "dmc_cartpole_swingup": 7},
+            "TCLIF": {"memory_maze_9x9": 7, "dmc_walker_walk": 5, "dmc_cheetah_run": 0, "dmc_cartpole_swingup": 5}}
+    out = []
+    for cell, cfg in (("DHSNN", "dhsnn"), ("TCLIF", "tclif")):
+        for task, mem in (("mmaze_official/memory_maze_9x9", 22), ("dmc500/dmc_walker_walk", 14.5),
+                          ("dmc500/dmc_cheetah_run", 14.5), ("dmc500/dmc_cartpole_swingup", 14.5)):
+            src = next(j for j in jobs if j["name"] == f"{task}/LIF_tau2/s0")
+            name = f"{task}/{cell}/s0"
+            cmd = src["cmd"].replace(" lifcell ", f" {cfg} ").replace(f"/runs/{src['name']}", f"/runs/{name}")
+            assert f" {cfg} --" in cmd and cmd.endswith(f"/runs/{name}")
+            gpu = pins[cell][task.split("/")[1]]
+            out.append(dict(name=name, cmd=cmd, logdir=str(RUNS / name), mem_gb=mem, gpus=[gpu]))
+    return sorted(out, key=lambda j: not j["name"].startswith("mmaze"))  # the 11-day runs first
+
+
 def priority(job):
     """Queue class of a job (§19.46): 1 candidate B on the paper's tables (RL, Memory Maze, pixel, table 2 probes),
     2 the new baselines on the core tables, 3 the pixel baselines, 5 the rest, 8 table 4 ablations, 9 the
@@ -1253,6 +1274,7 @@ def main():
     jobs = jobs[:1] + r42[:n_probe] + jobs[1:] + r42[n_probe:]
     jobs = jobs + round43(jobs)
     jobs = jobs + round44(jobs)
+    jobs = jobs + round45(jobs)
     # 2026-10-09 (EXPERIMENTS.md §19.29), user: "可以停": the binary-soma Memory Maze run is superseded by the final
     # model's (round 30, which copies its job); stopped at 540k updates
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2Lv2_tau1000/s0"]

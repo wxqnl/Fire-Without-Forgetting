@@ -1992,3 +1992,15 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
   - 像素 walker：本文 585k 882（最高 920）；LIF 445k 933；GRSN 505k 532；DH-SNN 425k 649；TC-LIF 405k 577。
   - Memory Maze 本文 390k：objects MSE 9.17（380k 的 10.67 是一次评估的波动），不读记忆的对照 12.07；walls 83.4%。
 - gpu4 上已没有我们的任务：23:54 通过我们自己的管道（`.mps/gpu4/pipe`）停掉了 gpu4 的 MPS 守护进程，gpu4 现在 4 MiB、无进程。已释放 gpu1、gpu4。
+
+### 19.62 补跑 DH-SNN、TC-LIF 的 Memory Maze 和 DMC 本体感知；本项目保留 4 张卡（10 月 13 日 00:30；用户："那这样吧，等再空出来两台之后，维持我们这个项目使用 4 张卡，把这些都跑了，DMC 也跑，尽量加加速"）
+
+- 起因：表 3 里 DH-SNN、TC-LIF 的 Memory Maze 和 DMC 本体感知三个任务共 10 格"未运行"（§19.46 只给新基线跑两张核心表和像素 walker）。
+- 第 45 轮（`make_jobs.round45()`）：从 LIF 的任务复制，换成 `dhsnn`、`tclif` 配置，共 8 个运行：
+  - Memory Maze 1M 次更新 ×2，`mem_gb` 22；
+  - DMC walker、cheetah、cartpole 500k 步 ×2，`mem_gb` 14.5。
+  - 任务列表备份在 `runs/jobs.before_round45.jsonl`，现有 404 个任务；原有任务一个没变。
+- 试跑：在 gpu3 上用 `probe_mm.py` 各跑 6 次更新，评估、存 checkpoint 都正常，DH-SNN 显存 19.5 GB、TC-LIF 18.6 GB，每次更新约 0.9 秒（LIF 0.92，GRSN 0.88）。1M 次更新约 10.5 天，预计 10 月 24 日左右跑完。DMC 本体感知按 LIF 的 1.5–2 天估，约 10 月 15 日跑完。
+- 卡的安排：本项目保留 gpu0、5、6、7 四张卡。新任务用 `gpus` 字段固定在这四张卡上，每张卡新增两个运行；gpu6 已经有本文的像素和 Memory Maze 两个运行（44 GB），只放一个。gpu1、gpu4 已释放（gpu1 现在跑 Spike-VLA 的分析）。gpu3 等 POPGym TC-LIF 跑完、gpu2 等像素 GRSN 跑完（约 10 月 14 日夜里）就释放，之后本项目只用这四张卡。新任务没有等两张卡空出来再启动，直接放在已经占着的卡上，占卡数不增加，结果提前约 2 天。
+- 加速：单个运行受每次更新的延迟限制，同卡多跑几个不影响速度（本文 Memory Maze 自 10 月 8 日起一直约 1.0 秒/更新），所以靠的是 8 个运行马上同时开跑。评估只占总时间约 3%，不改评估间隔。
+- 00:33 起：Memory Maze DH-SNN 在 gpu0、TC-LIF 在 gpu7；DMC walker DH-SNN 在 gpu5、cheetah DH-SNN 在 gpu6；其余 4 个在各卡 3 分钟的冷却期过后启动。
