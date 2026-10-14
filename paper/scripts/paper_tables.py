@@ -263,26 +263,41 @@ def pixel_run(m):
 
 
 def mm_dmc_energy_table():
-    """Table 3: Memory Maze probe and DMC return (proprioception and walker walk from pixels), one row per model."""
-    dmc = ["walker_walk", "cheetah_run", "cartpole_swingup"]
-    lines = [r"\begin{tabular}{@{}l cc ccc c@{}}", r"\toprule",
-             r" & \multicolumn{2}{c}{Memory Maze 9$\times$9} & \multicolumn{3}{c}{DMC, proprio.\ $\uparrow$} & pixels $\uparrow$ \\",
-             r"\cmidrule(lr){2-3}\cmidrule(lr){4-6}\cmidrule(l){7-7}",
-             r" & obj.\ MSE $\downarrow$ & walls \% $\uparrow$ & walk & run & swing & walk \\", r"\midrule"]
+    """Table 3: Memory Maze probe and DMC walker walk return (proprioception and pixels), one row per model. Cheetah
+    run and cartpole swingup are in the supplementary DMC table (2026-10-14, user: the main text keeps walker walk,
+    the only task run from pixels)."""
+    lines = [r"\begin{tabular}{@{}l cc cc@{}}", r"\toprule",
+             r" & \multicolumn{2}{c}{Memory Maze 9$\times$9} & \multicolumn{2}{c}{walker walk $\uparrow$} \\",
+             r"\cmidrule(lr){2-3}\cmidrule(l){4-5}",
+             r" & obj.\ MSE $\downarrow$ & walls \% $\uparrow$ & proprio. & pixels \\", r"\midrule"]
     for m, label in MODELS:
         mm = f"mmaze_official/memory_maze_9x9/{mt.key(m, 'mmaze')}"
         o = mm_cell(mm, "objects_mse")[0]
         w = mm_cell(mm, "walls_acc", 100)[0]
-        d = [final_return(f"dmc500/dmc_{t}/{mt.key(m, 'dmc')}", fmt="{:.0f}") for t in dmc]
-        d.append(final_return(pixel_run(m), fmt="{:.0f}"))
+        d = [final_return(f"dmc500/dmc_walker_walk/{mt.key(m, 'dmc')}", fmt="{:.0f}"),
+             final_return(pixel_run(m), fmt="{:.0f}")]
         if m == "OURS":
             lines.append(r"\midrule")
         lines.append(label + " & " + " & ".join([o, w] + d) + r" \\")
     lines.append(r"\midrule")
     for label, o, w in MM_PAPER:
-        lines.append(label + f" & {o} & {w} & " + " & ".join([r"\nr"] * 4) + r" \\")
+        lines.append(label + f" & {o} & {w} & " + " & ".join([r"\nr"] * 2) + r" \\")
     lines += [r"\bottomrule", r"\end{tabular}"]
     write("mm_dmc_energy", lines)
+
+
+def dmc_table():
+    """Supp.: DMC from proprioception, return after 500k steps on the three tasks, all models."""
+    dmc = ["walker_walk", "cheetah_run", "cartpole_swingup"]
+    lines = [r"\begin{tabular}{@{}l ccc@{}}", r"\toprule",
+             r"model & walker walk & cheetah run & cartpole swingup \\", r"\midrule"]
+    for m, label in SUPP_MODELS:
+        cells = [final_return(f"dmc500/dmc_{t}/{mt.key(m, 'dmc')}", fmt="{:.0f}") for t in dmc]
+        if m == "OURS":
+            lines.append(r"\midrule")
+        lines.append(label + " & " + " & ".join(cells) + r" \\")
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("dmc", lines)
 
 
 def energy_path(m):
@@ -383,6 +398,7 @@ def numbers():
                 rf"\newcommand{{\numFwfFinal{names[L]}}}{{{final_return(run)}}}"]
     for t, name in (("walker_walk", "Walk"), ("cheetah_run", "Run"), ("cartpole_swingup", "Swing")):
         out.append(rf"\newcommand{{\numFwfDmc{name}}}{{{final_return(f'dmc500/dmc_{t}/' + mt.key('OURS', 'dmc'), fmt='{:.0f}')}}}")
+    out.append(rf"\newcommand{{\numFwfPixWalk}}{{{final_return(pixel_run('OURS'), fmt='{:.0f}')}}}")
     # energy per environment step of the BSuite L=32 agents (energy.py on the rl3 runs; pending until measured)
     def energy(m):
         return json.loads(energy_path(m).read_text()) if energy_path(m).exists() else None
@@ -414,6 +430,7 @@ if __name__ == "__main__":
     probe_detail_table()
     ablation_table()
     mm_dmc_energy_table()
+    dmc_table()
     energy_table()
     policy_table()
     pix_diag_table()

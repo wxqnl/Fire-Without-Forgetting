@@ -7,8 +7,7 @@
   BSuite memory length~\cite{osband2020bsuite}: success as in R2I~\cite{samsami2024r2i}, \ie whether the evaluation return reaches 0.9 within the budget (\cmark) or not (\xmark); steps and returns in Supp.~\suppref{supp:impl}{A}. $^\dagger$Lengths, budget and training windows of R2I (1M steps; reward head with one output per action).
   POPGym RepeatPrevious~\cite{morad2023popgym} with the environment settings of R2I's code: max-mean episodic return, the metric of POPGym (chance $=-0.5$).
   \nr: not run, as the model fails at a shorter length.
-  $^dagger$R2I with its official code and configuration for 2M steps, measured on its training episodes (for our models the two measures differ by at most 0.07).
-  \pend{Blue}: in progress.}
+  $^\ddagger$R2I with its official code and configuration for 2M steps, measured on its training episodes (for our models the two measures differ by at most 0.07).}
   \label{tab:rl}
   \input{tables/rl}
 \end{table*}
@@ -34,7 +33,7 @@ We use benchmarks with published protocols and ANN results.
 \textbf{BSuite memory length}~\cite{osband2020bsuite} shows a cue, then $L$ uninformative steps, and rewards the agent for recalling the cue; we run $L\in\{8,16,32,64\}$, and $L\in\{51,71,101\}$ with the lengths, budget (1M steps) and training windows of R2I~\cite{samsami2024r2i}.
 \textbf{POPGym RepeatPrevious}~\cite{morad2023popgym} rewards the agent at every step for naming the suit of the card shown $k$ steps earlier ($k=4$ Easy, $k=32$ Medium), one of the three POPGym tasks with the highest memory demand that R2I evaluates; we use the environment settings of R2I's code for 2M steps.
 \textbf{Memory Maze 9$\times$9}~\cite{pasukonis2023memorymaze} is first-person 3D navigation with episodes of 1000 steps; we use its offline probing benchmark with the official dataset and probes: after 1M world model updates with truncated backpropagation through time, probes decode the positions of the target objects (MSE) and the maze layout (accuracy) from the frozen state.
-\textbf{DMC}~\cite{tassa2018dmc} from proprioception (walker walk, cheetah run, cartpole swingup; 500k steps, train ratio 512, as in DreamerV3) and walker walk from pixels (1M frames) serve as control tasks without a memory demand.
+\textbf{DMC}~\cite{tassa2018dmc} walker walk from proprioception (500k steps, train ratio 512, as in DreamerV3) and from pixels (1M frames) serves as a control task without a memory demand; cheetah run and cartpole swingup from proprioception are in Supp.~\suppref{supp:impl}{A}.
 On BSuite the reward depends on both the cue and the action, which the scalar reward head of a Dreamer world model does not learn within our budgets; all models therefore use a reward head with one output per action (Supp.~\suppref{supp:reward}{B}).
 Supp.~\suppref{supp:impl}{A} gives the settings and the evaluation protocol of each benchmark.
 
@@ -48,7 +47,7 @@ As in probing benchmarks~\cite{pasukonis2023memorymaze}, we report the final AUC
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{fig/rl_curves}
-  \caption{\textbf{Learning curves} on BSuite memory length with the lengths and budget of R2I (left three) and POPGym RepeatPrevious (right two; chance $=-0.5$). Exponential moving average of the evaluation return (R2I: return of the training episodes, see \cref{tab:rl}). \pend{Runs in progress.}}
+  \caption{\textbf{Learning curves} on BSuite memory length with the lengths and budget of R2I (left three) and POPGym RepeatPrevious (right two; chance $=-0.5$). Exponential moving average of the evaluation return (R2I: return of the training episodes, see \cref{tab:rl}).}
   \label{fig:rl_curves}
 \end{figure*}
 
@@ -56,18 +55,16 @@ As in probing benchmarks~\cite{pasukonis2023memorymaze}, we report the final AUC
 The spiking baselines remember as far as their neurons keep their state.
 \swm, cleared at every step and at every spike, recalls no cue, not even 8 steps back, and recurrent LIF neurons, cleared at every step, solve 8 steps.
 GRSN and DH-SNN carry leaky states across steps and solve 16 steps.
-TC-LIF adds its input to two compartments that do not decay, and its spikes subtract a fixed amount from them instead of clearing them; it solves 64 steps and, with R2I's lengths, 51 and 101 steps \pend{(71: in progress)}, as the design rule of \cref{sec:amnesia} predicts.
+TC-LIF adds its input to two compartments that do not decay, and its spikes subtract a fixed amount from them instead of clearing them; it solves 64 steps and, with R2I's lengths, 51 and 101 steps, as the design rule of \cref{sec:amnesia} predicts; at 71 steps its return stays at 0.10.
 \dv solves up to 32 steps in the short budgets and 51 steps with R2I's lengths (after 902k of 1M steps), and fails at 64, 71 and 101.
-\TODO{Recurrent LIF, GRSN and DH-SNN at 51 steps (runs in progress).}
 
-\method reaches a return of 0.9 at every length, as fast as the fastest baseline or faster: 64 steps after \numFwfToSixtyFour\ environment steps (TC-LIF 112k), and with R2I's lengths 51, 71 and 101 steps after \numFwfToFiftyOne, \numFwfToSeventyOne\ and \numFwfToHundredOne\ (TC-LIF 102k, \pend{$>$222k} and 242k; returns in Supp.~\suppref{supp:impl}{A}).
+\method reaches a return of 0.9 at every length, as fast as the fastest baseline or faster: 64 steps after \numFwfToSixtyFour\ environment steps (TC-LIF 112k), and with R2I's lengths 51, 71 and 101 steps after \numFwfToFiftyOne, \numFwfToSeventyOne\ and \numFwfToHundredOne\ (TC-LIF 102k at 51 and 242k at 101 steps; returns in Supp.~\suppref{supp:impl}{A}).
 R2I reports a median return of about 0.9 at 51 and 71 memory steps and about 0.35 at 101 after 1M steps (10 seeds; Fig.~7 of~\cite{samsami2024r2i}), with DreamerV3's default reward head and lengths that count one step less.
 
 On RepeatPrevious Easy, \method reaches \numFwfEasy, close to the best baseline, recurrent LIF (0.74).
 On Medium, which asks for the card of exactly 32 steps ago, every baseline, \dv included, stays at chance after 2M steps, while \method reaches \numFwfMedium.
 R2I, run with its official code, stays at chance on both tasks within 2M steps.
 In its published curves, R2I leaves chance on Medium only after about 3M steps, and DreamerV3 learns Easy but not Medium (Fig.~9 of~\cite{samsami2024r2i}), as in our runs.
-\TODO{DH-SNN and TC-LIF on POPGym (runs in progress).}
 
 \subsection{What the world model remembers}
 \label{sec:probe}
@@ -112,15 +109,15 @@ Integrator channels with long retention times hold the difference with a constan
 \begin{table}[t]
   \centering\tabfont
   \setlength{\tabcolsep}{3pt}
-  \caption{\textbf{Memory Maze and DMC.} Memory Maze 9$\times$9 offline probing~\cite{pasukonis2023memorymaze}: probes on the frozen state after 1M updates, second half of the evaluation episodes (constant predictor: 23.9 MSE, 80.8\% walls). DMC from proprioception: return after 500k steps; walker walk from pixels: return after 1M frames. \nr: not run. Bottom: reference results from~\cite{pasukonis2023memorymaze} (larger RSSM).}
+  \caption{\textbf{Memory Maze and DMC walker walk.} Memory Maze 9$\times$9 offline probing~\cite{pasukonis2023memorymaze}: probes on the frozen state after 1M updates, second half of the evaluation episodes (constant predictor: 23.9 MSE, 80.8\% walls). Walker walk: return after 500k steps from proprioception and after 1M frames from pixels. \nr: not run. Bottom: reference results from~\cite{pasukonis2023memorymaze} (larger RSSM).}
   \label{tab:mm}
-  \resizebox{\columnwidth}{!}{\input{tables/mm_dmc_energy}}
+  \input{tables/mm_dmc_energy}
 \end{table}
 
 Memory Maze tests whether a world model builds a map of a 3D maze from first-person views over 1000 steps.
 \Cref{tab:mm} reports the probes on the state that the policy reads: $(z_t,h_t)$ for all models, and in addition the dendritic spikes for \method.
-\method locates the target objects as well as \dv (MSE 9.8) and better than every spiking baseline (11.5 to 11.8).
-On the wall layout, all models of this size stay within 5 points of the constant predictor (80.8\%), \method at 82.8\% and \dv at 85.3\%; the larger RSSM of~\cite{pasukonis2023memorymaze} reaches 89.0\%.
+\method locates the target objects as well as \dv (MSE 9.8) and better than every spiking baseline (11.5 to 12.9).
+On the wall layout, all models of this size stay within 5 points of the constant predictor (80.8\%), \method at 83.1\% and \dv at 85.3\%; the larger RSSM of~\cite{pasukonis2023memorymaze} reaches 89.0\%.
 \Cref{fig:mm_viz} shows what this memory does.
 While an object is in view, every model locates it (squared error 1.4 to 3.5).
 Once the object leaves the view, the error of the spiking baselines rises within 3 to 5 steps to 7.3 to 11.7, whereas \method stays at \pend{3.8} and has the lowest error of all models, \dv included, from 6 to 100 steps after the object left the view.
@@ -186,8 +183,8 @@ The spike count, the feedback and the number of channels leave the memory nearly
 \subsection{Control tasks}
 \label{sec:control}
 
-On DMC from proprioception (\cref{tab:mm}), \method matches the best spiking model on walker walk (\numFwfDmcWalk, as \swm) and reaches \numFwfDmcRun\ on cheetah run and \numFwfDmcSwing\ on cartpole swingup, where recurrent LIF reaches 532 and 811.
-An actor that reads $(z_t,h_t)$ only reaches the same return with the same world model on walker walk and cheetah run (904 and 473) and a higher one on cartpole swingup (813; Supp.~\suppref{supp:policy}{E}).
+On walker walk (\cref{tab:mm}), \method reaches \numFwfDmcWalk\ from proprioception, the highest return of the spiking models together with \swm, and \numFwfPixWalk\ from pixels.
+On cheetah run and cartpole swingup from proprioception, it ranks second among the spiking baselines, after recurrent LIF (Supp.~\suppref{supp:impl}{A}).
 \TODO{Walker walk from pixels after 1M frames (runs in progress).}
 From pixels, every world model predicts the walker from the actions alone for about 10 to 20 steps (\cref{fig:walker_viz}); the frames that \method predicts stay closer to the observed ones than those of \swm at all 45 steps, and than those of \dv from step 15 on.
 

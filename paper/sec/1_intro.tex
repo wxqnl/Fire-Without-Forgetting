@@ -8,8 +8,8 @@
   Final return on BSuite memory length~\cite{osband2020bsuite}: the agent sees a cue, then $L$ uninformative steps, and is rewarded for recalling the cue (1 = always correct, 0 = chance).
   All models share one spiking world model and differ in the recurrent core (\cref{sec:setup}).
   Left: budgets of 150k to 500k environment steps. Right: $L$ = 51, 71 and 101 with the lengths and budget of R2I~\cite{samsami2024r2i} (1M steps).
-  \swm fails at every length, recurrent LIF neurons stop at 8 steps, and GRSN and DH-SNN at 16; TC-LIF, whose state is carried across steps and never cleared, learns 51 and 101 steps \pend{(71: in progress)}.
-  \method reaches a return of 0.9 at every length up to 101 steps, and \dv up to 51 (\cref{tab:rl}). \pend{Open markers: runs in progress.}}
+  \swm fails at every length, recurrent LIF neurons stop at 8 steps, and GRSN and DH-SNN at 16; TC-LIF, whose state is carried across steps and never cleared, learns 51 and 101 steps but not 71.
+  \method reaches a return of 0.9 at every length up to 101 steps, and \dv up to 51 (\cref{tab:rl}).}
   \label{fig:memory_length}
 \end{figure}
 

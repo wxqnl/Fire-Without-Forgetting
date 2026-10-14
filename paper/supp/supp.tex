@@ -64,7 +64,7 @@ Capacity does not explain the results: the GRU core of \dv is larger than the co
 BSuite evaluations average 32 episodes every 10k environment steps (20k with R2I's lengths), POPGym evaluations 16 episodes every 50k steps and DMC evaluations 10 episodes every 20k steps, all with the mode of the policy.
 \Cref{fig:rl_curves} smooths the evaluation returns with an exponential moving average, $m \leftarrow 0.6\,m + 0.4\,r$.
 The Heaviside step of the PDN soma is trained with the triangular surrogate derivative of \swm, $\max(0,\alpha-\alpha^2|x|)$ with $\alpha=2$.
-\Cref{tab:rl_detail} gives, per BSuite length, the steps until the return first reaches 0.9, the final return, and how the return holds after 0.9.
+\Cref{tab:rl_detail} gives, per BSuite length, the steps until the return first reaches 0.9, the final return, and how the return holds after 0.9, and \cref{tab:dmc} the returns of all models on the three DMC tasks from proprioception.
 Code will be released.
 
 \begin{table*}[t]
@@ -74,6 +74,13 @@ Code will be released.
   \label{tab:rl_detail}
   \input{tables/rl_detail}
 \end{table*}
+
+\begin{table}[t]
+  \centering\tabfont
+  \caption{\textbf{DMC from proprioception}: return after 500k environment steps, mean of the last three evaluations. \pend{Blue}: in progress.}
+  \label{tab:dmc}
+  \input{tables/dmc}
+\end{table}
 
 \section{Reward that depends on cue and action}
 \label{supp:reward}
