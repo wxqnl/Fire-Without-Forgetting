@@ -2030,3 +2030,13 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
 - 代价：checkpoint 不含优化器状态，Adam 从零重新累积；11:20–11:35 的约 1k 次更新没有保存。重启后第一次评估（604k）642.8，重启前 605k 649.4，接上了。
 - 11:36 通过 `.mps/gpu2/pipe` 停掉 gpu2 的 MPS 守护进程，gpu2 上只剩 `cts` 进程。已释放 gpu1、2、3、4，本项目只用 gpu0、5、6、7。
 - gpu0 现在有像素 LIF、像素 GRSN、Memory Maze DH-SNN、DMC cheetah TC-LIF 四个运行。
+
+### 19.66 DMC cheetah DH-SNN 跑完；正文 DMC 只放 walker（10 月 14 日 18:47；用户："DMC 的本体和像素放在一起，然后都只展示最经典的 walker 怎么样？"）
+
+- 跑完，exit 0（18:47）：DMC 本体感知 cheetah run DH-SNN 500k，回报 163（最后 3 次）。cheetah 上的脉冲模型：LIF 532、本文 487、GRSN 392、TC-LIF 351（465k，在跑）、Spiking-WM 343、DH-SNN 163，本文仍排第二。
+- 论文的写法（用户 10 月 14 日决定，论文会话已改，提交 691936a）：像素只跑了 walker，所以正文的 DMC 本体也只放 walker walk，和像素并列成两列；cheetah run、cartpole swingup 的三任务完整表和只读 $(z_t,h_t)$ 的 actor 对照放附录 Supp. A、E，正文用一句话写明本文在这两个任务上在脉冲基线中排第二、仅次于 recurrent LIF。DH-SNN、TC-LIF 的这两个任务照常跑完，进附录表。
+- 其余运行（最后 3 次评估）：
+  - DMC 本体 walker：本文 922.5、Spiking-WM 922.7、DH-SNN 916.6（505k，即将退出）、TC-LIF 806.6（505k）；cartpole DH-SNN 621.6（485k）、TC-LIF 484.4（425k）。
+  - 像素 walker：本文 932（905k）、LIF 944（785k，已平稳在 940–950）、DH-SNN 782（805k）、GRSN 772（864k）、TC-LIF 564（805k）；Spiking-WM 917 已跑完。近 18 小时约 7.6–9.8k 步/小时，预计本文 10 月 15 日 07:30 前后、GRSN 10:30、TC-LIF 15:00、DH-SNN 17:00、LIF 23:00 前后到 1M。
+  - Memory Maze：本文 530k，objects MSE 9.01（不读记忆的对照 11.97），walls 83.4%；DH-SNN 140k 12.35 / 81.9%；TC-LIF 150k 12.94 / 81.6%。约 3.45k 次更新/小时，本文约 10 月 20 日、DH-SNN 和 TC-LIF 约 10 月 25 日跑完。
+- 监控脚本 06:15 重启（旧的随上个会话退出），现在每个运行正常跑完也会报，便于及时记录。
