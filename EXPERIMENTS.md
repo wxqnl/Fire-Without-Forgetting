@@ -2055,3 +2055,4 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
 - 10:47 像素 walker GRSN 跑完，exit 0：回报 803.4（最后 3 次，1004k；中间 644k 起在 gpu0 上从 checkpoint 接着跑，§19.65）。
 - 14:09 像素 walker DH-SNN 跑完，exit 0：回报 860.5（最后 3 次，1005k）。
 - 释放 gpu5：上面已没有我们的任务，14:10 通过 `.mps/gpu5/pipe` 停掉我们的 MPS 守护进程，gpu5 现在 4 MiB、无进程。已释放 gpu1–5，本项目只用 gpu0、6、7。
+- 16:41 像素 walker TC-LIF 跑完，exit 0：回报 588.8（最后 3 次，1005k）。gpu7 上还有 Memory Maze TC-LIF，不释放。像素只剩 LIF（985k，最后 3 次 941.4）。
