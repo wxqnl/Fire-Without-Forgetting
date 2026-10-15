@@ -2043,3 +2043,4 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
 - 19:11 DMC 本体 walker TC-LIF 跑完，exit 0：回报 806.6（最后 3 次，505k）。
 - 19:49 DMC 本体 walker DH-SNN 跑完，exit 0：回报 916.6（最后 3 次，505k）。walker 本体感知的六个脉冲模型全部跑完：Spiking-WM 922.7、本文 922.5、DH-SNN 916.6、GRSN 863.1、TC-LIF 806.6、LIF 806.7；本文和 Spiking-WM 并列第一（取整都是 923）。
 - 20:27 DMC 本体 cartpole DH-SNN 跑完，exit 0：回报 622.4（最后 3 次，505k）。cartpole 上：LIF 811.5、本文 675.9、GRSN 651.8、DH-SNN 622.4、Spiking-WM 497.4，TC-LIF 在跑；本文仍排第二。
+- 22:34 DMC 本体 cheetah TC-LIF 跑完，exit 0：回报 434.2（最后 3 次，505k）。cheetah 的六个脉冲模型全部跑完：LIF 532.0、本文 487.0、TC-LIF 434.2、GRSN 392.4、Spiking-WM 342.8、DH-SNN 163.4；本文排第二。
