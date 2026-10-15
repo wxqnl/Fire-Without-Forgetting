@@ -2052,3 +2052,4 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
 - 像素 walker（最后 3 次）：DreamerV3 967.8、LIF 948.4（905k，在跑，近 6 次 928–967）、本文 929.1、Spiking-WM 916.7、DH-SNN 852.6（965k，在跑）、GRSN 803.4（1004k，即将退出）、TC-LIF 593.4（945k，在跑）。本文在脉冲模型中排第二，在 LIF 之后、Spiking-WM 之前；本体 walker 本文与 Spiking-WM 并列第一（922.5 / 922.7）。
 - gpu6 上还有本文 Memory Maze（560k），不释放。gpu5 只剩像素 DH-SNN，跑完后释放。
 - 论文需要 `make data`（附录 DMC 三任务表已无空格，像素本文定稿；LIF、DH-SNN、TC-LIF 像素约今天下午到晚上跑完）。论文会话 08:50 已不在线，没能通知，等它重新打开时转告。
+- 10:47 像素 walker GRSN 跑完，exit 0：回报 803.4（最后 3 次，1004k；中间 644k 起在 gpu0 上从 checkpoint 接着跑，§19.65）。
