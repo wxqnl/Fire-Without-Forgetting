@@ -2056,3 +2056,5 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
 - 14:09 像素 walker DH-SNN 跑完，exit 0：回报 860.5（最后 3 次，1005k）。
 - 释放 gpu5：上面已没有我们的任务，14:10 通过 `.mps/gpu5/pipe` 停掉我们的 MPS 守护进程，gpu5 现在 4 MiB、无进程。已释放 gpu1–5，本项目只用 gpu0、6、7。
 - 16:41 像素 walker TC-LIF 跑完，exit 0：回报 588.8（最后 3 次，1005k）。gpu7 上还有 Memory Maze TC-LIF，不释放。像素只剩 LIF（985k，最后 3 次 941.4）。
+- 19:11 像素 walker LIF 跑完，exit 0：回报 942.9（最后 3 次，1005k）。像素 walker 全部跑完（最后 3 次）：DreamerV3 967.8、LIF 942.9、本文 929.1、Spiking-WM 916.7、DH-SNN 860.5、GRSN 803.4、TC-LIF 588.8；本文在脉冲模型中排第二。
+- 现在只剩 3 个 Memory Maze：本文在 gpu6，DH-SNN 在 gpu0，TC-LIF 在 gpu7，各占一张卡，没有可释放的卡。
