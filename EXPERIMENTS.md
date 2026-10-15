@@ -2045,3 +2045,10 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
 - 20:27 DMC 本体 cartpole DH-SNN 跑完，exit 0：回报 622.4（最后 3 次，505k）。cartpole 上：LIF 811.5、本文 675.9、GRSN 651.8、DH-SNN 622.4、Spiking-WM 497.4，TC-LIF 在跑；本文仍排第二。
 - 22:34 DMC 本体 cheetah TC-LIF 跑完，exit 0：回报 434.2（最后 3 次，505k）。cheetah 的六个脉冲模型全部跑完：LIF 532.0、本文 487.0、TC-LIF 434.2、GRSN 392.4、Spiking-WM 342.8、DH-SNN 163.4；本文排第二。
 - 01:33（10 月 15 日）DMC 本体 cartpole TC-LIF 跑完，exit 0：回报 567.5（最后 3 次，505k）。第 45 轮的 6 个 DMC 本体运行全部跑完，附录三任务表没有空格了。cartpole 的六个脉冲模型：LIF 811.5、本文 675.9、GRSN 651.8、DH-SNN 622.4、TC-LIF 567.5、Spiking-WM 497.4；本文排第二。
+
+### 19.67 本文像素 walker 跑完（10 月 15 日 08:46）
+
+- 跑完，exit 0：DMC walker walk 像素 1M 帧，本文回报 929.1（最后 3 次：922、943、922；1005k）。
+- 像素 walker（最后 3 次）：DreamerV3 967.8、LIF 948.4（905k，在跑，近 6 次 928–967）、本文 929.1、Spiking-WM 916.7、DH-SNN 852.6（965k，在跑）、GRSN 803.4（1004k，即将退出）、TC-LIF 593.4（945k，在跑）。本文在脉冲模型中排第二，在 LIF 之后、Spiking-WM 之前；本体 walker 本文与 Spiking-WM 并列第一（922.5 / 922.7）。
+- gpu6 上还有本文 Memory Maze（560k），不释放。gpu5 只剩像素 DH-SNN，跑完后释放。
+- 已通知论文会话 `make data`（附录 DMC 三任务表已无空格，像素本文定稿；LIF、DH-SNN、TC-LIF 像素约今天下午到晚上跑完）。
