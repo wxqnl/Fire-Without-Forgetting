@@ -385,7 +385,7 @@ def walker_viz(steps=(1, 5, 10, 15, 20, 30, 45)):
         ax.plot(np.arange(1, len(y) + 1), y, **{a: v for a, v in STYLE[k].items() if a != "label"}, label=STYLE[k]["label"])
     ax.set_xlabel("prediction step")
     ax.set_ylabel("pixel MSE")
-    ax.legend(loc="upper left", handlelength=1.6)
+    ax.legend(loc="lower right", handlelength=1.6)
     fig.savefig(FIG / "walker_viz.pdf")
     plt.close(fig)
 

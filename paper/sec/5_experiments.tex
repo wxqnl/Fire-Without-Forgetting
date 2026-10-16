@@ -120,7 +120,7 @@ Memory Maze tests whether a world model builds a map of a 3D maze from first-per
 On the wall layout, all models of this size stay within 5 points of the constant predictor (80.8\%), \method at 83.7\% and \dv at 85.3\%; the larger RSSM of~\cite{pasukonis2023memorymaze} reaches 89.0\%.
 \Cref{fig:mm_viz} shows what this memory does.
 While an object is in view, every model locates it (squared error 1.4 to 3.5).
-Once the object leaves the view, the error of the spiking baselines rises within 3 to 5 steps to 7.3 to 11.7, whereas \method stays at \pend{3.8} and has the lowest error of all models, \dv included, from 6 to 100 steps after the object left the view.
+Once the object leaves the view, the error of the spiking baselines rises within 3 to 5 steps to 7.3 to 11.9, whereas \method stays at \pend{3.5} and has the lowest error of all models, \dv included, from 6 to 100 steps after the object left the view.
 \TODO{Memory Maze: final probes after 1M updates (in progress); the values are the latest probes during training.}
 
 \begin{figure*}[t]
@@ -130,7 +130,7 @@ Once the object leaves the view, the error of the spiking baselines rises within
   (a) First-person views around the first time, in evaluation trajectory 0, that an object in view for 5 steps leaves the view for at least 40 steps.
   (b) The position of this object (ring) that the probe of each model predicts 3, 10 and 15 steps later (\method: star); arrow: the agent; grey: its path since it last saw the object.
   (c) Squared error of the predicted object position against the steps since the object was last in view (within the $90^\circ$ field of view, no wall in between), first 100 evaluation trajectories.
-  \pend{\method: checkpoint after 330k of 1M updates.}}
+  \pend{\method: checkpoint after 650k of 1M updates.}}
   \label{fig:mm_viz}
 \end{figure*}
 
@@ -185,14 +185,13 @@ The spike count, the feedback and the number of channels leave the memory nearly
 
 On walker walk from proprioception (\cref{tab:mm}), \method reaches \numFwfDmcWalk, the highest return of the spiking models together with \swm.
 From pixels (\numFwfPixWalk) and on cheetah run and cartpole swingup from proprioception (Supp.~\suppref{supp:impl}{A}), it ranks second among the spiking baselines, after recurrent LIF.
-From pixels, every world model predicts the walker from the actions alone for about 10 to 20 steps (\cref{fig:walker_viz}); the frames that \method predicts stay closer to the observed ones than those of \swm at all 45 steps, and than those of \dv from step 15 on.
+From pixels, every world model predicts the walker from the actions alone for about 10 to 20 steps (\cref{fig:walker_viz}); the frames that \method predicts stay closer to the observed ones than those of \swm at 43 of the 45 steps, and than those of \dv from step 11 on.
 
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\textwidth]{fig/walker_viz}
   \caption{\textbf{Open-loop prediction from pixels} (DMC walker walk). Each world model observes 5 frames of the same evaluation episode of \method and then predicts 45 frames from the actions alone.
-  Right: pixel MSE of the predicted frames, mean over 8 segments of the episode.
-  \pend{\method: checkpoint after 448k of 1M frames.}}
+  Right: pixel MSE of the predicted frames, mean over 8 segments of the episode.}
   \label{fig:walker_viz}
 \end{figure*}
 
