@@ -43,7 +43,6 @@ The results show that \method outperforms the compared spiking baselines overall
 Specifically, within the training budget of R2I~\cite{samsami2024r2i}, \method acts on a cue seen 101 steps earlier in BSuite, whereas \dv fails beyond 51 steps.
 On POPGym RepeatPrevious Medium, which requires recalling the card shown exactly 32 steps earlier, \method is the only compared model whose return rises above chance within 2M environment steps.
 World model probes and ablations further confirm the roles of PDM and NWG in long-horizon memory and show that exact recall of the observation at a specific past step depends on the resonant channels.
-% DMC from pixels: check "comparable" when the pixel walker runs finish.
 We further evaluate \method on the standard control tasks of DMC~\cite{tassa2018dmc}, where its returns from both proprioception and pixels are comparable to those of the spiking baselines.
 These results show that \method offers an effective way to build spiking world models with long-horizon memory.
 The main contributions are as follows:
