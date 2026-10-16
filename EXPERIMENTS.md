@@ -2058,3 +2058,10 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
 - 16:41 像素 walker TC-LIF 跑完，exit 0：回报 588.8（最后 3 次，1005k）。gpu7 上还有 Memory Maze TC-LIF，不释放。像素只剩 LIF（985k，最后 3 次 941.4）。
 - 19:11 像素 walker LIF 跑完，exit 0：回报 942.9（最后 3 次，1005k）。像素 walker 全部跑完（最后 3 次）：DreamerV3 967.8、LIF 942.9、本文 929.1、Spiking-WM 916.7、DH-SNN 860.5、GRSN 803.4、TC-LIF 588.8；本文在脉冲模型中排第二。
 - 现在只剩 3 个 Memory Maze：本文在 gpu6，DH-SNN 在 gpu0，TC-LIF 在 gpu7，各占一张卡，没有可释放的卡。
+
+### 19.68 Memory Maze DH-SNN 从 gpu0 换到 gpu7；释放 gpu0（10 月 15 日 23:57；用户："吧 DH 和 TC 并到一张卡吧，反正本文的快跑完了"）
+
+- 像素和 DMC 全部跑完后，只剩 3 个 Memory Maze，各占一张卡（本文 gpu6，DH-SNN gpu0，TC-LIF gpu7，各约 20 GB）。
+- 做法：`make_jobs.py` 把 DH-SNN 固定到 gpu7（`gpus` [7]），任务列表备份 `runs/jobs.before_round47.jsonl`，只有这一行变了。23:56:42 DH-SNN 存完 270k 的 checkpoint，23:57:01 停掉（exit 143），队列 23:57:21 在 gpu7 上重启。`probe_mm.py` 从 `model.pt` 读回模型、探针和优化器状态："resumed at update 270000 (with optimizer state; the TBTT state restarts)"，丢掉的只有 checkpoint 之后约 20 秒的更新。
+- 第一次写的等待脚本按空格匹配 `/proc/PID/cmdline`（实际以 NUL 分隔），检查失败后没有停进程就退出了；随后手动核对进程再停。
+- 23:58 通过 `.mps/gpu0/pipe` 停掉 gpu0 的 MPS 守护进程，gpu0 现在 4 MiB、无进程。已释放 gpu0–5，本项目只用 gpu6（本文 Memory Maze，约 10 月 20 日跑完）和 gpu7（DH-SNN、TC-LIF，约 10 月 23 日跑完）。

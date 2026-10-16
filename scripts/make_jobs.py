@@ -1281,6 +1281,12 @@ def main():
     for job in jobs:
         if job["name"] == "dmcpix/dmc_walker_walk/GRSN_tau2/s0":
             job.update(gpus=[0], mem_gb=18)
+    # 2026-10-15 23:50 (EXPERIMENTS.md §19.68), user: "吧 DH 和 TC 并到一张卡吧，反正本文的快跑完了": the Memory Maze
+    # DH-SNN run is stopped right after a checkpoint (model.pt keeps the optimizer state) and resumes on gpu7 next to
+    # TC-LIF, so that gpu0 can be released
+    for job in jobs:
+        if job["name"] == "mmaze_official/memory_maze_9x9/DHSNN/s0":
+            job.update(gpus=[7])
     # 2026-10-09 (EXPERIMENTS.md §19.29), user: "可以停": the binary-soma Memory Maze run is superseded by the final
     # model's (round 30, which copies its job); stopped at 540k updates
     jobs = [j for j in jobs if j["name"] != "mmaze_official/memory_maze_9x9/PD2Lv2_tau1000/s0"]
