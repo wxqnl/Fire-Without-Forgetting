@@ -31,6 +31,7 @@ import pathlib
 import re
 import shlex
 import subprocess
+import sys
 import time
 
 
@@ -171,7 +172,7 @@ def main():
     parser.add_argument("--reserve_gb", type=float, default=4.0)
     parser.add_argument("--poll", type=float, default=20.0)
     parser.add_argument("--cooldown", type=float, default=180.0, help="seconds after a launch before the GPU gets another job")
-    parser.add_argument("--python", default="/home/user01/miniconda3/envs/fwf/bin/python")
+    parser.add_argument("--python", default=sys.executable)
     args = parser.parse_args()
     gpus = [int(g) for g in args.gpus.split(",")]
     idle_gpus = [int(g) for g in args.idle_gpus.split(",") if g]

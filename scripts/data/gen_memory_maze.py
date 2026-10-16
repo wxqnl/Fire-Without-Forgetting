@@ -11,7 +11,7 @@ step), reward, is_first, is_terminal, discount, plus the probe targets of every 
 agent_dir, targets_vec (the 3 objects relative to the agent), targets_pos, target_color and
 maze_layout (9x9, 1 = free), which the world model does not see.
 
-usage: MUJOCO_GL=osmesa python gen_memory_maze.py --out data/memory_maze_9x9 \
+usage: MUJOCO_GL=osmesa python scripts/data/gen_memory_maze.py --out data/memory_maze_9x9 \
            --train 2000 --eval 200 --workers 24
 """
 import argparse

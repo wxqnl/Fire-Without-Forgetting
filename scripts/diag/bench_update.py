@@ -1,13 +1,13 @@
 """Times world-model + actor-critic updates for a config, without env interaction.
 
-usage: python scripts/bench_update.py --configs popgym persist --task popgym_RepeatPreviousEasy
+usage: python scripts/diag/bench_update.py --configs popgym persist --task popgym_RepeatPreviousEasy
 """
 import pathlib
 import sys
 import time
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
-sys.argv[0] = str(pathlib.Path(__file__).resolve().parents[1] / "dreamer.py")
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
+sys.argv[0] = str(pathlib.Path(__file__).resolve().parents[2] / "dreamer.py")
 
 import argparse
 

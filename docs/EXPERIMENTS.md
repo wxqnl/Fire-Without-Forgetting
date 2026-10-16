@@ -2065,3 +2065,41 @@ BSuite rl3（L8–L64）不受影响：这条规则只在我们的模型重跑�
 - 做法：`make_jobs.py` 把 DH-SNN 固定到 gpu7（`gpus` [7]），任务列表备份 `runs/jobs.before_round47.jsonl`，只有这一行变了。23:56:42 DH-SNN 存完 270k 的 checkpoint，23:57:01 停掉（exit 143），队列 23:57:21 在 gpu7 上重启。`probe_mm.py` 从 `model.pt` 读回模型、探针和优化器状态："resumed at update 270000 (with optimizer state; the TBTT state restarts)"，丢掉的只有 checkpoint 之后约 20 秒的更新。
 - 第一次写的等待脚本按空格匹配 `/proc/PID/cmdline`（实际以 NUL 分隔），检查失败后没有停进程就退出了；随后手动核对进程再停。
 - 23:58 通过 `.mps/gpu0/pipe` 停掉 gpu0 的 MPS 守护进程，gpu0 现在 4 MiB、无进程。已释放 gpu0–5，本项目只用 gpu6（本文 Memory Maze，约 10 月 20 日跑完）和 gpu7（DH-SNN、TC-LIF，约 10 月 23 日跑完）。
+
+### 19.69 整理代码目录，重写 README（10 月 16 日 03:30；用户："你现在整理一下我们这个项目吧？包括代码目录啥的，还有 readme"）
+
+- **原则：** 正在跑的 3 个 Memory Maze（`probe_mm.py`）、队列和论文脚本都要从根目录导入，所以核心模块全部留在根目录。只移动它们不依赖的文件。
+- **记录文档：** `EXPERIMENTS.md`、`PHASE0.md`、`RESULTS.md` 移到 `docs/`。`scripts/main_tables.py` 改为写 `docs/RESULTS.md`。
+- **数据脚本，移到 `scripts/data/`：**
+  - `download_memory_maze.sh`
+  - `salvage_memory_maze.py`
+  - `gen_memory_maze.py`（原在根目录）
+- **诊断脚本，移到 `scripts/diag/`：**
+  - `diag_wm_offline.py`、`probe_mm_frozen.py`（原在根目录）
+  - `bench_update.py`、`diag_popgym.py`、`rl_wm_cue.py`
+  - 每个脚本都改成按自身位置找仓库根目录，`--help` 全部能跑通。
+- **删除两个用完的一次性脚本（git 历史里仍可找回）：**
+  - `scripts/deadline_stop.sh`：Phase 0 的 GPU 时限停机。
+  - `scripts/extend_mm.py`：10 月 1 日把 Memory Maze 从 200k 延长到 1M。
+- **任务列表：** `make_jobs.py` 里 diag_pix 的 9 条命令改成 `scripts/diag/diag_wm_offline.py`。重新生成的 `runs/jobs.jsonl` 和原来相比只有这 9 行不同，它们都已跑完。原文件备份为 `runs/jobs.before_reorg.jsonl`。
+- **去掉写死的本机路径：**
+  - `queue.py` 的 `--python` 默认改为当前解释器。
+  - `run_r2i.sh` 改为读 `R2I_PYTHON`。
+  - `rl_wm_cue.py` 改为相对路径。
+- **README：** 原来的 Spiking-WM README 换成 SD-Dreamer 的，内容包括：
+  - 方法简介和总览图 `assets/overview.png`（论文图 1 的预览图）；
+  - 目录结构、安装、数据准备；
+  - 每个基准的训练命令；
+  - 模型与配置块对照表、复现流程、`runs/` 分组。
+- **训练脚本：** `scripts/train.sh` 改为按任务名运行本文模型，使用论文设置。19 个任务的命令逐项和 `runs/jobs.jsonl` 里本文的命令核对过，参数一致。
+- **环境文件：**
+  - `environment.yml` 改名为 sd-dreamer。
+  - `requirements.txt` 只列代码实际用到的包，版本取自 fwf 环境。还没有在新环境里实际安装测试过。
+- **核查：**
+  - `paper/scripts` 的三个脚本（paper_tables、make_figures、viz_infer）都能正常导入。
+  - `main_tables.py` 能重新生成 `docs/RESULTS.md`。
+  - 论文文件一处没改。`paper/README.md` 和 `paper/HANDOFF.md` 里写的还是旧路径（`fwf/EXPERIMENTS.md`、`PHASE0.md`），等论文会话回来时告诉它。
+- **Memory Maze 进度：**
+  - DH-SNN 换到 gpu7 后的第一次评估（280k，02:30）正常：objects MSE 12.15，不读记忆的对照 12.11，walls 82.6%。约 3.9k 次更新/小时，速度没变。
+  - 本文 650k：9.00（对照 12.08），walls 83.7%。
+  - TC-LIF 290k：12.61（对照 12.23）。

@@ -14,7 +14,7 @@ and the action a_t that led to it; its reward is +-1/(N-k) depending on whether 
 With --init the same model is read at its initialisation (no checkpoint): what the architecture
 holds before any training.
 
-usage: python scripts/diag_popgym.py [--init] runs/r2i/popgym_RepeatPreviousEasy/<cell>/s0 ...
+usage: python scripts/diag/diag_popgym.py [--init] runs/r2i/popgym_RepeatPreviousEasy/<cell>/s0 ...
 """
 import argparse
 import json
@@ -22,8 +22,8 @@ import pathlib
 import shlex
 import sys
 
-ROOT = pathlib.Path(__file__).resolve().parents[1]
-sys.path[0] = str(ROOT)  # not scripts/, whose queue.py would shadow the standard library's
+ROOT = pathlib.Path(__file__).resolve().parents[2]
+sys.path[0] = str(ROOT)  # the modules live in the repository root
 
 import numpy as np
 import torch

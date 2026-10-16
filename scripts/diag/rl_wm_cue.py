@@ -1,8 +1,9 @@
 """Does the world model of an RL run keep the L101 cue? Loads the world model of an R2I L101 RL checkpoint and runs
 probe_wm.evaluate on held-out random-policy L101 episodes (reward by action, as in RL), without training.
-usage: python scripts/rl_wm_cue.py <rl logdir> <configs...>"""
+usage: python scripts/diag/rl_wm_cue.py <rl logdir> <configs...>"""
 import json, sys
-sys.path.insert(0, "/home/user01/Minko/calude/fwf")
+import pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 import numpy as np, torch
 import probe_wm, models, dreamer
 logdir, cfgs = sys.argv[1], sys.argv[2:]

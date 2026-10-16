@@ -3,7 +3,7 @@
 Single seed (s0). A value with (NN%) is from a run still in progress; · = queued or no evaluation yet;
 — = not part of the plan.
 
-Queue at 2026-10-11 20:43:30: 375/396 done, 21 running, 0 pending.
+Queue at 2026-10-16 02:58:12: 401/404 done, 3 running, 0 pending.
 
 ## Table 2. Memory tasks, RL: evaluation return (mean of the last 3 evaluations)
 
@@ -17,25 +17,25 @@ RepeatPreviousMedium: Spiking-WM, A+B+G, ours and DreamerV3.
 | model | L8 | L16 | L32 | L64 | L51 | L71 | L101 | RepeatPreviousEasy | RepeatPreviousMedium |
 |---|---|---|---|---|---|---|---|---|---|
 | Spiking-WM | 0.02 | 0.02 | -0.02 | -0.04 | -0.04 | 0.19 | -0.04 | 0.43 | -0.50 |
-| LIF | 0.65 | 0.02 | -0.02 | 0.04 | -0.02 (60%) | — | — | 0.69 | -0.50 |
-| GRSN | 1.00 | 0.94 | 0.06 | -0.04 | -0.08 (56%) | — | — | 0.33 | -0.51 |
-| DH-SNN | 1.00 | 0.92 | 0.48 | 0.06 | 0.08 (50%) | — | — | -0.49 (38%) | -0.49 (35%) |
-| TC-LIF | 1.00 | 1.00 | 1.00 | 0.88 | 0.92 (52%) | 0.19 (0%) | -0.19 (0%) | -0.44 (33%) | -0.53 (38%) |
+| LIF | 0.65 | 0.02 | -0.02 | 0.04 | -0.04 | — | — | 0.69 | -0.50 |
+| GRSN | 1.00 | 0.94 | 0.06 | -0.04 | 0.04 | — | — | 0.33 | -0.51 |
+| DH-SNN | 1.00 | 0.92 | 0.48 | 0.06 | 0.50 | — | — | -0.41 | -0.49 |
+| TC-LIF | 1.00 | 1.00 | 1.00 | 0.88 | 0.98 | 0.10 | 0.92 | -0.03 | -0.51 |
 | **Ours** | 0.98 | 0.98 | 1.00 | 0.98 | 0.79 | 0.96 | 0.94 | 0.66 | 0.32 |
 | DreamerV3 (ANN) | 1.00 | 0.92 | 0.96 | 0.04 | 0.98 | 0.04 | 0.04 | 0.39 | -0.44 |
 | Spiking-WM + A+B+G (ablation) | 0.96 | 0.98 | 1.00 | 0.04 | -0.04 | 0.08 | -0.04 | -0.29 | -0.50 |
 | spiking enc. + GRU | — | 1.00 | -0.02 | — | — | — | — | — | — |
-| ours, actor reads the soma only | 0.98 | 1.00 | 1.00 | 0.96 | — | — | — | 0.52 (38%) | 0.15 (53%) |
+| ours, actor reads the soma only | 0.98 | 1.00 | 1.00 | 0.96 | — | — | — | 0.49 | 0.24 |
 
 ## Table 3. BSuite: env steps until the evaluation return first reaches 0.9
 
 | model | L8 | L16 | L32 | L64 | L51 | L71 | L101 |
 |---|---|---|---|---|---|---|---|
 | Spiking-WM | > 152k | > 202k | > 302k | > 502k | > 1002k | > 1002k | > 1002k |
-| LIF | 142k | > 202k | > 302k | > 502k | > 602k … | — | — |
-| GRSN | 22k | 142k | > 302k | > 502k | > 562k … | — | — |
-| DH-SNN | 32k | 162k | > 302k | > 502k | > 502k … | — | — |
-| TC-LIF | 12k | 22k | 22k | 112k | 102k | > 2k … | > 2k … |
+| LIF | 142k | > 202k | > 302k | > 502k | > 1002k | — | — |
+| GRSN | 22k | 142k | > 302k | > 502k | > 1002k | — | — |
+| DH-SNN | 32k | 162k | > 302k | > 502k | > 1002k | — | — |
+| TC-LIF | 12k | 22k | 22k | 112k | 102k | > 1002k | 242k |
 | **Ours** | 12k | 12k | 22k | 82k | 62k | 182k | 142k |
 | DreamerV3 (ANN) | 12k | 22k | 112k | > 502k | 902k | > 1002k | > 1002k |
 | Spiking-WM + A+B+G (ablation) | 12k | 22k | 42k | > 502k | > 1002k | > 1002k | > 1002k |
@@ -85,14 +85,14 @@ Constant predictor on our split: objects MSE 24.0, walls accuracy 80.8.
 
 | model | objects MSE ↓ 200k | objects MSE ↓ 1M | walls acc. (%) ↑ 200k | walls acc. (%) ↑ 1M |
 |---|---|---|---|---|
-| Spiking-WM | 12.1 / 12.0 | 11.8 / 12.0 (960k) | 82.0 / 81.8 | 83.8 / 83.5 (960k) |
+| Spiking-WM | 12.1 / 12.0 | 11.8 / 12.0 | 82.0 / 81.8 | 83.5 / 83.0 |
 | LIF | 12.0 / 12.0 | 11.7 / 12.0 | 82.0 / 81.9 | 83.7 / 83.0 |
 | GRSN | 11.7 / 12.1 | 11.5 / 12.0 | 82.0 / 81.8 | 83.3 / 83.0 |
-| DH-SNN | — | — | — | — |
-| TC-LIF | — | — | — | — |
-| **Ours** | 9.8 / 12.1 | 9.6 / 12.1 (290k) | 82.3 / 81.9 | 82.9 / 82.4 (290k) |
+| DH-SNN | 12.3 / 12.2 | 12.2 / 12.1 (280k) | 82.1 / 82.1 | 82.6 / 82.5 (280k) |
+| TC-LIF | 12.7 / 12.2 | 12.6 / 12.2 (290k) | 82.0 / 81.9 | 82.3 / 82.3 (290k) |
+| **Ours** | 9.8 / 12.1 | 9.0 / 12.1 (650k) | 82.3 / 81.9 | 83.7 / 83.0 (650k) |
 | DreamerV3 (ANN) | 10.6 / 11.9 | 9.8 / 11.8 | 82.7 / 81.8 | 85.3 / 83.5 |
-| Spiking-WM + A+B+G (ablation) | 11.3 / 12.1 | 11.2 / 12.0 (960k) | 82.2 / 81.8 | 84.0 / 83.4 (960k) |
+| Spiking-WM + A+B+G (ablation) | 11.3 / 12.1 | 11.3 / 12.0 | 82.2 / 81.8 | 83.7 / 83.0 |
 | spiking enc. + GRU | — | — | — | — |
 | constant (paper) |  | 23.9 |  | 80.8 |
 | VAE, no memory (paper) |  | 17.2 |  | 84.1 |
@@ -110,7 +110,7 @@ a different seed per parallel env.
 | Spiking-WM | 923 | 343 | 497 |
 | LIF | 807 | 532 | 811 |
 | GRSN | 863 | 392 | 652 |
-| **Ours** | 923 | 487 | 676 (101%) |
+| **Ours** | 923 | 487 | 676 |
 | DreamerV3 (ANN) | 953 | 699 | 871 |
 | Spiking-WM + A+B+G (ablation) | 785 | 471 | 848 |
 | ours, actor reads the soma only | 904 | 473 | 813 |

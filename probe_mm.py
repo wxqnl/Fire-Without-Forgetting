@@ -231,7 +231,7 @@ def main():
     parser.add_argument("--mm_eval_eps", type=int, default=200)
     parser.add_argument("--probe_lr", type=float, default=3e-4)
     parser.add_argument("--keep", type=int, nargs="*", default=[],
-                        help="also keep the checkpoint of these updates as model_<N>k.pt (probe_mm_frozen.py)")
+                        help="also keep the checkpoint of these updates as model_<N>k.pt (scripts/diag/probe_mm_frozen.py)")
     args, rest = parser.parse_known_args()
     config, _ = probe_wm.parse_config(rest + ["--train_episodes", "1"])
     tools.set_seed_everywhere(config.seed)

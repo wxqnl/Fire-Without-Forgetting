@@ -1,8 +1,9 @@
-"""Writes the Phase 0 job list (E2 causal intervention) in priority order.
+"""Writes the job list of every run of the paper (runs/jobs.jsonl) in priority order.
 
-Conditions (2x2): base = original Spiking-WM; A = persist_state (no reset of the
-recurrent cell between env steps); B = no dendritic reset on somatic spikes; AB = both.
-Each cell is crossed with the dendritic time constant tau_d in {2, 16, 128}.
+The rounds follow docs/EXPERIMENTS.md: first the reset interventions on Spiking-WM (Phase 0, 2x2: base = original
+Spiking-WM; A = persist_state, no reset of the recurrent cell between env steps; B = no dendritic reset on somatic
+spikes; AB = both; each crossed with the dendritic time constant tau_d in {2, 16, 128}), then the main comparisons,
+ablations and diagnostics. The docstring of each round records why it was added.
 """
 import json
 import pathlib
@@ -295,7 +296,7 @@ def round5():
 
 def round6():
     """Memory Maze offline probe (probe_mm.py) for the six models of MAIN, one seed. Listed only
-    once the data cache exists (gen_memory_maze.py, then probe_mm.py --prepare)."""
+    once the data cache exists (scripts/data/gen_memory_maze.py, then probe_mm.py --prepare)."""
     data = ROOT / "data" / "memory_maze_9x9"
     if not all((data / f"{split}_cache" / "done").exists() for split in ("train", "eval")):
         return []
@@ -333,7 +334,7 @@ def round10():
     """2026-09-29 07:00: pipeline check for Memory Maze, not a paper result. Google Drive serves only
     a few MB of the official training archives (download quota), so the main runs wait for the full
     data (round 8). Meanwhile ours and DreamerV3 run 5k updates on the 1471 complete episodes at the
-    head of the partial archives (scripts/salvage_memory_maze.py), with the official evaluation set
+    head of the partial archives (scripts/data/salvage_memory_maze.py), with the official evaluation set
     and probe: checks the whole probe_mm.py path and measures the update speed for the budget of the
     full runs."""
     data = ROOT / "data" / "memory_maze_9x9_official_subset"
@@ -369,7 +370,7 @@ def round11():
 def round12():
     """2026-09-30: why ours does not learn POPGym RepeatPreviousEasy while DreamerV3 does. At 1M
     steps its reward head picks the suit of o_{t-4} at 37% (DreamerV3 75%) and its state holds the
-    cards 1-4 steps back at 72/56/44/39% (DreamerV3 91/87/84/81%; scripts/diag_popgym.py). World
+    cards 1-4 steps back at 72/56/44/39% (DreamerV3 91/87/84/81%; scripts/diag/diag_popgym.py). World
     model only, on random-action data, 10k updates: with unit rewards (x48) it shows whether the
     model can learn the 4-step memory at all; with the task's own +-1/48 rewards, as in the RL
     runs, whether the weak reward signal is what holds it back."""
@@ -762,7 +763,7 @@ def round24():
 
 def round25():
     """2026-10-07, user: "可以，先诊断像素 walker，有结论再找我". Pixel walker world models trained offline on the
-    same data, DreamerV3's replay buffer of its pixel walker run (diag_wm_offline.py; EXPERIMENTS.md §19.22): in
+    same data, DreamerV3's replay buffer of its pixel walker run (scripts/diag/diag_wm_offline.py; EXPERIMENTS.md §19.22): in
     RL each world model trains on the data of its own policy. Also FwF with the thermometer soma (T graded
     frames per step instead of one), the candidate fix if the binary soma limits velocity coding. GPU memory
     measured: Spiking-WM and LIF 13 GB, DreamerV3 3 GB."""
@@ -772,7 +773,7 @@ def round25():
     jobs = []
     for cell, (cfgs, gb) in cells.items():
         name = f"diag_pix/dmc_walker_walk/{cell}/s0"
-        cmd = (f"{{python}} diag_wm_offline.py --configs dmc_vision {' '.join(cfgs)} --data {data} --updates 30000 "
+        cmd = (f"{{python}} scripts/diag/diag_wm_offline.py --configs dmc_vision {' '.join(cfgs)} --data {data} --updates 30000 "
                f"--eval_every 3000 --logdir {RUNS / name}")
         jobs.append(dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=gb))
     return jobs
@@ -808,7 +809,7 @@ def round27():
     protocol) for thermo and thermo + feedback."""
     data = RUNS / "dmcpix/dmc_walker_walk/ann_tau2/s0/train_eps"
     name = "diag_pix/dmc_walker_walk/PD2Lv2thermofb_tau1000/s0"
-    cmd = (f"{{python}} diag_wm_offline.py --configs dmc_vision ours resonanthalf somathermo pdfeedback --data {data} "
+    cmd = (f"{{python}} scripts/diag/diag_wm_offline.py --configs dmc_vision ours resonanthalf somathermo pdfeedback --data {data} "
            f"--updates 30000 --eval_every 3000 --logdir {RUNS / name}")
     jobs = [dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=18)]
     for cell, cfgs in (("PD2Lreshalfthermo_tau1000", "somathermo"), ("PD2Lreshalfthermofb_tau1000", "somathermo pdfeedback")):
@@ -832,7 +833,7 @@ def round28():
     cfg = "somathermo pdfeedback pdch2"
     cell = "PD2Lv2thermofbch2_tau1000"
     name = f"diag_pix/dmc_walker_walk/{cell}/s0"
-    cmd = (f"{{python}} diag_wm_offline.py --configs dmc_vision ours resonanthalf {cfg} --data {data} "
+    cmd = (f"{{python}} scripts/diag/diag_wm_offline.py --configs dmc_vision ours resonanthalf {cfg} --data {data} "
            f"--updates 30000 --eval_every 3000 --logdir {RUNS / name}")
     jobs = [dict(name=name, cmd=" ".join(cmd.split()), logdir=str(RUNS / name), mem_gb=18)]
     cell = "PD2Lreshalfthermofbch2_tau1000"
@@ -925,7 +926,7 @@ def round31(jobs):
     data = RUNS / "dmcpix/dmc_walker_walk/ann_tau2/s0/train_eps"
     for cell, cfg in (("PD2Lv2stepfbch2_tau1000", "pdfeedback pdch2"), ("PD2Lv2thermoch2_tau1000", "somathermo pdch2")):
         name = f"diag_pix/dmc_walker_walk/{cell}/s0"
-        cmd = (f"{{python}} diag_wm_offline.py --configs dmc_vision ours resonanthalf {cfg} --data {data} "
+        cmd = (f"{{python}} scripts/diag/diag_wm_offline.py --configs dmc_vision ours resonanthalf {cfg} --data {data} "
                f"--updates 30000 --eval_every 3000 --logdir {RUNS / name}")
         out.append(dict(name=name, cmd=cmd, logdir=str(RUNS / name), mem_gb=18))
     flags = "somathermo pdfeedback pdch2"

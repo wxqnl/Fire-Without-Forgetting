@@ -19,12 +19,13 @@ their rate (2T + 1 levels); 'sign' one bit. --mem_layers last keeps only the las
 --mem_code soma instead reads the last layer's normalised soma current u (graded, before the
 threshold): is the information lost by binarising u, or never routed to u?
 
-usage: python probe_mm_frozen.py --configs mmprobe grucell annwm --ckpt runs/.../model.pt --logdir DIR
+usage: python scripts/diag/probe_mm_frozen.py --configs mmprobe grucell annwm --ckpt runs/.../model.pt --logdir DIR
 """
 import argparse
 import concurrent.futures
 import json
 import pathlib
+import sys
 import time
 
 import gym
@@ -32,10 +33,11 @@ import numpy as np
 import torch
 from torch import nn
 
-import models
-import probe_wm
-import tools
-from probe_mm import Episodes, Streams, embed_feat, last_state, pose, split_sources, state_feat, wm_batch
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))  # the repository root
+import models  # noqa: E402
+import probe_wm  # noqa: E402
+import tools  # noqa: E402
+from probe_mm import Episodes, Streams, embed_feat, last_state, pose, split_sources, state_feat, wm_batch  # noqa: E402
 
 PREFIX = {"state": "", "no_memory": "nomem_", "full": "full_"}
 MEM = {"code": "graded", "layers": "all", "T": 5}

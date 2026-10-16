@@ -6,14 +6,14 @@ so the members before the cut are complete; their bytes are inflated and checked
 CRC of the header. Output: DEST/train/*.npz and DEST/eval.zip -> the official evaluation archive,
 the layout probe_mm.py reads.
 
-usage: python scripts/salvage_memory_maze.py [SRC] [DEST]
+usage: python scripts/data/salvage_memory_maze.py [SRC] [DEST]
 """
 import pathlib
 import struct
 import sys
 import zlib
 
-ROOT = pathlib.Path(__file__).resolve().parents[1]
+ROOT = pathlib.Path(__file__).resolve().parents[2]
 SRC = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "data" / "memory_maze_9x9_official"
 DEST = pathlib.Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "data" / "memory_maze_9x9_official_subset"
 

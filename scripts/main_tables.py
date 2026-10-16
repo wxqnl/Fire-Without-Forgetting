@@ -1,4 +1,4 @@
-"""Paper main tables from the finished and running runs -> RESULTS.md (repo root).
+"""Paper main tables from the finished and running runs -> docs/RESULTS.md.
 
 A cell of a run that is still going shows its current value and progress, e.g. "0.52 (60%)";
 "·" = queued or no evaluation yet; "—" = not part of the plan. Single seed (s0) for now.
@@ -300,7 +300,7 @@ def main():
     out += table(["model", "filter AC (M)", "filter MAC (M)", "filter energy (µJ)", "agent energy (µJ)", "recurrent firing rate"],
                  [[label, *energy_cell(f"rl3/bsuite_memlen-32/{key(m, 'bsuite')}")] for m, label in models if m != "OURSALT"])
     text = "\n".join(out) + "\n"
-    (ROOT / "RESULTS.md").write_text(text)
+    (ROOT / "docs" / "RESULTS.md").write_text(text)
     print(text)
 
 

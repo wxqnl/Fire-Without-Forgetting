@@ -14,7 +14,7 @@ eval     every eval_every updates, on windows of 32 steps from the held-out epis
                    spikes h_t (mean over the T simulation steps) and, for the PDN, from the last layer's
                    dendritic state; fit on half of the held-out episodes, tested on the other half
 
-usage: python diag_wm_offline.py --configs dmc_vision ours resonanthalf --data <episode dir> --updates 20000
+usage: python scripts/diag/diag_wm_offline.py --configs dmc_vision ours resonanthalf --data <episode dir> --updates 20000
            --eval_every 2000 --logdir <out dir>
 """
 import argparse
@@ -26,7 +26,7 @@ import time
 
 os.environ.setdefault("MUJOCO_GL", "osmesa")
 os.environ.setdefault("PYOPENGL_PLATFORM", "osmesa")
-sys.path.append(str(pathlib.Path(__file__).parent))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))  # the repository root
 
 import numpy as np
 import torch

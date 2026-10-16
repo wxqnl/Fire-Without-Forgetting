@@ -1,10 +1,10 @@
 #!/bin/bash
-# usage: scripts/download_memory_maze.sh eval train-part0 ... train-part9
+# usage: scripts/data/download_memory_maze.sh eval train-part0 ... train-part9
 # official Memory Maze 9x9 offline dataset (Pasukonis et al. 2022), Google Drive folder 1-tMdUzshBEEIo5EjBnECn7IFK1lJLFsQ
 # A plain download of a popular file gets Drive's "Quota exceeded" page; a bounded byte range is served,
 # except for a random share of requests whatever their size. So: fetch 128 MB ranges, retry refused ones,
 # and append them, so an interrupted download resumes at the last full chunk.
-DEST="$(dirname "$0")/../data/memory_maze_9x9_official"; mkdir -p "$DEST"; cd "$DEST"
+DEST="$(dirname "$0")/../../data/memory_maze_9x9_official"; mkdir -p "$DEST"; cd "$DEST"
 declare -A IDS=(
   [eval]=18YPeLnu_TkVx7r4mZjeQ9gSMPEI-jtiP
   [train-part0]=1EdWafDjZG3VUo7CXTERx7fTx4IqWWNvC [train-part1]=1Kyn8seqBiU8drJ8uyS2RSgeefLatUCzi
